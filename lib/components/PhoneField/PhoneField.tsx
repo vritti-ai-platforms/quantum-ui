@@ -1,14 +1,14 @@
 import React from 'react';
 import PhoneInputBase, { type Country, type Value } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { cn } from '../../../shadcn/utils';
 import {
   Field,
-  FieldLabel,
   FieldContent,
   FieldDescription,
   FieldError,
+  FieldLabel,
 } from '../../../shadcn/shadcnField';
+import { cn } from '../../../shadcn/utils';
 
 export interface PhoneFieldProps {
   /**
@@ -97,7 +97,7 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
             className={cn(
               'flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-sm shadow-xs transition-[color,box-shadow]',
               'placeholder:text-muted-foreground',
-              'focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
+              'focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[1px]',
               'disabled:cursor-not-allowed disabled:opacity-50',
               hasError && 'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
               className
