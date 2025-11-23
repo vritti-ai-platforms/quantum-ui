@@ -90,9 +90,9 @@ export const WeakPassword: Story = {
 export const FairPassword: Story = {
   args: {
     label: 'Password',
-    placeholder: 'Enter your password',
+    placeholder: "password",
     showStrengthIndicator: true,
-    value: 'Password123',
+    value: "Password",
   },
 };
 
