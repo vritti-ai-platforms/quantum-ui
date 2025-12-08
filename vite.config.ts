@@ -39,6 +39,7 @@ export default defineConfig({
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),
         'components/ThemeToggle': resolve(__dirname, 'lib/components/ThemeToggle/index.ts'),
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
+        'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Utils entries

@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, TextField, ThemeToggle, Typography } from '../lib/components';
+import { Button, Card, CardContent, CardHeader, CardTitle, DatePicker, TextField, ThemeToggle, Typography } from '../lib/components';
 
 function App() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   // Memoized callbacks
   const handleSendMessage = useCallback(() => {
@@ -106,6 +107,13 @@ function App() {
                   value={message}
                   onChange={handleMessageChange}
                 />
+                <DatePicker
+                  label='Date of Birth'
+                  placeholder='Select your date of birth'
+                  value={selectedDate}
+                  onValueChange={setSelectedDate}
+                  description='Please select your date of birth'
+                />
                 <div className='flex gap-2'>
                   <Button variant='default' onClick={handleSendMessage} disabled={loading}>
                     {loading ? 'Sending...' : 'Send Message'}
@@ -158,14 +166,14 @@ function App() {
                   <TextField
                     label='Success State'
                     placeholder='Success input'
-                    message='Input validated successfully'
+                    description='Input validated successfully'
                     defaultValue='valid@example.com'
                     className='border-green-500 focus-visible:ring-green-200'
                   />
                   <TextField
                     label='Error State'
                     placeholder='Error input'
-                    message='Please enter a valid email'
+                    error='Please enter a valid email'
                     defaultValue='invalid'
                     className='border-red-500 focus-visible:ring-red-200'
                   />
@@ -214,6 +222,47 @@ function App() {
               <Button variant='secondary' onClick={handleReset} size='sm'>
                 Reset
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* DatePicker Showcase */}
+        <Card>
+          <CardHeader>
+            <CardTitle>DatePicker Component</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-6'>
+              <DatePicker
+                label='Date of Birth'
+                placeholder='Select date'
+                value={selectedDate}
+                onValueChange={setSelectedDate}
+              />
+              <DatePicker
+                label='Appointment Date'
+                placeholder='Select date'
+              />
+              <DatePicker
+                label='Event Date'
+                placeholder='Select date'
+                error='This field is required'
+              />
+              {selectedDate && (
+                <div className='md:col-span-2 p-4 bg-muted rounded-md'>
+                  <Typography variant='body2' className='font-semibold mb-2'>
+                    Selected Date:
+                  </Typography>
+                  <Typography variant='body1'>
+                    {selectedDate.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </Typography>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
