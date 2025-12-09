@@ -1,5 +1,32 @@
 import React, { useCallback, useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, DatePicker, TextField, ThemeToggle, Typography } from '../lib/components';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  DatePicker,
+  TextField,
+  ThemeToggle,
+  Typography,
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarSeparator,
+  SidebarTrigger,
+} from '../lib/components';
+import { Home, Search, Settings, User, Mail, Bell, FileText, Folder } from 'lucide-react';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -44,19 +71,123 @@ function App() {
   //commit
 
   return (
-    <main className='min-h-screen bg-background p-6'>
-      <div className='max-w-2xl mx-auto space-y-6'>
-        {/* Header */}
-        <div className='text-center relative'>
-          <ThemeToggle className='absolute top-0 right-0' />
-
-          <Typography variant='h1' className='mb-4'>
-            Quantum UI
-          </Typography>
-          <Typography variant='body1' intent='secondary' className='mb-4'>
-            Modern component library built with shadcn/ui and Tailwind CSS
-          </Typography>
-        </div>
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <span className="text-sm font-bold">Q</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">Quantum UI</span>
+              <span className="text-xs text-muted-foreground">v1.0.0</span>
+            </div>
+          </div>
+          <SidebarInput placeholder="Search..." />
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton isActive>
+                    <Home />
+                    <span>Dashboard</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <Search />
+                    <span>Search</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarSeparator />
+          <SidebarGroup>
+            <SidebarGroupLabel>Components</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <FileText />
+                    <span>Components</span>
+                    <SidebarMenuBadge>12</SidebarMenuBadge>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <Folder />
+                    <span>Forms</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarSeparator />
+          <SidebarGroup>
+            <SidebarGroupLabel>Notifications</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <Mail />
+                    <span>Inbox</span>
+                    <SidebarMenuBadge>5</SidebarMenuBadge>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <Bell />
+                    <span>Notifications</span>
+                    <SidebarMenuBadge>3</SidebarMenuBadge>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <User />
+                <span>Profile</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <Settings />
+                <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <main className='min-h-screen bg-background'>
+          <header className="flex h-16 items-center gap-4 border-b px-6">
+            <SidebarTrigger />
+            <Typography variant='h5' className='font-semibold'>
+              Quantum UI
+            </Typography>
+            <div className="ml-auto">
+              <ThemeToggle />
+            </div>
+          </header>
+          <div className='p-6'>
+            <div className='max-w-4xl mx-auto space-y-6'>
+              {/* Header */}
+              <div className='text-center'>
+                <Typography variant='h1' className='mb-4'>
+                  Quantum UI
+                </Typography>
+                <Typography variant='body1' intent='secondary' className='mb-4'>
+                  Modern component library built with shadcn/ui and Tailwind CSS
+                </Typography>
+              </div>
 
         {/* Component Showcase */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -289,14 +420,17 @@ function App() {
           </Card>
         </div>
 
-        {/* Footer */}
-        <div className='text-center py-6'>
-          <Typography variant='body2' intent='secondary'>
-            Built with shadcn/ui, Tailwind CSS, and React
-          </Typography>
-        </div>
-      </div>
-    </main>
+              {/* Footer */}
+              <div className='text-center py-6'>
+                <Typography variant='body2' intent='secondary'>
+                  Built with shadcn/ui, Tailwind CSS, and React
+                </Typography>
+              </div>
+            </div>
+          </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

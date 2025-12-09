@@ -11,3 +11,4 @@ export * from './Typography';
 export * from './Form';
 export * from './Field';
 export * from './DatePicker';
+export * from './Sidebar';
