@@ -11,6 +11,8 @@ export * from './shadcnSheet';
 export * from './shadcnSkeleton';
 export * from './shadcnTooltip';
 export * from './shadcnSidebar';
+export * from './shadcnTable';
+export * from './shadcnDropdownMenu';
 
 // Utilities
 export { cn } from './utils';

@@ -41,6 +41,7 @@ export default defineConfig({
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
         'components/Sidebar': resolve(__dirname, 'lib/components/Sidebar/index.ts'),
+        'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Utils entries
