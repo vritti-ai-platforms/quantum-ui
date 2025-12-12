@@ -202,3 +202,10 @@ body {
   max-width: 1rem;
   max-height: 1rem;
 }
+
+/* Loading animation for skeleton progress bars */
+@keyframes loading {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
