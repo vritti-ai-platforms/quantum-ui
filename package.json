@@ -118,7 +118,6 @@
     "build": "vite build",
     "build:js": "vite build",
     "build:types": "tsc --project tsconfig.lib.json --emitDeclarationOnly",
-    "build:copy-sidebar-types": "node scripts/copy-sidebar-types.js",
     "build:watch": "npm run build:types && vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview",
