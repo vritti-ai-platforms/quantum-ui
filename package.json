@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.22",
+  "version": "0.1.23",
   "type": "module",
   "sideEffects": false,
   "repository": {
