@@ -4,9 +4,6 @@ import './index.css';
 // Components
 export * from './components';
 
-// Context
-export * from './context';
-
 // Utilities
 export { cn } from '../shadcn/utils';
 
@@ -28,10 +25,11 @@ export {
   setToken,
   getToken,
   clearToken,
-  clearAllTokens,
+  recoverSession,
+  scheduleTokenRefresh,
+  cancelTokenRefresh,
   setCsrfToken,
   getCsrfToken,
   clearCsrfToken,
-  type TokenType
 } from './utils/axios';
 

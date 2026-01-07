@@ -1,205 +1,162 @@
 import Axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { getConfig } from '../config';
 
-/**
- * Token types supported by the application
- */
-export type TokenType = 'onboarding' | 'access' | 'refresh';
-
-/**
- * Token storage interface for type safety
- */
-interface TokenStore {
-  onboarding?: string;
-  access?: string;
-  refresh?: string;
+// Extend AxiosRequestConfig with custom options
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    /** Skip auth for public endpoints (login, signup, etc.) */
+    public?: boolean;
+  }
 }
 
-/**
- * In-memory token storage
- * Tokens are stored in memory for security - not persisted to localStorage
- */
-const tokenStore: TokenStore = {};
+// =============================================================================
+// State
+// =============================================================================
 
-/**
- * CSRF token storage
- * Stored in memory for security
- */
+let accessToken: string | null = null;
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+let sessionRecoveryPromise: Promise<boolean> | null = null;
 let csrfToken: string | null = null;
-
-/**
- * CSRF token fetch promise
- * Used to prevent duplicate fetches
- */
 let csrfFetchPromise: Promise<string | null> | null = null;
 
-/**
- * Sets the CSRF token in the in-memory store
- *
- * @param token - The CSRF token value to store
- *
- * @example
- * ```typescript
- * // Set CSRF token after fetching from server
- * setCsrfToken('csrf_token_from_server');
- * ```
- */
-export const setCsrfToken = (token: string): void => {
-  if (!token || typeof token !== 'string') {
-    console.warn('[axios] Invalid CSRF token provided');
-    return;
+// =============================================================================
+// Token Management
+// =============================================================================
+
+export const setToken = (token: string): void => {
+  if (token && typeof token === 'string') {
+    accessToken = token;
   }
-  csrfToken = token;
 };
 
-/**
- * Retrieves the CSRF token from the in-memory store
- *
- * @returns The CSRF token string if exists, null otherwise
- *
- * @example
- * ```typescript
- * const token = getCsrfToken();
- * if (token) {
- *   console.log('CSRF token is available');
- * }
- * ```
- */
-export const getCsrfToken = (): string | null => {
-  return csrfToken;
+export const getToken = (): string | null => accessToken;
+
+export const clearToken = (): void => {
+  accessToken = null;
+  cancelTokenRefresh();
 };
 
-/**
- * Clears the CSRF token from the in-memory store
- *
- * @example
- * ```typescript
- * // Clear CSRF token on logout or when no longer needed
- * clearCsrfToken();
- * ```
- */
+// =============================================================================
+// CSRF Token Management
+// =============================================================================
+
+export const setCsrfToken = (token: string): void => {
+  if (token && typeof token === 'string') {
+    csrfToken = token;
+  }
+};
+
+export const getCsrfToken = (): string | null => csrfToken;
+
 export const clearCsrfToken = (): void => {
   csrfToken = null;
 };
 
-/**
- * Token priority order for Authorization header
- * Higher priority tokens override lower priority ones
- */
-const TOKEN_PRIORITY: TokenType[] = ['access', 'refresh', 'onboarding'];
+// =============================================================================
+// Session Recovery & Refresh
+// =============================================================================
 
-/**
- * Sets a token in the in-memory store
- *
- * @param type - The type of token to set ('onboarding' | 'access' | 'refresh')
- * @param token - The token value to store
- *
- * @example
- * ```typescript
- * // Set onboarding token after user registration
- * setToken('onboarding', 'eyJhbGciOiJIUzI1NiIs...');
- *
- * // Set access token after login
- * setToken('access', 'eyJhbGciOiJIUzI1NiIs...');
- * ```
- */
-export const setToken = (type: TokenType, token: string): void => {
-  if (!token || typeof token !== 'string') {
-    console.warn(`[axios] Invalid token provided for type: ${type}`);
-    return;
-  }
+/** Recovers session from httpOnly cookie */
+export async function recoverSession(): Promise<{ success: boolean; expiresIn: number }> {
+  const config = getConfig();
 
-  tokenStore[type] = token;
-};
+  try {
+    const response = await Axios.get<{ accessToken: string; expiresIn: number }>(
+      '/auth/token',
+      {
+        baseURL: config.axios.baseURL,
+        withCredentials: true,
+        timeout: config.axios.timeout,
+      }
+    );
 
-/**
- * Retrieves a token from the in-memory store
- *
- * @param type - The type of token to retrieve ('onboarding' | 'access' | 'refresh')
- * @returns The token string if exists, null otherwise
- *
- * @example
- * ```typescript
- * const accessToken = getToken('access');
- * if (accessToken) {
- *   console.log('User is authenticated');
- * }
- * ```
- */
-export const getToken = (type: TokenType): string | null => {
-  return tokenStore[type] || null;
-};
-
-/**
- * Clears a specific token from the in-memory store
- *
- * @param type - The type of token to clear ('onboarding' | 'access' | 'refresh')
- *
- * @example
- * ```typescript
- * // Clear onboarding token after onboarding completes
- * clearToken('onboarding');
- *
- * // Clear access token on logout
- * clearToken('access');
- * ```
- */
-export const clearToken = (type: TokenType): void => {
-  delete tokenStore[type];
-};
-
-/**
- * Clears all tokens from the in-memory store
- * Useful for logout or complete session reset
- *
- * @example
- * ```typescript
- * // On user logout
- * clearAllTokens();
- * ```
- */
-export const clearAllTokens = (): void => {
-  Object.keys(tokenStore).forEach(key => {
-    delete tokenStore[key as TokenType];
-  });
-};
-
-/**
- * Gets the highest priority token available in the store
- * Used internally by the axios interceptor to determine which token to use
- *
- * @returns The highest priority token if available, null otherwise
- */
-const getActiveToken = (): string | null => {
-  for (const tokenType of TOKEN_PRIORITY) {
-    const token = tokenStore[tokenType];
-    if (token) {
-      return token;
+    if (response.data.accessToken) {
+      setToken(response.data.accessToken);
+      return { success: true, expiresIn: response.data.expiresIn };
     }
-  }
-  return null;
-};
 
-/**
- * Fetches CSRF token from the configured endpoint
- * Uses promise locking to prevent duplicate fetches
- *
- * @returns Promise resolving to CSRF token or null
- */
+    return { success: false, expiresIn: 0 };
+  } catch {
+    clearToken();
+    return { success: false, expiresIn: 0 };
+  }
+}
+
+/** Auto-recovers session if no token (used by request interceptor) */
+async function recoverSessionIfNeeded(): Promise<boolean> {
+  if (accessToken) return true;
+
+  if (sessionRecoveryPromise) {
+    return sessionRecoveryPromise;
+  }
+
+  sessionRecoveryPromise = (async () => {
+    try {
+      const result = await recoverSession();
+      if (result.success) {
+        scheduleTokenRefresh(result.expiresIn);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      sessionRecoveryPromise = null;
+    }
+  })();
+
+  return sessionRecoveryPromise;
+}
+
+/** Schedules proactive token refresh at 80% of token lifetime */
+export function scheduleTokenRefresh(expiresIn: number): void {
+  cancelTokenRefresh();
+
+  const refreshAt = expiresIn * 0.8 * 1000;
+
+  refreshTimer = setTimeout(async () => {
+    const config = getConfig();
+
+    try {
+      const response = await Axios.post<{ accessToken: string; expiresIn: number }>(
+        '/auth/refresh',
+        {},
+        {
+          baseURL: config.axios.baseURL,
+          withCredentials: true,
+          timeout: config.axios.timeout,
+        }
+      );
+
+      if (response.data.accessToken) {
+        setToken(response.data.accessToken);
+        scheduleTokenRefresh(response.data.expiresIn);
+      }
+    } catch {
+      clearToken();
+      redirectToLogin();
+    }
+  }, refreshAt);
+}
+
+export function cancelTokenRefresh(): void {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
+// =============================================================================
+// CSRF Token Fetching
+// =============================================================================
+
 async function fetchCsrfToken(): Promise<string | null> {
-  // Return existing fetch promise if one is in progress
-  if (csrfFetchPromise) {
-    return csrfFetchPromise;
-  }
+  if (csrfFetchPromise) return csrfFetchPromise;
 
-  // Create new fetch promise
   csrfFetchPromise = (async () => {
     try {
       const config = getConfig();
-
-      if (!config.csrf.enabled) {
-        return null;
-      }
+      if (!config.csrf.enabled) return null;
 
       const response = await Axios.get(config.csrf.endpoint, {
         baseURL: config.axios.baseURL,
@@ -208,19 +165,14 @@ async function fetchCsrfToken(): Promise<string | null> {
       });
 
       const token = response.data?.csrfToken;
-
       if (token && typeof token === 'string') {
         setCsrfToken(token);
         return token;
       }
-
-      console.warn('[axios] CSRF endpoint did not return a csrfToken field');
       return null;
-    } catch (error) {
-      console.error('[axios] Failed to fetch CSRF token:', error);
+    } catch {
       return null;
     } finally {
-      // Clear the promise after completion
       csrfFetchPromise = null;
     }
   })();
@@ -228,13 +180,40 @@ async function fetchCsrfToken(): Promise<string | null> {
   return csrfFetchPromise;
 }
 
-/**
- * Pre-configured axios instance for API requests
- * Configuration is initialized with defaults and can be overridden via configureQuantumUI()
- */
+// =============================================================================
+// Helpers
+// =============================================================================
+
+function redirectToLogin(): void {
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
+  }
+}
+
+function getSubdomain(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  const parts = window.location.hostname.split('.');
+
+  // localhost (e.g., acme.localhost)
+  if (parts.length >= 2 && parts[parts.length - 1] === 'localhost') {
+    return parts[0];
+  }
+
+  // production (e.g., acme.vritti.cloud)
+  if (parts.length >= 3) {
+    return parts[0];
+  }
+
+  return null;
+}
+
+// =============================================================================
+// Axios Instance & Interceptors
+// =============================================================================
+
 function createAxiosInstance(): AxiosInstance {
   const config = getConfig();
-
   return Axios.create({
     baseURL: config.axios.baseURL,
     withCredentials: config.axios.withCredentials,
@@ -245,132 +224,57 @@ function createAxiosInstance(): AxiosInstance {
 
 export const axios: AxiosInstance = createAxiosInstance();
 
-/**
- * Extracts the subdomain from the current hostname
- * Used for multi-tenant architecture
- *
- * @returns The subdomain if present, null otherwise
- *
- * @example
- * ```typescript
- * // URL: acme.localhost:3001
- * getSubdomain() // returns 'acme'
- *
- * // URL: localhost:3001
- * getSubdomain() // returns null
- * ```
- */
-const getSubdomain = (): string | null => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
+// Request interceptor: auto-recover session, add headers
+axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const quantumConfig = getConfig();
+  const isPublicRequest = (config as { public?: boolean }).public === true;
 
-  const hostname = window.location.hostname;
-
-  // Split hostname by dots
-  const parts = hostname.split('.');
-
-  // For localhost development (e.g., acme.localhost)
-  if (parts.length >= 2 && parts[parts.length - 1] === 'localhost') {
-    return parts[0];
-  }
-
-  // For production domains (e.g., acme.vritti.cloud)
-  if (parts.length >= 3) {
-    return parts[0];
-  }
-
-  // No subdomain found
-  return null;
-};
-
-/**
- * Request interceptor to automatically add Authorization header and tenant identifier
- * - Adds Bearer token if any token is available in the store
- * - Adds X-Tenant-Id header with subdomain for multi-tenant architecture
- * - Auto-fetches CSRF token if needed for state-changing requests
- *
- * Token Priority: access > refresh > onboarding
- */
-axios.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {
-    const quantumConfig = getConfig();
-
-    // Get the highest priority token available
-    const token = getActiveToken();
-
-    // Add Authorization header if token exists
-    if (token) {
-      const authHeaderName = quantumConfig.auth.tokenHeaderName;
-      const tokenPrefix = quantumConfig.auth.tokenPrefix;
-      config.headers[authHeaderName] = `${tokenPrefix} ${token}`;
+  // Auto-recover session for protected requests
+  if (!isPublicRequest) {
+    const hasSession = await recoverSessionIfNeeded();
+    if (!hasSession) {
+      redirectToLogin();
+      return Promise.reject(new Error('No valid session'));
     }
-
-    // Add tenant identifier from subdomain
-    const subdomain = getSubdomain();
-    if (subdomain) {
-      config.headers['x-subdomain'] = subdomain;
-    }
-
-    // Handle CSRF token for state-changing requests
-    const isStateChangingRequest = ['post', 'put', 'patch', 'delete'].includes(
-      config.method?.toLowerCase() || ''
-    );
-
-    if (isStateChangingRequest && quantumConfig.csrf.enabled) {
-      let csrfTokenValue = getCsrfToken();
-
-      // Auto-fetch CSRF token if not available
-      if (!csrfTokenValue) {
-        csrfTokenValue = await fetchCsrfToken();
-      }
-
-      // Add CSRF token to headers
-      if (csrfTokenValue) {
-        config.headers[quantumConfig.csrf.headerName] = csrfTokenValue;
-      } else {
-        console.warn('[axios] CSRF token not available for state-changing request');
-      }
-    }
-
-    return config;
-  },
-  (error) => {
-    // Handle request error
-    return Promise.reject(error);
   }
-);
 
-/**
- * Response interceptor for handling token expiration and refresh
- * Can be extended to handle token refresh logic
- */
+  // Add Authorization header
+  const token = getToken();
+  if (token) {
+    config.headers[quantumConfig.auth.tokenHeaderName] =
+      `${quantumConfig.auth.tokenPrefix} ${token}`;
+  }
+
+  // Add tenant subdomain header
+  const subdomain = getSubdomain();
+  if (subdomain) {
+    config.headers['x-subdomain'] = subdomain;
+  }
+
+  // Add CSRF token for state-changing requests
+  const isStateChanging = ['post', 'put', 'patch', 'delete'].includes(
+    config.method?.toLowerCase() || ''
+  );
+
+  if (isStateChanging && quantumConfig.csrf.enabled) {
+    let csrf = getCsrfToken();
+    if (!csrf) csrf = await fetchCsrfToken();
+    if (csrf) config.headers[quantumConfig.csrf.headerName] = csrf;
+  }
+
+  return config;
+});
+
+// Response interceptor: handle 401 errors
 axios.interceptors.response.use(
-  (response) => {
-    // Pass through successful responses
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
+  (response) => response,
+  (error) => {
+    const isPublicRequest = error.config?.public === true;
 
-    // Handle 401 Unauthorized errors
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      // Room for future token refresh logic
-      // const refreshToken = getToken('refresh');
-      // if (refreshToken) {
-      //   try {
-      //     const response = await refreshAccessToken(refreshToken);
-      //     setToken('access', response.data.accessToken);
-      //     originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
-      //     return axios(originalRequest);
-      //   } catch (refreshError) {
-      //     clearAllTokens();
-      //     window.location.href = '/login';
-      //     return Promise.reject(refreshError);
-      //   }
-      // }
+    if (error.response?.status === 401 && !isPublicRequest) {
+      clearToken();
+      cancelTokenRefresh();
+      redirectToLogin();
     }
 
     return Promise.reject(error);

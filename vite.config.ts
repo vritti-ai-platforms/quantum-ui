@@ -46,8 +46,6 @@ export default defineConfig({
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
-        // Context entries
-        'context/AuthProvider': resolve(__dirname, 'lib/context/index.ts'),
       },
       name: 'QuantumUI',
       formats: ['es'],

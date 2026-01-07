@@ -104,10 +104,6 @@
       "types": "./dist/axios.d.ts",
       "import": "./dist/utils/axios.js"
     },
-    "./AuthProvider": {
-      "types": "./dist/AuthProvider.d.ts",
-      "import": "./dist/context/AuthProvider.js"
-    },
     "./index.css": "./dist/assets/quantum-ui.css"
   },
   "files": [
