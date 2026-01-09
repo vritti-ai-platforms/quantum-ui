@@ -1,6 +1,15 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import type {
+  Cell,
+  ColumnDef,
+  ColumnFiltersState,
+  Header,
+  HeaderGroup,
+  Row,
+  SortingState,
+  VisibilityState,
+} from '@tanstack/react-table';
 import {
   flexRender,
   getCoreRowModel,
@@ -8,92 +17,76 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import type {
-  ColumnDef,
-  ColumnFiltersState,
-  HeaderGroup,
-  Header,
-  Row,
-  Cell,
-  SortingState,
-  VisibilityState,
-} from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../../../shadcn/shadcnTable"
-import { Input } from "../../../shadcn/shadcnInput"
-import { Button } from "../Button"
+} from '@tanstack/react-table';
+import * as React from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "../../../shadcn/shadcnDropdownMenu"
+} from '../../../shadcn/shadcnDropdownMenu';
+import { Input } from '../../../shadcn/shadcnInput';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
+import { Button } from '../Button';
 
 export interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
   /**
    * Enable pagination
    * @default true
    */
-  enablePagination?: boolean
+  enablePagination?: boolean;
   /**
    * Enable sorting
    * @default false
    */
-  enableSorting?: boolean
+  enableSorting?: boolean;
   /**
    * Enable filtering
    * @default false
    */
-  enableFiltering?: boolean
+  enableFiltering?: boolean;
   /**
    * Column ID to filter by (when enableFiltering is true)
    * If not provided, filtering will be available but no default input will be shown
    */
-  filterColumn?: string
+  filterColumn?: string;
   /**
    * Placeholder text for the filter input
    * @default "Filter..."
    */
-  filterPlaceholder?: string
+  filterPlaceholder?: string;
   /**
    * Enable column visibility
    * @default false
    */
-  enableColumnVisibility?: boolean
+  enableColumnVisibility?: boolean;
   /**
    * Initial sorting state
    */
-  initialSorting?: SortingState
+  initialSorting?: SortingState;
   /**
    * Initial column filters
    */
-  initialColumnFilters?: ColumnFiltersState
+  initialColumnFilters?: ColumnFiltersState;
   /**
    * Initial column visibility
    */
-  initialColumnVisibility?: VisibilityState
+  initialColumnVisibility?: VisibilityState;
   /**
    * Page size for pagination
    * @default 10
    */
-  pageSize?: number
+  pageSize?: number;
   /**
    * Custom empty state message
    */
-  emptyMessage?: React.ReactNode
+  emptyMessage?: React.ReactNode;
   /**
    * Custom className for the table container
    */
-  className?: string
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -103,21 +96,18 @@ export function DataTable<TData, TValue>({
   enableSorting = false,
   enableFiltering = false,
   filterColumn,
-  filterPlaceholder = "Filter...",
+  filterPlaceholder = 'Filter...',
   enableColumnVisibility = false,
   initialSorting = [],
   initialColumnFilters = [],
   initialColumnVisibility = {},
   pageSize = 10,
-  emptyMessage = "No results.",
+  emptyMessage = 'No results.',
   className,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>(initialSorting)
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    initialColumnFilters
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(initialColumnVisibility)
+  const [sorting, setSorting] = React.useState<SortingState>(initialSorting);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(initialColumnFilters);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility);
 
   const table = useReactTable({
     data,
@@ -125,14 +115,10 @@ export function DataTable<TData, TValue>({
     onSortingChange: enableSorting ? setSorting : undefined,
     onColumnFiltersChange: enableFiltering ? setColumnFilters : undefined,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: enablePagination
-      ? getPaginationRowModel()
-      : undefined,
+    getPaginationRowModel: enablePagination ? getPaginationRowModel() : undefined,
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
     getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
-    onColumnVisibilityChange: enableColumnVisibility
-      ? setColumnVisibility
-      : undefined,
+    onColumnVisibilityChange: enableColumnVisibility ? setColumnVisibility : undefined,
     initialState: {
       pagination: {
         pageSize,
@@ -144,7 +130,7 @@ export function DataTable<TData, TValue>({
       columnFilters: enableFiltering ? columnFilters : undefined,
       columnVisibility: enableColumnVisibility ? columnVisibility : undefined,
     },
-  })
+  });
 
   return (
     <div className={className}>
@@ -153,10 +139,8 @@ export function DataTable<TData, TValue>({
           {enableFiltering && filterColumn && (
             <Input
               placeholder={filterPlaceholder}
-              value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
-              onChange={(event) =>
-                table.getColumn(filterColumn)?.setFilterValue(event.target.value)
-              }
+              value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn(filterColumn)?.setFilterValue(event.target.value)}
               className="max-w-sm"
             />
           )}
@@ -177,13 +161,11 @@ export function DataTable<TData, TValue>({
                         key={column.id}
                         className="capitalize"
                         checked={column.getIsVisible()}
-                        onCheckedChange={(value: boolean) =>
-                          column.toggleVisibility(!!value)
-                        }
+                        onCheckedChange={(value: boolean) => column.toggleVisibility(!!value)}
                       >
                         {column.id}
                       </DropdownMenuCheckboxItem>
-                    )
+                    );
                   })}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -198,14 +180,9 @@ export function DataTable<TData, TValue>({
                 {headerGroup.headers.map((header: Header<TData, unknown>) => {
                   return (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -213,26 +190,15 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row: Row<TData>) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell: Cell<TData, TValue>) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
@@ -257,23 +223,16 @@ export function DataTable<TData, TValue>({
               Previous
             </Button>
             <div className="flex items-center justify-center text-sm font-medium">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount() || 1}
+              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
+            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
               Next
             </Button>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
 
-DataTable.displayName = "DataTable"
-
+DataTable.displayName = 'DataTable';

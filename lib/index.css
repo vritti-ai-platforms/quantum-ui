@@ -9,26 +9,26 @@
  * @import '@vritti/quantum-ui/index.css';
  */
 :root {
-  --background: oklch(1.0000 0 0);
+  --background: oklch(1 0 0);
   --foreground: oklch(0.2302 0.0547 256.1829);
-  --card: oklch(1.0000 0 0);
+  --card: oklch(1 0 0);
   --card-foreground: oklch(0.2302 0.0547 256.1829);
-  --popover: oklch(1.0000 0 0);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2302 0.0547 256.1829);
   --primary: oklch(0.5789 0.1833 256.2496);
-  --primary-foreground: oklch(1.0000 0 0);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9732 0.0131 251.5574);
   --secondary-foreground: oklch(0.5789 0.1833 256.2496);
   --muted: oklch(0.9802 0.0068 247.8944);
   --muted-foreground: oklch(0.5435 0.0511 251.7257);
-  --accent: oklch(0.9512 0.0194 252.8790);
+  --accent: oklch(0.9512 0.0194 252.879);
   --accent-foreground: oklch(0.5789 0.1833 256.2496);
-  --destructive: oklch(0.5771 0.2152 27.3250);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --warning: oklch(0.7500 0.1500 85);
+  --destructive: oklch(0.5771 0.2152 27.325);
+  --destructive-foreground: oklch(1 0 0);
+  --warning: oklch(0.75 0.15 85);
   --warning-foreground: oklch(0.2302 0.0547 256.1829);
-  --success: oklch(0.6500 0.1500 145);
-  --success-foreground: oklch(1.0000 0 0);
+  --success: oklch(0.65 0.15 145);
+  --success-foreground: oklch(1 0 0);
   --border: oklch(0.9467 0.0207 248.0465);
   --input: oklch(0.9467 0.0207 248.0465);
   --ring: oklch(0.5789 0.1833 256.2496);
@@ -45,24 +45,34 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --font-sans: 'IBM Plex Sans', sans-serif;
-  --font-serif: 'Playfair Display', serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
   --radius: 0.75rem;
   --shadow-x: 0rem;
   --shadow-y: 0.75rem;
   --shadow-blur: 1.5rem;
   --shadow-spread: 0.25rem;
   --shadow-opacity: 0.08;
-  --shadow-color: #0A1D36;
+  --shadow-color: #0a1d36;
   --shadow-2xs: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.04);
   --shadow-xs: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.04);
-  --shadow-sm: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 1px 2px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
-  --shadow: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 1px 2px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
-  --shadow-md: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 2px 4px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
-  --shadow-lg: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 4px 6px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
-  --shadow-xl: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 8px 10px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
-  --shadow-2xl: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.20);
+  --shadow-sm:
+    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 1px 2px -0.75px
+    hsl(214.0909 68.7500% 12.5490% / 0.08);
+  --shadow:
+    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 1px 2px -0.75px
+    hsl(214.0909 68.7500% 12.5490% / 0.08);
+  --shadow-md:
+    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 2px 4px -0.75px
+    hsl(214.0909 68.7500% 12.5490% / 0.08);
+  --shadow-lg:
+    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 4px 6px -0.75px
+    hsl(214.0909 68.7500% 12.5490% / 0.08);
+  --shadow-xl:
+    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08), 0rem 8px 10px -0.75px
+    hsl(214.0909 68.7500% 12.5490% / 0.08);
+  --shadow-2xl: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.2);
   --tracking-normal: 0.01em;
   --spacing: 0.25rem;
 }
@@ -83,10 +93,10 @@
   --accent: oklch(0.2645 0 0);
   --accent-foreground: oklch(0.5789 0.1833 256.2496);
   --destructive: oklch(0.6539 0.1926 25.1437);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --warning: oklch(0.8000 0.1600 90);
+  --destructive-foreground: oklch(1 0 0);
+  --warning: oklch(0.8 0.16 90);
   --warning-foreground: oklch(0.1591 0 0);
-  --success: oklch(0.7000 0.1600 150);
+  --success: oklch(0.7 0.16 150);
   --success-foreground: oklch(0.1591 0 0);
   --border: oklch(0.2931 0 0);
   --input: oklch(0.2931 0 0);
@@ -95,7 +105,7 @@
   --chart-2: oklch(0.6856 0.1417 256.6754);
   --chart-3: oklch(0.6731 0.1624 144.2083);
   --chart-4: oklch(0.8442 0.1722 84.9338);
-  --chart-5: oklch(0.6083 0.2090 27.0276);
+  --chart-5: oklch(0.6083 0.209 27.0276);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -104,9 +114,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.439 0 0);
-  --font-sans: 'IBM Plex Sans', sans-serif;
-  --font-serif: 'Playfair Display', serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
   --radius: 0.75rem;
   --shadow-x: 0rem;
   --shadow-y: 0.5rem;
@@ -192,7 +202,6 @@ body {
   letter-spacing: var(--tracking-normal);
 }
 
-
 /* PhoneInput flag sizing overrides for h-9 (36px) container */
 .PhoneInput {
   --PhoneInputCountryFlag-height: 1rem;
@@ -205,7 +214,13 @@ body {
 
 /* Loading animation for skeleton progress bars */
 @keyframes loading {
-  0% { width: 0%; }
-  50% { width: 70%; }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 70%;
+  }
+  100% {
+    width: 100%;
+  }
 }

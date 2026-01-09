@@ -1,7 +1,7 @@
 import { CheckCircle, Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
 import { cn } from '../../../shadcn/utils';
-import { TextField, TextFieldProps } from '../TextField/TextField';
+import { TextField, type TextFieldProps } from '../TextField/TextField';
 
 export interface PasswordFieldProps extends Omit<TextFieldProps, 'type' | 'endAdornment'> {
   /**
@@ -24,11 +24,6 @@ export interface PasswordFieldProps extends Omit<TextFieldProps, 'type' | 'endAd
    */
   toggleAriaLabel?: string;
 }
-
-// PasswordField automatically forwards ref from TextField
-type PasswordFieldComponentType = React.ForwardRefExoticComponent<
-  PasswordFieldProps & React.RefAttributes<HTMLInputElement>
->;
 
 // Helper function to calculate password strength
 const getPasswordStrength = (password: string) => {
@@ -57,7 +52,7 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
       error,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -73,12 +68,12 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
       <>
         {/* Password strength indicator */}
         {showStrengthIndicator && value && !error && (
-          <div className='space-y-1'>
-            <div className='flex justify-between items-center text-[10px]'>
-              <span className='text-muted-foreground'>Strength:</span>
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-[10px]">
+              <span className="text-muted-foreground">Strength:</span>
               <span className={passwordStrength.color}>{passwordStrength.label}</span>
             </div>
-            <div className='w-full bg-muted rounded-full h-1'>
+            <div className="w-full bg-muted rounded-full h-1">
               <div
                 className={cn('h-1 rounded-full transition-all duration-300', passwordStrength.bgColor)}
                 style={{ width: passwordStrength.width }}
@@ -89,9 +84,9 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
 
         {/* Password match indicator */}
         {showMatchIndicator && passwordsMatch && !error && (
-          <div className='flex items-center gap-1'>
-            <CheckCircle className='h-3 w-3 text-success' />
-            <span className='text-[10px] text-success'>Passwords match</span>
+          <div className="flex items-center gap-1">
+            <CheckCircle className="h-3 w-3 text-success" />
+            <span className="text-[10px] text-success">Passwords match</span>
           </div>
         )}
 
@@ -102,15 +97,15 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
 
     const eyeIcon = (
       <button
-        type='button'
+        type="button"
         onClick={togglePasswordVisibility}
         aria-label={toggleAriaLabel || (showPassword ? 'Hide password' : 'Show password')}
-        className='cursor-pointer'
+        className="cursor-pointer"
       >
         {showPassword ? (
-          <EyeOff className='h-3.5 w-3.5 text-muted-foreground' />
+          <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
         ) : (
-          <Eye className='h-3.5 w-3.5 text-muted-foreground' />
+          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
         )}
       </button>
     );
@@ -126,7 +121,7 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
         endAdornment={eyeIcon}
       />
     );
-  }
+  },
 );
 
 PasswordField.displayName = 'PasswordField';

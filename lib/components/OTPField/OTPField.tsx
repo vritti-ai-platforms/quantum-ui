@@ -1,13 +1,7 @@
 import React from 'react';
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../../../shadcn/shadcnInputOTP';
 import { cn } from '../../../shadcn/utils';
-import {
-  Field,
-  FieldLabel,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-} from '../../../shadcn/shadcnField';
 
 export interface OTPFieldProps {
   /**
@@ -59,20 +53,7 @@ export interface OTPFieldProps {
 
 // OTPField component - specialized input for one-time passwords with Field system
 export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
-  (
-    {
-      value,
-      onChange,
-      length = 6,
-      label,
-      description,
-      error,
-      disabled,
-      required,
-      className,
-    },
-    ref
-  ) => {
+  ({ value, onChange, length = 6, label, description, error, disabled, required, className }, _ref) => {
     const fieldId = React.useId();
     const hasError = !!error;
 
@@ -81,7 +62,7 @@ export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
         {label && (
           <FieldLabel htmlFor={fieldId}>
             {label}
-            {required && <span className='text-destructive ml-1'>*</span>}
+            {required && <span className="text-destructive ml-1">*</span>}
           </FieldLabel>
         )}
 
@@ -92,11 +73,7 @@ export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
             onChange={onChange}
             disabled={disabled}
             containerClassName={cn('justify-center', className)}
-            aria-describedby={
-              description || error
-                ? `${fieldId}-description ${fieldId}-error`
-                : undefined
-            }
+            aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
             aria-invalid={hasError}
           >
             <InputOTPGroup>
@@ -105,7 +82,8 @@ export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
                   key={index}
                   index={index}
                   className={cn(
-                    hasError && 'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40'
+                    hasError &&
+                      'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
                   )}
                 />
               ))}
@@ -113,20 +91,20 @@ export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
           </InputOTP>
 
           {description && (
-            <FieldDescription id={`${fieldId}-description`} className='text-center'>
+            <FieldDescription id={`${fieldId}-description`} className="text-center">
               {description}
             </FieldDescription>
           )}
 
           {error && (
-            <FieldError id={`${fieldId}-error`} className='text-center'>
+            <FieldError id={`${fieldId}-error`} className="text-center">
               {error}
             </FieldError>
           )}
         </FieldContent>
       </Field>
     );
-  }
+  },
 );
 
 OTPField.displayName = 'OTPField';

@@ -1,7 +1,7 @@
 export { axios } from './axios';
 export {
-  mapApiErrorsToForm,
-  type FieldMapping,
   type ApiErrorResponse,
-  type MapApiErrorsOptions
+  type FieldMapping,
+  type MapApiErrorsOptions,
+  mapApiErrorsToForm,
 } from './formHelpers';

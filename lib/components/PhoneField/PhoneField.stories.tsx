@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { PhoneField, isValidPhoneNumber, type PhoneValue } from './index';
+import { isValidPhoneNumber, PhoneField, type PhoneValue } from './index';
 
 const meta: Meta<typeof PhoneField> = {
   title: 'Components/PhoneField',
@@ -41,14 +41,14 @@ type Story = StoryObj<typeof PhoneField>;
 export const Default: Story = {
   render: () => {
     const [phone, setPhone] = React.useState<PhoneValue>();
-    return <PhoneField label='Phone Number' value={phone} onChange={(value) => setPhone(value)} />;
+    return <PhoneField label="Phone Number" value={phone} onChange={(value) => setPhone(value)} />;
   },
 };
 
 export const WithValue: Story = {
   render: () => {
     const [phone, setPhone] = React.useState<PhoneValue | undefined>('+14155552671' as PhoneValue);
-    return <PhoneField label='Phone Number' value={phone} onChange={(value) => setPhone(value)} />;
+    return <PhoneField label="Phone Number" value={phone} onChange={(value) => setPhone(value)} />;
   },
 };
 
@@ -57,10 +57,10 @@ export const WithHelperText: Story = {
     const [phone, setPhone] = React.useState<PhoneValue>();
     return (
       <PhoneField
-        label='Phone Number'
+        label="Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
-        description='Enter your phone number with country code'
+        description="Enter your phone number with country code"
       />
     );
   },
@@ -72,11 +72,11 @@ export const DefaultCountryUS: Story = {
     const [phone, setPhone] = React.useState<PhoneValue>();
     return (
       <PhoneField
-        label='US Phone Number'
+        label="US Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
-        defaultCountry='US'
-        description='Default: United States'
+        defaultCountry="US"
+        description="Default: United States"
       />
     );
   },
@@ -87,11 +87,11 @@ export const DefaultCountryIndia: Story = {
     const [phone, setPhone] = React.useState<PhoneValue>();
     return (
       <PhoneField
-        label='Indian Phone Number'
+        label="Indian Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
-        defaultCountry='IN'
-        description='Default: India'
+        defaultCountry="IN"
+        description="Default: India"
       />
     );
   },
@@ -102,11 +102,11 @@ export const DefaultCountryUK: Story = {
     const [phone, setPhone] = React.useState<PhoneValue>();
     return (
       <PhoneField
-        label='UK Phone Number'
+        label="UK Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
-        defaultCountry='GB'
-        description='Default: United Kingdom'
+        defaultCountry="GB"
+        description="Default: United Kingdom"
       />
     );
   },
@@ -117,11 +117,11 @@ export const DefaultCountryGermany: Story = {
     const [phone, setPhone] = React.useState<PhoneValue>();
     return (
       <PhoneField
-        label='German Phone Number'
+        label="German Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
-        defaultCountry='DE'
-        description='Default: Germany'
+        defaultCountry="DE"
+        description="Default: Germany"
       />
     );
   },
@@ -133,10 +133,10 @@ export const ErrorState: Story = {
     const [phone, setPhone] = React.useState<PhoneValue | undefined>('+1234' as PhoneValue);
     return (
       <PhoneField
-        label='Phone Number'
+        label="Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
-        error='Please enter a valid phone number'
+        error="Please enter a valid phone number"
       />
     );
   },
@@ -147,11 +147,11 @@ export const Disabled: Story = {
     const [phone, setPhone] = React.useState<PhoneValue | undefined>('+14155552671' as PhoneValue);
     return (
       <PhoneField
-        label='Phone Number'
+        label="Phone Number"
         value={phone}
         onChange={(value) => setPhone(value)}
         disabled={true}
-        description='This field is disabled'
+        description="This field is disabled"
       />
     );
   },
@@ -168,9 +168,9 @@ export const WithValidation: Story = {
     const showSuccess = touched && phone && isValid;
 
     return (
-      <div className='w-80'>
+      <div className="w-80">
         <PhoneField
-          label='Phone Number'
+          label="Phone Number"
           value={phone}
           onChange={(value) => {
             setPhone(value);
@@ -178,16 +178,12 @@ export const WithValidation: Story = {
           }}
           error={showError ? 'Invalid phone number' : undefined}
           description={
-            showError
-              ? undefined
-              : showSuccess
-              ? '✓ Valid phone number'
-              : 'Enter a valid international phone number'
+            showError ? undefined : showSuccess ? '✓ Valid phone number' : 'Enter a valid international phone number'
           }
         />
 
         {phone && (
-          <div className='mt-4 p-3 bg-muted rounded-lg text-xs space-y-1'>
+          <div className="mt-4 p-3 bg-muted rounded-lg text-xs space-y-1">
             <p>
               <strong>Value:</strong> {phone}
             </p>
@@ -216,11 +212,16 @@ export const AllCountries: Story = {
     const [phoneDE, setPhoneDE] = React.useState<PhoneValue>();
 
     return (
-      <div className='w-80 space-y-4'>
-        <PhoneField label='United States' value={phoneUS} onChange={(value) => setPhoneUS(value)} defaultCountry='US' />
-        <PhoneField label='India' value={phoneIN} onChange={(value) => setPhoneIN(value)} defaultCountry='IN' />
-        <PhoneField label='United Kingdom' value={phoneGB} onChange={(value) => setPhoneGB(value)} defaultCountry='GB' />
-        <PhoneField label='Germany' value={phoneDE} onChange={(value) => setPhoneDE(value)} defaultCountry='DE' />
+      <div className="w-80 space-y-4">
+        <PhoneField label="United States" value={phoneUS} onChange={(value) => setPhoneUS(value)} defaultCountry="US" />
+        <PhoneField label="India" value={phoneIN} onChange={(value) => setPhoneIN(value)} defaultCountry="IN" />
+        <PhoneField
+          label="United Kingdom"
+          value={phoneGB}
+          onChange={(value) => setPhoneGB(value)}
+          defaultCountry="GB"
+        />
+        <PhoneField label="Germany" value={phoneDE} onChange={(value) => setPhoneDE(value)} defaultCountry="DE" />
       </div>
     );
   },
@@ -238,49 +239,49 @@ export const ContactForm: Story = {
     const [phone, setPhone] = React.useState<PhoneValue>();
 
     return (
-      <div className='w-96 space-y-4'>
-        <div className='grid grid-cols-2 gap-4'>
-          <div className='space-y-1.5'>
-            <label className='text-sm font-medium'>First Name</label>
+      <div className="w-96 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">First Name</label>
             <input
-              type='text'
+              type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder='John'
-              className='flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm'
+              placeholder="John"
+              className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm"
             />
           </div>
-          <div className='space-y-1.5'>
-            <label className='text-sm font-medium'>Last Name</label>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Last Name</label>
             <input
-              type='text'
+              type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder='Doe'
-              className='flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm'
+              placeholder="Doe"
+              className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm"
             />
           </div>
         </div>
 
-        <div className='space-y-1.5'>
-          <label className='text-sm font-medium'>Email Address</label>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">Email Address</label>
           <input
-            type='email'
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder='john.doe@example.com'
-            className='flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm'
+            placeholder="john.doe@example.com"
+            className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm"
           />
         </div>
 
         <PhoneField
-          label='Phone Number'
+          label="Phone Number"
           value={phone}
           onChange={(value) => setPhone(value)}
           description="We'll never share your phone number"
         />
 
-        <button className='w-full h-9 bg-primary text-primary-foreground rounded-lg text-sm font-medium'>Submit</button>
+        <button className="w-full h-9 bg-primary text-primary-foreground rounded-lg text-sm font-medium">Submit</button>
       </div>
     );
   },
@@ -298,29 +299,29 @@ export const AllStates: Story = {
     const [phoneDisabled, setPhoneDisabled] = React.useState<PhoneValue | undefined>('+14155552671' as PhoneValue);
 
     return (
-      <div className='w-80 space-y-4'>
-        <PhoneField label='Normal State' value={phoneNormal} onChange={(value) => setPhoneNormal(value)} />
+      <div className="w-80 space-y-4">
+        <PhoneField label="Normal State" value={phoneNormal} onChange={(value) => setPhoneNormal(value)} />
 
         <PhoneField
-          label='Valid Phone'
+          label="Valid Phone"
           value={phoneValid}
           onChange={(value) => setPhoneValid(value)}
-          description='✓ This phone number is valid'
+          description="✓ This phone number is valid"
         />
 
         <PhoneField
-          label='Invalid Phone'
+          label="Invalid Phone"
           value={phoneInvalid}
           onChange={(value) => setPhoneInvalid(value)}
-          error='Please enter a valid phone number'
+          error="Please enter a valid phone number"
         />
 
         <PhoneField
-          label='Disabled State'
+          label="Disabled State"
           value={phoneDisabled}
           onChange={(value) => setPhoneDisabled(value)}
           disabled={true}
-          description='This field is disabled'
+          description="This field is disabled"
         />
       </div>
     );

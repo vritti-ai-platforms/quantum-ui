@@ -65,9 +65,7 @@ export const Animated: Story = {
     return (
       <div className="w-80 space-y-4">
         <Progress value={progress} />
-        <div className="text-center text-sm text-muted-foreground">
-          {progress}% Complete
-        </div>
+        <div className="text-center text-sm text-muted-foreground">{progress}% Complete</div>
       </div>
     );
   },
@@ -186,14 +184,7 @@ export const OnboardingFlow: Story = {
     const totalSteps = 6;
     const progress = (currentStep / totalSteps) * 100;
 
-    const steps = [
-      'Verify Email',
-      'Verify Mobile',
-      'Set Password',
-      'Enable 2FA',
-      'Complete Profile',
-      'Done',
-    ];
+    const steps = ['Verify Email', 'Verify Mobile', 'Set Password', 'Enable 2FA', 'Complete Profile', 'Done'];
 
     return (
       <div className="w-96 space-y-4">

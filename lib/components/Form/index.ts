@@ -1,12 +1,18 @@
-export {
-  Controller, Form, type FormProps
-} from './Form';
-
 // Re-export Field components for tree-shaking
 export {
-  Field, FieldContent, FieldDescription,
+  Field,
+  FieldContent,
+  FieldDescription,
   FieldError,
-  FieldGroup, FieldLabel, FieldLegend,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
   FieldSeparator,
-  FieldSet, FieldTitle
+  FieldSet,
+  FieldTitle,
 } from '../../../shadcn/shadcnField';
+export {
+  Controller,
+  Form,
+  type FormProps,
+} from './Form';

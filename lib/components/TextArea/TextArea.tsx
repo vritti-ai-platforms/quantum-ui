@@ -1,13 +1,7 @@
 import React from 'react';
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 import { Textarea } from '../../../shadcn/shadcnTextarea';
 import { cn } from '../../../shadcn/utils';
-import {
-  Field,
-  FieldLabel,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-} from '../../../shadcn/shadcnField';
 
 export interface TextAreaProps extends React.ComponentProps<'textarea'> {
   /**
@@ -28,18 +22,9 @@ export interface TextAreaProps extends React.ComponentProps<'textarea'> {
 
 // TextArea molecule - Textarea + Label composition with Field system
 export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  (
-    {
-      label,
-      description,
-      error,
-      className,
-      id,
-      ...props
-    },
-    ref
-  ) => {
-    const fieldId = id || React.useId();
+  ({ label, description, error, className, id, ...props }, ref) => {
+    const generatedId = React.useId();
+    const fieldId = id || generatedId;
     const hasError = !!error;
 
     return (
@@ -51,28 +36,18 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
             ref={ref}
             id={fieldId}
             className={cn(className)}
-            aria-describedby={
-              description || error
-                ? `${fieldId}-description ${fieldId}-error`
-                : undefined
-            }
+            aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
             aria-invalid={hasError}
             {...props}
           />
 
-          {description && (
-            <FieldDescription id={`${fieldId}-description`}>
-              {description}
-            </FieldDescription>
-          )}
+          {description && <FieldDescription id={`${fieldId}-description`}>{description}</FieldDescription>}
 
-          {error && (
-            <FieldError id={`${fieldId}-error`}>{error}</FieldError>
-          )}
+          {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
         </FieldContent>
       </Field>
     );
-  }
+  },
 );
 
 TextArea.displayName = 'TextArea';

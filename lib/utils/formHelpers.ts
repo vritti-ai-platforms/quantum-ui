@@ -1,4 +1,4 @@
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import type { FieldValues, UseFormReturn } from 'react-hook-form';
 
 /**
  * Field mapping configuration for API error to form field mapping
@@ -22,7 +22,7 @@ export interface FieldError {
 export interface ApiErrorResponse {
   message?: string;
   error?: string;
-  errors?: FieldError[];  // RFC 7807 array format only
+  errors?: FieldError[]; // RFC 7807 array format only
 }
 
 /**
@@ -64,18 +64,15 @@ export interface MapApiErrorsOptions {
 export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValues>(
   error: unknown,
   form: UseFormReturn<TFieldValues>,
-  options: MapApiErrorsOptions = {}
+  options: MapApiErrorsOptions = {},
 ): void {
-  const {
-    fieldMapping = {},
-    setRootError = true
-  } = options;
+  const { fieldMapping = {}, setRootError = true } = options;
 
   if (!error || typeof error !== 'object') {
     if (setRootError) {
       form.setError('root', {
         type: 'manual',
-        message: 'An error occurred'
+        message: 'An error occurred',
       });
     }
     return;
@@ -99,14 +96,14 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
 
         form.setError(formField as any, {
           type: 'manual',
-          message: errorItem.message
+          message: errorItem.message,
         });
         hasFieldErrors = true;
       } else if (errorItem.message && setRootError) {
         // Error without field goes to root
         form.setError('root', {
           type: 'manual',
-          message: errorItem.message
+          message: errorItem.message,
         });
       }
     }
@@ -116,8 +113,7 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
   if (!hasFieldErrors && generalMessage && setRootError) {
     form.setError('root', {
       type: 'manual',
-      message: generalMessage
+      message: generalMessage,
     });
   }
 }
-

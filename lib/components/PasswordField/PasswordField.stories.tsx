@@ -90,9 +90,9 @@ export const WeakPassword: Story = {
 export const FairPassword: Story = {
   args: {
     label: 'Password',
-    placeholder: "password",
+    placeholder: 'password',
     showStrengthIndicator: true,
-    value: "Password",
+    value: 'Password',
   },
 };
 
@@ -109,10 +109,10 @@ export const StrongPassword: Story = {
 export const ErrorState: Story = {
   render: () => (
     <PasswordField
-      label='Password'
-      placeholder='Enter your password'
-      defaultValue='weak'
-      error='Password is too weak'
+      label="Password"
+      placeholder="Enter your password"
+      defaultValue="weak"
+      error="Password is too weak"
     />
   ),
 };
@@ -120,11 +120,11 @@ export const ErrorState: Story = {
 export const SuccessState: Story = {
   render: () => (
     <PasswordField
-      label='Password'
-      placeholder='Enter your password'
-      defaultValue='MyStr0ng!Pass'
-      className='border-green-500 focus-visible:ring-green-200'
-      description='Password is strong'
+      label="Password"
+      placeholder="Enter your password"
+      defaultValue="MyStr0ng!Pass"
+      className="border-green-500 focus-visible:ring-green-200"
+      description="Password is strong"
     />
   ),
 };
@@ -132,11 +132,11 @@ export const SuccessState: Story = {
 export const WarningState: Story = {
   render: () => (
     <PasswordField
-      label='Password'
-      placeholder='Enter your password'
-      defaultValue='weak'
-      className='border-yellow-500 focus-visible:ring-yellow-200'
-      description='Consider using a stronger password'
+      label="Password"
+      placeholder="Enter your password"
+      defaultValue="weak"
+      className="border-yellow-500 focus-visible:ring-yellow-200"
+      description="Consider using a stronger password"
     />
   ),
 };
@@ -186,21 +186,21 @@ export const ReadOnly: Story = {
 // Form examples
 export const SignupForm: Story = {
   render: () => (
-    <div className='w-96 space-y-4'>
+    <div className="w-96 space-y-4">
       <PasswordField
-        label='Create Password'
-        placeholder='Enter your password'
+        label="Create Password"
+        placeholder="Enter your password"
         showStrengthIndicator={true}
-        value='MyStr0ng!Pass'
+        value="MyStr0ng!Pass"
         onChange={() => {}}
       />
       <PasswordField
-        label='Confirm Password'
-        placeholder='Confirm your password'
-        value='MyStr0ng!Pass'
+        label="Confirm Password"
+        placeholder="Confirm your password"
+        value="MyStr0ng!Pass"
         onChange={() => {}}
-        className='border-green-500 focus-visible:ring-green-200'
-        description='Passwords match'
+        className="border-green-500 focus-visible:ring-green-200"
+        description="Passwords match"
       />
     </div>
   ),
@@ -211,20 +211,20 @@ export const SignupForm: Story = {
 
 export const SignupFormWithError: Story = {
   render: () => (
-    <div className='w-96 space-y-4'>
+    <div className="w-96 space-y-4">
       <PasswordField
-        label='Create Password'
-        placeholder='Enter your password'
+        label="Create Password"
+        placeholder="Enter your password"
         showStrengthIndicator={true}
-        value='MyStr0ng!Pass'
+        value="MyStr0ng!Pass"
         onChange={() => {}}
       />
       <PasswordField
-        label='Confirm Password'
-        placeholder='Confirm your password'
-        value='MyStr0ngPass'
+        label="Confirm Password"
+        placeholder="Confirm your password"
+        value="MyStr0ngPass"
         onChange={() => {}}
-        error='Passwords do not match'
+        error="Passwords do not match"
       />
     </div>
   ),
@@ -235,22 +235,22 @@ export const SignupFormWithError: Story = {
 
 export const PasswordChangeForm: Story = {
   render: () => (
-    <div className='w-96 space-y-4'>
-      <PasswordField label='Current Password' placeholder='Enter your current password' />
+    <div className="w-96 space-y-4">
+      <PasswordField label="Current Password" placeholder="Enter your current password" />
       <PasswordField
-        label='New Password'
-        placeholder='Enter your new password'
+        label="New Password"
+        placeholder="Enter your new password"
         showStrengthIndicator={true}
-        value='NewStr0ng!Pass'
+        value="NewStr0ng!Pass"
         onChange={() => {}}
       />
       <PasswordField
-        label='Confirm New Password'
-        placeholder='Confirm your new password'
-        value='NewStr0ng!Pass'
+        label="Confirm New Password"
+        placeholder="Confirm your new password"
+        value="NewStr0ng!Pass"
         onChange={() => {}}
-        className='border-green-500 focus-visible:ring-green-200'
-        description='Passwords match'
+        className="border-green-500 focus-visible:ring-green-200"
+        description="Passwords match"
       />
     </div>
   ),
@@ -261,10 +261,10 @@ export const PasswordChangeForm: Story = {
 
 export const AllSizes: Story = {
   render: () => (
-    <div className='w-96 space-y-4'>
-      <PasswordField label='Small Size' placeholder='Small password field' className='h-8 text-sm' />
-      <PasswordField label='Medium Size (Default)' placeholder='Medium password field' />
-      <PasswordField label='Large Size' placeholder='Large password field' className='h-12 text-lg' />
+    <div className="w-96 space-y-4">
+      <PasswordField label="Small Size" placeholder="Small password field" className="h-8 text-sm" />
+      <PasswordField label="Medium Size (Default)" placeholder="Medium password field" />
+      <PasswordField label="Large Size" placeholder="Large password field" className="h-12 text-lg" />
     </div>
   ),
   parameters: {
@@ -274,27 +274,27 @@ export const AllSizes: Story = {
 
 export const AllStates: Story = {
   render: () => (
-    <div className='w-96 space-y-4'>
-      <PasswordField label='Normal State' placeholder='Normal password' />
+    <div className="w-96 space-y-4">
+      <PasswordField label="Normal State" placeholder="Normal password" />
       <PasswordField
-        label='Success State'
-        placeholder='Success password'
-        defaultValue='MyStr0ng!Pass'
-        className='border-green-500 focus-visible:ring-green-200'
-        description='Password is strong'
+        label="Success State"
+        placeholder="Success password"
+        defaultValue="MyStr0ng!Pass"
+        className="border-green-500 focus-visible:ring-green-200"
+        description="Password is strong"
       />
       <PasswordField
-        label='Warning State'
-        placeholder='Warning password'
-        defaultValue='weak'
-        className='border-yellow-500 focus-visible:ring-yellow-200'
-        description='Consider using a stronger password'
+        label="Warning State"
+        placeholder="Warning password"
+        defaultValue="weak"
+        className="border-yellow-500 focus-visible:ring-yellow-200"
+        description="Consider using a stronger password"
       />
       <PasswordField
-        label='Error State'
-        placeholder='Error password'
-        defaultValue='123'
-        error='Password must be at least 8 characters'
+        label="Error State"
+        placeholder="Error password"
+        defaultValue="123"
+        error="Password must be at least 8 characters"
       />
     </div>
   ),
@@ -306,37 +306,37 @@ export const AllStates: Story = {
 export const WithStartAdornment: Story = {
   render: () => (
     <PasswordField
-      label='Password'
-      placeholder='Enter your password'
-      startAdornment={<Lock className='h-4 w-4 text-muted-foreground' />}
+      label="Password"
+      placeholder="Enter your password"
+      startAdornment={<Lock className="h-4 w-4 text-muted-foreground" />}
     />
   ),
 };
 
 export const StrengthIndicatorExamples: Story = {
   render: () => (
-    <div className='w-96 space-y-4'>
+    <div className="w-96 space-y-4">
       <PasswordField
-        label='Weak Password'
-        placeholder='Enter your password'
+        label="Weak Password"
+        placeholder="Enter your password"
         showStrengthIndicator={true}
-        value='weak'
+        value="weak"
         onChange={() => {}}
-        description='Add uppercase, numbers, and special characters'
+        description="Add uppercase, numbers, and special characters"
       />
       <PasswordField
-        label='Fair Password'
-        placeholder='Enter your password'
+        label="Fair Password"
+        placeholder="Enter your password"
         showStrengthIndicator={true}
-        value='Password123'
+        value="Password123"
         onChange={() => {}}
-        description='Add special characters for better security'
+        description="Add special characters for better security"
       />
       <PasswordField
-        label='Strong Password'
-        placeholder='Enter your password'
+        label="Strong Password"
+        placeholder="Enter your password"
         showStrengthIndicator={true}
-        value='MyStr0ng!Pass'
+        value="MyStr0ng!Pass"
         onChange={() => {}}
       />
     </div>

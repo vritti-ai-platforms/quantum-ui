@@ -1,4 +1,4 @@
-import Axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import Axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { getConfig } from '../config';
 
 // Extend AxiosRequestConfig with custom options
@@ -122,7 +122,7 @@ export function scheduleTokenRefresh(expiresIn: number): void {
           baseURL: config.axios.baseURL,
           withCredentials: true,
           timeout: config.axios.timeout,
-        }
+        },
       );
 
       if (response.data.accessToken) {
@@ -272,7 +272,7 @@ axios.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axios;

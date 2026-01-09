@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { ChevronDownIcon } from 'lucide-react';
+import * as React from 'react';
 import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Label } from '../../../shadcn/shadcnLabel';
@@ -79,7 +79,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
       id = 'date',
       ...props
     },
-    ref
+    ref,
   ) => {
     const [internalOpen, setInternalOpen] = React.useState(false);
     const [internalDate, setInternalDate] = React.useState<Date | undefined>(value);
@@ -119,11 +119,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
               variant="outline"
               id={id}
               aria-invalid={!!error}
-              className={cn(
-                'w-48 justify-between font-normal',
-                !displayDate && 'text-muted-foreground',
-                className
-              )}
+              className={cn('w-48 justify-between font-normal', !displayDate && 'text-muted-foreground', className)}
               {...props}
             >
               {displayDate ? displayDate.toLocaleDateString() : placeholder}
@@ -140,14 +136,11 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             />
           </PopoverContent>
         </Popover>
-        {description && !error && (
-          <p className="text-sm text-muted-foreground px-1">{description}</p>
-        )}
+        {description && !error && <p className="text-sm text-muted-foreground px-1">{description}</p>}
         {error && <p className="text-sm text-destructive px-1">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 DatePicker.displayName = 'DatePicker';
-

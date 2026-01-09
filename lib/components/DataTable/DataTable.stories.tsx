@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from './DataTable';
-import { Button } from '../Button';
 
 // Sample data type
 type Payment = {
@@ -224,9 +223,7 @@ export const WithAllFeatures: Story = {
     data: Array.from({ length: 50 }, (_, i) => ({
       id: `payment-${i}`,
       amount: Math.floor(Math.random() * 1000) + 10,
-      status: ['pending', 'processing', 'success', 'failed'][
-        Math.floor(Math.random() * 4)
-      ] as Payment['status'],
+      status: ['pending', 'processing', 'success', 'failed'][Math.floor(Math.random() * 4)] as Payment['status'],
       email: `user${i}@example.com`,
     })),
     enablePagination: true,
@@ -270,9 +267,7 @@ export const LargeDataset: Story = {
     data: Array.from({ length: 50 }, (_, i) => ({
       id: `payment-${i}`,
       amount: Math.floor(Math.random() * 1000) + 10,
-      status: ['pending', 'processing', 'success', 'failed'][
-        Math.floor(Math.random() * 4)
-      ] as Payment['status'],
+      status: ['pending', 'processing', 'success', 'failed'][Math.floor(Math.random() * 4)] as Payment['status'],
       email: `user${i}@example.com`,
     })),
     enablePagination: true,
@@ -290,9 +285,7 @@ export const CustomPageSize: Story = {
     data: Array.from({ length: 20 }, (_, i) => ({
       id: `payment-${i}`,
       amount: Math.floor(Math.random() * 1000) + 10,
-      status: ['pending', 'processing', 'success', 'failed'][
-        Math.floor(Math.random() * 4)
-      ] as Payment['status'],
+      status: ['pending', 'processing', 'success', 'failed'][Math.floor(Math.random() * 4)] as Payment['status'],
       email: `user${i}@example.com`,
     })),
     enablePagination: true,
@@ -302,4 +295,3 @@ export const CustomPageSize: Story = {
     pageSize: 5,
   },
 };
-

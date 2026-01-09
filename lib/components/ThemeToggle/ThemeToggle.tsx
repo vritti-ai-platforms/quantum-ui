@@ -1,5 +1,6 @@
-import React, { useLayoutEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import type React from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { Button } from '../Button/Button';
 
 export interface ThemeToggleProps {
@@ -38,7 +39,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, size = 'md'
 
   return (
     <Button
-      variant='ghost'
+      variant="ghost"
       size={size === 'md' ? 'default' : size}
       onClick={toggleTheme}
       className={`text-foreground ${className}`}

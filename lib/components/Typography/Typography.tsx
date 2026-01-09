@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { cn } from '../../../shadcn/utils';
 
 export interface TypographyProps {

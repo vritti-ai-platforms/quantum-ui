@@ -34,14 +34,12 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
   ({ label, description, error, className, id, startAdornment, endAdornment, ...props }, ref) => {
     return (
-      <Field >
+      <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
 
-        <div className='relative'>
+        <div className="relative">
           {startAdornment && (
-            <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>
-              {startAdornment}
-            </div>
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">{startAdornment}</div>
           )}
           <Input
             aria-invalid={!!error}
@@ -50,16 +48,14 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
             id={id}
             {...props}
           />
-          {endAdornment && (
-            <div className='absolute inset-y-0 right-0 flex items-center pr-3'>{endAdornment}</div>
-          )}
+          {endAdornment && <div className="absolute inset-y-0 right-0 flex items-center pr-3">{endAdornment}</div>}
         </div>
 
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         {error && <FieldError>{error}</FieldError>}
       </Field>
     );
-  }
+  },
 );
 
 TextField.displayName = 'TextField';

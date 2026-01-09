@@ -74,14 +74,7 @@ export const WithDescription: Story = {
 export const WithError: Story = {
   render: () => {
     const [otp, setOtp] = React.useState('123456');
-    return (
-      <OTPField
-        label="Verification Code"
-        value={otp}
-        onChange={setOtp}
-        error="Invalid code. Please try again."
-      />
-    );
+    return <OTPField label="Verification Code" value={otp} onChange={setOtp} error="Invalid code. Please try again." />;
   },
 };
 
@@ -102,15 +95,7 @@ export const Disabled: Story = {
 export const FourDigits: Story = {
   render: () => {
     const [otp, setOtp] = React.useState('');
-    return (
-      <OTPField
-        label="PIN Code"
-        value={otp}
-        onChange={setOtp}
-        length={4}
-        description="Enter your 4-digit PIN"
-      />
-    );
+    return <OTPField label="PIN Code" value={otp} onChange={setOtp} length={4} description="Enter your 4-digit PIN" />;
   },
 };
 
@@ -147,13 +132,7 @@ export const WithValidation: Story = {
             if (!touched && value.length > 0) setTouched(true);
           }}
           error={showError ? 'Please enter the complete 6-digit code' : undefined}
-          description={
-            showError
-              ? undefined
-              : isComplete
-                ? '✓ Code entered'
-                : 'Enter the code sent to your device'
-          }
+          description={showError ? undefined : isComplete ? '✓ Code entered' : 'Enter the code sent to your device'}
           required
         />
 
@@ -174,7 +153,7 @@ export const VerificationFlow: Story = {
     const [isVerified, setIsVerified] = React.useState(false);
     const [error, setError] = React.useState('');
 
-    const handleVerify = async () => {
+    const handleVerify = React.useCallback(async () => {
       if (otp.length !== 6) return;
 
       setIsVerifying(true);
@@ -191,13 +170,13 @@ export const VerificationFlow: Story = {
       }
 
       setIsVerifying(false);
-    };
+    }, [otp]);
 
     React.useEffect(() => {
       if (otp.length === 6 && !isVerified) {
         handleVerify();
       }
-    }, [otp]);
+    }, [otp, handleVerify, isVerified]);
 
     return (
       <div className="w-96 space-y-4">
@@ -248,27 +227,11 @@ export const AllStates: Story = {
       <div className="space-y-8 w-96">
         <OTPField label="Default" value={otp1} onChange={setOtp1} description="Enter your verification code" />
 
-        <OTPField
-          label="Filled"
-          value={otp2}
-          onChange={setOtp2}
-          description="✓ Code entered successfully"
-        />
+        <OTPField label="Filled" value={otp2} onChange={setOtp2} description="✓ Code entered successfully" />
 
-        <OTPField
-          label="Error"
-          value={otp3}
-          onChange={setOtp3}
-          error="Invalid code. Please try again."
-        />
+        <OTPField label="Error" value={otp3} onChange={setOtp3} error="Invalid code. Please try again." />
 
-        <OTPField
-          label="Disabled"
-          value={otp4}
-          onChange={setOtp4}
-          disabled
-          description="Field is disabled"
-        />
+        <OTPField label="Disabled" value={otp4} onChange={setOtp4} disabled description="Field is disabled" />
       </div>
     );
   },

@@ -6,5 +6,5 @@ export {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '../../../shadcn/shadcnCard';

@@ -91,17 +91,8 @@ export const Controlled: Story = {
     const [date, setDate] = React.useState<Date | undefined>(undefined);
     return (
       <div className="flex flex-col gap-4">
-        <DatePicker
-          label="Controlled Date Picker"
-          value={date}
-          onValueChange={setDate}
-          placeholder="Select date"
-        />
-        {date && (
-          <p className="text-sm text-muted-foreground">
-            Selected: {date.toLocaleDateString()}
-          </p>
-        )}
+        <DatePicker label="Controlled Date Picker" value={date} onValueChange={setDate} placeholder="Select date" />
+        {date && <p className="text-sm text-muted-foreground">Selected: {date.toLocaleDateString()}</p>}
       </div>
     );
   },
@@ -115,25 +106,12 @@ export const AllStates: Story = {
   render: () => (
     <div className="flex flex-col gap-6 w-80">
       <DatePicker label="Default" placeholder="Select date" />
-      <DatePicker
-        label="With Description"
-        description="This is a helper text"
-        placeholder="Select date"
-      />
-      <DatePicker
-        label="With Error"
-        error="This field is required"
-        placeholder="Select date"
-      />
-      <DatePicker
-        label="With Selected Date"
-        value={new Date('2024-01-15')}
-        placeholder="Select date"
-      />
+      <DatePicker label="With Description" description="This is a helper text" placeholder="Select date" />
+      <DatePicker label="With Error" error="This field is required" placeholder="Select date" />
+      <DatePicker label="With Selected Date" value={new Date('2024-01-15')} placeholder="Select date" />
     </div>
   ),
   parameters: {
     layout: 'padded',
   },
 };
-

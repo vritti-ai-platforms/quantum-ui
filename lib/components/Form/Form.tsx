@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
 import React from 'react';
 import {
   Controller,
-  ControllerProps,
-  FieldPath,
-  FieldValues,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
   FormProvider,
-  UseFormReturn
+  type UseFormReturn,
 } from 'react-hook-form';
 import { FieldError } from '../../../shadcn/shadcnField';
 import { cn } from '../../../shadcn/utils';
+import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Checkbox } from '../Checkbox';
-import { mapApiErrorsToForm, type FieldMapping } from '../../utils/formHelpers';
 
 // Re-export Controller for explicit usage
 export { Controller } from 'react-hook-form';
@@ -22,11 +22,11 @@ export { Controller } from 'react-hook-form';
  */
 function processChildren<
   TFieldValues extends FieldValues = FieldValues,
-  TContext = any,
-  TTransformedValues extends FieldValues | undefined = TFieldValues
+  _TContext = any,
+  TTransformedValues extends FieldValues | undefined = TFieldValues,
 >(
   children: React.ReactNode,
-  control: ControllerProps<TFieldValues, FieldPath<TFieldValues>, TTransformedValues>['control']
+  control: ControllerProps<TFieldValues, FieldPath<TFieldValues>, TTransformedValues>['control'],
 ): React.ReactNode {
   return React.Children.map(children, (child) => {
     // Handle non-element children (strings, numbers, null, etc.)
@@ -91,7 +91,7 @@ function processChildren<
 export interface FormProps<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
-  TTransformedValues extends FieldValues | undefined = TFieldValues
+  TTransformedValues extends FieldValues | undefined = TFieldValues,
 > extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
   /**
    * The react-hook-form form instance
@@ -147,7 +147,7 @@ export interface FormProps<
 export function Form<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
-  TTransformedValues extends FieldValues | undefined = TFieldValues
+  TTransformedValues extends FieldValues | undefined = TFieldValues,
 >({
   form,
   onSubmit,
@@ -167,14 +167,14 @@ export function Form<
         // mapApiErrorsToForm now handles axios error structure extraction internally
         mapApiErrorsToForm(error, form as any, {
           fieldMapping,
-          setRootError: showRootError
+          setRootError: showRootError,
         });
         // Log error for debugging
         console.error('[Form Submission Error]', error);
         // Error is swallowed, not re-thrown
       }
     },
-    [onSubmit, fieldMapping, form, showRootError]
+    [onSubmit, fieldMapping, form, showRootError],
   );
 
   const handleSubmit = form.handleSubmit(wrappedOnSubmit as any);
@@ -187,20 +187,14 @@ export function Form<
       <form onSubmit={handleSubmit} {...props}>
         {/* Top position error */}
         {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
-          <FieldError
-            errors={[form.formState.errors.root]}
-            className={cn("text-center", rootErrorClassName)}
-          />
+          <FieldError errors={[form.formState.errors.root]} className={cn('text-center', rootErrorClassName)} />
         )}
 
         {processedChildren}
 
         {/* Bottom position error */}
         {showRootError && rootErrorPosition === 'bottom' && form.formState.errors.root && (
-          <FieldError
-            errors={[form.formState.errors.root]}
-            className={cn("text-center", rootErrorClassName)}
-          />
+          <FieldError errors={[form.formState.errors.root]} className={cn('text-center', rootErrorClassName)} />
         )}
       </form>
     </FormProvider>

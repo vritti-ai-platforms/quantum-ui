@@ -1,35 +1,33 @@
 // Styles - Import CSS for bundling
 import './index.css';
 
+// Utilities
+export { cn } from '../shadcn/utils';
 // Components
 export * from './components';
 
-// Utilities
-export { cn } from '../shadcn/utils';
-
 // Configuration
 export {
-  defineConfig,
-  configureQuantumUI,
-  getConfig,
-  resetConfig,
-  type QuantumUIConfig,
-  type CsrfConfig,
+  type AuthConfig,
   type AxiosConfig,
-  type AuthConfig
+  type CsrfConfig,
+  configureQuantumUI,
+  defineConfig,
+  getConfig,
+  type QuantumUIConfig,
+  resetConfig,
 } from './config';
 
 // Axios with token management and CSRF support
 export {
   axios,
-  setToken,
-  getToken,
+  cancelTokenRefresh,
+  clearCsrfToken,
   clearToken,
+  getCsrfToken,
+  getToken,
   recoverSession,
   scheduleTokenRefresh,
-  cancelTokenRefresh,
   setCsrfToken,
-  getCsrfToken,
-  clearCsrfToken,
+  setToken,
 } from './utils/axios';
-

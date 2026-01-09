@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { OTPInput, OTPInputContext } from 'input-otp';
 import { Dot } from 'lucide-react';
+import * as React from 'react';
 
 import { cn } from '../utils';
 
@@ -12,12 +12,12 @@ const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, React.Compo
       className={cn('disabled:cursor-not-allowed', className)}
       {...props}
     />
-  )
+  ),
 );
 InputOTP.displayName = 'InputOTP';
 
 const InputOTPGroup = React.forwardRef<React.ElementRef<'div'>, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => <div ref={ref} className={cn('flex items-center', className)} {...props} />
+  ({ className, ...props }, ref) => <div ref={ref} className={cn('flex items-center', className)} {...props} />,
 );
 InputOTPGroup.displayName = 'InputOTPGroup';
 
@@ -36,7 +36,7 @@ const InputOTPSlot = React.forwardRef<
         'bg-transparent dark:bg-input/30 text-foreground',
         'focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
         isActive && 'z-10 border-ring ring-ring/50 ring-[3px]',
-        className
+        className,
       )}
       {...props}
     >
@@ -56,7 +56,7 @@ const InputOTPSeparator = React.forwardRef<React.ElementRef<'div'>, React.Compon
     <div ref={ref} role="separator" {...props}>
       <Dot />
     </div>
-  )
+  ),
 );
 InputOTPSeparator.displayName = 'InputOTPSeparator';
 
