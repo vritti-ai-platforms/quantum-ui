@@ -57,18 +57,15 @@ export const clearCsrfToken = (): void => {
 // =============================================================================
 
 /** Recovers session from httpOnly cookie */
-export async function recoverSession(): Promise<{ success: boolean; expiresIn: number }> {
+export async function recoverToken(): Promise<{ success: boolean; expiresIn: number }> {
   const config = getConfig();
 
   try {
-    const response = await Axios.get<{ accessToken: string; expiresIn: number }>(
-      '/auth/token',
-      {
-        baseURL: config.axios.baseURL,
-        withCredentials: true,
-        timeout: config.axios.timeout,
-      }
-    );
+    const response = await Axios.get<{ accessToken: string; expiresIn: number }>('/auth/token', {
+      baseURL: config.axios.baseURL,
+      withCredentials: true,
+      timeout: config.axios.timeout,
+    });
 
     if (response.data.accessToken) {
       setToken(response.data.accessToken);
@@ -83,7 +80,7 @@ export async function recoverSession(): Promise<{ success: boolean; expiresIn: n
 }
 
 /** Auto-recovers session if no token (used by request interceptor) */
-async function recoverSessionIfNeeded(): Promise<boolean> {
+async function recoverTokenIfNeeded(): Promise<boolean> {
   if (accessToken) return true;
 
   if (sessionRecoveryPromise) {
@@ -92,7 +89,7 @@ async function recoverSessionIfNeeded(): Promise<boolean> {
 
   sessionRecoveryPromise = (async () => {
     try {
-      const result = await recoverSession();
+      const result = await recoverToken();
       if (result.success) {
         scheduleTokenRefresh(result.expiresIn);
         return true;
@@ -231,7 +228,7 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 
   // Auto-recover session for protected requests
   if (!isPublicRequest) {
-    const hasSession = await recoverSessionIfNeeded();
+    const hasSession = await recoverTokenIfNeeded();
     if (!hasSession) {
       redirectToLogin();
       return Promise.reject(new Error('No valid session'));
@@ -241,8 +238,7 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   // Add Authorization header
   const token = getToken();
   if (token) {
-    config.headers[quantumConfig.auth.tokenHeaderName] =
-      `${quantumConfig.auth.tokenPrefix} ${token}`;
+    config.headers[quantumConfig.auth.tokenHeaderName] = `${quantumConfig.auth.tokenPrefix} ${token}`;
   }
 
   // Add tenant subdomain header
@@ -252,9 +248,7 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   }
 
   // Add CSRF token for state-changing requests
-  const isStateChanging = ['post', 'put', 'patch', 'delete'].includes(
-    config.method?.toLowerCase() || ''
-  );
+  const isStateChanging = ['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '');
 
   if (isStateChanging && quantumConfig.csrf.enabled) {
     let csrf = getCsrfToken();
