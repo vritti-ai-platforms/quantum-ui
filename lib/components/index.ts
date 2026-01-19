@@ -8,6 +8,7 @@ export * from './OTPField';
 export * from './PasswordField';
 export * from './PhoneField';
 export * from './Skeleton';
+export * from './Spinner';
 export * from './TextArea';
 export * from './TextField';
 export * from './ThemeToggle';

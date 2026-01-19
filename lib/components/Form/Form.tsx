@@ -1,6 +1,5 @@
-'use client';
-
-import React from 'react';
+import type { UseMutationResult } from '@tanstack/react-query';
+import * as React from 'react';
 import {
   Controller,
   type ControllerProps,
@@ -9,8 +8,6 @@ import {
   FormProvider,
   type UseFormReturn,
 } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
-import type { UseMutationResult } from '@tanstack/react-query';
 import { FieldError } from '../../../shadcn/shadcnField';
 import { cn } from '../../../shadcn/utils';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
@@ -75,22 +72,15 @@ function processChildren<
       );
     }
 
-    // Handle submit buttons - inject loading state
+    // Handle submit buttons - inject loading state via isLoading prop
     if (childProps.type === 'submit') {
       const isButtonElement =
-        child.type === Button ||
-        (typeof child.type === 'function' && (child.type as any).displayName === 'Button');
+        child.type === Button || (typeof child.type === 'function' && (child.type as any).displayName === 'Button');
 
-      if (isButtonElement && isSubmitting) {
+      if (isButtonElement) {
         return React.cloneElement(child, {
           ...childProps,
-          disabled: true,
-          children: (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {childProps.children}
-            </>
-          ),
+          isLoading: isSubmitting,
         });
       }
     }

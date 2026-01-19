@@ -92,6 +92,10 @@
       "types": "./dist/Skeleton.d.ts",
       "import": "./dist/components/Skeleton.js"
     },
+    "./Spinner": {
+      "types": "./dist/Spinner.d.ts",
+      "import": "./dist/components/Spinner.js"
+    },
     "./Field": {
       "types": "./dist/Field.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
@@ -132,9 +136,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.3",
-    "@storybook/addon-docs": "10.0.8",
-    "@storybook/addon-themes": "^10.0.8",
-    "@storybook/react-vite": "10.0.8",
+    "@storybook/addon-docs": "10.1.11",
+    "@storybook/addon-themes": "^10.1.11",
+    "@storybook/react-vite": "10.1.11",
     "@tailwindcss/postcss": "^4.1.13",
     "@tanstack/react-query": "^5.90.17",
     "@types/node": "^22.18.1",
@@ -146,7 +150,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.9.4",
-    "storybook": "10.0.8",
+    "storybook": "10.1.11",
     "tailwindcss": "^4.1.17",
     "tw-animate-css": "^1.3.8",
     "typescript": "~5.8.3",
