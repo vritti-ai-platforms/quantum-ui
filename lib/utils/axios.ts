@@ -61,7 +61,7 @@ export async function recoverToken(): Promise<{ success: boolean; expiresIn: num
   const config = getConfig();
 
   try {
-    const response = await Axios.get<{ accessToken: string; expiresIn: number }>('/auth/token', {
+    const response = await Axios.get<{ accessToken: string; expiresIn: number }>(config.auth.tokenEndpoint, {
       baseURL: config.axios.baseURL,
       withCredentials: true,
       timeout: config.axios.timeout,
@@ -81,6 +81,11 @@ export async function recoverToken(): Promise<{ success: boolean; expiresIn: num
 
 /** Auto-recovers session if no token (used by request interceptor) */
 async function recoverTokenIfNeeded(): Promise<boolean> {
+  const config = getConfig();
+
+  // Skip recovery if disabled
+  if (!config.auth.sessionRecoveryEnabled) return true;
+
   if (accessToken) return true;
 
   if (sessionRecoveryPromise) {
@@ -116,7 +121,7 @@ export function scheduleTokenRefresh(expiresIn: number): void {
 
     try {
       const response = await Axios.post<{ accessToken: string; expiresIn: number }>(
-        '/auth/refresh',
+        config.auth.refreshEndpoint,
         {},
         {
           baseURL: config.axios.baseURL,

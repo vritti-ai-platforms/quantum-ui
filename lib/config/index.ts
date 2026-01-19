@@ -88,6 +88,24 @@ export interface AuthConfig {
    * @default 'Bearer'
    */
   tokenPrefix: string;
+
+  /**
+   * Endpoint for session recovery from httpOnly cookie
+   * @default '/auth/token'
+   */
+  tokenEndpoint: string;
+
+  /**
+   * Endpoint for token refresh
+   * @default '/auth/refresh'
+   */
+  refreshEndpoint: string;
+
+  /**
+   * Whether automatic session recovery is enabled
+   * @default true
+   */
+  sessionRecoveryEnabled: boolean;
 }
 
 /**
@@ -135,6 +153,9 @@ const defaultConfig: Required<{
   auth: {
     tokenHeaderName: 'Authorization',
     tokenPrefix: 'Bearer',
+    tokenEndpoint: '/auth/token',
+    refreshEndpoint: '/auth/refresh',
+    sessionRecoveryEnabled: true,
   },
 };
 
