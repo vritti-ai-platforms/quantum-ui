@@ -1,7 +1,6 @@
 export * from './Button';
 export * from './Card';
 export * from './Checkbox';
-export * from './DataTable';
 export * from './DatePicker';
 export * from './Field';
 export * from './Form';

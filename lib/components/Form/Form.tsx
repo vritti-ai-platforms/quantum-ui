@@ -9,9 +9,12 @@ import {
   FormProvider,
   type UseFormReturn,
 } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
+import type { UseMutationResult } from '@tanstack/react-query';
 import { FieldError } from '../../../shadcn/shadcnField';
 import { cn } from '../../../shadcn/utils';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
+import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 
 // Re-export Controller for explicit usage
@@ -19,6 +22,7 @@ export { Controller } from 'react-hook-form';
 
 /**
  * Recursively process children to wrap form fields with Controller
+ * and inject loading state into submit buttons
  */
 function processChildren<
   TFieldValues extends FieldValues = FieldValues,
@@ -27,6 +31,7 @@ function processChildren<
 >(
   children: React.ReactNode,
   control: ControllerProps<TFieldValues, FieldPath<TFieldValues>, TTransformedValues>['control'],
+  isSubmitting: boolean,
 ): React.ReactNode {
   return React.Children.map(children, (child) => {
     // Handle non-element children (strings, numbers, null, etc.)
@@ -70,16 +75,36 @@ function processChildren<
       );
     }
 
+    // Handle submit buttons - inject loading state
+    if (childProps.type === 'submit') {
+      const isButtonElement =
+        child.type === Button ||
+        (typeof child.type === 'function' && (child.type as any).displayName === 'Button');
+
+      if (isButtonElement && isSubmitting) {
+        return React.cloneElement(child, {
+          ...childProps,
+          disabled: true,
+          children: (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {childProps.children}
+            </>
+          ),
+        });
+      }
+    }
+
     // Handle React Fragments - process their children directly
     if (isFragment) {
-      return processChildren(childProps.children, control);
+      return processChildren(childProps.children, control, isSubmitting);
     }
 
     // Recurse into children for container elements (divs, FieldGroups, etc.)
     if (childProps.children != null) {
       return React.cloneElement(child, {
         ...childProps,
-        children: processChildren(childProps.children, control),
+        children: processChildren(childProps.children, control, isSubmitting),
       });
     }
 
@@ -92,6 +117,9 @@ export interface FormProps<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
   TTransformedValues extends FieldValues | undefined = TFieldValues,
+  TMutationData = unknown,
+  TMutationError = Error,
+  TMutationVariables = any,
 > extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
   /**
    * The react-hook-form form instance
@@ -99,9 +127,10 @@ export interface FormProps<
   form: UseFormReturn<TFieldValues, TContext, TTransformedValues>;
 
   /**
-   * Form submit handler - receives the transformed values if transformation is applied
+   * Form submit handler - receives the transformed values if transformation is applied.
+   * Optional when using `mutation` prop.
    */
-  onSubmit: Parameters<UseFormReturn<TFieldValues, TContext, TTransformedValues>['handleSubmit']>[0];
+  onSubmit?: Parameters<UseFormReturn<TFieldValues, TContext, TTransformedValues>['handleSubmit']>[0];
 
   /**
    * Children elements - automatically wrapped with Controller if they have a name prop
@@ -130,16 +159,50 @@ export interface FormProps<
    * Maps API field names to form field names
    */
   fieldMapping?: FieldMapping;
+
+  /**
+   * TanStack Query mutation for automatic handling.
+   * When provided, the form will use `mutateAsync` to submit data and handle errors automatically.
+   * The mutation's own callbacks (onSuccess, onError, etc.) will fire automatically.
+   * Form only adds `mapApiErrorsToForm` as an extra error handling layer.
+   */
+  mutation?: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
+
+  /**
+   * Transform form data to mutation variables before submission.
+   * Only used when `mutation` prop is provided.
+   */
+  transformSubmit?: (
+    data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues,
+  ) => TMutationVariables;
 }
 
 /**
  * Smart Form component that automatically wraps children with Controller
  *
- * Usage:
+ * Usage with onSubmit:
  * ```tsx
  * <Form form={form} onSubmit={handleSubmit}>
  *   <TextField name="email" label="Email" description="Your email address" />
  *   <PasswordField name="password" label="Password" />
+ *   <Button type="submit">Submit</Button>
+ * </Form>
+ * ```
+ *
+ * Usage with TanStack Query mutation:
+ * ```tsx
+ * const mutation = useMutation({
+ *   mutationFn: (data) => api.post('/login', data),
+ *   onSuccess: (data) => console.log('Success!', data),
+ *   onError: (error) => console.error('Error!', error),
+ * });
+ *
+ * <Form
+ *   form={form}
+ *   mutation={mutation}
+ *   transformSubmit={(data) => ({ ...data, timestamp: Date.now() })}
+ * >
+ *   <TextField name="email" label="Email" />
  *   <Button type="submit">Submit</Button>
  * </Form>
  * ```
@@ -148,6 +211,9 @@ export function Form<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
   TTransformedValues extends FieldValues | undefined = TFieldValues,
+  TMutationData = unknown,
+  TMutationError = Error,
+  TMutationVariables = any,
 >({
   form,
   onSubmit,
@@ -156,31 +222,44 @@ export function Form<
   rootErrorPosition = 'bottom',
   rootErrorClassName,
   fieldMapping,
+  mutation,
+  transformSubmit,
   ...props
-}: FormProps<TFieldValues, TContext, TTransformedValues>) {
+}: FormProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
+  // Compute isSubmitting from both form state and mutation state
+  const isSubmitting = form.formState.isSubmitting || (mutation?.isPending ?? false);
+
   // Wrap the submit handler with automatic error mapping (always enabled)
+  // Form only adds mapApiErrorsToForm - the mutation's own callbacks fire automatically
   const wrappedOnSubmit = React.useCallback(
     async (data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues) => {
       try {
-        await onSubmit(data as any);
+        if (mutation) {
+          const variables = transformSubmit ? transformSubmit(data) : data;
+          // mutateAsync will trigger the mutation's onSuccess/onError callbacks
+          await mutation.mutateAsync(variables as TMutationVariables);
+        } else if (onSubmit) {
+          await onSubmit(data as any);
+        }
       } catch (error) {
-        // mapApiErrorsToForm now handles axios error structure extraction internally
+        // Form's only job: map API errors to form fields
+        // mapApiErrorsToForm handles axios error structure extraction internally
         mapApiErrorsToForm(error, form as any, {
           fieldMapping,
           setRootError: showRootError,
         });
         // Log error for debugging
         console.error('[Form Submission Error]', error);
-        // Error is swallowed, not re-thrown
+        // Error is swallowed, not re-thrown (mutation's onError already fired)
       }
     },
-    [onSubmit, fieldMapping, form, showRootError],
+    [onSubmit, mutation, transformSubmit, fieldMapping, form, showRootError],
   );
 
   const handleSubmit = form.handleSubmit(wrappedOnSubmit as any);
 
   // Process children recursively to automatically wrap with Controller
-  const processedChildren = processChildren(children, form.control);
+  const processedChildren = processChildren(children, form.control, isSubmitting);
 
   return (
     <FormProvider {...form}>

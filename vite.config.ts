@@ -1,6 +1,6 @@
-import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
@@ -40,7 +40,6 @@ export default defineConfig({
         'components/ThemeToggle': resolve(__dirname, 'lib/components/ThemeToggle/index.ts'),
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
-        'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),

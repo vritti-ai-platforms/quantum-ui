@@ -26,7 +26,7 @@ export {
   clearToken,
   getCsrfToken,
   getToken,
-  recoverSession,
+  recoverToken,
   scheduleTokenRefresh,
   setCsrfToken,
   setToken,
