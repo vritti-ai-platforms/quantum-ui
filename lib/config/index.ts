@@ -91,13 +91,13 @@ export interface AuthConfig {
 
   /**
    * Endpoint for session recovery from httpOnly cookie
-   * @default '/auth/token'
+   * @default 'cloud-api/auth/token'
    */
   tokenEndpoint: string;
 
   /**
    * Endpoint for token refresh
-   * @default '/auth/refresh'
+   * @default 'cloud-api/auth/refresh'
    */
   refreshEndpoint: string;
 
@@ -153,16 +153,43 @@ const defaultConfig: Required<{
   auth: {
     tokenHeaderName: 'Authorization',
     tokenPrefix: 'Bearer',
-    tokenEndpoint: '/auth/token',
-    refreshEndpoint: '/auth/refresh',
+    tokenEndpoint: 'cloud-api/auth/token',
+    refreshEndpoint: 'cloud-api/auth/refresh',
     sessionRecoveryEnabled: true,
   },
 };
 
 /**
- * Current active configuration
+ * Global key for storing config in window object
+ * This ensures config is shared across Module Federation boundaries
  */
-let currentConfig = { ...defaultConfig };
+const GLOBAL_CONFIG_KEY = '__QUANTUM_UI_CONFIG__';
+
+// Type-safe global window access
+type GlobalWindow = Window & typeof globalThis & { [GLOBAL_CONFIG_KEY]?: typeof defaultConfig };
+
+/**
+ * Get the current config from global storage or initialize with defaults
+ */
+function getGlobalConfig(): typeof defaultConfig {
+  if (typeof window !== 'undefined') {
+    const globalWindow = window as GlobalWindow;
+    if (!globalWindow[GLOBAL_CONFIG_KEY]) {
+      globalWindow[GLOBAL_CONFIG_KEY] = { ...defaultConfig };
+    }
+    return globalWindow[GLOBAL_CONFIG_KEY] ?? { ...defaultConfig };
+  }
+  return { ...defaultConfig };
+}
+
+/**
+ * Set the global config
+ */
+function setGlobalConfig(config: typeof defaultConfig): void {
+  if (typeof window !== 'undefined') {
+    (window as GlobalWindow)[GLOBAL_CONFIG_KEY] = config;
+  }
+}
 
 /**
  * Helper function to define configuration with type safety
@@ -197,7 +224,7 @@ export function defineConfig(config: QuantumUIConfig): QuantumUIConfig {
  * ```
  */
 export function configureQuantumUI(userConfig: QuantumUIConfig): void {
-  currentConfig = {
+  const newConfig = {
     csrf: {
       ...defaultConfig.csrf,
       ...(userConfig.csrf || {}),
@@ -215,14 +242,15 @@ export function configureQuantumUI(userConfig: QuantumUIConfig): void {
       ...(userConfig.auth || {}),
     },
   };
+  setGlobalConfig(newConfig);
 }
 
 /**
  * Get the current configuration
  * @returns Current merged configuration
  */
-export function getConfig(): typeof currentConfig {
-  return currentConfig;
+export function getConfig(): typeof defaultConfig {
+  return getGlobalConfig();
 }
 
 /**
@@ -230,5 +258,5 @@ export function getConfig(): typeof currentConfig {
  * Mainly useful for testing
  */
 export function resetConfig(): void {
-  currentConfig = { ...defaultConfig };
+  setGlobalConfig({ ...defaultConfig });
 }
