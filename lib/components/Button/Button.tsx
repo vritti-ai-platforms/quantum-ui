@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Button as ShadcnButton, buttonVariants } from '../../../shadcn/shadcnButton';
-import { Spinner } from '../Spinner';
+import { buttonVariants, Button as ShadcnButton } from '../../../shadcn/shadcnButton';
 import { cn } from '../../../shadcn/utils';
+import { Spinner } from '../Spinner';
 
 export interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
   /** Shows loading spinner and disables button */

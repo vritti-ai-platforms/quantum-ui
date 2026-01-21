@@ -6,6 +6,11 @@ import { cn } from '../../../shadcn/utils';
 
 export interface PhoneFieldProps {
   /**
+   * Field name for react-hook-form integration (used by Form component)
+   */
+  name?: string;
+
+  /**
    * Phone number value in E.164 format (e.g., +14155552671)
    */
   value?: Value;
@@ -13,7 +18,7 @@ export interface PhoneFieldProps {
   /**
    * Callback when phone number changes
    */
-  onChange: (value: Value | undefined) => void;
+  onChange?: (value: Value | undefined) => void;
 
   /**
    * Default country code (e.g., 'US', 'IN', 'GB')
@@ -53,7 +58,7 @@ export interface PhoneFieldProps {
 
 // PhoneField component - specialized input for international phone numbers with Field system
 export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
-  ({ value, onChange, defaultCountry = 'IN', label, description, error, disabled, className, placeholder }, _ref) => {
+  ({ name: _name, value, onChange = () => {}, defaultCountry = 'IN', label, description, error, disabled, className, placeholder }, _ref) => {
     const fieldId = React.useId();
     const hasError = !!error;
 

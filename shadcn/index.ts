@@ -9,7 +9,6 @@ export * from './shadcnLabel';
 export * from './shadcnPopover';
 export * from './shadcnSeparator';
 export * from './shadcnSheet';
-export * from './shadcnSidebar';
 export * from './shadcnSkeleton';
 export * from './shadcnTable';
 export * from './shadcnTooltip';

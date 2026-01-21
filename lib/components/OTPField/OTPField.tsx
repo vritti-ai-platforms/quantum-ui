@@ -5,14 +5,19 @@ import { cn } from '../../../shadcn/utils';
 
 export interface OTPFieldProps {
   /**
+   * Field name for react-hook-form integration (used by Form component)
+   */
+  name?: string;
+
+  /**
    * OTP value
    */
-  value: string;
+  value?: string;
 
   /**
    * Callback when OTP changes
    */
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
 
   /**
    * Number of OTP digits
@@ -53,7 +58,7 @@ export interface OTPFieldProps {
 
 // OTPField component - specialized input for one-time passwords with Field system
 export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
-  ({ value, onChange, length = 6, label, description, error, disabled, required, className }, _ref) => {
+  ({ name: _name, value = '', onChange = () => {}, length = 6, label, description, error, disabled, required, className }, _ref) => {
     const fieldId = React.useId();
     const hasError = !!error;
 

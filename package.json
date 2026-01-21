@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -30,78 +30,78 @@
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/lib/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/lib/index.d.ts",
       "import": "./dist/index.js"
     },
     "./Button": {
-      "types": "./dist/components/Button/index.d.ts",
+      "types": "./dist/lib/components/Button/index.d.ts",
       "import": "./dist/components/Button.js"
     },
     "./Card": {
-      "types": "./dist/components/Card/index.d.ts",
+      "types": "./dist/lib/components/Card/index.d.ts",
       "import": "./dist/components/Card.js"
     },
     "./TextField": {
-      "types": "./dist/components/TextField/index.d.ts",
+      "types": "./dist/lib/components/TextField/index.d.ts",
       "import": "./dist/components/TextField.js"
     },
     "./Typography": {
-      "types": "./dist/components/Typography/index.d.ts",
+      "types": "./dist/lib/components/Typography/index.d.ts",
       "import": "./dist/components/Typography.js"
     },
     "./ThemeToggle": {
-      "types": "./dist/components/ThemeToggle/index.d.ts",
+      "types": "./dist/lib/components/ThemeToggle/index.d.ts",
       "import": "./dist/components/ThemeToggle.js"
     },
     "./Checkbox": {
-      "types": "./dist/components/Checkbox/index.d.ts",
+      "types": "./dist/lib/components/Checkbox/index.d.ts",
       "import": "./dist/components/Checkbox.js"
     },
     "./PasswordField": {
-      "types": "./dist/components/PasswordField/index.d.ts",
+      "types": "./dist/lib/components/PasswordField/index.d.ts",
       "import": "./dist/components/PasswordField.js"
     },
     "./PhoneField": {
-      "types": "./dist/components/PhoneField/index.d.ts",
+      "types": "./dist/lib/components/PhoneField/index.d.ts",
       "import": "./dist/components/PhoneField.js"
     },
     "./Progress": {
-      "types": "./dist/components/Progress/index.d.ts",
+      "types": "./dist/lib/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"
     },
     "./OTPField": {
-      "types": "./dist/components/OTPField/index.d.ts",
+      "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
     },
     "./TextArea": {
-      "types": "./dist/components/TextArea/index.d.ts",
+      "types": "./dist/lib/components/TextArea/index.d.ts",
       "import": "./dist/components/TextArea.js"
     },
     "./Form": {
-      "types": "./dist/components/Form/index.d.ts",
+      "types": "./dist/lib/components/Form/index.d.ts",
       "import": "./dist/components/Form.js"
     },
     "./DatePicker": {
-      "types": "./dist/components/DatePicker/index.d.ts",
+      "types": "./dist/lib/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
     },
     "./Skeleton": {
-      "types": "./dist/components/Skeleton/index.d.ts",
+      "types": "./dist/lib/components/Skeleton/index.d.ts",
       "import": "./dist/components/Skeleton.js"
     },
     "./Spinner": {
-      "types": "./dist/components/Spinner/index.d.ts",
+      "types": "./dist/lib/components/Spinner/index.d.ts",
       "import": "./dist/components/Spinner.js"
     },
     "./Field": {
-      "types": "./dist/components/Field/index.d.ts",
+      "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
     },
     "./axios": {
-      "types": "./dist/utils/axios.d.ts",
+      "types": "./dist/lib/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
     },
     "./index.css": "./dist/assets/quantum-ui.css"
@@ -147,8 +147,8 @@
     "@vitejs/plugin-react": "^4.4.1",
     "ajv": "^8.17.1",
     "glob": "^11.0.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
     "react-router-dom": "^7.9.4",
     "storybook": "10.1.11",
     "tailwindcss": "^4.1.17",
@@ -176,7 +176,7 @@
     "input-otp": "^1.4.2",
     "lucide-react": "^0.544.0",
     "react-day-picker": "^9.11.3",
-    "react-hook-form": "^7.66.0",
+    "react-hook-form": "^7.71.1",
     "react-phone-number-input": "^3.4.12",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.1.12"
