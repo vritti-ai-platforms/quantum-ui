@@ -150,6 +150,7 @@ MyComponent.displayName = 'MyComponent';
 - Import `cn` utility from `../../../shadcn/utils` for class merging
 - Follow the design token system (see `lib/index.css`)
 - Support dark mode via `.dark` class variants
+- **NEVER hardcode color values** (hex, rgb, hsl, oklch) - always use design system tokens
 
 ```typescript
 import { cn } from '../../../shadcn/utils';
@@ -159,6 +160,39 @@ import { cn } from '../../../shadcn/utils';
   'rounded-md border border-border',
   className
 )} />
+```
+
+### 6. Color Usage Guidelines
+
+**CRITICAL: Never hardcode colors.** Always use design system tokens from `lib/index.css`.
+
+Available semantic colors:
+- `primary` / `primary-foreground` - Brand primary color
+- `secondary` / `secondary-foreground` - Secondary actions
+- `muted` / `muted-foreground` - Subtle backgrounds/text
+- `accent` / `accent-foreground` - Accent highlights
+- `destructive` / `destructive-foreground` - Error/danger states
+- `warning` / `warning-foreground` - Warning states
+- `success` / `success-foreground` - Success states
+- `background` / `foreground` - Base colors
+- `card` / `card-foreground` - Card surfaces
+- `border`, `input`, `ring` - UI element colors
+
+```typescript
+// WRONG - Hardcoded colors
+<div style={{ color: '#16a34a' }} />
+<div className="text-green-600" />  // Tailwind palette colors may not match theme
+
+// CORRECT - Design system tokens
+<div className="text-success" />
+<div className="bg-success/15 text-success" />
+<CheckCircle className="text-success" />
+```
+
+For opacity variants, use Tailwind's opacity modifier:
+```typescript
+<div className="bg-success/15" />  // 15% opacity
+<div className="bg-destructive/20" />  // 20% opacity
 ```
 
 ### 6. shadcn Component Integration
