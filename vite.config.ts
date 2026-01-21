@@ -16,7 +16,7 @@ export default defineConfig({
       outDir: 'dist',
       insertTypesEntry: false,
       pathsToAliases: false,
-      rollupTypes: true,
+      rollupTypes: false,
       entryRoot: 'lib',
     }),
     tailwindcss(),
