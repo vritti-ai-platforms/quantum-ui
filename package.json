@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -37,71 +37,71 @@
       "import": "./dist/index.js"
     },
     "./Button": {
-      "types": "./dist/Button.d.ts",
+      "types": "./dist/components/Button/index.d.ts",
       "import": "./dist/components/Button.js"
     },
     "./Card": {
-      "types": "./dist/Card.d.ts",
+      "types": "./dist/components/Card/index.d.ts",
       "import": "./dist/components/Card.js"
     },
     "./TextField": {
-      "types": "./dist/TextField.d.ts",
+      "types": "./dist/components/TextField/index.d.ts",
       "import": "./dist/components/TextField.js"
     },
     "./Typography": {
-      "types": "./dist/Typography.d.ts",
+      "types": "./dist/components/Typography/index.d.ts",
       "import": "./dist/components/Typography.js"
     },
     "./ThemeToggle": {
-      "types": "./dist/ThemeToggle.d.ts",
+      "types": "./dist/components/ThemeToggle/index.d.ts",
       "import": "./dist/components/ThemeToggle.js"
     },
     "./Checkbox": {
-      "types": "./dist/Checkbox.d.ts",
+      "types": "./dist/components/Checkbox/index.d.ts",
       "import": "./dist/components/Checkbox.js"
     },
     "./PasswordField": {
-      "types": "./dist/PasswordField.d.ts",
+      "types": "./dist/components/PasswordField/index.d.ts",
       "import": "./dist/components/PasswordField.js"
     },
     "./PhoneField": {
-      "types": "./dist/PhoneField.d.ts",
+      "types": "./dist/components/PhoneField/index.d.ts",
       "import": "./dist/components/PhoneField.js"
     },
     "./Progress": {
-      "types": "./dist/Progress.d.ts",
+      "types": "./dist/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"
     },
     "./OTPField": {
-      "types": "./dist/OTPField.d.ts",
+      "types": "./dist/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
     },
     "./TextArea": {
-      "types": "./dist/TextArea.d.ts",
+      "types": "./dist/components/TextArea/index.d.ts",
       "import": "./dist/components/TextArea.js"
     },
     "./Form": {
-      "types": "./dist/Form.d.ts",
+      "types": "./dist/components/Form/index.d.ts",
       "import": "./dist/components/Form.js"
     },
     "./DatePicker": {
-      "types": "./dist/DatePicker.d.ts",
+      "types": "./dist/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
     },
     "./Skeleton": {
-      "types": "./dist/Skeleton.d.ts",
+      "types": "./dist/components/Skeleton/index.d.ts",
       "import": "./dist/components/Skeleton.js"
     },
     "./Spinner": {
-      "types": "./dist/Spinner.d.ts",
+      "types": "./dist/components/Spinner/index.d.ts",
       "import": "./dist/components/Spinner.js"
     },
     "./Field": {
-      "types": "./dist/Field.d.ts",
+      "types": "./dist/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
     },
     "./axios": {
-      "types": "./dist/axios.d.ts",
+      "types": "./dist/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
     },
     "./index.css": "./dist/assets/quantum-ui.css"
