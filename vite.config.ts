@@ -40,6 +40,7 @@ export default defineConfig({
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),
+        'components/Sonner': resolve(__dirname, 'lib/components/Sonner/index.ts'),
         'components/Spinner': resolve(__dirname, 'lib/components/Spinner/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),

@@ -1,4 +1,5 @@
-import Axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import Axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import { generateToastId, toast } from '../components/Sonner/toast';
 import { getConfig } from '../config';
 
 // Extend AxiosRequestConfig with custom options
@@ -6,7 +7,26 @@ declare module 'axios' {
   export interface AxiosRequestConfig {
     /** Skip auth for public endpoints (login, signup, etc.) */
     public?: boolean;
+    /** Show success toast for mutations (default: true for POST/PUT/PATCH/DELETE) */
+    showSuccessToast?: boolean;
+    /** Show error toast for errors (default: true) */
+    showErrorToast?: boolean;
+    /** Custom success message (overrides API response message) */
+    successMessage?: string;
+    /** Show loading toast during request - auto updates to success/error on completion */
+    loadingMessage?: string;
+    /** Internal: toast ID for loading → success/error updates */
+    _toastId?: string;
   }
+}
+
+// Type for API error response
+interface ApiErrorResponse {
+  title?: string;
+  status?: number;
+  detail?: string;
+  message?: string;
+  errors?: Array<{ field: string; message: string }>;
 }
 
 // =============================================================================
@@ -261,20 +281,96 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     if (csrf) config.headers[quantumConfig.csrf.headerName] = csrf;
   }
 
+  // Show loading toast if loadingMessage is provided
+  const loadingMessage = (config as { loadingMessage?: string }).loadingMessage;
+  if (loadingMessage) {
+    const toastId = generateToastId();
+    (config as { _toastId?: string })._toastId = toastId;
+    toast.loading(loadingMessage, { id: toastId });
+  }
+
   return config;
 });
 
-// Response interceptor: handle 401 errors
+// Response interceptor: handle success toasts and errors
 axios.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const isPublicRequest = error.config?.public === true;
+  (response) => {
+    const config = response.config;
+    const method = config.method?.toUpperCase();
+    const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method || '');
+    const toastId = (config as { _toastId?: string })._toastId;
 
-    if (error.response?.status === 401 && !isPublicRequest) {
+    // If there was a loading toast, update it
+    if (toastId) {
+      const message = config.successMessage || response.data?.message;
+      if (message) {
+        toast.success(message, { id: toastId });
+      } else {
+        // No message - just show brief success to dismiss loading
+        toast.success('Done', { id: toastId, duration: 1000 });
+      }
+    } else {
+      // Original behavior - show success toast for mutations
+      const showSuccess = config.showSuccessToast ?? isMutation;
+
+      if (showSuccess) {
+        // Use custom message if provided, otherwise use API response message
+        const message = config.successMessage || response.data?.message;
+        if (message) {
+          toast.success(message);
+        }
+      }
+    }
+
+    return response;
+  },
+  (error: AxiosError<ApiErrorResponse>) => {
+    const config = error.config;
+    const showError = config?.showErrorToast ?? true;
+    const status = error.response?.status;
+    const errorData = error.response?.data;
+    const isPublicRequest = (config as { public?: boolean })?.public === true;
+    const toastId = (config as { _toastId?: string })?._toastId;
+
+    // Handle 401 - redirect to login
+    if (status === 401 && !isPublicRequest) {
+      // Dismiss loading toast if exists
+      if (toastId) {
+        toast.error('Session expired', { id: toastId });
+      }
       clearToken();
       cancelTokenRefresh();
       redirectToLogin();
+      return Promise.reject(error);
     }
+
+    // Show toast for server errors (5xx)
+    if (showError && status && status >= 500) {
+      const errorMessage = errorData?.message || errorData?.detail || 'Something went wrong. Please try again.';
+      if (toastId) {
+        toast.error('Server Error', { id: toastId, description: errorMessage });
+      } else {
+        toast.error('Server Error', { description: errorMessage });
+      }
+    }
+
+    // Show toast for network errors
+    if (showError && !error.response) {
+      if (toastId) {
+        toast.error('Network Error', { id: toastId, description: 'Please check your internet connection.' });
+      } else {
+        toast.error('Network Error', { description: 'Please check your internet connection.' });
+      }
+    }
+
+    // For 4xx errors with loading toast, dismiss it with the error message
+    if (toastId && status && status >= 400 && status < 500 && status !== 401) {
+      const errorMessage = errorData?.message || errorData?.detail || 'Request failed';
+      toast.error(errorMessage, { id: toastId });
+    }
+
+    // Note: 4xx errors (validation) without loading toast are handled by form inline errors
+    // to avoid duplicate feedback - no toast needed
 
     return Promise.reject(error);
   },
