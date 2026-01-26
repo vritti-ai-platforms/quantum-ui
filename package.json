@@ -116,6 +116,14 @@
       "types": "./dist/lib/components/Spinner/index.d.ts",
       "import": "./dist/components/Spinner.js"
     },
+    "./Switch": {
+      "types": "./dist/lib/components/Switch/index.d.ts",
+      "import": "./dist/components/Switch.js"
+    },
+    "./Toggle": {
+      "types": "./dist/lib/components/Toggle/index.d.ts",
+      "import": "./dist/components/Toggle.js"
+    },
     "./Field": {
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
@@ -190,6 +198,8 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
