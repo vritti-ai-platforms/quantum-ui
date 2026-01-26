@@ -26,9 +26,11 @@ export default defineConfig({
         // Main entry point
         index: resolve(__dirname, 'lib/index.ts'),
         // Component entries
+        'components/Avatar': resolve(__dirname, 'lib/components/Avatar/index.ts'),
         'components/Badge': resolve(__dirname, 'lib/components/Badge/index.ts'),
         'components/Button': resolve(__dirname, 'lib/components/Button/index.ts'),
         'components/Card': resolve(__dirname, 'lib/components/Card/index.ts'),
+        'components/Chart': resolve(__dirname, 'lib/components/Chart/index.ts'),
         'components/Checkbox': resolve(__dirname, 'lib/components/Checkbox/index.ts'),
         'components/OTPField': resolve(__dirname, 'lib/components/OTPField/index.ts'),
         'components/PasswordField': resolve(__dirname, 'lib/components/PasswordField/index.ts'),
@@ -40,6 +42,7 @@ export default defineConfig({
         'components/ThemeToggle': resolve(__dirname, 'lib/components/ThemeToggle/index.ts'),
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
+        'components/Separator': resolve(__dirname, 'lib/components/Separator/index.ts'),
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),
         'components/Sonner': resolve(__dirname, 'lib/components/Sonner/index.ts'),
         'components/Spinner': resolve(__dirname, 'lib/components/Spinner/index.ts'),

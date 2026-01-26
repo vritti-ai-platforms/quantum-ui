@@ -1,6 +1,8 @@
+export * from './Avatar';
 export * from './Badge';
 export * from './Button';
 export * from './Card';
+export * from './Chart';
 export * from './Checkbox';
 export * from './DatePicker';
 export * from './Field';
@@ -8,6 +10,7 @@ export * from './Form';
 export * from './OTPField';
 export * from './PasswordField';
 export * from './PhoneField';
+export * from './Separator';
 export * from './Skeleton';
 export * from './Sonner';
 export * from './Spinner';
