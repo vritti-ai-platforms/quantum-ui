@@ -36,6 +36,10 @@
       "types": "./dist/lib/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./Badge": {
+      "types": "./dist/lib/components/Badge/index.d.ts",
+      "import": "./dist/components/Badge.js"
+    },
     "./Button": {
       "types": "./dist/lib/components/Button/index.d.ts",
       "import": "./dist/components/Button.js"
