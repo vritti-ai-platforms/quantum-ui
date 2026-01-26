@@ -97,7 +97,7 @@ When adding a new component, update these files:
 2. **`package.json`** - Add to exports field:
    ```json
    "./MyComponent": {
-     "types": "./dist/MyComponent.d.ts",
+     "types": "./dist/lib/components/MyComponent/index.d.ts",
      "import": "./dist/components/MyComponent.js"
    }
    ```

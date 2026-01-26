@@ -26,6 +26,7 @@ export default defineConfig({
         // Main entry point
         index: resolve(__dirname, 'lib/index.ts'),
         // Component entries
+        'components/Badge': resolve(__dirname, 'lib/components/Badge/index.ts'),
         'components/Button': resolve(__dirname, 'lib/components/Button/index.ts'),
         'components/Card': resolve(__dirname, 'lib/components/Card/index.ts'),
         'components/Checkbox': resolve(__dirname, 'lib/components/Checkbox/index.ts'),
