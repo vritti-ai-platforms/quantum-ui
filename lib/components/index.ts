@@ -8,6 +8,7 @@ export * from './Form';
 export * from './OTPField';
 export * from './PasswordField';
 export * from './PhoneField';
+export * from './Progress';
 export * from './Skeleton';
 export * from './Sonner';
 export * from './Spinner';
