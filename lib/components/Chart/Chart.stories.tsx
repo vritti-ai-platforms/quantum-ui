@@ -137,8 +137,8 @@ export const PieChartExample: Story = {
       <PieChart>
         <ChartTooltip content={<ChartTooltipContent hideLabel />} />
         <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.fill} />
+          {pieData.map((entry) => (
+            <Cell key={entry.name} fill={entry.fill} />
           ))}
         </Pie>
         <ChartLegend content={<ChartLegendContent nameKey="name" />} />

@@ -96,10 +96,10 @@ export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
             aria-invalid={hasError}
           >
             <InputOTPGroup>
-              {Array.from({ length }, (_, index) => (
+              {Array.from({ length }, (_, idx) => idx).map((position) => (
                 <InputOTPSlot
-                  key={index}
-                  index={index}
+                  key={position}
+                  index={position}
                   className={cn(
                     hasError &&
                       'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',

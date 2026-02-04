@@ -24,7 +24,7 @@
           } else {
             document.documentElement.setAttribute('data-theme', 'light');
           }
-        } catch (e) {
+        } catch (_e) {
           // Fallback to light theme if localStorage is not available
           document.documentElement.setAttribute('data-theme', 'light');
         }
