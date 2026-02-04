@@ -5,6 +5,7 @@ export * from './Card';
 export * from './Chart';
 export * from './Checkbox';
 export * from './DatePicker';
+export * from './DropdownMenu';
 export * from './Field';
 export * from './Form';
 export * from './OTPField';
