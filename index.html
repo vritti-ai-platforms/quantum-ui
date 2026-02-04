@@ -13,7 +13,7 @@
     />
     <script>
       // Prevent theme flickering by setting theme before React loads
-      (function () {
+      (() => {
         // Add no-transition class to prevent flickering during initial load
         document.documentElement.classList.add('no-transition');
 
@@ -30,8 +30,8 @@
         }
 
         // Remove no-transition class after DOM is ready to enable smooth transitions
-        window.addEventListener('DOMContentLoaded', function () {
-          setTimeout(function () {
+        window.addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => {
             document.documentElement.classList.remove('no-transition');
             document.documentElement.classList.add('loaded');
           }, 100);

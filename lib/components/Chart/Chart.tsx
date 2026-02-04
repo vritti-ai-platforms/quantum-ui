@@ -1,10 +1,10 @@
 import {
   ChartContainer as ShadcnChartContainer,
-  ChartTooltip as ShadcnChartTooltip,
-  ChartTooltipContent as ShadcnChartTooltipContent,
   ChartLegend as ShadcnChartLegend,
   ChartLegendContent as ShadcnChartLegendContent,
   ChartStyle as ShadcnChartStyle,
+  ChartTooltip as ShadcnChartTooltip,
+  ChartTooltipContent as ShadcnChartTooltipContent,
   useChart as shadcnUseChart,
 } from '../../../shadcn/shadcnChart';
 

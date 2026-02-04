@@ -13,6 +13,7 @@ import { cn } from '../../../shadcn/utils';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
+import { Switch } from '../Switch';
 
 // Re-export Controller for explicit usage
 export { Controller } from 'react-hook-form';
@@ -49,17 +50,19 @@ function processChildren<
           control={control}
           name={name}
           render={({ field, fieldState }) => {
-            // Check if this is a Checkbox component - map value to checked
+            // Check if this is a Checkbox or Switch component - map value to checked
             const isCheckbox = child.type === Checkbox;
+            const isSwitch = child.type === Switch;
 
-            const fieldProps = isCheckbox
-              ? {
-                  checked: field.value,
-                  onCheckedChange: field.onChange,
-                  onBlur: field.onBlur,
-                  ref: field.ref,
-                }
-              : field;
+            const fieldProps =
+              isCheckbox || isSwitch
+                ? {
+                    checked: field.value,
+                    onCheckedChange: field.onChange,
+                    onBlur: field.onBlur,
+                    ref: field.ref,
+                  }
+                : field;
 
             return React.cloneElement(child, {
               ...childProps,

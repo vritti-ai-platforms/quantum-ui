@@ -1,11 +1,10 @@
+export type { ChartConfig } from './Chart';
 export {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  ChartTooltip,
+  ChartTooltipContent,
   useChart,
 } from './Chart';
-
-export type { ChartConfig } from './Chart';

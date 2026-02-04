@@ -58,7 +58,21 @@ export interface OTPFieldProps {
 
 // OTPField component - specialized input for one-time passwords with Field system
 export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
-  ({ name: _name, value = '', onChange = () => {}, length = 6, label, description, error, disabled, required, className }, _ref) => {
+  (
+    {
+      name: _name,
+      value = '',
+      onChange = () => {},
+      length = 6,
+      label,
+      description,
+      error,
+      disabled,
+      required,
+      className,
+    },
+    _ref,
+  ) => {
     const fieldId = React.useId();
     const hasError = !!error;
 

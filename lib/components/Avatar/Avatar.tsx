@@ -1,10 +1,10 @@
 import {
   Avatar as ShadcnAvatar,
-  AvatarImage as ShadcnAvatarImage,
-  AvatarFallback as ShadcnAvatarFallback,
   AvatarBadge as ShadcnAvatarBadge,
+  AvatarFallback as ShadcnAvatarFallback,
   AvatarGroup as ShadcnAvatarGroup,
   AvatarGroupCount as ShadcnAvatarGroupCount,
+  AvatarImage as ShadcnAvatarImage,
 } from '../../../shadcn/shadcnAvatar';
 
 /**

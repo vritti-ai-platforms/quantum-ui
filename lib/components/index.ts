@@ -16,7 +16,7 @@ export * from './Sonner';
 export * from './Spinner';
 export * from './Switch';
 export * from './TextArea';
-export * from './Toggle';
 export * from './TextField';
 export * from './ThemeToggle';
+export * from './Toggle';
 export * from './Typography';

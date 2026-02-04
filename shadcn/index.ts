@@ -10,9 +10,9 @@ export * from './shadcnPopover';
 export * from './shadcnSeparator';
 export * from './shadcnSheet';
 export * from './shadcnSkeleton';
+export * from './shadcnSonner';
 export * from './shadcnTable';
 export * from './shadcnTooltip';
-export * from './shadcnSonner';
 
 // Utilities
 export { cn } from './utils';

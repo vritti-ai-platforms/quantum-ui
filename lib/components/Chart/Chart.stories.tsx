@@ -1,25 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Line,
   LineChart,
-  XAxis,
-  YAxis,
-  Area,
-  AreaChart,
   Pie,
   PieChart,
-  Cell,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import {
+  type ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-  type ChartConfig,
+  ChartTooltip,
+  ChartTooltipContent,
 } from './Chart';
 
 const meta: Meta<typeof ChartContainer> = {
@@ -111,13 +111,7 @@ export const LineChartExample: Story = {
         <XAxis dataKey="month" tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Line
-          type="monotone"
-          dataKey="value"
-          stroke="var(--color-value)"
-          strokeWidth={2}
-          dot={false}
-        />
+        <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} dot={false} />
       </LineChart>
     </ChartContainer>
   ),
@@ -131,13 +125,7 @@ export const AreaChartExample: Story = {
         <XAxis dataKey="month" tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Area
-          type="monotone"
-          dataKey="value"
-          stroke="var(--color-value)"
-          fill="var(--color-value)"
-          fillOpacity={0.2}
-        />
+        <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="var(--color-value)" fillOpacity={0.2} />
       </AreaChart>
     </ChartContainer>
   ),
@@ -148,15 +136,7 @@ export const PieChartExample: Story = {
     <ChartContainer config={pieChartConfig} className="min-h-[300px] w-[500px]">
       <PieChart>
         <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-        <Pie
-          data={pieData}
-          dataKey="value"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={80}
-        >
+        <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
           {pieData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.fill} />
           ))}
