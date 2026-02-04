@@ -58,7 +58,21 @@ export interface PhoneFieldProps {
 
 // PhoneField component - specialized input for international phone numbers with Field system
 export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
-  ({ name: _name, value, onChange = () => {}, defaultCountry = 'IN', label, description, error, disabled, className, placeholder }, _ref) => {
+  (
+    {
+      name: _name,
+      value,
+      onChange = () => {},
+      defaultCountry = 'IN',
+      label,
+      description,
+      error,
+      disabled,
+      className,
+      placeholder,
+    },
+    _ref,
+  ) => {
     const fieldId = React.useId();
     const hasError = !!error;
 

@@ -211,18 +211,22 @@ When wrapping, prefer the simple alias pattern unless you need to:
 
 ## Build Commands
 
+**Note:** This project uses **pnpm** as the package manager.
+
 ```bash
 # Development
-npm run dev
+pnpm dev
 
 # Build library
-npm run build
+pnpm build
 
 # Run Storybook
-npm run storybook
+pnpm storybook
 
-# Lint
-npm run lint
+# Code Quality (Biome)
+pnpm check    # Check and auto-fix issues
+pnpm format   # Format code
+pnpm lint     # Lint code
 ```
 
 ## Common Patterns

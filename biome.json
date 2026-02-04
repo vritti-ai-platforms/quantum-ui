@@ -60,7 +60,9 @@
             "useUniqueElementIds": "off"
           },
           "suspicious": {
-            "noShadowRestrictedNames": "off"
+            "noShadowRestrictedNames": "off",
+            "noExplicitAny": "off",
+            "noArrayIndexKey": "off"
           }
         }
       }

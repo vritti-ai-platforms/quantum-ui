@@ -1,10 +1,19 @@
-import type { FieldValues, UseFormReturn } from 'react-hook-form';
+import type { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
 
 /**
  * Field mapping configuration for API error to form field mapping
  */
 export interface FieldMapping {
   [apiField: string]: string; // Maps API field names to form field names
+}
+
+/**
+ * Axios error structure (or similar HTTP client error structure)
+ */
+interface AxiosLikeError {
+  response?: {
+    data?: unknown;
+  };
 }
 
 /**
@@ -79,7 +88,8 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
   }
 
   // Extract error data from axios response structure
-  const errorData = (error as any)?.response?.data || error;
+  const axiosError = error as AxiosLikeError;
+  const errorData = axiosError.response?.data || error;
   const apiError = errorData as ApiErrorResponse;
 
   // Handle general error message
@@ -94,7 +104,7 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
       if (errorItem.field) {
         const formField = fieldMapping[errorItem.field] || errorItem.field;
 
-        form.setError(formField as any, {
+        form.setError(formField as FieldPath<TFieldValues>, {
           type: 'manual',
           message: errorItem.message,
         });
