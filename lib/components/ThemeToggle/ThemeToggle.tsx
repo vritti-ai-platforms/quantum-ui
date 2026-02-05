@@ -1,6 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 import type React from 'react';
-import { useLayoutEffect, useState } from 'react';
+import { useTheme } from '../../hooks/useTheme';
 import { Button } from '../Button/Button';
 
 export interface ThemeToggleProps {
@@ -15,27 +15,20 @@ export interface ThemeToggleProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * ThemeToggle component for switching between light and dark themes.
+ *
+ * Uses the useTheme hook internally for theme state management.
+ *
+ * @example
+ * ```tsx
+ * <ThemeToggle />
+ * <ThemeToggle size="lg" className="custom-class" />
+ * ```
+ */
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, size = 'md' }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useLayoutEffect(() => {
-    // Check for saved theme preference or system preference
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldUseDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-
-    setIsDarkMode(shouldUseDark);
-    document.documentElement.classList.toggle('dark', shouldUseDark);
-  }, []);
-
-  const toggleTheme = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-
-    // Update DOM and localStorage
-    document.documentElement.classList.toggle('dark', newDarkMode);
-    localStorage.setItem('theme', newDarkMode ? 'dark' : 'light');
-  };
+  const { theme, toggleTheme } = useTheme();
+  const isDarkMode = theme === 'dark';
 
   return (
     <Button
@@ -56,3 +49,5 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, size = 'md'
     </Button>
   );
 };
+
+ThemeToggle.displayName = 'ThemeToggle';

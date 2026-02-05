@@ -51,6 +51,10 @@ export default defineConfig({
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
+        // Hooks entries
+        'hooks/index': resolve(__dirname, 'lib/hooks/index.ts'),
+        // Context entries
+        'context/index': resolve(__dirname, 'lib/context/index.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
       },

@@ -136,6 +136,14 @@
       "types": "./dist/lib/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
     },
+    "./hooks": {
+      "types": "./dist/lib/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
+    },
+    "./context": {
+      "types": "./dist/lib/context/index.d.ts",
+      "import": "./dist/context/index.js"
+    },
     "./index.css": "./dist/assets/quantum-ui.css"
   },
   "files": [
