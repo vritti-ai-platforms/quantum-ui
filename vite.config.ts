@@ -55,6 +55,8 @@ export default defineConfig({
         'hooks/index': resolve(__dirname, 'lib/hooks/index.ts'),
         // Context entries
         'context/index': resolve(__dirname, 'lib/context/index.ts'),
+        // Theme entries (consolidated theme exports for Module Federation)
+        'theme/index': resolve(__dirname, 'lib/theme/index.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
       },

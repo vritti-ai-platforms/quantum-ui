@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.7",
+  "version": "0.2.8",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -143,6 +143,10 @@
     "./context": {
       "types": "./dist/lib/context/index.d.ts",
       "import": "./dist/context/index.js"
+    },
+    "./theme": {
+      "types": "./dist/lib/theme/index.d.ts",
+      "import": "./dist/theme/index.js"
     },
     "./index.css": "./dist/assets/quantum-ui.css"
   },

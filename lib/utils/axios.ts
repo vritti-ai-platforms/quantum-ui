@@ -7,6 +7,8 @@ declare module 'axios' {
   export interface AxiosRequestConfig {
     /** Skip auth for public endpoints (login, signup, etc.) */
     public?: boolean;
+    /** Skip redirect to login on 401 (for auth check endpoints like /me) */
+    skipAuthRedirect?: boolean;
     /** Show success toast for mutations (default: true for POST/PUT/PATCH/DELETE) */
     showSuccessToast?: boolean;
     /** Show error toast for errors (default: true) */

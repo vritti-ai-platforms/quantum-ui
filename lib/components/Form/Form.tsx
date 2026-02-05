@@ -259,14 +259,14 @@ export function Form<
       <form onSubmit={handleSubmit} {...props}>
         {/* Top position error */}
         {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
-          <FieldError errors={[form.formState.errors.root]} className={cn('text-center', rootErrorClassName)} />
+          <FieldError errors={[form.formState.errors.root]} className={cn('mb-4 text-center', rootErrorClassName)} />
         )}
 
         {processedChildren}
 
         {/* Bottom position error */}
         {showRootError && rootErrorPosition === 'bottom' && form.formState.errors.root && (
-          <FieldError errors={[form.formState.errors.root]} className={cn('text-center', rootErrorClassName)} />
+          <FieldError errors={[form.formState.errors.root]} className={cn('mt-4 text-center', rootErrorClassName)} />
         )}
       </form>
     </FormProvider>
