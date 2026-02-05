@@ -36,6 +36,7 @@ export default defineConfig({
         'components/PasswordField': resolve(__dirname, 'lib/components/PasswordField/index.ts'),
         'components/PhoneField': resolve(__dirname, 'lib/components/PhoneField/index.ts'),
         'components/Progress': resolve(__dirname, 'lib/components/Progress/index.ts'),
+        'components/SelectField': resolve(__dirname, 'lib/components/SelectField/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),
