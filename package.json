@@ -5,16 +5,16 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.8",
+  "version": "0.2.9",
   "type": "module",
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vritti-hub/quantum-ui.git"
+    "url": "git+https://github.com/vritti-ai-platforms/quantum-ui.git"
   },
-  "homepage": "https://vritti-hub.github.io/quantum-ui",
+  "homepage": "https://vritti-ai-platforms.github.io/quantum-ui",
   "bugs": {
-    "url": "https://github.com/vritti-hub/quantum-ui/issues"
+    "url": "https://github.com/vritti-ai-platforms/quantum-ui/issues"
   },
   "keywords": [
     "react",
@@ -35,6 +35,10 @@
     ".": {
       "types": "./dist/lib/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./Alert": {
+      "types": "./dist/lib/components/Alert/index.d.ts",
+      "import": "./dist/components/Alert.js"
     },
     "./Avatar": {
       "types": "./dist/lib/components/Avatar/index.d.ts",
@@ -159,7 +163,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc --project tsconfig.lib.json --noEmit && vite build",
+    "typecheck": "tsc --project tsconfig.lib.json --noEmit",
     "build:js": "vite build",
     "build:types": "tsc --project tsconfig.lib.json --emitDeclarationOnly",
     "build:watch": "npm run build:types && vite build --watch",
@@ -189,7 +194,7 @@
     "@storybook/react": "10.2.0",
     "@storybook/react-vite": "10.2.0",
     "@tailwindcss/postcss": "^4.1.18",
-    "@tanstack/react-query": "^5.90.19",
+    "@tanstack/react-query": "^5.90.20",
     "@types/node": "^25.0.9",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",

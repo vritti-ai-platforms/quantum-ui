@@ -17,21 +17,25 @@ interface AxiosLikeError {
 }
 
 /**
- * RFC 7807 field error structure
+ * RFC 9457 field error structure
  */
 export interface FieldError {
-  field?: string;
+  field: string;
   message: string;
 }
 
 /**
  * API error structure with field-specific errors
- * Supports RFC 7807 array format only
+ * Supports RFC 9457 Problem Details format
  */
 export interface ApiErrorResponse {
-  message?: string;
-  error?: string;
-  errors?: FieldError[]; // RFC 7807 array format only
+  type?: string;       // RFC 9457: URI reference identifying the problem type
+  title?: string;      // RFC 9457: Short human-readable summary
+  status?: number;     // RFC 9457: HTTP status code
+  label?: string;      // Root error heading displayed to the user
+  detail?: string;     // RFC 9457: Human-readable explanation
+  instance?: string;   // RFC 9457: URI reference for the specific occurrence
+  errors?: FieldError[];
 }
 
 /**
@@ -50,7 +54,11 @@ export interface MapApiErrorsOptions {
 }
 
 /**
- * Maps API error response to react-hook-form errors
+ * Maps an RFC 9457 Problem Details API error response to react-hook-form errors.
+ *
+ * Root errors (`label`/`title` + `detail`) and field errors (`errors[]`) are
+ * handled independently -- a single response can populate both the root error
+ * alert and inline field errors at the same time.
  *
  * @param error - The error object from API response
  * @param form - The react-hook-form instance
@@ -80,7 +88,7 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
   if (!error || typeof error !== 'object') {
     if (setRootError) {
       form.setError('root', {
-        type: 'manual',
+        type: 'Error',
         message: 'An error occurred',
       });
     }
@@ -92,37 +100,26 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
   const errorData = axiosError.response?.data || error;
   const apiError = errorData as ApiErrorResponse;
 
-  // Handle general error message
-  const generalMessage = apiError.message || apiError.error;
+  // Extract title/label for error heading (RFC 9457)
+  const errorTitle = apiError.label || apiError.title || 'Error';
+  const generalMessage = apiError.detail;
 
-  // Map field-specific errors
-  let hasFieldErrors = false;
-
-  // Handle RFC 7807 array format: errors: [{field, message}]
+  // Map field-specific errors (field is always present in RFC 9457)
   if (apiError.errors && Array.isArray(apiError.errors)) {
     for (const errorItem of apiError.errors) {
-      if (errorItem.field) {
-        const formField = fieldMapping[errorItem.field] || errorItem.field;
+      const formField = fieldMapping[errorItem.field] || errorItem.field;
 
-        form.setError(formField as FieldPath<TFieldValues>, {
-          type: 'manual',
-          message: errorItem.message,
-        });
-        hasFieldErrors = true;
-      } else if (errorItem.message && setRootError) {
-        // Error without field goes to root
-        form.setError('root', {
-          type: 'manual',
-          message: errorItem.message,
-        });
-      }
+      form.setError(formField as FieldPath<TFieldValues>, {
+        type: 'manual',
+        message: errorItem.message,
+      });
     }
   }
 
-  // Set root error if no field errors were set but we have a general message
-  if (!hasFieldErrors && generalMessage && setRootError) {
+  // Root error from detail (independent of field errors)
+  if (generalMessage && setRootError) {
     form.setError('root', {
-      type: 'manual',
+      type: errorTitle,
       message: generalMessage,
     });
   }

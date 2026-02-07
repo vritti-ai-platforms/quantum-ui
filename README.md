@@ -3,7 +3,7 @@
 A modern, TypeScript-first React component library built on Radix UI primitives and styled with Tailwind CSS v4. Fully typed, accessible, and tree-shakeable.
 
 [![npm version](https://img.shields.io/npm/v/@vritti/quantum-ui.svg)](https://www.npmjs.com/package/@vritti/quantum-ui)
-[![License](https://img.shields.io/npm/l/@vritti/quantum-ui.svg)](https://github.com/vritti-hub/quantum-ui/blob/main/LICENSE)
+[![License](https://img.shields.io/npm/l/@vritti/quantum-ui.svg)](https://github.com/vritti-ai-platforms/quantum-ui/blob/main/LICENSE)
 
 ## Features
 
@@ -16,7 +16,7 @@ A modern, TypeScript-first React component library built on Radix UI primitives 
 
 ## Documentation
 
-📖 [View full documentation and interactive examples on Storybook](https://vritti-hub.github.io/quantum-ui)
+📖 [View full documentation and interactive examples on Storybook](https://vritti-ai-platforms.github.io/quantum-ui)
 
 ## Installation
 
@@ -88,7 +88,7 @@ import { Button, Card, TextField } from '@vritti/quantum-ui';
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/vritti-hub/quantum-ui.git
+git clone https://github.com/vritti-ai-platforms/quantum-ui.git
 cd quantum-ui
 ```
 
@@ -136,7 +136,7 @@ We welcome contributions! Please follow these steps:
 
 ## Issues and Support
 
-Found a bug or have a feature request? Please [open an issue](https://github.com/vritti-hub/quantum-ui/issues).
+Found a bug or have a feature request? Please [open an issue](https://github.com/vritti-ai-platforms/quantum-ui/issues).
 
 ## License
 
@@ -144,7 +144,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Links
 
-- [Documentation (Storybook)](https://vritti-hub.github.io/quantum-ui)
-- [GitHub Repository](https://github.com/vritti-hub/quantum-ui)
+- [Documentation (Storybook)](https://vritti-ai-platforms.github.io/quantum-ui)
+- [GitHub Repository](https://github.com/vritti-ai-platforms/quantum-ui)
 - [npm Package](https://www.npmjs.com/package/@vritti/quantum-ui)
-- [Report Issues](https://github.com/vritti-hub/quantum-ui/issues)
+- [Report Issues](https://github.com/vritti-ai-platforms/quantum-ui/issues)

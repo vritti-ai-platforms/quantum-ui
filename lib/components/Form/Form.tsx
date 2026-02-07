@@ -8,8 +8,8 @@ import {
   FormProvider,
   type UseFormReturn,
 } from 'react-hook-form';
-import { FieldError } from '../../../shadcn/shadcnField';
 import { cn } from '../../../shadcn/utils';
+import { Alert } from '../Alert';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
@@ -158,8 +158,9 @@ export interface FormProps<
    * When provided, the form will use `mutateAsync` to submit data and handle errors automatically.
    * The mutation's own callbacks (onSuccess, onError, etc.) will fire automatically.
    * Form only adds `mapApiErrorsToForm` as an extra error handling layer.
+   * Optional - you can use `onSubmit` instead for forms that don't use mutations.
    */
-  mutation?: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
+  mutation: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
 
   /**
    * Transform form data to mutation variables before submission.
@@ -259,14 +260,24 @@ export function Form<
       <form onSubmit={handleSubmit} {...props}>
         {/* Top position error */}
         {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
-          <FieldError errors={[form.formState.errors.root]} className={cn('mb-4 text-center', rootErrorClassName)} />
+          <Alert
+            variant="destructive"
+            title={form.formState.errors.root.type || 'Error'}
+            description={form.formState.errors.root.message}
+            className={cn('mb-4', rootErrorClassName)}
+          />
         )}
 
         {processedChildren}
 
         {/* Bottom position error */}
         {showRootError && rootErrorPosition === 'bottom' && form.formState.errors.root && (
-          <FieldError errors={[form.formState.errors.root]} className={cn('mt-4 text-center', rootErrorClassName)} />
+          <Alert
+            variant="destructive"
+            title={form.formState.errors.root.type || 'Error'}
+            description={form.formState.errors.root.message}
+            className={cn('mt-4', rootErrorClassName)}
+          />
         )}
       </form>
     </FormProvider>
