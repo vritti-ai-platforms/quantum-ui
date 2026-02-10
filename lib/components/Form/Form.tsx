@@ -148,6 +148,12 @@ export interface FormProps<
   rootErrorClassName?: string;
 
   /**
+   * Action element rendered in the root error Alert (e.g. button or link)
+   * Positioned in the top-right corner using AlertAction
+   */
+  rootErrorAction?: React.ReactNode;
+
+  /**
    * Field mapping for automatic API error mapping
    * Maps API field names to form field names
    */
@@ -215,6 +221,7 @@ export function Form<
   showRootError = true,
   rootErrorPosition = 'bottom',
   rootErrorClassName,
+  rootErrorAction,
   fieldMapping,
   mutation,
   transformSubmit,
@@ -264,6 +271,7 @@ export function Form<
             variant="destructive"
             title={form.formState.errors.root.type || 'Error'}
             description={form.formState.errors.root.message}
+            action={rootErrorAction}
             className={cn('mb-4', rootErrorClassName)}
           />
         )}
@@ -276,6 +284,7 @@ export function Form<
             variant="destructive"
             title={form.formState.errors.root.type || 'Error'}
             description={form.formState.errors.root.message}
+            action={rootErrorAction}
             className={cn('mt-4', rootErrorClassName)}
           />
         )}

@@ -137,7 +137,7 @@ const defaultConfig: Required<{
   auth: AuthConfig;
 }> = {
   csrf: {
-    endpoint: '/csrf/token',
+    endpoint: 'csrf/token',
     enabled: true,
     headerName: 'x-csrf-token',
   },
