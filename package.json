@@ -92,6 +92,10 @@
       "types": "./dist/lib/components/SelectField/index.d.ts",
       "import": "./dist/components/SelectField.js"
     },
+    "./SingleSelect": {
+      "types": "./dist/lib/components/SingleSelect/index.d.ts",
+      "import": "./dist/components/SingleSelect.js"
+    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"

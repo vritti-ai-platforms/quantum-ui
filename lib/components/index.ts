@@ -15,6 +15,7 @@ export * from './PhoneField';
 export * from './Progress';
 export * from './SelectField';
 export * from './Separator';
+export * from './SingleSelect';
 export * from './Skeleton';
 export * from './Sonner';
 export * from './Spinner';
