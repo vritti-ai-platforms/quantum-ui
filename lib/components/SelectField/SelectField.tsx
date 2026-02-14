@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../shadcn/shadcnSelect';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shadcn/shadcnSelect';
 import { cn } from '../../../shadcn/utils';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 
@@ -158,13 +152,7 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
           defaultValue={defaultValue}
           required={required}
         >
-          <SelectTrigger
-            ref={ref}
-            id={id}
-            onBlur={onBlur}
-            aria-invalid={!!error}
-            className={cn('w-full', className)}
-          >
+          <SelectTrigger ref={ref} id={id} onBlur={onBlur} aria-invalid={!!error} className={cn('w-full', className)}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
 
