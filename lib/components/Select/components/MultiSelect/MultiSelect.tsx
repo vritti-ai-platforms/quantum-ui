@@ -5,6 +5,8 @@ import {
   MultiSelectActions,
   MultiSelectContent,
   MultiSelectEmpty,
+  MultiSelectGroup,
+  MultiSelectGroupLabel,
   MultiSelectList,
   MultiSelectRoot,
   MultiSelectRow,
@@ -12,7 +14,7 @@ import {
   MultiSelectTrigger,
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
-import type { SelectOption } from '../../types';
+import type { SelectGroup, SelectOption } from '../../types';
 
 export interface MultiSelectProps {
   label?: string;
@@ -20,6 +22,7 @@ export interface MultiSelectProps {
   error?: string;
   placeholder?: string;
   options: SelectOption[];
+  groups?: SelectGroup[];
   value?: string[];
   onChange?: (values: string[]) => void;
   onBlur?: () => void;
@@ -43,6 +46,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       error,
       placeholder = 'Select options',
       options,
+      groups,
       value: controlledValue,
       onChange,
       onBlur,
@@ -133,6 +137,72 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       [selectedValues, optionMap],
     );
 
+    // O(n + g) grouping — one pass over groups, one pass over options
+    const grouped = React.useMemo(() => {
+      if (!groups || groups.length === 0) return null;
+
+      const buckets = new Map<string | number, SelectOption[]>();
+      for (const g of groups) {
+        buckets.set(g.id, []);
+      }
+
+      const ungrouped: SelectOption[] = [];
+      for (const option of filteredOptions) {
+        const bucket = option.groupId != null ? buckets.get(option.groupId) : undefined;
+        if (bucket) {
+          bucket.push(option);
+        } else {
+          ungrouped.push(option);
+        }
+      }
+
+      const entries: Array<{ name: string; options: SelectOption[] }> = [];
+      for (const g of groups) {
+        const bucket = buckets.get(g.id)!;
+        if (bucket.length > 0) {
+          entries.push({ name: g.name, options: bucket });
+        }
+      }
+
+      return { ungrouped, entries };
+    }, [filteredOptions, groups]);
+
+    // Renders a single option row
+    function renderRow(option: SelectOption) {
+      return (
+        <MultiSelectRow
+          key={option.value}
+          name={option.label}
+          checked={selectedSet.has(option.value)}
+          onToggle={() => toggleOption(option.value)}
+          disabled={option.disabled}
+        />
+      );
+    }
+
+    // Renders the option list content (flat or grouped)
+    function renderOptions() {
+      if (filteredOptions.length === 0) {
+        return <MultiSelectEmpty />;
+      }
+
+      if (!grouped) {
+        return filteredOptions.map(renderRow);
+      }
+
+      return (
+        <>
+          {grouped.ungrouped.map(renderRow)}
+          {grouped.entries.map((entry) => (
+            <MultiSelectGroup key={entry.name}>
+              <MultiSelectGroupLabel>{entry.name}</MultiSelectGroupLabel>
+              {entry.options.map(renderRow)}
+            </MultiSelectGroup>
+          ))}
+        </>
+      );
+    }
+
     // Renders badge chips, count summary, or placeholder inside the trigger
     const renderTriggerContent = React.useCallback(() => {
       if (selectedOptions.length === 0) {
@@ -191,23 +261,9 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
               <MultiSelectSearch value={searchQuery} onValueChange={setSearchQuery} placeholder={searchPlaceholder} />
             )}
 
-            <MultiSelectActions onSelectAll={selectAll} onClear={clearAll} disabled={disabled} />
+            <MultiSelectList id={listboxId}>{renderOptions()}</MultiSelectList>
 
-            <MultiSelectList id={listboxId}>
-              {filteredOptions.length === 0 ? (
-                <MultiSelectEmpty />
-              ) : (
-                filteredOptions.map((option) => (
-                  <MultiSelectRow
-                    key={option.value}
-                    name={option.label}
-                    checked={selectedSet.has(option.value)}
-                    onToggle={() => toggleOption(option.value)}
-                    disabled={option.disabled}
-                  />
-                ))
-              )}
-            </MultiSelectList>
+            <MultiSelectActions onSelectAll={selectAll} onClear={clearAll} disabled={disabled} />
           </MultiSelectContent>
         </MultiSelectRoot>
 

@@ -114,7 +114,7 @@ function MultiSelectActions({ onSelectAll, onClear, disabled, className }: Multi
   return (
     <div
       data-slot="multi-select-actions"
-      className={cn('flex items-center justify-between border-b px-3 py-1.5', className)}
+      className={cn('flex items-center justify-between border-t px-3 py-1.5', className)}
     >
       <button
         type="button"
@@ -214,6 +214,36 @@ const MultiSelectRow = React.memo(function MultiSelectRow({
   );
 });
 
+// MultiSelectGroup — wraps a group of rows with a role="group" container
+interface MultiSelectGroupProps extends React.ComponentProps<'div'> {
+  className?: string;
+}
+
+function MultiSelectGroup({ className, children, ...props }: MultiSelectGroupProps) {
+  return (
+    <div data-slot="multi-select-group" role="group" className={cn('', className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+// MultiSelectGroupLabel — styled label for a group header
+interface MultiSelectGroupLabelProps extends React.ComponentProps<'div'> {
+  className?: string;
+}
+
+function MultiSelectGroupLabel({ className, children, ...props }: MultiSelectGroupLabelProps) {
+  return (
+    <div
+      data-slot="multi-select-group-label"
+      className={cn('text-muted-foreground px-2 py-1.5 text-xs', className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
 // MultiSelectEmpty — displayed when no options match a search filter
 interface MultiSelectEmptyProps {
   children?: React.ReactNode;
@@ -235,6 +265,8 @@ export {
   MultiSelectActions,
   MultiSelectContent,
   MultiSelectEmpty,
+  MultiSelectGroup,
+  MultiSelectGroupLabel,
   MultiSelectList,
   MultiSelectRoot,
   MultiSelectRow,
@@ -246,6 +278,8 @@ export type {
   MultiSelectActionsProps,
   MultiSelectContentProps,
   MultiSelectEmptyProps,
+  MultiSelectGroupLabelProps,
+  MultiSelectGroupProps,
   MultiSelectListProps,
   MultiSelectRootProps,
   MultiSelectRowProps,
