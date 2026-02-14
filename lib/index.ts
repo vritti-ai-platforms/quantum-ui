@@ -3,16 +3,8 @@ import './index.css';
 
 // Utilities
 export { cn } from '../shadcn/utils';
-
-// Hooks
-export * from './hooks';
-
-// Context
-export * from './context';
-
 // Components
 export * from './components';
-
 // Configuration
 export {
   type AuthConfig,
@@ -24,6 +16,10 @@ export {
   type QuantumUIConfig,
   resetConfig,
 } from './config';
+// Context
+export * from './context';
+// Hooks
+export * from './hooks';
 
 // Axios with token management and CSRF support
 export {

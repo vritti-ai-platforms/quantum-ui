@@ -9,8 +9,8 @@ import {
   type UseFormReturn,
 } from 'react-hook-form';
 import { cn } from '../../../shadcn/utils';
-import { Alert } from '../Alert';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
+import { Alert } from '../Alert';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 import { Switch } from '../Switch';

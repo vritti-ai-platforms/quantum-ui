@@ -1,7 +1,7 @@
 export {
   ThemeContext,
-  ThemeProvider,
   type ThemeContextValue,
   type ThemeMode,
+  ThemeProvider,
   type ThemeProviderProps,
 } from './ThemeContext';

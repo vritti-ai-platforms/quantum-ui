@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, type ReactNode, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 
 /**
  * Theme mode type - either 'light' or 'dark'
@@ -108,14 +101,8 @@ function getInitialTheme(storageKey: string, defaultTheme?: ThemeMode): ThemeMod
  * </ThemeProvider>
  * ```
  */
-export function ThemeProvider({
-  children,
-  defaultTheme,
-  storageKey = THEME_STORAGE_KEY,
-}: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<ThemeMode>(() =>
-    getInitialTheme(storageKey, defaultTheme)
-  );
+export function ThemeProvider({ children, defaultTheme, storageKey = THEME_STORAGE_KEY }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<ThemeMode>(() => getInitialTheme(storageKey, defaultTheme));
 
   // Apply theme to document on initial mount and when theme changes
   useLayoutEffect(() => {
@@ -142,7 +129,7 @@ export function ThemeProvider({
       toggleTheme,
       setTheme,
     }),
-    [theme, toggleTheme, setTheme]
+    [theme, toggleTheme, setTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -29,12 +29,12 @@ export interface FieldError {
  * Supports RFC 9457 Problem Details format
  */
 export interface ApiErrorResponse {
-  type?: string;       // RFC 9457: URI reference identifying the problem type
-  title?: string;      // RFC 9457: Short human-readable summary
-  status?: number;     // RFC 9457: HTTP status code
-  label?: string;      // Root error heading displayed to the user
-  detail?: string;     // RFC 9457: Human-readable explanation
-  instance?: string;   // RFC 9457: URI reference for the specific occurrence
+  type?: string; // RFC 9457: URI reference identifying the problem type
+  title?: string; // RFC 9457: Short human-readable summary
+  status?: number; // RFC 9457: HTTP status code
+  label?: string; // Root error heading displayed to the user
+  detail?: string; // RFC 9457: Human-readable explanation
+  instance?: string; // RFC 9457: URI reference for the specific occurrence
   errors?: FieldError[];
 }
 

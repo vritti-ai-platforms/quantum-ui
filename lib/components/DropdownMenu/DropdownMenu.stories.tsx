@@ -18,11 +18,10 @@ import {
   Users,
 } from 'lucide-react';
 import * as React from 'react';
-import { Button } from '../Button';
 import { Avatar, AvatarFallback, AvatarImage } from '../Avatar';
+import { Button } from '../Button';
 import {
   DropdownMenu,
-  DropdownMenuRoot,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -31,6 +30,7 @@ import {
   DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuRoot,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuSub,

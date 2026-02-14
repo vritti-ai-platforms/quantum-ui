@@ -61,7 +61,7 @@ export function useTheme(): UseThemeReturn {
   if (!context) {
     throw new Error(
       'useTheme must be used within a ThemeProvider. ' +
-        'Wrap your application with <ThemeProvider> to use the useTheme hook.'
+        'Wrap your application with <ThemeProvider> to use the useTheme hook.',
     );
   }
 

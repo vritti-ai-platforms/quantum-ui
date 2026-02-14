@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  DropdownMenu as ShadcnDropdownMenuRoot,
   DropdownMenuCheckboxItem as ShadcnDropdownMenuCheckboxItem,
   DropdownMenuContent as ShadcnDropdownMenuContent,
   DropdownMenuGroup as ShadcnDropdownMenuGroup,
@@ -9,6 +8,7 @@ import {
   DropdownMenuPortal as ShadcnDropdownMenuPortal,
   DropdownMenuRadioGroup as ShadcnDropdownMenuRadioGroup,
   DropdownMenuRadioItem as ShadcnDropdownMenuRadioItem,
+  DropdownMenu as ShadcnDropdownMenuRoot,
   DropdownMenuSeparator as ShadcnDropdownMenuSeparator,
   DropdownMenuShortcut as ShadcnDropdownMenuShortcut,
   DropdownMenuSub as ShadcnDropdownMenuSub,

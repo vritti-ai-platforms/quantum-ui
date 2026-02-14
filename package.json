@@ -88,13 +88,9 @@
       "types": "./dist/lib/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"
     },
-    "./SelectField": {
-      "types": "./dist/lib/components/SelectField/index.d.ts",
-      "import": "./dist/components/SelectField.js"
-    },
-    "./SingleSelect": {
-      "types": "./dist/lib/components/SingleSelect/index.d.ts",
-      "import": "./dist/components/SingleSelect.js"
+    "./Select": {
+      "types": "./dist/lib/components/Select/index.d.ts",
+      "import": "./dist/components/Select.js"
     },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
