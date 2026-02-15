@@ -4,10 +4,16 @@ export { Select } from './Select';
 export type { SingleSelectProps } from './components/SingleSelect/SingleSelect';
 export { SingleSelect } from './components/SingleSelect/SingleSelect';
 
+export type { SingleSelectFilterProps } from './components/SingleSelect/SingleSelectFilter';
+export { SingleSelectFilter } from './components/SingleSelect/SingleSelectFilter';
+
 export type { MultiSelectProps } from './components/MultiSelect/MultiSelect';
 export { MultiSelect } from './components/MultiSelect/MultiSelect';
 
-export type { SelectGroup, SelectOption } from './types';
+export type { MultiSelectFilterProps } from './components/MultiSelect/MultiSelectFilter';
+export { MultiSelectFilter } from './components/MultiSelect/MultiSelectFilter';
+
+export type { SelectGroup, SelectOption, SelectVariant } from './types';
 
 // Compound primitives for custom multi-select layouts
 import {

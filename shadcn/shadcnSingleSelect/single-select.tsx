@@ -206,7 +206,7 @@ interface SingleSelectGroupProps extends React.ComponentProps<'div'> {
 
 function SingleSelectGroup({ className, children, ...props }: SingleSelectGroupProps) {
   return (
-    <div data-slot="single-select-group" role="group" className={cn('', className)} {...props}>
+    <div data-slot="single-select-group" role="group" className={cn(className)} {...props}>
       {children}
     </div>
   );

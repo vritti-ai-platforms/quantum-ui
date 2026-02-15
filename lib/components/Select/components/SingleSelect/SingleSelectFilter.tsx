@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from 'lucide-react';
 import * as React from 'react';
 import {
   SingleSelectClear,
@@ -9,17 +10,14 @@ import {
   SingleSelectRoot,
   SingleSelectRow,
   SingleSelectSearch,
-  SingleSelectTrigger,
 } from '../../../../../shadcn/shadcnSingleSelect';
+import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../../shadcn/utils';
-import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
 import type { SelectGroup, SelectOption } from '../../types';
 import { useSingleSelectState } from './useSingleSelectState';
 
-export interface SingleSelectProps {
+export interface SingleSelectFilterProps {
   label?: string;
-  description?: React.ReactNode;
-  error?: string;
   placeholder?: string;
   options: SelectOption[];
   groups?: SelectGroup[];
@@ -32,19 +30,15 @@ export interface SingleSelectProps {
   className?: string;
   id?: string;
   defaultValue?: string;
-  searchable?: boolean;
   searchPlaceholder?: string;
-  clearable?: boolean;
 }
 
-// Single-value form field wrapper built on Popover primitives
-export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProps>(
+// Compact single-select filter trigger with inline label display
+export const SingleSelectFilter = React.forwardRef<HTMLButtonElement, SingleSelectFilterProps>(
   (
     {
       label,
-      description,
-      error,
-      placeholder = 'Select an option',
+      placeholder,
       options,
       groups,
       value: controlledValue,
@@ -56,9 +50,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       className,
       id,
       defaultValue,
-      searchable = false,
       searchPlaceholder = 'Search...',
-      clearable = false,
     },
     ref,
   ) => {
@@ -112,49 +104,51 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       );
     }
 
+    const triggerText = selectedOption
+      ? `${label} = ${selectedOption.label}`
+      : (label ?? placeholder);
+
     return (
-      <Field>
-        {label && <FieldLabel>{label}</FieldLabel>}
-
+      <>
         <SingleSelectRoot open={open} onOpenChange={setOpen} disabled={disabled}>
-          <SingleSelectTrigger
-            ref={ref}
-            id={id}
-            open={open}
-            listboxId={listboxId}
-            aria-invalid={!!error}
-            aria-required={required}
-            disabled={disabled}
-            onBlur={onBlur}
-            className={cn('w-full', className)}
-          >
-            <span className="flex flex-1 items-center overflow-hidden">
-              {selectedOption ? (
-                <span className="truncate">{selectedOption.label}</span>
-              ) : (
-                <span className="text-muted-foreground">{placeholder}</span>
+          <PopoverTrigger asChild>
+            <button
+              ref={ref}
+              id={id}
+              type="button"
+              role="combobox"
+              aria-expanded={open}
+              aria-haspopup="listbox"
+              aria-controls={listboxId}
+              aria-required={required}
+              disabled={disabled}
+              onBlur={onBlur}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                selectedOption
+                  ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                  : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+                className,
               )}
-            </span>
-          </SingleSelectTrigger>
+            >
+              <span className="truncate">{triggerText}</span>
+              <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
+            </button>
+          </PopoverTrigger>
 
-          <SingleSelectContent>
-            {searchable && (
-              <SingleSelectSearch value={searchQuery} onValueChange={setSearchQuery} placeholder={searchPlaceholder} />
-            )}
+          <SingleSelectContent className="w-[250px]">
+            <SingleSelectSearch value={searchQuery} onValueChange={setSearchQuery} placeholder={searchPlaceholder} />
 
             <SingleSelectList id={listboxId}>{renderOptions()}</SingleSelectList>
 
-            {clearable && <SingleSelectClear onClear={clearSelection} disabled={!selectedValue} />}
+            <SingleSelectClear onClear={clearSelection} disabled={!selectedValue} />
           </SingleSelectContent>
         </SingleSelectRoot>
 
         {name && selectedValue && <input type="hidden" name={name} value={selectedValue} />}
-
-        {description && !error && <FieldDescription>{description}</FieldDescription>}
-        {error && <FieldError>{error}</FieldError>}
-      </Field>
+      </>
     );
   },
 );
 
-SingleSelect.displayName = 'SingleSelect';
+SingleSelectFilter.displayName = 'SingleSelectFilter';

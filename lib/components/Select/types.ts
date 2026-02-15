@@ -9,3 +9,5 @@ export interface SelectGroup {
   id: string | number;
   name: string;
 }
+
+export type SelectVariant = 'default' | 'filter';

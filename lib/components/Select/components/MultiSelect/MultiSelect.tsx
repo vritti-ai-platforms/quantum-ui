@@ -15,6 +15,7 @@ import {
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
 import type { SelectGroup, SelectOption } from '../../types';
+import { useMultiSelectState } from './useMultiSelectState';
 
 export interface MultiSelectProps {
   label?: string;
@@ -62,110 +63,21 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     },
     ref,
   ) => {
-    const isControlled = controlledValue !== undefined;
-    const [internalValue, setInternalValue] = React.useState<string[]>(defaultValue ?? []);
-    const selectedValues = isControlled ? controlledValue : internalValue;
-    const selectedSet = React.useMemo(() => new Set(selectedValues), [selectedValues]);
-
-    // Ref to latest selectedValues so toggleOption stays reference-stable
-    const selectedValuesRef = React.useRef(selectedValues);
-    selectedValuesRef.current = selectedValues;
-
-    const [open, setOpen] = React.useState(false);
-    const [searchQuery, setSearchQuery] = React.useState('');
-    const listboxId = React.useId();
-
-    const optionMap = React.useMemo(() => {
-      const map = new Map<string, SelectOption>();
-      for (const option of options) {
-        map.set(option.value, option);
-      }
-      return map;
-    }, [options]);
-
-    const filteredOptions = React.useMemo(() => {
-      if (!searchQuery) return options;
-      const lower = searchQuery.toLowerCase();
-      return options.filter((option) => option.label.toLowerCase().includes(lower));
-    }, [options, searchQuery]);
-
-    const updateSelection = React.useCallback(
-      (nextValues: string[]) => {
-        if (!isControlled) {
-          setInternalValue(nextValues);
-        }
-        onChange?.(nextValues);
-      },
-      [isControlled, onChange],
-    );
-
-    const toggleOption = React.useCallback(
-      (optionValue: string) => {
-        const option = optionMap.get(optionValue);
-        if (option?.disabled) return;
-        const current = selectedValuesRef.current;
-        const nextValues = current.includes(optionValue)
-          ? current.filter((v) => v !== optionValue)
-          : [...current, optionValue];
-        updateSelection(nextValues);
-      },
-      [optionMap, updateSelection],
-    );
-
-    // Preserve already-selected disabled options when selecting all
-    const selectAll = React.useCallback(() => {
-      const enabledValues = options.filter((o) => !o.disabled).map((o) => o.value);
-      const currentDisabledValues = selectedValuesRef.current.filter((v) => optionMap.get(v)?.disabled);
-      updateSelection([...new Set([...currentDisabledValues, ...enabledValues])]);
-    }, [options, optionMap, updateSelection]);
-
-    // Retain disabled options that are currently selected when clearing
-    const clearAll = React.useCallback(() => {
-      const currentDisabledValues = selectedValuesRef.current.filter((v) => optionMap.get(v)?.disabled);
-      updateSelection(currentDisabledValues);
-    }, [optionMap, updateSelection]);
-
-    // Reset search when popover closes
-    React.useEffect(() => {
-      if (!open) {
-        setSearchQuery('');
-      }
-    }, [open]);
-
-    const selectedOptions = React.useMemo(
-      () => selectedValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[],
-      [selectedValues, optionMap],
-    );
-
-    // O(n + g) grouping — one pass over groups, one pass over options
-    const grouped = React.useMemo(() => {
-      if (!groups || groups.length === 0) return null;
-
-      const buckets = new Map<string | number, SelectOption[]>();
-      for (const g of groups) {
-        buckets.set(g.id, []);
-      }
-
-      const ungrouped: SelectOption[] = [];
-      for (const option of filteredOptions) {
-        const bucket = option.groupId != null ? buckets.get(option.groupId) : undefined;
-        if (bucket) {
-          bucket.push(option);
-        } else {
-          ungrouped.push(option);
-        }
-      }
-
-      const entries: Array<{ name: string; options: SelectOption[] }> = [];
-      for (const g of groups) {
-        const bucket = buckets.get(g.id)!;
-        if (bucket.length > 0) {
-          entries.push({ name: g.name, options: bucket });
-        }
-      }
-
-      return { ungrouped, entries };
-    }, [filteredOptions, groups]);
+    const {
+      selectedValues,
+      selectedSet,
+      selectedOptions,
+      open,
+      setOpen,
+      searchQuery,
+      setSearchQuery,
+      listboxId,
+      filteredOptions,
+      grouped,
+      toggleOption,
+      selectAll,
+      clearAll,
+    } = useMultiSelectState({ options, groups, value: controlledValue, onChange, defaultValue });
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
@@ -204,7 +116,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     }
 
     // Renders badge chips, count summary, or placeholder inside the trigger
-    const renderTriggerContent = React.useCallback(() => {
+    function renderTriggerContent() {
       if (selectedOptions.length === 0) {
         return <span className="text-muted-foreground">{placeholder}</span>;
       }
@@ -222,7 +134,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                 type="button"
                 aria-label={`Remove ${option.label}`}
                 className="rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                // Prevent mousedown from shifting focus away from the popover trigger
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -235,7 +146,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
           ))}
         </span>
       );
-    }, [selectedOptions, placeholder, maxDisplayedItems, toggleOption]);
+    }
 
     return (
       <Field>

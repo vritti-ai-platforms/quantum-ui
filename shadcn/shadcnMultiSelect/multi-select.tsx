@@ -221,7 +221,7 @@ interface MultiSelectGroupProps extends React.ComponentProps<'div'> {
 
 function MultiSelectGroup({ className, children, ...props }: MultiSelectGroupProps) {
   return (
-    <div data-slot="multi-select-group" role="group" className={cn('', className)} {...props}>
+    <div data-slot="multi-select-group" role="group" className={cn(className)} {...props}>
       {children}
     </div>
   );

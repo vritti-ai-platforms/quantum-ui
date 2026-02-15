@@ -67,6 +67,8 @@ export const App = () => {
   const [groupedCountry, setGroupedCountry] = useState<string | undefined>(undefined);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedGroupedSkills, setSelectedGroupedSkills] = useState<string[]>([]);
+  const [filterCountry, setFilterCountry] = useState<string | undefined>(undefined);
+  const [filterSkills, setFilterSkills] = useState<string[]>([]);
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-8 p-8">
@@ -152,6 +154,26 @@ export const App = () => {
         searchable
       />
 
+      {/* Filter variants */}
+      <h2 className="text-lg font-semibold">Filter Variants</h2>
+      <div className="flex flex-wrap gap-2">
+        <Select
+          type="filter"
+          label="Country"
+          options={countries}
+          value={filterCountry}
+          onChange={setFilterCountry}
+        />
+        <Select
+          multiple
+          type="filter"
+          label="Skills"
+          options={skills}
+          value={filterSkills}
+          onChange={setFilterSkills}
+        />
+      </div>
+
       {/* Multi Select with error */}
       <Select
         multiple
@@ -182,6 +204,13 @@ export const App = () => {
         <p>
           <strong>Grouped Skills:</strong>{' '}
           {selectedGroupedSkills.length > 0 ? selectedGroupedSkills.join(', ') : '(none)'}
+        </p>
+        <p>
+          <strong>Filter Country:</strong> {filterCountry || '(none)'}
+        </p>
+        <p>
+          <strong>Filter Skills:</strong>{' '}
+          {filterSkills.length > 0 ? filterSkills.join(', ') : '(none)'}
         </p>
       </div>
     </div>
