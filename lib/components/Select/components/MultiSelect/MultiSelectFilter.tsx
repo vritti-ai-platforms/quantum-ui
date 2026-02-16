@@ -13,8 +13,8 @@ import {
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../../shadcn/utils';
+import { useMultiSelect } from '../../hooks/useMultiSelect';
 import type { SelectGroup, SelectOption } from '../../types';
-import { useMultiSelectState } from './useMultiSelectState';
 
 export interface MultiSelectFilterProps {
   label?: string;
@@ -67,7 +67,7 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
       toggleOption,
       selectAll,
       clearAll,
-    } = useMultiSelectState({ options, groups, value: controlledValue, onChange, defaultValue });
+    } = useMultiSelect({ options, groups, value: controlledValue, onChange, defaultValue });
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
@@ -107,9 +107,7 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
 
     const hasValues = selectedValues.length > 0;
 
-    const triggerText = hasValues
-      ? `${label} = ${selectedValues.length} selected`
-      : (label ?? placeholder);
+    const triggerText = hasValues ? `${label} = ${selectedValues.length} selected` : (label ?? placeholder);
 
     return (
       <>

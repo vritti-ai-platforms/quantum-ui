@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { SelectGroup, SelectOption } from '../../types';
+import type { SelectGroup, SelectOption } from '../types';
 
 interface UseMultiSelectStateProps {
   options: SelectOption[];
@@ -10,7 +10,7 @@ interface UseMultiSelectStateProps {
 }
 
 // Manages controlled/uncontrolled multi-select state, search filtering, and grouping
-export function useMultiSelectState({
+export function useMultiSelect({
   options,
   groups,
   value: controlledValue,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
-import type { SelectGroup, SelectOption } from '../../types';
+import type { SelectGroup, SelectOption } from '../types';
 
 interface UseSingleSelectStateProps {
   options: SelectOption[];
@@ -11,7 +11,7 @@ interface UseSingleSelectStateProps {
 
 // Manages controlled/uncontrolled single-select state, search filtering, and grouping
 // No ref needed here — selectOption receives the value as an argument rather than reading current state
-export function useSingleSelectState({
+export function useSingleSelect({
   options,
   groups,
   value: controlledValue,

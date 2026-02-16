@@ -1,5 +1,6 @@
 import { ChevronDownIcon } from 'lucide-react';
 import * as React from 'react';
+import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
 import {
   SingleSelectClear,
   SingleSelectContent,
@@ -11,10 +12,9 @@ import {
   SingleSelectRow,
   SingleSelectSearch,
 } from '../../../../../shadcn/shadcnSingleSelect';
-import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../../shadcn/utils';
+import { useSingleSelect } from '../../hooks/useSingleSelect';
 import type { SelectGroup, SelectOption } from '../../types';
-import { useSingleSelectState } from './useSingleSelectState';
 
 export interface SingleSelectFilterProps {
   label?: string;
@@ -66,7 +66,7 @@ export const SingleSelectFilter = React.forwardRef<HTMLButtonElement, SingleSele
       grouped,
       selectOption,
       clearSelection,
-    } = useSingleSelectState({ options, groups, value: controlledValue, onChange, defaultValue });
+    } = useSingleSelect({ options, groups, value: controlledValue, onChange, defaultValue });
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
@@ -104,9 +104,7 @@ export const SingleSelectFilter = React.forwardRef<HTMLButtonElement, SingleSele
       );
     }
 
-    const triggerText = selectedOption
-      ? `${label} = ${selectedOption.label}`
-      : (label ?? placeholder);
+    const triggerText = selectedOption ? `${label} = ${selectedOption.label}` : (label ?? placeholder);
 
     return (
       <>

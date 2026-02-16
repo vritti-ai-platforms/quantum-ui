@@ -13,8 +13,8 @@ import {
 } from '../../../../../shadcn/shadcnSingleSelect';
 import { cn } from '../../../../../shadcn/utils';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
+import { useSingleSelect } from '../../hooks/useSingleSelect';
 import type { SelectGroup, SelectOption } from '../../types';
-import { useSingleSelectState } from './useSingleSelectState';
 
 export interface SingleSelectProps {
   label?: string;
@@ -74,7 +74,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       grouped,
       selectOption,
       clearSelection,
-    } = useSingleSelectState({ options, groups, value: controlledValue, onChange, defaultValue });
+    } = useSingleSelect({ options, groups, value: controlledValue, onChange, defaultValue });
 
     // Renders a single option row
     function renderRow(option: SelectOption) {

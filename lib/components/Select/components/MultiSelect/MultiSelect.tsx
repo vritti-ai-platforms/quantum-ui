@@ -14,8 +14,8 @@ import {
   MultiSelectTrigger,
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
+import { useMultiSelect } from '../../hooks/useMultiSelect';
 import type { SelectGroup, SelectOption } from '../../types';
-import { useMultiSelectState } from './useMultiSelectState';
 
 export interface MultiSelectProps {
   label?: string;
@@ -77,7 +77,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       toggleOption,
       selectAll,
       clearAll,
-    } = useMultiSelectState({ options, groups, value: controlledValue, onChange, defaultValue });
+    } = useMultiSelect({ options, groups, value: controlledValue, onChange, defaultValue });
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
