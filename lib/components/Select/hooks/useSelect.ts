@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { axios } from '../../../utils/axios';
@@ -27,6 +27,12 @@ export interface UseSelectReturn {
 }
 
 const NOOP_REF = () => {};
+
+// Stable JSON serialization for query keys (order-independent)
+function stableStringify(obj: object | undefined): string {
+  if (!obj) return '';
+  return JSON.stringify(obj, Object.keys(obj).sort());
+}
 
 // Manages async option fetching with debounced search, sentinel-based infinite scroll, and selected value resolution
 export function useSelect({
@@ -57,19 +63,29 @@ export function useSelect({
     };
   }, [searchQuery, searchDebounceMs, isAsync]);
 
+  // Serialize selected values to a comma-separated string of IDs (filters out booleans)
+  const serializedValues = useMemo(
+    () =>
+      selectedValues && selectedValues.length > 0
+        ? selectedValues.filter((v): v is string | number => typeof v !== 'boolean').join(',')
+        : undefined,
+    [selectedValues],
+  );
+
   // Query 1: Resolve selected values to full option objects
   const { data: resolvedSelected } = useQuery({
     queryKey: ['select-resolve', instanceId, optionsEndpoint, JSON.stringify(selectedValues)],
     queryFn: () =>
       axios
         .get<SelectOptionsResponse>(optionsEndpoint ?? '', {
-          params: { values: selectedValues?.join(','), ...fieldKeys, ...params },
+          params: { values: serializedValues, ...fieldKeys, ...params },
           showSuccessToast: false,
           showErrorToast: false,
         })
         .then((r) => r.data),
     enabled: isAsync && (selectedValues?.length ?? 0) > 0,
     staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
   });
 
   // Query 2: Paginated search results, excluding selected IDs
@@ -79,8 +95,8 @@ export function useSelect({
       instanceId,
       optionsEndpoint,
       debouncedSearch,
-      JSON.stringify(fieldKeys),
-      JSON.stringify(params),
+      stableStringify(fieldKeys),
+      stableStringify(params),
     ],
     queryFn: ({ pageParam = 0 }) =>
       axios
@@ -89,7 +105,7 @@ export function useSelect({
             search: debouncedSearch || undefined,
             limit,
             offset: pageParam,
-            excludeIds: selectedValues?.join(',') || undefined,
+            excludeIds: serializedValues,
             ...fieldKeys,
             ...params,
           },
@@ -101,6 +117,7 @@ export function useSelect({
       lastPage.hasMore ? lastPageParam + limit : undefined,
     initialPageParam: 0,
     enabled: isAsync,
+    placeholderData: keepPreviousData,
   });
 
   // Merge: resolved selected first, then search results (Set-based dedup)
