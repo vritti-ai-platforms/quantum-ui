@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Select } from '../lib/components/Select';
+import { Select, type SelectValue } from '../lib/components/Select';
 
 const countries = [
   { value: 'us', label: 'United States' },
@@ -61,14 +61,14 @@ const groupedSkills = [
 ];
 
 export const App = () => {
-  const [country, setCountry] = useState<string | undefined>(undefined);
-  const [searchableCountry, setSearchableCountry] = useState<string | undefined>(undefined);
-  const [clearableCountry, setClearableCountry] = useState<string | undefined>(undefined);
-  const [groupedCountry, setGroupedCountry] = useState<string | undefined>(undefined);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [selectedGroupedSkills, setSelectedGroupedSkills] = useState<string[]>([]);
-  const [filterCountry, setFilterCountry] = useState<string | undefined>(undefined);
-  const [filterSkills, setFilterSkills] = useState<string[]>([]);
+  const [country, setCountry] = useState<SelectValue | undefined>(undefined);
+  const [searchableCountry, setSearchableCountry] = useState<SelectValue | undefined>(undefined);
+  const [clearableCountry, setClearableCountry] = useState<SelectValue | undefined>(undefined);
+  const [groupedCountry, setGroupedCountry] = useState<SelectValue | undefined>(undefined);
+  const [selectedSkills, setSelectedSkills] = useState<SelectValue[]>([]);
+  const [selectedGroupedSkills, setSelectedGroupedSkills] = useState<SelectValue[]>([]);
+  const [filterCountry, setFilterCountry] = useState<SelectValue | undefined>(undefined);
+  const [filterSkills, setFilterSkills] = useState<SelectValue[]>([]);
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-8 p-8">
@@ -157,13 +157,7 @@ export const App = () => {
       {/* Filter variants */}
       <h2 className="text-lg font-semibold">Filter Variants</h2>
       <div className="flex flex-wrap gap-2">
-        <Select
-          type="filter"
-          label="Country"
-          options={countries}
-          value={filterCountry}
-          onChange={setFilterCountry}
-        />
+        <Select type="filter" label="Country" options={countries} value={filterCountry} onChange={setFilterCountry} />
         <Select
           multiple
           type="filter"
@@ -182,6 +176,22 @@ export const App = () => {
         options={skills}
         error="Please select at least one skill"
         required
+      />
+
+      {/* Async Select — requires backend endpoint */}
+      <h2 className="text-lg font-semibold">Async Select (requires API)</h2>
+      <Select
+        label="Country (Async)"
+        placeholder="Search countries..."
+        optionsEndpoint="/cloud-api/countries/options"
+        limit={20}
+      />
+      <Select
+        multiple
+        label="Countries (Async Multi)"
+        placeholder="Search countries..."
+        optionsEndpoint="/cloud-api/countries/options"
+        limit={20}
       />
 
       {/* Debug output */}
@@ -209,8 +219,7 @@ export const App = () => {
           <strong>Filter Country:</strong> {filterCountry || '(none)'}
         </p>
         <p>
-          <strong>Filter Skills:</strong>{' '}
-          {filterSkills.length > 0 ? filterSkills.join(', ') : '(none)'}
+          <strong>Filter Skills:</strong> {filterSkills.length > 0 ? filterSkills.join(', ') : '(none)'}
         </p>
       </div>
     </div>

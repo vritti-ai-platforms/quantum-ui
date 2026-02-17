@@ -1,4 +1,4 @@
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import {
   MultiSelectActions,
@@ -14,23 +14,24 @@ import {
 import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../../shadcn/utils';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
-import type { SelectGroup, SelectOption } from '../../types';
+import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
 export interface MultiSelectFilterProps {
   label?: string;
   placeholder?: string;
-  options: SelectOption[];
+  options?: SelectOption[];
   groups?: SelectGroup[];
-  value?: string[];
-  onChange?: (values: string[]) => void;
+  value?: SelectValue[];
+  onChange?: (values: SelectValue[]) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
   id?: string;
-  defaultValue?: string[];
+  defaultValue?: SelectValue[];
   searchPlaceholder?: string;
+  asyncState?: AsyncSelectState;
 }
 
 // Compact multi-select filter trigger with count-based label display
@@ -51,32 +52,33 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
       id,
       defaultValue,
       searchPlaceholder = 'Search...',
+      asyncState,
     },
     ref,
   ) => {
-    const {
-      selectedValues,
-      selectedSet,
-      open,
-      setOpen,
-      searchQuery,
-      setSearchQuery,
-      listboxId,
-      filteredOptions,
-      grouped,
-      toggleOption,
-      selectAll,
-      clearAll,
-    } = useMultiSelect({ options, groups, value: controlledValue, onChange, defaultValue });
+    const state = useMultiSelect({
+      options: options ?? [],
+      groups,
+      value: controlledValue,
+      onChange,
+      defaultValue,
+      remoteSearch: !!asyncState,
+    });
+
+    // Resolve search binding -- async delegates to parent, filter always shows search
+    const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
+    const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
       return (
         <MultiSelectRow
-          key={option.value}
+          key={String(option.value)}
           name={option.label}
-          checked={selectedSet.has(option.value)}
-          onToggle={() => toggleOption(option.value)}
+          checked={state.selectedSet.has(option.value)}
+          onToggle={() => {
+            state.toggleOption(option.value);
+          }}
           disabled={option.disabled}
         />
       );
@@ -84,18 +86,27 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
 
     // Renders the option list content (flat or grouped)
     function renderOptions() {
-      if (filteredOptions.length === 0) {
+      if (asyncState?.loading) {
+        return (
+          <div className="flex items-center justify-center gap-2 py-6">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Loading...</span>
+          </div>
+        );
+      }
+
+      if (state.filteredOptions.length === 0) {
         return <MultiSelectEmpty />;
       }
 
-      if (!grouped) {
-        return filteredOptions.map(renderRow);
+      if (!state.grouped) {
+        return state.filteredOptions.map(renderRow);
       }
 
       return (
         <>
-          {grouped.ungrouped.map(renderRow)}
-          {grouped.entries.map((entry) => (
+          {state.grouped.ungrouped.map(renderRow)}
+          {state.grouped.entries.map((entry) => (
             <MultiSelectGroup key={entry.name}>
               <MultiSelectGroupLabel>{entry.name}</MultiSelectGroupLabel>
               {entry.options.map(renderRow)}
@@ -105,22 +116,22 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
       );
     }
 
-    const hasValues = selectedValues.length > 0;
+    const hasValues = state.selectedValues.length > 0;
 
-    const triggerText = hasValues ? `${label} = ${selectedValues.length} selected` : (label ?? placeholder);
+    const triggerText = hasValues ? `${label} = ${state.selectedValues.length} selected` : (label ?? placeholder);
 
     return (
       <>
-        <MultiSelectRoot open={open} onOpenChange={setOpen} disabled={disabled}>
+        <MultiSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
           <PopoverTrigger asChild>
             <button
               ref={ref}
               id={id}
               type="button"
               role="combobox"
-              aria-expanded={open}
+              aria-expanded={state.open}
               aria-haspopup="listbox"
-              aria-controls={listboxId}
+              aria-controls={state.listboxId}
               aria-required={required}
               disabled={disabled}
               onBlur={onBlur}
@@ -138,15 +149,30 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
           </PopoverTrigger>
 
           <MultiSelectContent className="w-[250px]">
-            <MultiSelectSearch value={searchQuery} onValueChange={setSearchQuery} placeholder={searchPlaceholder} />
+            <MultiSelectSearch
+              value={searchValue}
+              onValueChange={setSearchValue}
+              placeholder={searchPlaceholder}
+            />
 
-            <MultiSelectList id={listboxId}>{renderOptions()}</MultiSelectList>
+            <MultiSelectList id={state.listboxId}>
+              {renderOptions()}
+              {asyncState?.hasMore && (
+                <div ref={asyncState.sentinelRef} className="h-1" />
+              )}
+              {asyncState?.loadingMore && (
+                <div className="flex items-center justify-center gap-2 py-2">
+                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Loading more...</span>
+                </div>
+              )}
+            </MultiSelectList>
 
-            <MultiSelectActions onSelectAll={selectAll} onClear={clearAll} disabled={disabled} />
+            <MultiSelectActions onSelectAll={state.selectAll} onClear={state.clearAll} disabled={disabled} />
           </MultiSelectContent>
         </MultiSelectRoot>
 
-        {name && selectedValues.map((v) => <input key={v} type="hidden" name={name} value={v} />)}
+        {name && state.selectedValues.map((v) => <input key={String(v)} type="hidden" name={name} value={String(v)} />)}
       </>
     );
   },

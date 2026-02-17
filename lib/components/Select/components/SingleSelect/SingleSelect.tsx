@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import {
   SingleSelectClear,
@@ -14,27 +15,28 @@ import {
 import { cn } from '../../../../../shadcn/utils';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
 import { useSingleSelect } from '../../hooks/useSingleSelect';
-import type { SelectGroup, SelectOption } from '../../types';
+import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
 export interface SingleSelectProps {
   label?: string;
   description?: React.ReactNode;
   error?: string;
   placeholder?: string;
-  options: SelectOption[];
+  options?: SelectOption[];
   groups?: SelectGroup[];
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: SelectValue;
+  onChange?: (value: SelectValue) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
   id?: string;
-  defaultValue?: string;
+  defaultValue?: SelectValue;
   searchable?: boolean;
   searchPlaceholder?: string;
   clearable?: boolean;
+  asyncState?: AsyncSelectState;
 }
 
 // Single-value form field wrapper built on Popover primitives
@@ -59,31 +61,34 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       searchable = false,
       searchPlaceholder = 'Search...',
       clearable = false,
+      asyncState,
     },
     ref,
   ) => {
-    const {
-      selectedValue,
-      selectedOption,
-      open,
-      setOpen,
-      searchQuery,
-      setSearchQuery,
-      listboxId,
-      filteredOptions,
-      grouped,
-      selectOption,
-      clearSelection,
-    } = useSingleSelect({ options, groups, value: controlledValue, onChange, defaultValue });
+    const state = useSingleSelect({
+      options: options ?? [],
+      groups,
+      value: controlledValue,
+      onChange,
+      defaultValue,
+      remoteSearch: !!asyncState,
+    });
+
+    // Resolve search binding -- async delegates to parent, static uses local state
+    const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
+    const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
+    const showSearch = !!asyncState || searchable;
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
       return (
         <SingleSelectRow
-          key={option.value}
+          key={String(option.value)}
           name={option.label}
-          selected={selectedValue === option.value}
-          onSelect={() => selectOption(option.value)}
+          selected={state.selectedValue === option.value}
+          onSelect={() => {
+            state.selectOption(option.value);
+          }}
           disabled={option.disabled}
         />
       );
@@ -91,18 +96,27 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
 
     // Renders the option list content (flat or grouped)
     function renderOptions() {
-      if (filteredOptions.length === 0) {
+      if (asyncState?.loading) {
+        return (
+          <div className="flex items-center justify-center gap-2 py-6">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Loading...</span>
+          </div>
+        );
+      }
+
+      if (state.filteredOptions.length === 0) {
         return <SingleSelectEmpty />;
       }
 
-      if (!grouped) {
-        return filteredOptions.map(renderRow);
+      if (!state.grouped) {
+        return state.filteredOptions.map(renderRow);
       }
 
       return (
         <>
-          {grouped.ungrouped.map(renderRow)}
-          {grouped.entries.map((entry) => (
+          {state.grouped.ungrouped.map(renderRow)}
+          {state.grouped.entries.map((entry) => (
             <SingleSelectGroup key={entry.name}>
               <SingleSelectGroupLabel>{entry.name}</SingleSelectGroupLabel>
               {entry.options.map(renderRow)}
@@ -116,12 +130,12 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
 
-        <SingleSelectRoot open={open} onOpenChange={setOpen} disabled={disabled}>
+        <SingleSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
           <SingleSelectTrigger
             ref={ref}
             id={id}
-            open={open}
-            listboxId={listboxId}
+            open={state.open}
+            listboxId={state.listboxId}
             aria-invalid={!!error}
             aria-required={required}
             disabled={disabled}
@@ -129,8 +143,8 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
             className={cn('w-full', className)}
           >
             <span className="flex flex-1 items-center overflow-hidden">
-              {selectedOption ? (
-                <span className="truncate">{selectedOption.label}</span>
+              {state.selectedOption ? (
+                <span className="truncate">{state.selectedOption.label}</span>
               ) : (
                 <span className="text-muted-foreground">{placeholder}</span>
               )}
@@ -138,17 +152,32 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
           </SingleSelectTrigger>
 
           <SingleSelectContent>
-            {searchable && (
-              <SingleSelectSearch value={searchQuery} onValueChange={setSearchQuery} placeholder={searchPlaceholder} />
+            {showSearch && (
+              <SingleSelectSearch
+                value={searchValue}
+                onValueChange={setSearchValue}
+                placeholder={searchPlaceholder}
+              />
             )}
 
-            <SingleSelectList id={listboxId}>{renderOptions()}</SingleSelectList>
+            <SingleSelectList id={state.listboxId}>
+              {renderOptions()}
+              {asyncState?.hasMore && (
+                <div ref={asyncState.sentinelRef} className="h-1" />
+              )}
+              {asyncState?.loadingMore && (
+                <div className="flex items-center justify-center gap-2 py-2">
+                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Loading more...</span>
+                </div>
+              )}
+            </SingleSelectList>
 
-            {clearable && <SingleSelectClear onClear={clearSelection} disabled={!selectedValue} />}
+            {clearable && <SingleSelectClear onClear={state.clearSelection} disabled={!state.selectedValue} />}
           </SingleSelectContent>
         </SingleSelectRoot>
 
-        {name && selectedValue && <input type="hidden" name={name} value={selectedValue} />}
+        {name && state.selectedValue && <input type="hidden" name={name} value={String(state.selectedValue)} />}
 
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         {error && <FieldError>{error}</FieldError>}

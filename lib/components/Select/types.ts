@@ -1,5 +1,7 @@
+export type SelectValue = string | number | boolean;
+
 export interface SelectOption {
-  value: string;
+  value: SelectValue;
   label: string;
   disabled?: boolean;
   groupId?: string | number;
@@ -10,4 +12,25 @@ export interface SelectGroup {
   name: string;
 }
 
+export interface SelectOptionsResponse {
+  options: SelectOption[];
+  groups?: SelectGroup[];
+  hasMore: boolean;
+}
+
+export interface AsyncSelectState {
+  loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  sentinelRef: (node?: Element | null) => void;
+}
+
 export type SelectVariant = 'default' | 'filter';
+
+export interface SelectFieldKeys {
+  valueKey?: string;
+  labelKey?: string;
+  groupIdKey?: string;
+}

@@ -73,7 +73,14 @@ export default defineConfig({
           return ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom'].includes(id);
         }
         // Externalize all peer dependencies for other entries
-        return ['react', 'react-dom', 'react/jsx-runtime', 'axios', 'react-router-dom'].includes(id);
+        return [
+          'react',
+          'react-dom',
+          'react/jsx-runtime',
+          'axios',
+          'react-router-dom',
+          '@tanstack/react-query',
+        ].includes(id);
       },
       output: {
         assetFileNames: 'assets/[name][extname]',

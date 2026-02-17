@@ -13,7 +13,10 @@ export { MultiSelect } from './components/MultiSelect/MultiSelect';
 export type { MultiSelectFilterProps } from './components/MultiSelect/MultiSelectFilter';
 export { MultiSelectFilter } from './components/MultiSelect/MultiSelectFilter';
 
-export type { SelectGroup, SelectOption, SelectVariant } from './types';
+export type { AsyncSelectState, SelectFieldKeys, SelectGroup, SelectOption, SelectOptionsResponse, SelectValue, SelectVariant } from './types';
+
+export { useSelect } from './hooks/useSelect';
+export type { UseSelectProps, UseSelectReturn } from './hooks/useSelect';
 
 // Compound primitives for custom multi-select layouts
 import {

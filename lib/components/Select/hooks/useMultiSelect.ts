@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { SelectGroup, SelectOption } from '../types';
+import type { SelectGroup, SelectOption, SelectValue } from '../types';
 
 interface UseMultiSelectStateProps {
   options: SelectOption[];
   groups?: SelectGroup[];
-  value?: string[];
-  onChange?: (values: string[]) => void;
-  defaultValue?: string[];
+  value?: SelectValue[];
+  onChange?: (values: SelectValue[]) => void;
+  defaultValue?: SelectValue[];
+  remoteSearch?: boolean;
 }
 
 // Manages controlled/uncontrolled multi-select state, search filtering, and grouping
@@ -16,11 +17,12 @@ export function useMultiSelect({
   value: controlledValue,
   onChange,
   defaultValue,
+  remoteSearch,
 }: UseMultiSelectStateProps) {
   const isControlled = controlledValue !== undefined;
-  const [internalValue, setInternalValue] = useState<string[]>(defaultValue ?? []);
+  const [internalValue, setInternalValue] = useState<SelectValue[]>(defaultValue ?? []);
   const selectedValues = isControlled ? controlledValue : internalValue;
-  const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
+  const selectedSet = useMemo(() => new Set<SelectValue>(selectedValues), [selectedValues]);
 
   // Ref to latest selectedValues so callbacks stay reference-stable
   const selectedValuesRef = useRef(selectedValues);
@@ -31,7 +33,7 @@ export function useMultiSelect({
   const listboxId = useId();
 
   const optionMap = useMemo(() => {
-    const map = new Map<string, SelectOption>();
+    const map = new Map<SelectValue, SelectOption>();
     for (const option of options) {
       map.set(option.value, option);
     }
@@ -39,13 +41,13 @@ export function useMultiSelect({
   }, [options]);
 
   const filteredOptions = useMemo(() => {
-    if (!searchQuery) return options;
+    if (remoteSearch || !searchQuery) return options;
     const lower = searchQuery.toLowerCase();
     return options.filter((option) => option.label.toLowerCase().includes(lower));
-  }, [options, searchQuery]);
+  }, [options, searchQuery, remoteSearch]);
 
   const updateSelection = useCallback(
-    (nextValues: string[]) => {
+    (nextValues: SelectValue[]) => {
       if (!isControlled) {
         setInternalValue(nextValues);
       }
@@ -56,7 +58,7 @@ export function useMultiSelect({
 
   // Toggle a single option on or off
   const toggleOption = useCallback(
-    (optionValue: string) => {
+    (optionValue: SelectValue) => {
       const option = optionMap.get(optionValue);
       if (option?.disabled) return;
       const current = selectedValuesRef.current;

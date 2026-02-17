@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from '../../../../../shadcn/shadcnBadge';
 import {
@@ -15,27 +15,28 @@ import {
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
-import type { SelectGroup, SelectOption } from '../../types';
+import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
 export interface MultiSelectProps {
   label?: string;
   description?: React.ReactNode;
   error?: string;
   placeholder?: string;
-  options: SelectOption[];
+  options?: SelectOption[];
   groups?: SelectGroup[];
-  value?: string[];
-  onChange?: (values: string[]) => void;
+  value?: SelectValue[];
+  onChange?: (values: SelectValue[]) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
   id?: string;
-  defaultValue?: string[];
+  defaultValue?: SelectValue[];
   maxDisplayedItems?: number;
   searchable?: boolean;
   searchPlaceholder?: string;
+  asyncState?: AsyncSelectState;
 }
 
 // Multi-value select with checkbox options, search, and badge chips
@@ -60,33 +61,34 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       maxDisplayedItems = 3,
       searchable = false,
       searchPlaceholder = 'Search...',
+      asyncState,
     },
     ref,
   ) => {
-    const {
-      selectedValues,
-      selectedSet,
-      selectedOptions,
-      open,
-      setOpen,
-      searchQuery,
-      setSearchQuery,
-      listboxId,
-      filteredOptions,
-      grouped,
-      toggleOption,
-      selectAll,
-      clearAll,
-    } = useMultiSelect({ options, groups, value: controlledValue, onChange, defaultValue });
+    const state = useMultiSelect({
+      options: options ?? [],
+      groups,
+      value: controlledValue,
+      onChange,
+      defaultValue,
+      remoteSearch: !!asyncState,
+    });
+
+    // Resolve search binding -- async delegates to parent, static uses local state
+    const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
+    const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
+    const showSearch = !!asyncState || searchable;
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
       return (
         <MultiSelectRow
-          key={option.value}
+          key={String(option.value)}
           name={option.label}
-          checked={selectedSet.has(option.value)}
-          onToggle={() => toggleOption(option.value)}
+          checked={state.selectedSet.has(option.value)}
+          onToggle={() => {
+            state.toggleOption(option.value);
+          }}
           disabled={option.disabled}
         />
       );
@@ -94,18 +96,27 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
 
     // Renders the option list content (flat or grouped)
     function renderOptions() {
-      if (filteredOptions.length === 0) {
+      if (asyncState?.loading) {
+        return (
+          <div className="flex items-center justify-center gap-2 py-6">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Loading...</span>
+          </div>
+        );
+      }
+
+      if (state.filteredOptions.length === 0) {
         return <MultiSelectEmpty />;
       }
 
-      if (!grouped) {
-        return filteredOptions.map(renderRow);
+      if (!state.grouped) {
+        return state.filteredOptions.map(renderRow);
       }
 
       return (
         <>
-          {grouped.ungrouped.map(renderRow)}
-          {grouped.entries.map((entry) => (
+          {state.grouped.ungrouped.map(renderRow)}
+          {state.grouped.entries.map((entry) => (
             <MultiSelectGroup key={entry.name}>
               <MultiSelectGroupLabel>{entry.name}</MultiSelectGroupLabel>
               {entry.options.map(renderRow)}
@@ -117,18 +128,18 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
 
     // Renders badge chips, count summary, or placeholder inside the trigger
     function renderTriggerContent() {
-      if (selectedOptions.length === 0) {
+      if (state.selectedOptions.length === 0) {
         return <span className="text-muted-foreground">{placeholder}</span>;
       }
 
-      if (selectedOptions.length > maxDisplayedItems) {
-        return <span className="text-sm">{selectedOptions.length} items selected</span>;
+      if (state.selectedOptions.length > maxDisplayedItems) {
+        return <span className="text-sm">{state.selectedOptions.length} items selected</span>;
       }
 
       return (
         <span className="flex flex-wrap items-center gap-1">
-          {selectedOptions.map((option) => (
-            <Badge key={option.value} variant="secondary" className="gap-1 pr-1">
+          {state.selectedOptions.map((option) => (
+            <Badge key={String(option.value)} variant="secondary" className="gap-1 pr-1">
               {option.label}
               <button
                 type="button"
@@ -137,7 +148,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleOption(option.value);
+                  state.toggleOption(option.value);
                 }}
               >
                 <X className="size-3 text-muted-foreground hover:text-foreground" />
@@ -152,12 +163,12 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
 
-        <MultiSelectRoot open={open} onOpenChange={setOpen} disabled={disabled}>
+        <MultiSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
           <MultiSelectTrigger
             ref={ref}
             id={id}
-            open={open}
-            listboxId={listboxId}
+            open={state.open}
+            listboxId={state.listboxId}
             aria-invalid={!!error}
             aria-required={required}
             disabled={disabled}
@@ -168,17 +179,32 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
           </MultiSelectTrigger>
 
           <MultiSelectContent>
-            {searchable && (
-              <MultiSelectSearch value={searchQuery} onValueChange={setSearchQuery} placeholder={searchPlaceholder} />
+            {showSearch && (
+              <MultiSelectSearch
+                value={searchValue}
+                onValueChange={setSearchValue}
+                placeholder={searchPlaceholder}
+              />
             )}
 
-            <MultiSelectList id={listboxId}>{renderOptions()}</MultiSelectList>
+            <MultiSelectList id={state.listboxId}>
+              {renderOptions()}
+              {asyncState?.hasMore && (
+                <div ref={asyncState.sentinelRef} className="h-1" />
+              )}
+              {asyncState?.loadingMore && (
+                <div className="flex items-center justify-center gap-2 py-2">
+                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Loading more...</span>
+                </div>
+              )}
+            </MultiSelectList>
 
-            <MultiSelectActions onSelectAll={selectAll} onClear={clearAll} disabled={disabled} />
+            <MultiSelectActions onSelectAll={state.selectAll} onClear={state.clearAll} disabled={disabled} />
           </MultiSelectContent>
         </MultiSelectRoot>
 
-        {name && selectedValues.map((v) => <input key={v} type="hidden" name={name} value={v} />)}
+        {name && state.selectedValues.map((v) => <input key={String(v)} type="hidden" name={name} value={String(v)} />)}
 
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         {error && <FieldError>{error}</FieldError>}

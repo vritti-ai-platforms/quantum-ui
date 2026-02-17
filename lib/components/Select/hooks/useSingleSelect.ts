@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
-import type { SelectGroup, SelectOption } from '../types';
+import type { SelectGroup, SelectOption, SelectValue } from '../types';
 
 interface UseSingleSelectStateProps {
   options: SelectOption[];
   groups?: SelectGroup[];
-  value?: string;
-  onChange?: (value: string) => void;
-  defaultValue?: string;
+  value?: SelectValue;
+  onChange?: (value: SelectValue) => void;
+  defaultValue?: SelectValue;
+  remoteSearch?: boolean;
 }
 
 // Manages controlled/uncontrolled single-select state, search filtering, and grouping
@@ -17,9 +18,10 @@ export function useSingleSelect({
   value: controlledValue,
   onChange,
   defaultValue,
+  remoteSearch,
 }: UseSingleSelectStateProps) {
   const isControlled = controlledValue !== undefined;
-  const [internalValue, setInternalValue] = useState<string>(defaultValue ?? '');
+  const [internalValue, setInternalValue] = useState<SelectValue>(defaultValue ?? '');
   const selectedValue = isControlled ? controlledValue : internalValue;
 
   const [open, setOpen] = useState(false);
@@ -27,7 +29,7 @@ export function useSingleSelect({
   const listboxId = useId();
 
   const optionMap = useMemo(() => {
-    const map = new Map<string, SelectOption>();
+    const map = new Map<SelectValue, SelectOption>();
     for (const option of options) {
       map.set(option.value, option);
     }
@@ -35,13 +37,13 @@ export function useSingleSelect({
   }, [options]);
 
   const filteredOptions = useMemo(() => {
-    if (!searchQuery) return options;
+    if (remoteSearch || !searchQuery) return options;
     const lower = searchQuery.toLowerCase();
     return options.filter((o) => o.label.toLowerCase().includes(lower));
-  }, [options, searchQuery]);
+  }, [options, searchQuery, remoteSearch]);
 
   const updateSelection = useCallback(
-    (nextValue: string) => {
+    (nextValue: SelectValue) => {
       if (!isControlled) {
         setInternalValue(nextValue);
       }
@@ -52,7 +54,7 @@ export function useSingleSelect({
 
   // Select an option and close the popover
   const selectOption = useCallback(
-    (optionValue: string) => {
+    (optionValue: SelectValue) => {
       const option = optionMap.get(optionValue);
       if (option?.disabled) return;
       updateSelection(optionValue);
