@@ -31,6 +31,12 @@ const buttonVariants = cva(
         'icon-lg': 'size-10',
       },
     },
+    compoundVariants: [
+      {
+        variant: 'link',
+        className: 'h-auto p-0 inline border-none',
+      },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',
