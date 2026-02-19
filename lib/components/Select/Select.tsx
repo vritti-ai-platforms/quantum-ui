@@ -38,9 +38,7 @@ export const Select = React.forwardRef<HTMLButtonElement, SelectProps>((props, r
     limit,
     fieldKeys,
     params,
-    selectedValues: rest.value != null
-      ? (Array.isArray(rest.value) ? rest.value : [rest.value])
-      : undefined,
+    selectedValues: rest.value != null ? (Array.isArray(rest.value) ? rest.value : [rest.value]) : undefined,
   });
 
   const isAsync = !!optionsEndpoint;

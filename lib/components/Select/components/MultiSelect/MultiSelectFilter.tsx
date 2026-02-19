@@ -149,17 +149,11 @@ export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelect
           </PopoverTrigger>
 
           <MultiSelectContent className="w-[250px]">
-            <MultiSelectSearch
-              value={searchValue}
-              onValueChange={setSearchValue}
-              placeholder={searchPlaceholder}
-            />
+            <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
 
             <MultiSelectList id={state.listboxId}>
               {renderOptions()}
-              {asyncState?.hasMore && (
-                <div ref={asyncState.sentinelRef} className="h-1" />
-              )}
+              {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
               {asyncState?.loadingMore && (
                 <div className="flex items-center justify-center gap-2 py-2">
                   <Loader2 className="size-3 animate-spin text-muted-foreground" />

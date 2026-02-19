@@ -113,8 +113,7 @@ export function useSelect({
           showErrorToast: false,
         })
         .then((r) => r.data),
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.hasMore ? lastPageParam + limit : undefined,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => (lastPage.hasMore ? lastPageParam + limit : undefined),
     initialPageParam: 0,
     enabled: isAsync,
     placeholderData: keepPreviousData,

@@ -153,18 +153,12 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
 
           <SingleSelectContent>
             {showSearch && (
-              <SingleSelectSearch
-                value={searchValue}
-                onValueChange={setSearchValue}
-                placeholder={searchPlaceholder}
-              />
+              <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
             )}
 
             <SingleSelectList id={state.listboxId}>
               {renderOptions()}
-              {asyncState?.hasMore && (
-                <div ref={asyncState.sentinelRef} className="h-1" />
-              )}
+              {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
               {asyncState?.loadingMore && (
                 <div className="flex items-center justify-center gap-2 py-2">
                   <Loader2 className="size-3 animate-spin text-muted-foreground" />

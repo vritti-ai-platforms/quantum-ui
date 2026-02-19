@@ -60,6 +60,10 @@
       "types": "./dist/lib/components/Chart/index.d.ts",
       "import": "./dist/components/Chart.js"
     },
+    "./DataTable": {
+      "types": "./dist/lib/components/DataTable/index.d.ts",
+      "import": "./dist/components/DataTable.js"
+    },
     "./TextField": {
       "types": "./dist/lib/components/TextField/index.d.ts",
       "import": "./dist/components/TextField.js"
@@ -227,6 +231,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

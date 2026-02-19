@@ -5,6 +5,7 @@ export * from './Button';
 export * from './Card';
 export * from './Chart';
 export * from './Checkbox';
+export * from './DataTable';
 export * from './DatePicker';
 export * from './DropdownMenu';
 export * from './Field';

@@ -16,7 +16,11 @@ interface SingleSelectRootProps {
 
 function SingleSelectRoot({ open, onOpenChange, disabled, children }: SingleSelectRootProps) {
   return (
-    <Popover data-slot="single-select" open={disabled ? false : open} onOpenChange={disabled ? undefined : onOpenChange}>
+    <Popover
+      data-slot="single-select"
+      open={disabled ? false : open}
+      onOpenChange={disabled ? undefined : onOpenChange}
+    >
       {children}
     </Popover>
   );
