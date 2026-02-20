@@ -1,7 +1,6 @@
 import type { Column } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { cn } from '../../../../shadcn/utils';
-import { Button } from '../../Button';
 
 interface DataTableColumnHeaderProps<TData, TValue> {
   column: Column<TData, TValue>;
@@ -9,32 +8,46 @@ interface DataTableColumnHeaderProps<TData, TValue> {
   className?: string;
 }
 
-// Renders a sortable column header with sort direction indicators
+// Renders a sortable column header with hover-to-show sort indicators and pinned badge
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  const isPinned = column.getIsPinned();
+
+  const pinnedBadge = isPinned ? (
+    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-primary/10 text-primary">Pinned</span>
+  ) : null;
+
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>;
+    return (
+      <span className={cn('font-medium flex items-center gap-2', className)}>
+        {title}
+        {pinnedBadge}
+      </span>
+    );
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className={cn('-ml-3 h-8 data-[state=open]:bg-accent', className)}
+    <button
+      type="button"
+      className={cn(
+        'flex items-center gap-2 cursor-pointer select-none group bg-transparent border-0 p-0 text-inherit',
+        className,
+      )}
       onClick={column.getToggleSortingHandler()}
     >
-      <span>{title}</span>
+      <span className="font-medium">{title}</span>
+      {pinnedBadge}
       {column.getIsSorted() === 'desc' ? (
-        <ArrowDown className="ml-2 h-4 w-4" />
+        <ArrowDown className="h-4 w-4" />
       ) : column.getIsSorted() === 'asc' ? (
-        <ArrowUp className="ml-2 h-4 w-4" />
+        <ArrowUp className="h-4 w-4" />
       ) : (
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUp className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
       )}
-    </Button>
+    </button>
   );
 }
 
