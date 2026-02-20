@@ -14,41 +14,45 @@ import { DataTableSelectionBar } from './components/DataTableSelectionBar';
 import { DataTableViewOptions } from './components/DataTableViewOptions';
 import type { DataTableProps, DensityType } from './types';
 
-// Renders a full-featured data table from a DataTableInstance produced by useDataTable
-export function DataTable<TData>({ table: instance }: DataTableProps<TData>) {
-  const {
-    _table,
-    globalFilter,
-    setGlobalFilter,
-    isLoading,
-    search: searchConfig,
-    pagination: paginationConfig,
-    selection: selectionConfig,
-    empty: emptyConfig,
-    toolbar: toolbarConfig,
-    maxHeight,
-    className,
-  } = instance;
+const densityClasses: Record<DensityType, string> = {
+  compact: 'py-1 px-2 text-xs',
+  normal: 'py-2 px-4 text-sm',
+  comfortable: 'py-4 px-4 text-sm',
+};
 
+// Renders a full-featured data table from a raw TanStack Table instance
+export function DataTable<TData>({
+  table,
+  search,
+  pagination,
+  selection,
+  empty,
+  toolbar,
+  isLoading = false,
+  maxHeight = '600px',
+  className,
+}: DataTableProps<TData>) {
   const [density, setDensity] = useState<DensityType>('normal');
 
-  const selectedCount = _table.getFilteredSelectedRowModel().rows.length;
-  const columnCount = _table.getAllColumns().length;
-  const isFiltered = _table.getState().columnFilters.length > 0 || globalFilter.length > 0;
-  const visibilityEnabled = _table.options.enableHiding !== false;
+  const globalFilter = (table.getState().globalFilter as string) ?? '';
+  const selectedCount = table.getFilteredSelectedRowModel().rows.length;
+  const columnCount = table.getAllColumns().length;
+  const isFiltered = table.getState().columnFilters.length > 0 || globalFilter.length > 0;
+  const visibilityEnabled = table.options.enableHiding !== false;
+  const showToolbar = search || visibilityEnabled || toolbar;
 
   return (
     <div className={cn('space-y-2', className)}>
       {/* Toolbar */}
-      {toolbarConfig !== null && (
+      {showToolbar && (
         <div className="flex items-center gap-4">
           <div className="flex flex-1 items-center gap-2">
             {isFiltered && (
               <Button
                 variant="ghost"
                 onClick={() => {
-                  _table.resetColumnFilters();
-                  setGlobalFilter('');
+                  table.resetColumnFilters();
+                  table.setGlobalFilter('');
                 }}
                 className="h-8 px-2 lg:px-3"
               >
@@ -58,29 +62,33 @@ export function DataTable<TData>({ table: instance }: DataTableProps<TData>) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {searchConfig && (
-              <DataTableSearch value={globalFilter} onChange={setGlobalFilter} placeholder={searchConfig.placeholder} />
+            {search && (
+              <DataTableSearch
+                value={globalFilter}
+                onChange={(value) => table.setGlobalFilter(value)}
+                placeholder={search.placeholder}
+              />
             )}
-            {visibilityEnabled && <DataTableViewOptions table={_table} />}
+            {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity density={density} onDensityChange={setDensity} />
-            {toolbarConfig.actions}
+            {toolbar?.actions}
           </div>
         </div>
       )}
 
       {/* Selection bar */}
-      {selectionConfig && selectedCount > 0 && (
-        <DataTableSelectionBar count={selectedCount} onClear={() => _table.toggleAllRowsSelected(false)}>
-          {selectionConfig.actions}
+      {selection && selectedCount > 0 && (
+        <DataTableSelectionBar count={selectedCount} onClear={() => table.toggleAllRowsSelected(false)}>
+          {selection.actions}
         </DataTableSelectionBar>
       )}
 
       {/* Table */}
       <div className="border rounded-lg">
-        <div className="relative w-full overflow-auto" style={{ maxHeight: maxHeight ?? '600px' }}>
+        <div className="relative w-full overflow-auto" style={{ maxHeight }}>
           <table className="w-full caption-bottom text-sm">
             <TableHeader>
-              {_table.getHeaderGroups().map((headerGroup) => (
+              {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id} colSpan={header.colSpan}>
@@ -96,20 +104,22 @@ export function DataTable<TData>({ table: instance }: DataTableProps<TData>) {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: _table.getState().pagination.pageSize }).map((_, index) => (
+                Array.from({ length: table.getState().pagination?.pageSize ?? 10 }).map((_, index) => (
                   <TableRow key={`skeleton-${index}`}>
                     {Array.from({ length: columnCount }).map((_, cellIndex) => (
-                      <TableCell key={`skeleton-cell-${cellIndex}`}>
+                      <TableCell key={`skeleton-cell-${cellIndex}`} className={densityClasses[density]}>
                         <Skeleton className="h-5 w-full" />
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
-              ) : _table.getRowModel().rows.length > 0 ? (
-                _table.getRowModel().rows.map((row) => (
+              ) : table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell key={cell.id} className={densityClasses[density]}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -117,10 +127,10 @@ export function DataTable<TData>({ table: instance }: DataTableProps<TData>) {
                 <TableRow>
                   <TableCell colSpan={columnCount} className="h-24 text-center">
                     <DataTableEmpty
-                      icon={emptyConfig.icon}
-                      title={emptyConfig.title}
-                      description={emptyConfig.description}
-                      action={emptyConfig.action}
+                      icon={empty?.icon}
+                      title={empty?.title}
+                      description={empty?.description}
+                      action={empty?.action}
                     />
                   </TableCell>
                 </TableRow>
@@ -131,13 +141,13 @@ export function DataTable<TData>({ table: instance }: DataTableProps<TData>) {
       </div>
 
       {/* Pagination */}
-      {paginationConfig && (
+      {pagination && (
         <DataTablePagination
-          table={_table}
-          pageSizeOptions={paginationConfig.pageSizeOptions}
-          itemLabel={paginationConfig.itemLabel}
-          showGoToPage={paginationConfig.showGoToPage}
-          showSelectedCount={selectionConfig !== null}
+          table={table}
+          pageSizeOptions={pagination.pageSizeOptions}
+          itemLabel={pagination.itemLabel}
+          showGoToPage={pagination.showGoToPage}
+          showSelectedCount={!!selection}
         />
       )}
     </div>
