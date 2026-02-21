@@ -218,7 +218,7 @@ export function Form<
   form,
   onSubmit,
   children,
-  showRootError = true,
+  showRootError = false,
   rootErrorPosition = 'bottom',
   rootErrorClassName,
   rootErrorAction,
