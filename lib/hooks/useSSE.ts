@@ -11,8 +11,10 @@ export interface UseSSEOptions<EventMap extends Record<string, unknown> = Record
   path: string;
   /** SSE event names to listen for via addEventListener */
   events: (keyof EventMap & string)[];
-  /** Whether to connect. Set false to disconnect. @default true */
+  /** Whether to connect. Set false to disconnect and reset state. @default true */
   enabled?: boolean;
+  /** Whether to auto-reconnect when the server closes the connection. @default true */
+  autoReconnect?: boolean;
   /** Whether to send cookies with the request. @default true */
   withCredentials?: boolean;
   /** Called when the EventSource connection encounters an error */
@@ -117,6 +119,14 @@ export function useSSE<EventMap extends Record<string, unknown> = Record<string,
 
     eventSource.onerror = (event) => {
       setIsConnected(false);
+
+      // When autoReconnect is false, close on any error to prevent browser reconnect
+      if (!optionsRef.current.autoReconnect && optionsRef.current.autoReconnect !== undefined) {
+        eventSource.close();
+        eventSourceRef.current = null;
+        return;
+      }
+
       if (eventSource.readyState === EventSource.CLOSED) {
         setError('Connection lost.');
         optionsRef.current.onError?.(event);
