@@ -32,9 +32,9 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
 
 // TextField molecule - Input + Label composition using Field system
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
-  ({ label, description, error, className, id, startAdornment, endAdornment, ...props }, ref) => {
+  ({ label, description, error, className, id, disabled, startAdornment, endAdornment, ...props }, ref) => {
     return (
-      <Field>
+      <Field data-disabled={disabled}>
         {label && <FieldLabel>{label}</FieldLabel>}
 
         <div className="relative">
@@ -44,6 +44,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           <Input
             aria-invalid={!!error}
             ref={ref}
+            disabled={disabled}
             className={cn(className, startAdornment && 'pl-10', endAdornment && 'pr-10')}
             id={id}
             {...props}
