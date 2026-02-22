@@ -142,7 +142,7 @@ export function scheduleTokenRefresh(expiresIn: number): void {
     const config = getConfig();
 
     try {
-      const response = await Axios.post<{ accessToken: string; expiresIn: number }>(
+      const response = await axios.post<{ accessToken: string; expiresIn: number }>(
         config.auth.refreshEndpoint,
         {},
         {
