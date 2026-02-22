@@ -1,6 +1,5 @@
 import type { UseMutationResult } from '@tanstack/react-query';
 import * as React from 'react';
-import type { Country } from 'react-phone-number-input';
 import {
   Controller,
   type ControllerProps,
@@ -9,6 +8,7 @@ import {
   FormProvider,
   type UseFormReturn,
 } from 'react-hook-form';
+import type { Country } from 'react-phone-number-input';
 import { cn } from '../../../shadcn/utils';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Alert } from '../Alert';
