@@ -10,6 +10,7 @@ import {
 } from 'react-hook-form';
 import type { Country } from 'react-phone-number-input';
 import { cn } from '../../../shadcn/utils';
+import { axios } from '../../utils/axios';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Alert } from '../Alert';
 import { Button } from '../Button';
@@ -245,6 +246,12 @@ export function Form<
   // Form only adds mapApiErrorsToForm - the mutation's own callbacks fire automatically
   const wrappedOnSubmit = React.useCallback(
     async (data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues) => {
+      // Suppress error toasts during form submission — Form handles errors inline
+      const interceptorId = axios.interceptors.request.use((config) => ({
+        ...config,
+        showErrorToast: false,
+      }));
+
       try {
         if (mutation) {
           const variables = transformSubmit ? transformSubmit(data) : data;
@@ -263,6 +270,8 @@ export function Form<
         // Log error for debugging
         console.error('[Form Submission Error]', error);
         // Error is swallowed, not re-thrown (mutation's onError already fired)
+      } finally {
+        axios.interceptors.request.eject(interceptorId);
       }
     },
     [onSubmit, mutation, transformSubmit, fieldMapping, form, showRootError],
