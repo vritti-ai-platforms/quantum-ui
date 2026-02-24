@@ -12,10 +12,10 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
-import { useState } from 'react';
 import { Badge } from '../lib/components/Badge';
 import { Button } from '../lib/components/Button';
 import { DataTable } from '../lib/components/DataTable/DataTable';
+import { useDataTable } from '../lib/components/DataTable/hooks/useDataTable';
 import { getSelectionColumn } from '../lib/components/DataTable/utils';
 import {
   DropdownMenuContent,
@@ -340,6 +340,7 @@ const InvoicesTable = () => {
   const table = useDataTable({
     data: invoices,
     columns: invoiceColumns,
+    slug: 'invoices',
   });
 
   return (

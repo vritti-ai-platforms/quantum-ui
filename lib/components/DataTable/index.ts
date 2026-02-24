@@ -10,6 +10,8 @@ export { DataTableSelectionBar } from './components/DataTableSelectionBar';
 export { DataTableViewOptions } from './components/DataTableViewOptions';
 export { DataTable } from './DataTable';
 export { useDataTable } from './hooks/useDataTable';
+export { useDataTableStore } from './store/store';
+export type { TableSlice, TableState } from './store/store';
 
 // Types
 export type {
