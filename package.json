@@ -96,6 +96,10 @@
       "types": "./dist/lib/components/Select/index.d.ts",
       "import": "./dist/components/Select.js"
     },
+    "./Sortable": {
+      "types": "./dist/lib/components/Sortable/index.d.ts",
+      "import": "./dist/components/Sortable.js"
+    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
@@ -216,6 +220,9 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",

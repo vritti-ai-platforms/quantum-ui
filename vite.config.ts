@@ -39,6 +39,7 @@ export default defineConfig({
         'components/Progress': resolve(__dirname, 'lib/components/Progress/index.ts'),
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
+        'components/Sortable': resolve(__dirname, 'lib/components/Sortable/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),

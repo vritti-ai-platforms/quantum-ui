@@ -6,6 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { useRef } from 'react';
 import { useDataTableStore } from '../store/store';
 
 interface UseDataTableOptions<TData> {
@@ -20,7 +21,7 @@ interface UseDataTableOptions<TData> {
   enableHiding?: boolean;
 }
 
-// Creates a fully configured TanStack Table instance with all features enabled
+// Creates a fully configured TanStack Table instance with persisted state
 export function useDataTable<TData>({
   data,
   columns,
@@ -32,16 +33,27 @@ export function useDataTable<TData>({
   enableHiding = true,
   enableSorting = true,
 }: UseDataTableOptions<TData>) {
-  const tableState = useDataTableStore((state) => state.tables[slug]);
-  const onColumnOrderChange = useDataTableStore((state) => state.onColumnOrderChange);
+  const initTable = useDataTableStore((state) => state.initTable);
+  const updateField = useDataTableStore((state) => state.updateField);
+
+  // Synchronous init — ensures store entry exists before selector reads
+  const initializedSlug = useRef<string | null>(null);
+  if (initializedSlug.current !== slug) {
+    initTable(slug);
+    initializedSlug.current = slug;
+  }
+
+  const state = useDataTableStore((state) => state.tables[slug]);
 
   const table = useReactTable({
     data,
     columns,
-    state: {
-      columnOrder: tableState?.columnOrder,
-    },
-    onColumnOrderChange: (updaterOrValue) => onColumnOrderChange(slug, updaterOrValue),
+    state,
+    onSortingChange: (updater) => updateField(slug, 'sorting', updater),
+    onColumnFiltersChange: (updater) => updateField(slug, 'columnFilters', updater),
+    onColumnVisibilityChange: (updater) => updateField(slug, 'columnVisibility', updater),
+    onColumnPinningChange: (updater) => updateField(slug, 'columnPinning', updater),
+    onColumnOrderChange: (updater) => updateField(slug, 'columnOrder', updater),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

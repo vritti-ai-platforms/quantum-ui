@@ -84,7 +84,7 @@ export function DataTable<TData>({
       )}
 
       {/* Table */}
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-hidden">
         <div className="relative w-full overflow-auto" style={{ maxHeight }}>
           <table className="w-full caption-bottom text-sm">
             <TableHeader>
