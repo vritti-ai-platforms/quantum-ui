@@ -21,5 +21,7 @@ export function getSelectionColumn<TData>(): ColumnDef<TData, unknown> {
     ),
     enableSorting: false,
     enableHiding: false,
+    enableResizing: false,
+    size: 40,
   };
 }

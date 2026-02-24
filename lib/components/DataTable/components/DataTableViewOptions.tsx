@@ -1,11 +1,11 @@
 import type { Column, Table } from '@tanstack/react-table';
 import { Columns, Eye, EyeOff, GripVertical, Lock, Pin } from 'lucide-react';
-import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shadcnPopover';
 import { Switch } from '../../../../shadcn/shadcnSwitch';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { SortableItem, SortableList } from '../../Sortable';
+import type { DataTableMeta } from '../types';
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;
@@ -24,7 +24,7 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
       {({ isDragging, dragHandleProps }) => (
         <div
           className={cn(
-            'flex items-center justify-between px-3 py-2.5 hover:bg-accent/50 transition-colors',
+            'flex items-center justify-between px-3 py-2 hover:bg-accent/50 transition-colors',
             isDragging && 'opacity-50 bg-accent/30',
           )}
         >
@@ -34,31 +34,31 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
             {...dragHandleProps.attributes}
             {...dragHandleProps.listeners}
           >
-            <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+            <GripVertical className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <span className="text-sm truncate">{label}</span>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
               onClick={() => column.pin(isPinned ? false : 'left')}
               className={cn(
-                'p-1.5 rounded-sm hover:bg-accent transition-colors',
+                'p-1 rounded-sm hover:bg-accent transition-colors',
                 isPinned ? 'text-primary fill-primary' : 'text-muted-foreground',
               )}
               aria-label={isPinned ? `Unpin ${column.id}` : `Pin ${column.id}`}
             >
-              <Pin className="h-4 w-4" />
+              <Pin className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
               onClick={() => column.toggleVisibility()}
               className={cn(
-                'p-1.5 rounded-sm hover:bg-accent transition-colors',
+                'p-1 rounded-sm hover:bg-accent transition-colors',
                 isVisible ? 'text-muted-foreground' : 'text-muted-foreground/50',
               )}
               aria-label={isVisible ? `Hide ${column.id}` : `Show ${column.id}`}
             >
-              {isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              {isVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>
@@ -69,8 +69,6 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
 
 // Column settings popover with drag-to-reorder, pin, and visibility controls
 export function DataTableViewOptions<TData>({ table, className }: DataTableViewOptionsProps<TData>) {
-  const [resizeLock, setResizeLock] = useState(false);
-
   // getAllLeafColumns respects columnOrder — getAllColumns does NOT
   const columns = table
     .getAllLeafColumns()
@@ -103,14 +101,33 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[260px] p-0">
-        <div className="flex items-center justify-between px-3 py-2.5 border-b">
+        {/* Header */}
+        <div className="px-3 py-3 border-b">
           <span className="text-sm font-medium">Column Settings</span>
-          <div className="flex items-center gap-2">
-            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-            <Switch size="sm" checked={resizeLock} onCheckedChange={setResizeLock} aria-label="Toggle resize lock" />
-          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">Drag to reorder, pin, or hide columns</p>
         </div>
-        <div className="max-h-[300px] overflow-y-auto py-1.5">
+
+        {/* Resize Lock */}
+        {(table.options.meta as DataTableMeta)?.toggleLockColumnSizing && (
+          <div className="flex items-center justify-between px-3 py-2.5 border-b">
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div>
+                <span className="text-sm">Resize Lock</span>
+                <p className="text-xs text-muted-foreground">Columns can be resized</p>
+              </div>
+            </div>
+            <Switch
+              size="sm"
+              checked={(table.options.meta as DataTableMeta)?.lockedColumnSizing ?? false}
+              onCheckedChange={() => (table.options.meta as DataTableMeta)?.toggleLockColumnSizing()}
+              aria-label="Lock column sizes"
+            />
+          </div>
+        )}
+
+        {/* Column list */}
+        <div className="max-h-[300px] overflow-y-auto py-1">
           <SortableList items={sortableColumns} onReorder={handleReorder}>
             {sortableColumns.map((item) => (
               <SortableColumnItem key={item.id} column={item.column} />

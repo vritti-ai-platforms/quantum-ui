@@ -2,6 +2,7 @@ import type {
   ColumnFiltersState,
   ColumnOrderState,
   ColumnPinningState,
+  ColumnSizingState,
   SortingState,
   Updater,
   VisibilityState,
@@ -16,6 +17,8 @@ export interface TableState {
   columnVisibility: VisibilityState;
   columnPinning: ColumnPinningState;
   columnOrder: ColumnOrderState;
+  columnSizing: ColumnSizingState;
+  lockedColumnSizing: boolean;
 }
 
 export interface TableSlice {
@@ -30,6 +33,8 @@ const DEFAULT_TABLE_STATE: TableState = {
   columnVisibility: {},
   columnPinning: { left: ['select'], right: [] },
   columnOrder: [],
+  columnSizing: {},
+  lockedColumnSizing: false,
 };
 
 // Resolves TanStack's Updater<T> pattern — value or function

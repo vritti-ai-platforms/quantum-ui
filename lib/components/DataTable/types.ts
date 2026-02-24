@@ -32,6 +32,11 @@ export interface DataTableToolbarConfig {
 
 export type DensityType = 'compact' | 'normal' | 'comfortable';
 
+export interface DataTableMeta {
+  lockedColumnSizing: boolean;
+  toggleLockColumnSizing: () => void;
+}
+
 // ─── DataTable component props ───
 
 export interface DataTableProps<TData> {

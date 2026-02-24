@@ -12,7 +12,7 @@ import { DataTableRowDensity } from './components/DataTableRowDensity';
 import { DataTableSearch } from './components/DataTableSearch';
 import { DataTableSelectionBar } from './components/DataTableSelectionBar';
 import { DataTableViewOptions } from './components/DataTableViewOptions';
-import type { DataTableProps, DensityType } from './types';
+import type { DataTableMeta, DataTableProps, DensityType } from './types';
 
 const densityClasses: Record<DensityType, string> = {
   compact: 'py-1 px-2 text-xs',
@@ -86,16 +86,32 @@ export function DataTable<TData>({
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="relative w-full overflow-auto" style={{ maxHeight }}>
-          <table className="w-full caption-bottom text-sm">
+          <table className="w-full caption-bottom text-sm" style={{ width: table.getCenterTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      style={{ width: header.getSize() }}
+                      className="relative group/resize"
+                    >
                       {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
                         <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
                       ) : (
                         flexRender(header.column.columnDef.header, header.getContext())
+                      )}
+                      {!(table.options.meta as DataTableMeta)?.lockedColumnSizing && header.column.getCanResize() && (
+                        <div
+                          onPointerDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={cn(
+                            'absolute top-0 right-0 w-1 h-full cursor-col-resize select-none touch-none',
+                            'opacity-0 group-hover/resize:opacity-100 hover:bg-primary/50',
+                            header.column.getIsResizing() && 'opacity-100 bg-primary',
+                          )}
+                        />
                       )}
                     </TableHead>
                   ))}
@@ -117,7 +133,7 @@ export function DataTable<TData>({
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className={densityClasses[density]}>
+                      <TableCell key={cell.id} className={densityClasses[density]} style={{ width: cell.column.getSize() }}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
