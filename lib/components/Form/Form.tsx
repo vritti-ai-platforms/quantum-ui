@@ -237,6 +237,7 @@ export function Form<
   fieldMapping,
   mutation,
   transformSubmit,
+  className,
   ...props
 }: FormProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
   // Compute isSubmitting from both form state and mutation state
@@ -284,7 +285,7 @@ export function Form<
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit} {...props}>
+      <form onSubmit={handleSubmit} className={cn('space-y-4', className)} {...props}>
         {/* Top position error */}
         {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
           <Alert
