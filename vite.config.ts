@@ -53,6 +53,7 @@ export default defineConfig({
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),
         'components/Sonner': resolve(__dirname, 'lib/components/Sonner/index.ts'),
         'components/Spinner': resolve(__dirname, 'lib/components/Spinner/index.ts'),
+        'components/StepProgressIndicator': resolve(__dirname, 'lib/components/StepProgressIndicator/index.ts'),
         'components/Switch': resolve(__dirname, 'lib/components/Switch/index.ts'),
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
         // shadcn entries

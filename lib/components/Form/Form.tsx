@@ -178,7 +178,7 @@ export interface FormProps<
    * Form only adds `mapApiErrorsToForm` as an extra error handling layer.
    * Optional - you can use `onSubmit` instead for forms that don't use mutations.
    */
-  mutation: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
+  mutation?: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
 
   /**
    * Transform form data to mutation variables before submission.

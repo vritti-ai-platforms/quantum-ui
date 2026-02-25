@@ -144,6 +144,10 @@
       "types": "./dist/lib/components/Spinner/index.d.ts",
       "import": "./dist/components/Spinner.js"
     },
+    "./StepProgressIndicator": {
+      "types": "./dist/lib/components/StepProgressIndicator/index.d.ts",
+      "import": "./dist/components/StepProgressIndicator.js"
+    },
     "./Switch": {
       "types": "./dist/lib/components/Switch/index.d.ts",
       "import": "./dist/components/Switch.js"

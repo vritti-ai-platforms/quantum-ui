@@ -22,6 +22,7 @@ export * from './Sidebar';
 export * from './Skeleton';
 export * from './Sonner';
 export * from './Spinner';
+export * from './StepProgressIndicator';
 export * from './Switch';
 export * from './TextArea';
 export * from './TextField';
