@@ -17,6 +17,7 @@ export { useDataTableStore } from './store/store';
 export type {
   ColumnDef,
   DataTableEmptyConfig,
+  DataTableMeta,
   DataTablePaginationConfig,
   DataTableProps,
   DataTableSearchConfig,

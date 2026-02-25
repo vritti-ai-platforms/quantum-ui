@@ -6,7 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useDataTableStore } from '../store/store';
 
 interface UseDataTableOptions<TData> {
@@ -47,8 +47,15 @@ export function useDataTable<TData>({
 
   const tanstackState = useDataTableStore((s) => s.tables[slug]);
 
-  // Separate custom fields from TanStack-compatible state
   const { lockedColumnSizing, ...state } = tanstackState ?? {};
+
+  const meta = useMemo(
+    () => ({
+      lockedColumnSizing,
+      toggleLockColumnSizing: () => updateField(slug, 'lockedColumnSizing', !lockedColumnSizing),
+    }),
+    [lockedColumnSizing, updateField, slug],
+  );
 
   const table = useReactTable({
     data,
@@ -76,10 +83,7 @@ export function useDataTable<TData>({
     enableRowSelection,
     enableHiding,
     initialState,
-    meta: {
-      lockedColumnSizing,
-      toggleLockColumnSizing: () => updateField(slug, 'lockedColumnSizing', !lockedColumnSizing),
-    },
+    meta,
   });
 
   return table;

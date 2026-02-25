@@ -41,6 +41,13 @@ export function DataTableSearch<TData>({ table, className }: DataTableSearchProp
     return filterableColumns[0]?.id ?? '';
   });
 
+  // Reset to first available if selected column is hidden/removed
+  useEffect(() => {
+    if (!filterableColumns.some((c) => c.id === selectedColumnId)) {
+      setSelectedColumnId(filterableColumns[0]?.id ?? '');
+    }
+  }, [filterableColumns, selectedColumnId]);
+
   const selectedColumn = table.getColumn(selectedColumnId);
   const filterValue = (selectedColumn?.getFilterValue() as string) ?? '';
   const selectedLabel = selectedColumn ? getColumnLabel(selectedColumn.columnDef, selectedColumn.id) : '';
@@ -79,9 +86,7 @@ export function DataTableSearch<TData>({ table, className }: DataTableSearchProp
     >
       {/* Column selector */}
       <SingleSelectRoot open={columnSelectorOpen} onOpenChange={setColumnSelectorOpen}>
-        <SingleSelectTrigger
-          className="border-0 shadow-none rounded-none border-r border-input min-h-0 h-full px-2.5 py-0 gap-1"
-        >
+        <SingleSelectTrigger className="border-0 shadow-none rounded-none border-r border-input min-h-0 h-full px-2.5 py-0 gap-1">
           <span className="capitalize">{selectedLabel}</span>
         </SingleSelectTrigger>
         <SingleSelectContent align="start" className="w-[160px]">
