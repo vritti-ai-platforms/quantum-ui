@@ -47,11 +47,7 @@ export function DataTable<TData>({
         <div className="flex items-center gap-4">
           <div className="flex flex-1 items-center gap-2">
             {isFiltered && (
-              <Button
-                variant="ghost"
-                onClick={() => table.resetColumnFilters()}
-                className="h-8 px-2 lg:px-3"
-              >
+              <Button variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
                 Reset
                 <X className="ml-2 h-4 w-4" />
               </Button>
@@ -110,20 +106,26 @@ export function DataTable<TData>({
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: table.getState().pagination?.pageSize ?? 10 }).map((_, index) => (
-                  <TableRow key={`skeleton-${index}`}>
-                    {Array.from({ length: columnCount }).map((_, cellIndex) => (
-                      <TableCell key={`skeleton-cell-${cellIndex}`} className={densityClasses[density]}>
-                        <Skeleton className="h-5 w-full" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                Array.from({ length: table.getState().pagination?.pageSize ?? 10 }, (_, i) => `skeleton-row-${i}`).map(
+                  (rowKey) => (
+                    <TableRow key={rowKey}>
+                      {Array.from({ length: columnCount }, (_, i) => `${rowKey}-cell-${i}`).map((cellKey) => (
+                        <TableCell key={cellKey} className={densityClasses[density]}>
+                          <Skeleton className="h-5 w-full" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ),
+                )
               ) : table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className={densityClasses[density]} style={{ width: cell.column.getSize() }}>
+                      <TableCell
+                        key={cell.id}
+                        className={densityClasses[density]}
+                        style={{ width: cell.column.getSize() }}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
