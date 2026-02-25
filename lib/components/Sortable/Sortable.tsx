@@ -1,5 +1,5 @@
 import type { DraggableAttributes } from '@dnd-kit/core';
-import { closestCenter, DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { closestCenter, DndContext, type DragOverEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import {
   arrayMove,
@@ -67,8 +67,8 @@ export function SortableList<T extends { id: string | number }>({
   const itemIds = useMemo(() => items.map((item) => item.id), [items]);
   const resolvedStrategy = STRATEGY_MAP[strategy];
 
-  // Reorders items array and calls onReorder with the new order
-  function handleDragEnd(event: DragEndEvent) {
+  // Reorders items live as the dragged item crosses over others
+  function handleDragOver(event: DragOverEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -80,7 +80,7 @@ export function SortableList<T extends { id: string | number }>({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragOver={handleDragOver}>
       <SortableContext items={itemIds} strategy={resolvedStrategy}>
         <div className={className}>{children}</div>
       </SortableContext>

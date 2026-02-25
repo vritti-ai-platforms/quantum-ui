@@ -34,10 +34,9 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   const [density, setDensity] = useState<DensityType>('normal');
 
-  const globalFilter = (table.getState().globalFilter as string) ?? '';
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
   const columnCount = table.getAllColumns().length;
-  const isFiltered = table.getState().columnFilters.length > 0 || globalFilter.length > 0;
+  const isFiltered = table.getState().columnFilters.length > 0;
   const visibilityEnabled = table.options.enableHiding !== false;
   const showToolbar = search || visibilityEnabled || toolbar;
 
@@ -50,10 +49,7 @@ export function DataTable<TData>({
             {isFiltered && (
               <Button
                 variant="ghost"
-                onClick={() => {
-                  table.resetColumnFilters();
-                  table.setGlobalFilter('');
-                }}
+                onClick={() => table.resetColumnFilters()}
                 className="h-8 px-2 lg:px-3"
               >
                 Reset
@@ -62,13 +58,7 @@ export function DataTable<TData>({
             )}
           </div>
           <div className="flex items-center gap-2">
-            {search && (
-              <DataTableSearch
-                value={globalFilter}
-                onChange={(value) => table.setGlobalFilter(value)}
-                placeholder={search.placeholder}
-              />
-            )}
+            {search && <DataTableSearch table={table} />}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity density={density} onDensityChange={setDensity} />
             {toolbar?.actions}
@@ -86,7 +76,7 @@ export function DataTable<TData>({
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="relative w-full overflow-auto" style={{ maxHeight }}>
-          <table className="w-full caption-bottom text-sm" style={{ width: table.getCenterTotalSize() }}>
+          <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
