@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Select } from '../../Select/Select';
-import type { SelectValue, SelectVariant } from '../../Select/types';
+import { Select } from '../../components/Select/Select';
+import type { SelectValue, SelectVariant } from '../../components/Select/types';
 
 export interface IndustrySelectProps {
   value?: SelectValue;
@@ -32,6 +32,7 @@ export const IndustrySelect = React.forwardRef<HTMLButtonElement, IndustrySelect
         {...props}
       />
     );
+    
   },
 );
 

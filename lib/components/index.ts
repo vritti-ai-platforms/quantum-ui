@@ -17,7 +17,6 @@ export * from './PasswordField';
 export * from './PhoneField';
 export * from './Progress';
 export * from './Select';
-export * from './selects';
 export * from './Separator';
 export * from './Sidebar';
 export * from './Skeleton';
