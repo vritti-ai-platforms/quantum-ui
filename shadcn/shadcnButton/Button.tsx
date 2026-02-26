@@ -34,7 +34,7 @@ const buttonVariants = cva(
     compoundVariants: [
       {
         variant: 'link',
-        className: 'h-auto p-0 inline border-none',
+        className: 'h-auto p-0 inline-flex border-none',
       },
     ],
     defaultVariants: {
