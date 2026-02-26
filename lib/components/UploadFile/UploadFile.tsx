@@ -2,7 +2,7 @@ import type React from 'react';
 import { useRef } from 'react';
 import { Field, FieldError, FieldLabel } from '../Field';
 
-export interface UploadFileProps {
+interface UploadFileBaseProps {
   // Trigger element rendered as the clickable anchor
   anchor: React.ReactNode;
   // Allow multiple file selection (default: false, returns single File)
@@ -11,15 +11,25 @@ export interface UploadFileProps {
   accept?: string;
   // Disable the file input
   disabled?: boolean;
-  // Optional field label for Form usage
+  // Optional field label
   label?: string;
-  // Validation error injected by Form's Controller
+  // Validation error message
   error?: string;
-  // Field name for Form detection — Controller wraps when present
-  name?: string;
-  // Callback with selected File (single) or File[] (multiple)
+}
+
+// Standalone usage — onChange is required
+interface UploadFileStandaloneProps extends UploadFileBaseProps {
+  name?: never;
   onChange: (files: File | File[]) => void;
 }
+
+// Form usage — Controller injects onChange via name prop
+interface UploadFileFormProps extends UploadFileBaseProps {
+  name: string;
+  onChange?: (files: File | File[]) => void;
+}
+
+export type UploadFileProps = UploadFileStandaloneProps | UploadFileFormProps;
 
 // Headless file upload trigger wrapping a hidden input
 export const UploadFile: React.FC<UploadFileProps> = ({
@@ -45,9 +55,9 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     if (!fileList || fileList.length === 0) return;
 
     if (multiple) {
-      onChange(Array.from(fileList));
+      onChange?.(Array.from(fileList));
     } else {
-      onChange(fileList[0]);
+      onChange?.(fileList[0]);
     }
 
     // Reset so the same file can be re-selected
