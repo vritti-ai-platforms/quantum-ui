@@ -33,7 +33,6 @@ export const IndustrySelect = React.forwardRef<HTMLButtonElement, IndustrySelect
         {...props}
       />
     );
-    
   },
 );
 

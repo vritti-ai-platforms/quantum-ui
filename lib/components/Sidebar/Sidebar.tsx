@@ -1,5 +1,4 @@
 import {
-  type SidebarMode as ShadcnSidebarMode,
   Sidebar as ShadcnSidebar,
   SidebarContent as ShadcnSidebarContent,
   SidebarControl as ShadcnSidebarControl,
@@ -14,15 +13,16 @@ import {
   SidebarMenuAction as ShadcnSidebarMenuAction,
   SidebarMenuBadge as ShadcnSidebarMenuBadge,
   SidebarMenuButton as ShadcnSidebarMenuButton,
-  sidebarMenuButtonVariants as shadcnSidebarMenuButtonVariants,
   SidebarMenuItem as ShadcnSidebarMenuItem,
   SidebarMenuSkeleton as ShadcnSidebarMenuSkeleton,
   SidebarMenuSub as ShadcnSidebarMenuSub,
   SidebarMenuSubButton as ShadcnSidebarMenuSubButton,
   SidebarMenuSubItem as ShadcnSidebarMenuSubItem,
+  type SidebarMode as ShadcnSidebarMode,
   SidebarProvider as ShadcnSidebarProvider,
   SidebarRail as ShadcnSidebarRail,
   SidebarTrigger as ShadcnSidebarTrigger,
+  sidebarMenuButtonVariants as shadcnSidebarMenuButtonVariants,
   useSidebar as shadcnUseSidebar,
   useSidebarMode as shadcnUseSidebarMode,
 } from '../../../shadcn/shadcnSidebar';

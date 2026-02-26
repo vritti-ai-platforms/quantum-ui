@@ -5,8 +5,6 @@ import './index.css';
 export { cn } from '../shadcn/utils';
 // Components
 export * from './components';
-// Selects
-export * from './selects';
 // Configuration
 export {
   type AuthConfig,
@@ -22,6 +20,8 @@ export {
 export * from './context';
 // Hooks
 export * from './hooks';
+// Selects
+export * from './selects';
 
 // Axios with token management and CSRF support
 export {

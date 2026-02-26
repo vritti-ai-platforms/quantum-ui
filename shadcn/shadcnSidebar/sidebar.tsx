@@ -6,7 +6,6 @@ import { PanelLeftIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { useIsMobile } from '../../lib/hooks/useIsMobile';
-import { cn } from '../utils';
 import { Button } from '../shadcnButton';
 import {
   DropdownMenu,
@@ -15,20 +14,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '../shadcnDropdownMenu';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '../shadcnSheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../shadcnSheet';
 import { Skeleton } from '../shadcnSkeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../shadcnTooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../shadcnTooltip';
+import { cn } from '../utils';
 
 const SIDEBAR_WIDTH = '16rem';
 const SIDEBAR_WIDTH_MOBILE = '18rem';
@@ -94,10 +83,7 @@ function SidebarProvider({
   // Keyboard shortcut to toggle sidebar (Cmd+B / Ctrl+B)
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
+      if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         toggleSidebar();
       }
@@ -134,10 +120,7 @@ function SidebarProvider({
               ...style,
             } as React.CSSProperties
           }
-          className={cn(
-            'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full',
-            className,
-          )}
+          className={cn('group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full', className)}
           {...props}
         >
           {children}
@@ -168,10 +151,7 @@ function Sidebar({
     return (
       <div
         data-slot="sidebar"
-        className={cn(
-          'bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col',
-          className,
-        )}
+        className={cn('bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col', className)}
         {...props}
       >
         {children}
@@ -258,11 +238,7 @@ function Sidebar({
 }
 
 // Toggle button that calls toggleSidebar from context
-function SidebarTrigger({
-  className,
-  onClick,
-  ...props
-}: React.ComponentProps<typeof Button>) {
+function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -422,10 +398,7 @@ function SidebarGroupAction({
 }
 
 // Content wrapper within a sidebar group
-function SidebarGroupContent({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+function SidebarGroupContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="sidebar-group-content"
@@ -465,8 +438,7 @@ const sidebarMenuButtonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+        default: 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         outline:
           'bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
       },
@@ -515,18 +487,12 @@ function SidebarMenuButton({
     return button;
   }
 
-  const tooltipProps =
-    typeof tooltip === 'string' ? { children: tooltip } : tooltip;
+  const tooltipProps = typeof tooltip === 'string' ? { children: tooltip } : tooltip;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== 'collapsed' || isMobile}
-        {...tooltipProps}
-      />
+      <TooltipContent side="right" align="center" hidden={state !== 'collapsed' || isMobile} {...tooltipProps} />
     </Tooltip>
   );
 }
@@ -564,10 +530,7 @@ function SidebarMenuAction({
 }
 
 // Badge positioned on a menu item (e.g., unread count)
-function SidebarMenuBadge({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+function SidebarMenuBadge({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="sidebar-menu-badge"
@@ -605,12 +568,7 @@ function SidebarMenuSkeleton({
       className={cn('flex h-8 items-center gap-2 rounded-md px-2', className)}
       {...props}
     >
-      {showIcon && (
-        <Skeleton
-          className="size-4 rounded-md"
-          data-sidebar="menu-skeleton-icon"
-        />
-      )}
+      {showIcon && <Skeleton className="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />}
       <Skeleton
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
@@ -641,10 +599,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<'ul'>) {
 }
 
 // List item wrapper within a submenu
-function SidebarMenuSubItem({
-  className,
-  ...props
-}: React.ComponentProps<'li'>) {
+function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot="sidebar-menu-sub-item"
@@ -702,8 +657,7 @@ function useSidebarMode(storageKey = 'sidebar-mode') {
 
   const [sidebarMode, setSidebarMode] = React.useState<SidebarMode>(() => {
     const stored = localStorage.getItem(storageKey);
-    if (stored === 'expanded' || stored === 'collapsed' || stored === 'hover')
-      return stored;
+    if (stored === 'expanded' || stored === 'collapsed' || stored === 'hover') return stored;
     return 'expanded';
   });
 
@@ -765,19 +719,11 @@ const SidebarControl = ({
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-48">
-        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-          Sidebar control
-        </DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Sidebar control</DropdownMenuLabel>
         {SIDEBAR_MODE_OPTIONS.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onClick={() => onSidebarModeChange(option.value)}
-            className="gap-2"
-          >
+          <DropdownMenuItem key={option.value} onClick={() => onSidebarModeChange(option.value)} className="gap-2">
             <span className="flex size-3.5 items-center justify-center">
-              {sidebarMode === option.value && (
-                <span className="size-1.5 rounded-full bg-foreground" />
-              )}
+              {sidebarMode === option.value && <span className="size-1.5 rounded-full bg-foreground" />}
             </span>
             {option.label}
           </DropdownMenuItem>

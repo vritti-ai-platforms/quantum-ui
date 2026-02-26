@@ -164,6 +164,10 @@
       "types": "./dist/lib/components/Toggle/index.d.ts",
       "import": "./dist/components/Toggle.js"
     },
+    "./UploadFile": {
+      "types": "./dist/lib/components/UploadFile/index.d.ts",
+      "import": "./dist/components/UploadFile.js"
+    },
     "./Field": {
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"

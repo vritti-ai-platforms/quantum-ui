@@ -106,16 +106,10 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
               className,
             )}
             numberInputProps={{
-              className: cn(
-                'flex-1 bg-transparent outline-none',
-                'placeholder:text-muted-foreground',
-              ),
+              className: cn('flex-1 bg-transparent outline-none', 'placeholder:text-muted-foreground'),
             }}
             countrySelectProps={{
-              className: cn(
-                'mr-2 bg-transparent border-none outline-none',
-                'focus:ring-0',
-              ),
+              className: cn('mr-2 bg-transparent border-none outline-none', 'focus:ring-0'),
             }}
           />
 

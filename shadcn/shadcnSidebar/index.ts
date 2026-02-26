@@ -1,5 +1,4 @@
 export {
-  type SidebarMode,
   Sidebar,
   SidebarContent,
   SidebarControl,
@@ -14,15 +13,16 @@ export {
   SidebarMenuAction,
   SidebarMenuBadge,
   SidebarMenuButton,
-  sidebarMenuButtonVariants,
   SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  type SidebarMode,
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
+  sidebarMenuButtonVariants,
   useSidebar,
   useSidebarMode,
 } from './sidebar';

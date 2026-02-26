@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react';
-import * as React from 'react';
+import type * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Collapsible as ShadcnCollapsible,
@@ -58,10 +58,7 @@ const CollapsibleItem: React.FC<{
   >
     <ShadcnSidebarMenuItem>
       <ShadcnCollapsibleTrigger asChild>
-        <ShadcnSidebarMenuButton
-          tooltip={item.title}
-          isActive={pathname.startsWith(item.path)}
-        >
+        <ShadcnSidebarMenuButton tooltip={item.title} isActive={pathname.startsWith(item.path)}>
           <item.icon />
           <span>{item.title}</span>
           <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -71,10 +68,7 @@ const CollapsibleItem: React.FC<{
         <ShadcnSidebarMenuSub>
           {item.children?.map((child) => (
             <ShadcnSidebarMenuSubItem key={child.path}>
-              <ShadcnSidebarMenuSubButton
-                isActive={pathname === child.path}
-                onClick={() => navigate(child.path)}
-              >
+              <ShadcnSidebarMenuSubButton isActive={pathname === child.path} onClick={() => navigate(child.path)}>
                 <span>{child.title}</span>
               </ShadcnSidebarMenuSubButton>
             </ShadcnSidebarMenuSubItem>
@@ -92,11 +86,7 @@ const FlatItem: React.FC<{
   navigate: (path: string) => void;
 }> = ({ item, pathname, navigate }) => (
   <ShadcnSidebarMenuItem>
-    <ShadcnSidebarMenuButton
-      tooltip={item.title}
-      isActive={pathname === item.path}
-      onClick={() => navigate(item.path)}
-    >
+    <ShadcnSidebarMenuButton tooltip={item.title} isActive={pathname === item.path} onClick={() => navigate(item.path)}>
       <item.icon />
       <span>{item.title}</span>
     </ShadcnSidebarMenuButton>
@@ -126,19 +116,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ groups, topOffset = 14 }
               <ShadcnSidebarMenu>
                 {group.items.map((item) =>
                   item.children ? (
-                    <CollapsibleItem
-                      key={item.title}
-                      item={item}
-                      pathname={location.pathname}
-                      navigate={navigate}
-                    />
+                    <CollapsibleItem key={item.title} item={item} pathname={location.pathname} navigate={navigate} />
                   ) : (
-                    <FlatItem
-                      key={item.title}
-                      item={item}
-                      pathname={location.pathname}
-                      navigate={navigate}
-                    />
+                    <FlatItem key={item.title} item={item} pathname={location.pathname} navigate={navigate} />
                   ),
                 )}
               </ShadcnSidebarMenu>

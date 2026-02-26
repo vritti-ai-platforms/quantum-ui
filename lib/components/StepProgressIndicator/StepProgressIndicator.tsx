@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import { type ReactNode, Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { cn } from '../../../shadcn/utils';
 import { Progress } from '../Progress';
 import { Typography } from '../Typography';
@@ -18,11 +18,7 @@ export interface StepProgressIndicatorProps {
 }
 
 // Reusable multi-step indicator with icon circles, connector lines, and per-step progress bars
-export const StepProgressIndicator = ({
-  steps,
-  currentStep,
-  progress = 0,
-}: StepProgressIndicatorProps) => (
+export const StepProgressIndicator = ({ steps, currentStep, progress = 0 }: StepProgressIndicatorProps) => (
   <div className="flex w-full items-start justify-between">
     {steps.map((step, index) => {
       const num = index + 1;
@@ -51,20 +47,12 @@ export const StepProgressIndicator = ({
             >
               {step.label}
             </Typography>
-            <Progress
-              value={isCompleted ? 100 : isActive ? progress : 0}
-              className="h-1 w-16"
-            />
+            <Progress value={isCompleted ? 100 : isActive ? progress : 0} className="h-1 w-16" />
           </div>
 
           {index < steps.length - 1 && (
             <div className="mx-2 mt-4 h-0.5 flex-1">
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all',
-                  isCompleted ? 'bg-primary' : 'bg-border',
-                )}
-              />
+              <div className={cn('h-full rounded-full transition-all', isCompleted ? 'bg-primary' : 'bg-border')} />
             </div>
           )}
         </Fragment>

@@ -42,7 +42,7 @@ export default defineConfig({
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
         'selects/IndustrySelect': resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
-        'IndustrySelect': resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
+        IndustrySelect: resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),
@@ -58,6 +58,7 @@ export default defineConfig({
         'components/StepProgressIndicator': resolve(__dirname, 'lib/components/StepProgressIndicator/index.ts'),
         'components/Switch': resolve(__dirname, 'lib/components/Switch/index.ts'),
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
+        'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Hooks entries
