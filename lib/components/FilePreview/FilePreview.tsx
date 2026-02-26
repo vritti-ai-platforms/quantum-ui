@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { File, FileArchive, FileAudio, FileCode, FileSpreadsheet, FileText, FileVideo } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '../../../shadcn/utils';
 
 export interface FilePreviewProps {
@@ -14,12 +14,7 @@ function getFileIcon(mimeType: string) {
   if (mimeType === 'application/pdf') return FileText;
   if (mimeType.startsWith('video/')) return FileVideo;
   if (mimeType.startsWith('audio/')) return FileAudio;
-  if (
-    mimeType === 'text/csv' ||
-    mimeType.includes('spreadsheet') ||
-    mimeType.includes('excel')
-  )
-    return FileSpreadsheet;
+  if (mimeType === 'text/csv' || mimeType.includes('spreadsheet') || mimeType.includes('excel')) return FileSpreadsheet;
   if (
     mimeType === 'application/zip' ||
     mimeType === 'application/gzip' ||
@@ -63,10 +58,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({ file, size = 40, class
       className={cn('flex items-center justify-center rounded bg-muted shrink-0', className)}
       style={{ width: size, height: size }}
     >
-      <IconComponent
-        className="text-muted-foreground"
-        style={{ width: iconSize, height: iconSize }}
-      />
+      <IconComponent className="text-muted-foreground" style={{ width: iconSize, height: iconSize }} />
     </div>
   );
 };
