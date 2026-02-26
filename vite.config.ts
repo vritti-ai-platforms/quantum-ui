@@ -58,6 +58,7 @@ export default defineConfig({
         'components/StepProgressIndicator': resolve(__dirname, 'lib/components/StepProgressIndicator/index.ts'),
         'components/Switch': resolve(__dirname, 'lib/components/Switch/index.ts'),
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
+        'components/FilePreview': resolve(__dirname, 'lib/components/FilePreview/index.ts'),
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),

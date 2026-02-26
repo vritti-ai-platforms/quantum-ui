@@ -164,6 +164,10 @@
       "types": "./dist/lib/components/Toggle/index.d.ts",
       "import": "./dist/components/Toggle.js"
     },
+    "./FilePreview": {
+      "types": "./dist/lib/components/FilePreview/index.d.ts",
+      "import": "./dist/components/FilePreview.js"
+    },
     "./UploadFile": {
       "types": "./dist/lib/components/UploadFile/index.d.ts",
       "import": "./dist/components/UploadFile.js"

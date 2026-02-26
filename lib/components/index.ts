@@ -29,4 +29,5 @@ export * from './TextField';
 export * from './ThemeToggle';
 export * from './Toggle';
 export * from './Typography';
+export * from './FilePreview';
 export * from './UploadFile';
