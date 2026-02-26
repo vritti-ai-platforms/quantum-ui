@@ -26,6 +26,7 @@ export interface SingleSelectProps {
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
+  onOptionSelect?: (option: SelectOption | null) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
@@ -51,6 +52,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       groups,
       value: controlledValue,
       onChange,
+      onOptionSelect,
       onBlur,
       name,
       disabled = false,
@@ -70,6 +72,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
       groups,
       value: controlledValue,
       onChange,
+      onOptionSelect,
       defaultValue,
       remoteSearch: !!asyncState,
     });

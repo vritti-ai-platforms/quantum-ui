@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Select } from '../../components/Select/Select';
-import type { SelectValue, SelectVariant } from '../../components/Select/types';
+import type { SelectOption, SelectValue, SelectVariant } from '../../components/Select/types';
 
 export interface IndustrySelectProps {
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
+  onOptionSelect?: (option: SelectOption | null) => void;
   onBlur?: () => void;
   name?: string;
   label?: string;

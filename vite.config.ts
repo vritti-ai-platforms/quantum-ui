@@ -42,6 +42,7 @@ export default defineConfig({
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
         'selects/IndustrySelect': resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
+        'IndustrySelect': resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),

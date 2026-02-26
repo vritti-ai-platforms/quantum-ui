@@ -108,6 +108,10 @@
       "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
       "import": "./dist/selects/IndustrySelect.js"
     },
+    "./IndustrySelect": {
+      "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
+      "import": "./dist/selects/IndustrySelect.js"
+    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"

@@ -26,6 +26,7 @@ export interface MultiSelectProps {
   groups?: SelectGroup[];
   value?: SelectValue[];
   onChange?: (values: SelectValue[]) => void;
+  onOptionsSelect?: (options: SelectOption[]) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
@@ -51,6 +52,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       groups,
       value: controlledValue,
       onChange,
+      onOptionsSelect,
       onBlur,
       name,
       disabled = false,
@@ -70,6 +72,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       groups,
       value: controlledValue,
       onChange,
+      onOptionsSelect,
       defaultValue,
       remoteSearch: !!asyncState,
     });
