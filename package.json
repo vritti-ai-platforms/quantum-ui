@@ -132,6 +132,10 @@
       "types": "./dist/lib/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
     },
+    "./Dialog": {
+      "types": "./dist/lib/components/Dialog/index.d.ts",
+      "import": "./dist/components/Dialog.js"
+    },
     "./DropdownMenu": {
       "types": "./dist/lib/components/DropdownMenu/index.d.ts",
       "import": "./dist/components/DropdownMenu.js"

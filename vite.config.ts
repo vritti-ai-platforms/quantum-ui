@@ -50,6 +50,7 @@ export default defineConfig({
         'components/ThemeToggle': resolve(__dirname, 'lib/components/ThemeToggle/index.ts'),
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
+        'components/Dialog': resolve(__dirname, 'lib/components/Dialog/index.ts'),
         'components/DropdownMenu': resolve(__dirname, 'lib/components/DropdownMenu/index.ts'),
         'components/Separator': resolve(__dirname, 'lib/components/Separator/index.ts'),
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),

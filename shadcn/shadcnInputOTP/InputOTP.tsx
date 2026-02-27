@@ -22,34 +22,33 @@ const InputOTPGroup = forwardRef<React.ElementRef<'div'>, React.ComponentPropsWi
 );
 InputOTPGroup.displayName = 'InputOTPGroup';
 
-const InputOTPSlot = forwardRef<
-  React.ElementRef<'div'>,
-  React.ComponentPropsWithoutRef<'div'> & { index: number }
->(({ index, className, ...props }, ref) => {
-  const inputOTPContext = useContext(OTPInputContext);
-  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
+const InputOTPSlot = forwardRef<React.ElementRef<'div'>, React.ComponentPropsWithoutRef<'div'> & { index: number }>(
+  ({ index, className, ...props }, ref) => {
+    const inputOTPContext = useContext(OTPInputContext);
+    const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        'relative flex h-12 w-12 items-center justify-center border-y border-r border-input text-base transition-all first:rounded-l-md first:border-l last:rounded-r-md',
-        'bg-transparent dark:bg-input/30 text-foreground',
-        'focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
-        isActive && 'z-10 border-ring ring-ring/50 ring-[3px]',
-        className,
-      )}
-      {...props}
-    >
-      {char}
-      {hasFakeCaret && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
-        </div>
-      )}
-    </div>
-  );
-});
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'relative flex h-12 w-12 items-center justify-center border-y border-r border-input text-base transition-all first:rounded-l-md first:border-l last:rounded-r-md',
+          'bg-transparent dark:bg-input/30 text-foreground',
+          'focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
+          isActive && 'z-10 border-ring ring-ring/50 ring-[3px]',
+          className,
+        )}
+        {...props}
+      >
+        {char}
+        {hasFakeCaret && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
+          </div>
+        )}
+      </div>
+    );
+  },
+);
 InputOTPSlot.displayName = 'InputOTPSlot';
 
 const InputOTPSeparator = forwardRef<React.ElementRef<'div'>, React.ComponentPropsWithoutRef<'div'>>(

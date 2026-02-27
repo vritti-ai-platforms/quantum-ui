@@ -199,9 +199,7 @@ const SingleSelectRow = memo(function SingleSelectRow({
       onKeyDown={handleKeyDown}
     >
       <span className="truncate">{name}</span>
-      {description && (
-        <span className="truncate text-xs text-muted-foreground mt-0.5">{description}</span>
-      )}
+      {description && <span className="truncate text-xs text-muted-foreground mt-0.5">{description}</span>}
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         {selected && <CheckIcon className="size-4" />}
       </span>
