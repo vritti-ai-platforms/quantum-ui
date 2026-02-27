@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef } from 'react';
 import { buttonVariants, Button as ShadcnButton } from '../../../shadcn/shadcnButton';
 import { cn } from '../../../shadcn/utils';
 import { Spinner } from '../Spinner';
@@ -11,7 +12,7 @@ export interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
 }
 
 // Button with built-in loading state and adornment support
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, isLoading = false, loadingText, startAdornment, endAdornment, disabled, className, ...props }, ref) => {
     return (
       <ShadcnButton

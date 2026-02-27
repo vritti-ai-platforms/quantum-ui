@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef } from 'react';
 import {
   SingleSelectClear,
   SingleSelectContent,
@@ -41,7 +42,7 @@ export interface SingleSelectProps {
 }
 
 // Single-value form field wrapper built on Popover primitives
-export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProps>(
+export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
   (
     {
       label,
@@ -88,6 +89,7 @@ export const SingleSelect = React.forwardRef<HTMLButtonElement, SingleSelectProp
         <SingleSelectRow
           key={String(option.value)}
           name={option.label}
+          description={option.description}
           selected={state.selectedValue === option.value}
           onSelect={() => {
             state.selectOption(option.value);

@@ -1,7 +1,8 @@
 'use client';
 
 import { ChevronDownIcon, SearchIcon } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef, memo } from 'react';
 
 import { Checkbox } from '../shadcnCheckbox';
 import { Popover, PopoverContent, PopoverTrigger } from '../shadcnPopover';
@@ -30,7 +31,7 @@ interface MultiSelectTriggerProps extends React.ComponentProps<'button'> {
   listboxId?: string;
 }
 
-const MultiSelectTrigger = React.forwardRef<HTMLButtonElement, MultiSelectTriggerProps>(
+const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTriggerProps>(
   ({ className, children, disabled, open, listboxId, ...props }, ref) => {
     return (
       <PopoverTrigger asChild>
@@ -164,7 +165,7 @@ interface MultiSelectRowProps {
   className?: string;
 }
 
-const MultiSelectRow = React.memo(function MultiSelectRow({
+const MultiSelectRow = memo(function MultiSelectRow({
   name,
   checked,
   onToggle,

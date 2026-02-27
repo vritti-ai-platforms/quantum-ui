@@ -3,7 +3,8 @@
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { PanelLeftIcon } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useIsMobile } from '../../lib/hooks/useIsMobile';
 import { Button } from '../shadcnButton';
@@ -34,11 +35,11 @@ type SidebarContextProps = {
   toggleSidebar: () => void;
 };
 
-const SidebarContext = React.createContext<SidebarContextProps | null>(null);
+const SidebarContext = createContext<SidebarContextProps | null>(null);
 
 // Accesses sidebar state from the nearest SidebarProvider
 function useSidebar() {
-  const context = React.useContext(SidebarContext);
+  const context = useContext(SidebarContext);
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider.');
   }
@@ -60,11 +61,11 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void;
 }) {
   const isMobile = useIsMobile();
-  const [openMobile, setOpenMobile] = React.useState(false);
+  const [openMobile, setOpenMobile] = useState(false);
 
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  const [_open, _setOpen] = useState(defaultOpen);
   const open = openProp ?? _open;
-  const setOpen = React.useCallback(
+  const setOpen = useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === 'function' ? value(open) : value;
       if (setOpenProp) {
@@ -76,12 +77,12 @@ function SidebarProvider({
     [setOpenProp, open],
   );
 
-  const toggleSidebar = React.useCallback(() => {
+  const toggleSidebar = useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   }, [isMobile, setOpen]);
 
   // Keyboard shortcut to toggle sidebar (Cmd+B / Ctrl+B)
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
@@ -95,7 +96,7 @@ function SidebarProvider({
 
   const state = open ? 'expanded' : 'collapsed';
 
-  const contextValue = React.useMemo<SidebarContextProps>(
+  const contextValue = useMemo<SidebarContextProps>(
     () => ({
       state,
       open,
@@ -105,7 +106,7 @@ function SidebarProvider({
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, toggleSidebar],
   );
 
   return (
@@ -557,7 +558,7 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<'div'> & {
   showIcon?: boolean;
 }) {
-  const width = React.useMemo(() => {
+  const width = useMemo(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`;
   }, []);
 
@@ -655,18 +656,18 @@ const SIDEBAR_MODE_OPTIONS: { value: SidebarMode; label: string }[] = [
 function useSidebarMode(storageKey = 'sidebar-mode') {
   const { setOpen } = useSidebar();
 
-  const [sidebarMode, setSidebarMode] = React.useState<SidebarMode>(() => {
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>(() => {
     const stored = localStorage.getItem(storageKey);
     if (stored === 'expanded' || stored === 'collapsed' || stored === 'hover') return stored;
     return 'expanded';
   });
 
   // Stable ref to avoid re-triggering effect when setOpen identity changes
-  const setOpenRef = React.useRef(setOpen);
+  const setOpenRef = useRef(setOpen);
   setOpenRef.current = setOpen;
 
   // Sync sidebar open/close when mode changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (sidebarMode === 'expanded') {
       setOpenRef.current(true);
     } else {

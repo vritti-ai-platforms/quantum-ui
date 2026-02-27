@@ -2,7 +2,8 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef } from 'react';
 import { cn } from '../utils';
 
 const Sheet = DialogPrimitive.Root;
@@ -13,7 +14,7 @@ const SheetClose = DialogPrimitive.Close;
 
 const SheetPortal = DialogPrimitive.Portal;
 
-const SheetOverlay = React.forwardRef<
+const SheetOverlay = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
@@ -32,7 +33,7 @@ interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof Dialog
   side?: 'top' | 'right' | 'bottom' | 'left';
 }
 
-const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, SheetContentProps>(
+const SheetContent = forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, SheetContentProps>(
   ({ side = 'right', className, children, ...props }, ref) => (
     <SheetPortal>
       <SheetOverlay />
@@ -73,7 +74,7 @@ const SheetFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
 );
 SheetFooter.displayName = 'SheetFooter';
 
-const SheetTitle = React.forwardRef<
+const SheetTitle = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
@@ -81,7 +82,7 @@ const SheetTitle = React.forwardRef<
 ));
 SheetTitle.displayName = DialogPrimitive.Title.displayName;
 
-const SheetDescription = React.forwardRef<
+const SheetDescription = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (

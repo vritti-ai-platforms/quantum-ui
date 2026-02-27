@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { forwardRef } from 'react';
 import { Select } from '../../components/Select/Select';
 import type { SelectOption, SelectValue, SelectVariant } from '../../components/Select/types';
 
@@ -20,7 +20,7 @@ export interface IndustrySelectProps {
 }
 
 // Pre-configured Select for industry selection with async search
-export const IndustrySelect = React.forwardRef<HTMLButtonElement, IndustrySelectProps>(
+export const IndustrySelect = forwardRef<HTMLButtonElement, IndustrySelectProps>(
   ({ label = 'Industry', placeholder = 'Select industry', ...props }, ref) => {
     return (
       <Select
@@ -29,7 +29,7 @@ export const IndustrySelect = React.forwardRef<HTMLButtonElement, IndustrySelect
         placeholder={placeholder}
         searchable
         optionsEndpoint="cloud-api/industries/select"
-        fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+        fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'description' }}
         {...props}
       />
     );

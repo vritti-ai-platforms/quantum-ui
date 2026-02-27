@@ -1,5 +1,6 @@
 import { ChevronDownIcon } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Label } from '../../../shadcn/shadcnLabel';
@@ -63,7 +64,7 @@ export interface DatePickerProps {
   id?: string;
 }
 
-export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
+export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
   (
     {
       label,
@@ -81,8 +82,8 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     },
     ref,
   ) => {
-    const [internalOpen, setInternalOpen] = React.useState(false);
-    const [internalDate, setInternalDate] = React.useState<Date | undefined>(value);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const [internalDate, setInternalDate] = useState<Date | undefined>(value);
 
     // Use controlled or uncontrolled state
     const isControlled = controlledOpen !== undefined;
@@ -90,7 +91,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     const setOpen = isControlled ? onOpenChange || (() => {}) : setInternalOpen;
 
     // Sync internal date with value prop
-    React.useEffect(() => {
+    useEffect(() => {
       if (value !== undefined) {
         setInternalDate(value);
       }

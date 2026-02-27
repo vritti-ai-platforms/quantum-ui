@@ -1,5 +1,5 @@
 import { ChevronDownIcon, Loader2 } from 'lucide-react';
-import * as React from 'react';
+import { forwardRef } from 'react';
 import {
   MultiSelectActions,
   MultiSelectContent,
@@ -35,7 +35,7 @@ export interface MultiSelectFilterProps {
 }
 
 // Compact multi-select filter trigger with count-based label display
-export const MultiSelectFilter = React.forwardRef<HTMLButtonElement, MultiSelectFilterProps>(
+export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilterProps>(
   (
     {
       label,

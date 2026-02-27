@@ -17,7 +17,7 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react';
-import * as React from 'react';
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../Avatar';
 import { Button } from '../Button';
 import {
@@ -113,9 +113,9 @@ export const WithKeyboardShortcuts: Story = {
 
 export const WithCheckboxItems: Story = {
   render: () => {
-    const [showStatusBar, setShowStatusBar] = React.useState(true);
-    const [showActivityBar, setShowActivityBar] = React.useState(false);
-    const [showPanel, setShowPanel] = React.useState(true);
+    const [showStatusBar, setShowStatusBar] = useState(true);
+    const [showActivityBar, setShowActivityBar] = useState(false);
+    const [showPanel, setShowPanel] = useState(true);
 
     const items: MenuItem[] = [
       { type: 'label', id: 'appearance', label: 'Appearance' },
@@ -157,7 +157,7 @@ export const WithCheckboxItems: Story = {
 
 export const WithRadioItems: Story = {
   render: () => {
-    const [position, setPosition] = React.useState('bottom');
+    const [position, setPosition] = useState('bottom');
 
     const items: MenuItem[] = [
       { type: 'label', id: 'panel-position', label: 'Panel Position' },
@@ -536,9 +536,9 @@ export const CustomItemAsMenuItem: Story = {
 // Primitive components example for full control
 export const PrimitiveComponents: Story = {
   render: () => {
-    const [bookmarksChecked, setBookmarksChecked] = React.useState(true);
-    const [urlsChecked, setUrlsChecked] = React.useState(false);
-    const [person, setPerson] = React.useState('pedro');
+    const [bookmarksChecked, setBookmarksChecked] = useState(true);
+    const [urlsChecked, setUrlsChecked] = useState(false);
+    const [person, setPerson] = useState('pedro');
 
     return (
       <DropdownMenuRoot>
@@ -682,8 +682,8 @@ export const TableRowActions: Story = {
 
 export const UserProfileMenu: Story = {
   render: () => {
-    const [notifications, setNotifications] = React.useState(true);
-    const [theme, setTheme] = React.useState('system');
+    const [notifications, setNotifications] = useState(true);
+    const [theme, setTheme] = useState('system');
 
     const items: MenuItem[] = [
       {
@@ -909,9 +909,9 @@ export const DeeplyNestedMenus: Story = {
 // All features combined
 export const AllFeaturesCombined: Story = {
   render: () => {
-    const [showInlinePreview, setShowInlinePreview] = React.useState(true);
-    const [showFullPath, setShowFullPath] = React.useState(false);
-    const [sortBy, setSortBy] = React.useState('name');
+    const [showInlinePreview, setShowInlinePreview] = useState(true);
+    const [showFullPath, setShowFullPath] = useState(false);
+    const [sortBy, setSortBy] = useState('name');
 
     const items: MenuItem[] = [
       { type: 'label', id: 'file-menu', label: 'File Menu' },

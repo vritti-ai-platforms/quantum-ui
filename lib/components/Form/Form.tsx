@@ -1,5 +1,6 @@
 import type { UseMutationResult } from '@tanstack/react-query';
-import * as React from 'react';
+import type React from 'react';
+import { Children, cloneElement, Fragment, isValidElement, useCallback } from 'react';
 import {
   Controller,
   type ControllerProps,
@@ -35,14 +36,14 @@ function processChildren<
   isSubmitting: boolean,
   setValue: UseFormReturn<TFieldValues, _TContext, TTransformedValues>['setValue'],
 ): React.ReactNode {
-  return React.Children.map(children, (child) => {
+  return Children.map(children, (child) => {
     // Handle non-element children (strings, numbers, null, etc.)
-    if (!React.isValidElement(child)) {
+    if (!isValidElement(child)) {
       return child;
     }
 
     const childProps = child.props as any;
-    const isFragment = child.type === React.Fragment;
+    const isFragment = child.type === Fragment;
 
     // Handle form fields with name prop (but not Fragments)
     if (!isFragment && childProps.name && typeof childProps.name === 'string') {
@@ -76,7 +77,7 @@ function processChildren<
                     }
                   : field;
 
-            return React.cloneElement(child, {
+            return cloneElement(child, {
               ...childProps,
               ...fieldProps,
               error: fieldState.error?.message || (fieldState.error ? 'Invalid' : undefined),
@@ -93,7 +94,7 @@ function processChildren<
         child.type === Button || (typeof child.type === 'function' && (child.type as any).displayName === 'Button');
 
       if (isButtonElement) {
-        return React.cloneElement(child, {
+        return cloneElement(child, {
           ...childProps,
           isLoading: isSubmitting,
         });
@@ -107,7 +108,7 @@ function processChildren<
 
     // Recurse into children for container elements (divs, FieldGroups, etc.)
     if (childProps.children != null) {
-      return React.cloneElement(child, {
+      return cloneElement(child, {
         ...childProps,
         children: processChildren(childProps.children, control, isSubmitting, setValue),
       });
@@ -245,7 +246,7 @@ export function Form<
 
   // Wrap the submit handler with automatic error mapping (always enabled)
   // Form only adds mapApiErrorsToForm - the mutation's own callbacks fire automatically
-  const wrappedOnSubmit = React.useCallback(
+  const wrappedOnSubmit = useCallback(
     async (data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues) => {
       // Suppress error toasts during form submission — Form handles errors inline
       const interceptorId = axios.interceptors.request.use((config) => ({

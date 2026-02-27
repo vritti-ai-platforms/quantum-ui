@@ -1,9 +1,9 @@
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
 import { Camera, Upload, User, X } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../../shadcn/utils';
-import { Field, FieldError, FieldLabel } from '../Field';
 import { Button } from '../Button';
+import { Field, FieldError, FieldLabel } from '../Field';
 import { FilePreview } from '../FilePreview';
 
 // Preset anchor string values
@@ -102,10 +102,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     if (multiple) {
       // Merge with existing files, avoiding duplicates by name+size
       const incoming = Array.from(fileList);
-      const merged = [
-        ...files,
-        ...incoming.filter((f) => !files.some((e) => e.name === f.name && e.size === f.size)),
-      ];
+      const merged = [...files, ...incoming.filter((f) => !files.some((e) => e.name === f.name && e.size === f.size))];
       onChange?.(merged);
     } else {
       onChange?.(fileList[0]);
@@ -156,9 +153,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           )}
         >
           <Upload className="h-6 w-6 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            {placeholder ?? 'Click or drag to upload'}
-          </p>
+          <p className="text-sm text-muted-foreground">{placeholder ?? 'Click or drag to upload'}</p>
           {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </button>
       );
@@ -169,12 +164,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       if (!multiple && hasFiles) return null;
 
       return (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleClick}
-          disabled={disabled}
-        >
+        <Button type="button" variant="outline" onClick={handleClick} disabled={disabled}>
           <Upload className="h-4 w-4" />
           {placeholder ?? 'Upload file'}
         </Button>

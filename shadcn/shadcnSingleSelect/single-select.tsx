@@ -1,7 +1,8 @@
 'use client';
 
 import { CheckIcon, ChevronDownIcon, SearchIcon } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef, memo } from 'react';
 
 import { Popover, PopoverContent, PopoverTrigger } from '../shadcnPopover';
 import { cn } from '../utils';
@@ -33,7 +34,7 @@ interface SingleSelectTriggerProps extends React.ComponentProps<'button'> {
   listboxId?: string;
 }
 
-const SingleSelectTrigger = React.forwardRef<HTMLButtonElement, SingleSelectTriggerProps>(
+const SingleSelectTrigger = forwardRef<HTMLButtonElement, SingleSelectTriggerProps>(
   ({ className, children, disabled, open, listboxId, ...props }, ref) => {
     return (
       <PopoverTrigger asChild>
@@ -151,14 +152,16 @@ function SingleSelectList({ className, children, ...props }: SingleSelectListPro
 // SingleSelectRow — a single option row with a check icon
 interface SingleSelectRowProps {
   name: string;
+  description?: string;
   selected: boolean;
   onSelect: () => void;
   disabled?: boolean;
   className?: string;
 }
 
-const SingleSelectRow = React.memo(function SingleSelectRow({
+const SingleSelectRow = memo(function SingleSelectRow({
   name,
+  description,
   selected,
   onSelect,
   disabled,
@@ -186,7 +189,7 @@ const SingleSelectRow = React.memo(function SingleSelectRow({
       aria-disabled={disabled}
       tabIndex={disabled ? undefined : 0}
       className={cn(
-        'relative flex w-full cursor-default items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none',
+        'relative flex w-full cursor-default flex-col items-start rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -196,6 +199,9 @@ const SingleSelectRow = React.memo(function SingleSelectRow({
       onKeyDown={handleKeyDown}
     >
       <span className="truncate">{name}</span>
+      {description && (
+        <span className="truncate text-xs text-muted-foreground mt-0.5">{description}</span>
+      )}
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         {selected && <CheckIcon className="size-4" />}
       </span>
