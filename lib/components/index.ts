@@ -19,7 +19,6 @@ export * from './PhoneField';
 export * from './Progress';
 export * from './Select';
 export * from './Separator';
-export * from './Sidebar';
 export * from './Skeleton';
 export * from './Sonner';
 export * from './Spinner';

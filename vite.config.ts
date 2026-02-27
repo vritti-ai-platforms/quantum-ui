@@ -26,7 +26,7 @@ export default defineConfig({
         // Main entry point
         index: resolve(__dirname, 'lib/index.ts'),
         // Component entries
-        'components/AppSidebar': resolve(__dirname, 'lib/components/AppSidebar/index.ts'),
+        'components/Sidebar': resolve(__dirname, 'lib/components/AppSidebar/index.ts'),
         'components/Breadcrumb': resolve(__dirname, 'lib/components/Breadcrumb/index.ts'),
         'components/Alert': resolve(__dirname, 'lib/components/Alert/index.ts'),
         'components/Avatar': resolve(__dirname, 'lib/components/Avatar/index.ts'),
@@ -52,7 +52,6 @@ export default defineConfig({
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
         'components/DropdownMenu': resolve(__dirname, 'lib/components/DropdownMenu/index.ts'),
         'components/Separator': resolve(__dirname, 'lib/components/Separator/index.ts'),
-        'components/Sidebar': resolve(__dirname, 'lib/components/Sidebar/index.ts'),
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),
         'components/Sonner': resolve(__dirname, 'lib/components/Sonner/index.ts'),
         'components/Spinner': resolve(__dirname, 'lib/components/Spinner/index.ts'),
@@ -71,6 +70,7 @@ export default defineConfig({
         'theme/index': resolve(__dirname, 'lib/theme/index.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
+        'utils/slug': resolve(__dirname, 'lib/utils/slug.ts'),
       },
       name: 'QuantumUI',
       formats: ['es'],

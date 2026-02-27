@@ -36,9 +36,9 @@
       "types": "./dist/lib/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./AppSidebar": {
+    "./Sidebar": {
       "types": "./dist/lib/components/AppSidebar/index.d.ts",
-      "import": "./dist/components/AppSidebar.js"
+      "import": "./dist/components/Sidebar.js"
     },
     "./Breadcrumb": {
       "types": "./dist/lib/components/Breadcrumb/index.d.ts",
@@ -140,10 +140,6 @@
       "types": "./dist/lib/components/Separator/index.d.ts",
       "import": "./dist/components/Separator.js"
     },
-    "./Sidebar": {
-      "types": "./dist/lib/components/Sidebar/index.d.ts",
-      "import": "./dist/components/Sidebar.js"
-    },
     "./Skeleton": {
       "types": "./dist/lib/components/Skeleton/index.d.ts",
       "import": "./dist/components/Skeleton.js"
@@ -183,6 +179,10 @@
     "./axios": {
       "types": "./dist/lib/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
+    },
+    "./utils/slug": {
+      "types": "./dist/lib/utils/slug.d.ts",
+      "import": "./dist/utils/slug.js"
     },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",

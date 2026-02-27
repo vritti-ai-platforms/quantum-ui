@@ -1,4 +1,4 @@
-export type { BreadcrumbProps } from './Breadcrumb';
+export type { BreadcrumbProps, BreadcrumbSegment } from './Breadcrumb';
 export { Breadcrumb } from './Breadcrumb';
 
 // Primitives for advanced composition

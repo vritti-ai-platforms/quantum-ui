@@ -11,6 +11,16 @@ import {
 } from '../../../shadcn/shadcnBreadcrumb';
 import { cn } from '../../../shadcn/utils';
 
+// Parsed segment shape exposed to consumers via renderSegment
+export interface BreadcrumbSegment {
+  path: string;
+  raw: string;
+  label: string;
+  slug: string | null;
+  id: string | null;
+  isLast: boolean;
+}
+
 export interface BreadcrumbProps extends React.ComponentProps<'nav'> {
   // Full path → display label (e.g. { '/settings/profile': 'Profile' })
   routes?: Record<string, string>;
@@ -18,12 +28,8 @@ export interface BreadcrumbProps extends React.ComponentProps<'nav'> {
   separator?: React.ReactNode;
   // Max visible segments before collapsing middle items (0 = no limit)
   maxItems?: number;
-}
-
-interface BreadcrumbSegment {
-  path: string;
-  label: string;
-  isLast: boolean;
+  // Custom renderer — return ReactNode to override, or null/undefined for default
+  renderSegment?: (segment: BreadcrumbSegment) => React.ReactNode | null | undefined;
 }
 
 // Converts 'my-account' to 'My Account'
@@ -54,6 +60,7 @@ export function Breadcrumb({
   routes = {},
   separator,
   maxItems = 0,
+  renderSegment,
   className,
   ...props
 }: BreadcrumbProps) {
@@ -63,9 +70,17 @@ export function Breadcrumb({
 
   const items: BreadcrumbSegment[] = segments.map((segment, index) => {
     const path = '/' + segments.slice(0, index + 1).join('/');
+    const tildeIdx = segment.indexOf('~');
+    const slug = tildeIdx >= 0 ? segment.slice(0, tildeIdx) : null;
+    const id = tildeIdx >= 0 ? segment.slice(tildeIdx + 1) : null;
+    const label = routes[path] ?? humanizeSegment(slug ?? segment);
+
     return {
       path,
-      label: routes[path] ?? humanizeSegment(segment),
+      raw: segment,
+      label,
+      slug,
+      id,
       isLast: index === segments.length - 1,
     };
   });
@@ -85,6 +100,17 @@ export function Breadcrumb({
                 <BreadcrumbItem>
                   <BreadcrumbEllipsis />
                 </BreadcrumbItem>
+              </React.Fragment>
+            );
+          }
+
+          // Check for custom rendering
+          const customNode = renderSegment?.(item);
+          if (customNode !== null && customNode !== undefined) {
+            return (
+              <React.Fragment key={item.path}>
+                {index > 0 && <BreadcrumbSeparator>{separator}</BreadcrumbSeparator>}
+                <BreadcrumbItem>{customNode}</BreadcrumbItem>
               </React.Fragment>
             );
           }

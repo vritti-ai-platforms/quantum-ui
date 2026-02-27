@@ -41,7 +41,7 @@ export interface SidebarNavGroup {
   items: SidebarNavItem[];
 }
 
-export interface AppSidebarProps {
+export interface SidebarProps {
   groups: SidebarNavGroup[];
   topOffset?: number;
 }
@@ -94,7 +94,7 @@ const FlatItem: React.FC<{
 );
 
 // Data-driven sidebar that renders grouped nav items with collapsible support
-export const AppSidebar: React.FC<AppSidebarProps> = ({ groups, topOffset = 14 }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ groups, topOffset = 14 }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sidebarProps, controlProps } = shadcnUseSidebarMode();
@@ -111,7 +111,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ groups, topOffset = 14 }
       <ShadcnSidebarContent>
         {groups.map((group) => (
           <ShadcnSidebarGroup key={group.label}>
-            <ShadcnSidebarGroupLabel>{group.label}</ShadcnSidebarGroupLabel>
+            <ShadcnSidebarGroupLabel className="group-data-[collapsible=icon]:mt-0">
+              {group.label}
+            </ShadcnSidebarGroupLabel>
             <ShadcnSidebarGroupContent>
               <ShadcnSidebarMenu>
                 {group.items.map((item) =>
@@ -136,4 +138,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ groups, topOffset = 14 }
   );
 };
 
-AppSidebar.displayName = 'AppSidebar';
+Sidebar.displayName = 'Sidebar';
+
+// Re-export layout primitives consumers need alongside the sidebar
+export {
+  SidebarInset,
+  SidebarProvider,
+} from '../../../shadcn/shadcnSidebar';
