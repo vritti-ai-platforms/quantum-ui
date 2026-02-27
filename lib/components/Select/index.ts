@@ -2,7 +2,11 @@ export type { MultiSelectProps } from './components/MultiSelect/MultiSelect';
 export { MultiSelect } from './components/MultiSelect/MultiSelect';
 export type { MultiSelectFilterProps } from './components/MultiSelect/MultiSelectFilter';
 export { MultiSelectFilter } from './components/MultiSelect/MultiSelectFilter';
-export type { SingleSelectProps } from './components/SingleSelect/SingleSelect';
+export type {
+  SingleSelectAnchorProps,
+  SingleSelectOptionRenderProps,
+  SingleSelectProps,
+} from './components/SingleSelect/SingleSelect';
 export { SingleSelect } from './components/SingleSelect/SingleSelect';
 export type { SingleSelectFilterProps } from './components/SingleSelect/SingleSelectFilter';
 export { SingleSelectFilter } from './components/SingleSelect/SingleSelectFilter';
