@@ -1,6 +1,7 @@
 export * from './Alert';
 export * from './AppSidebar';
 export * from './Avatar';
+export * from './Breadcrumb';
 export * from './Badge';
 export * from './Button';
 export * from './Card';

@@ -40,6 +40,10 @@
       "types": "./dist/lib/components/AppSidebar/index.d.ts",
       "import": "./dist/components/AppSidebar.js"
     },
+    "./Breadcrumb": {
+      "types": "./dist/lib/components/Breadcrumb/index.d.ts",
+      "import": "./dist/components/Breadcrumb.js"
+    },
     "./Alert": {
       "types": "./dist/lib/components/Alert/index.d.ts",
       "import": "./dist/components/Alert.js"
