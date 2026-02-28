@@ -28,12 +28,22 @@ export interface DataTableToolbarConfig {
 
 export type DensityType = 'compact' | 'normal' | 'comfortable';
 
+export interface DataTableFilterItem {
+  slug: string;
+  label: string;
+  node: React.ReactNode;
+}
+
 export interface DataTableMeta {
   slug: string;
   singular: string;
   plural: string;
   lockedColumnSizing: boolean;
   toggleLockColumnSizing: () => void;
+  filterOrder: string[];
+  filterVisibility: Record<string, boolean>;
+  setFilterOrder: (order: string[]) => void;
+  toggleFilterVisibility: (slug: string) => void;
 }
 
 // ─── DataTable component props ───
@@ -45,6 +55,7 @@ export interface DataTableProps<TData> {
   selectActions?: SelectActions<TData>;
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
+  filters?: DataTableFilterItem[];
   isLoading?: boolean;
   maxHeight?: string;
   className?: string;

@@ -19,6 +19,8 @@ export interface TableState {
   columnOrder: ColumnOrderState;
   columnSizing: ColumnSizingState;
   lockedColumnSizing: boolean;
+  filterOrder: string[];
+  filterVisibility: Record<string, boolean>;
   lastAccessed: number;
 }
 
@@ -36,6 +38,8 @@ const DEFAULT_TABLE_STATE: TableState = {
   columnOrder: [],
   columnSizing: {},
   lockedColumnSizing: false,
+  filterOrder: [],
+  filterVisibility: {},
   lastAccessed: 0,
 };
 

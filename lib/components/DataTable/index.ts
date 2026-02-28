@@ -3,6 +3,7 @@
 // Sub-components
 export { DataTableColumnHeader } from './components/DataTableColumnHeader';
 export { DataTableEmpty } from './components/DataTableEmpty';
+export { DataTableFilters } from './components/DataTableFilters';
 export { DataTablePagination } from './components/DataTablePagination';
 export { DataTableRowDensity } from './components/DataTableRowDensity';
 export { DataTableSearch } from './components/DataTableSearch';
@@ -17,6 +18,7 @@ export { useDataTableStore } from './store/store';
 export type {
   ColumnDef,
   DataTableEmptyConfig,
+  DataTableFilterItem,
   DataTableMeta,
   DataTablePaginationConfig,
   DataTableProps,

@@ -1,5 +1,5 @@
 import { flexRender } from '@tanstack/react-table';
-import { X } from 'lucide-react';
+import { Funnel, SlidersHorizontal, X } from 'lucide-react';
 import { useState } from 'react';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
@@ -7,6 +7,7 @@ import { Button } from '../Button';
 import { Skeleton } from '../Skeleton';
 import { DataTableColumnHeader } from './components/DataTableColumnHeader';
 import { DataTableEmpty } from './components/DataTableEmpty';
+import { DataTableFilters } from './components/DataTableFilters';
 import { DataTablePagination } from './components/DataTablePagination';
 import { DataTableRowDensity } from './components/DataTableRowDensity';
 import { DataTableSearch } from './components/DataTableSearch';
@@ -28,17 +29,19 @@ export function DataTable<TData>({
   selectActions,
   emptyStateConfig,
   toolbarActions,
+  filters,
   isLoading = false,
   maxHeight = '600px',
   className,
 }: DataTableProps<TData>) {
   const [density, setDensity] = useState<DensityType>('normal');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const meta = table.options.meta as DataTableMeta | undefined;
   const columnCount = table.getAllColumns().length;
   const isFiltered = table.getState().columnFilters.length > 0;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = enableSearch || visibilityEnabled || toolbarActions;
+  const showToolbar = enableSearch || visibilityEnabled || toolbarActions || filters;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -55,6 +58,17 @@ export function DataTable<TData>({
           </div>
           <div className="flex items-center gap-2">
             {enableSearch && <DataTableSearch table={table} />}
+            {filters && (
+              <Button
+                variant={filtersOpen ? 'secondary' : 'outline'}
+                size="sm"
+                className={cn('h-8 w-8 p-0', filtersOpen && 'border border-transparent')}
+                onClick={() => setFiltersOpen((v) => !v)}
+                aria-label="Toggle filters"
+              >
+                <Funnel className="h-4 w-4" />
+              </Button>
+            )}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity density={density} onDensityChange={setDensity} />
             {toolbarActions?.actions}
@@ -69,6 +83,19 @@ export function DataTable<TData>({
 
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
+        {/* Sliding filter panel */}
+        {filters && (
+          <div
+            className={cn(
+              'grid transition-all duration-200 ease-in-out',
+              filtersOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+            )}
+          >
+            <div className="overflow-hidden">
+              <DataTableFilters filters={filters} table={table} />
+            </div>
+          </div>
+        )}
         <div className="relative w-full overflow-auto" style={{ maxHeight }}>
           <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
             <TableHeader>

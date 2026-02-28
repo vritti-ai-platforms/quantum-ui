@@ -1,7 +1,9 @@
-import type { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, Table } from '@tanstack/react-table';
 import {
   AlertCircle,
+  Check,
   CheckCircle2,
+  ChevronDown,
   Clock,
   Copy,
   CreditCard,
@@ -19,7 +21,6 @@ import { DataTable } from '../lib/components/DataTable/DataTable';
 import { useDataTable } from '../lib/components/DataTable/hooks/useDataTable';
 import { getSelectionColumn } from '../lib/components/DataTable/utils';
 import { Dialog } from '../lib/components/Dialog';
-import { TextField } from '../lib/components/TextField';
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -28,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../lib/components/DropdownMenu/DropdownMenu';
+import { TextField } from '../lib/components/TextField';
 
 const Section = ({
   title,
@@ -57,14 +59,46 @@ interface Invoice {
 }
 
 const clients = [
-  'Acme Corp', 'Globex Inc', 'Stark Industries', 'Wayne Enterprises', 'Umbrella Corp',
-  'Cyberdyne Systems', 'Pied Piper', 'Hooli', 'Initech', 'Wonka Industries',
-  'Dunder Mifflin', 'Bluth Company', 'Sterling Cooper', 'Prestige Worldwide', 'Massive Dynamic',
-  'Weyland-Yutani', 'Soylent Corp', 'Tyrell Corp', 'Los Pollos', 'Oscorp',
-  'Aperture Science', 'Vault-Tec', 'Abstergo Industries', 'Mishima Zaibatsu', 'Shinra Electric',
-  'Capsule Corp', 'LexCorp', 'Gekko & Co', 'Virtucon', 'Nakatomi Trading',
-  'Rekall Inc', 'Omni Consumer', 'Brawndo Corp', 'Oceanic Airlines', 'Dharma Initiative',
-  'InGen', 'Cyberdine Labs', 'Ellingson Mineral', 'Zorg Industries', 'Axiom Corp',
+  'Acme Corp',
+  'Globex Inc',
+  'Stark Industries',
+  'Wayne Enterprises',
+  'Umbrella Corp',
+  'Cyberdyne Systems',
+  'Pied Piper',
+  'Hooli',
+  'Initech',
+  'Wonka Industries',
+  'Dunder Mifflin',
+  'Bluth Company',
+  'Sterling Cooper',
+  'Prestige Worldwide',
+  'Massive Dynamic',
+  'Weyland-Yutani',
+  'Soylent Corp',
+  'Tyrell Corp',
+  'Los Pollos',
+  'Oscorp',
+  'Aperture Science',
+  'Vault-Tec',
+  'Abstergo Industries',
+  'Mishima Zaibatsu',
+  'Shinra Electric',
+  'Capsule Corp',
+  'LexCorp',
+  'Gekko & Co',
+  'Virtucon',
+  'Nakatomi Trading',
+  'Rekall Inc',
+  'Omni Consumer',
+  'Brawndo Corp',
+  'Oceanic Airlines',
+  'Dharma Initiative',
+  'InGen',
+  'Cyberdine Labs',
+  'Ellingson Mineral',
+  'Zorg Industries',
+  'Axiom Corp',
 ];
 const statuses: Invoice['status'][] = ['paid', 'overdue', 'pending', 'draft'];
 const categories = ['Enterprise', 'SMB', 'Startup'];
@@ -180,6 +214,78 @@ const invoiceColumns: ColumnDef<Invoice, unknown>[] = [
   },
 ];
 
+// ─── FILTER COMPONENTS ───
+
+const StatusFilter = ({ table }: { table: Table<Invoice> }) => {
+  const column = table.getColumn('status');
+  const value = column?.getFilterValue() as Invoice['status'] | undefined;
+
+  return (
+    <DropdownMenuRoot>
+      <DropdownMenuTrigger asChild>
+        <Button variant={value ? 'secondary' : 'outline'} size="sm" className="h-8 gap-1">
+          Status
+          {value && (
+            <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs capitalize">
+              {value}
+            </Badge>
+          )}
+          <ChevronDown className="h-3.5 w-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        {statuses.map((s) => (
+          <DropdownMenuItem key={s} onClick={() => column?.setFilterValue(value === s ? undefined : s)}>
+            {value === s ? <Check className="mr-2 h-4 w-4" /> : <span className="mr-2 w-4" />}
+            <span className="capitalize">{s}</span>
+          </DropdownMenuItem>
+        ))}
+        {value && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => column?.setFilterValue(undefined)}>Clear filter</DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenuRoot>
+  );
+};
+
+const CategoryFilter = ({ table }: { table: Table<Invoice> }) => {
+  const column = table.getColumn('category');
+  const value = column?.getFilterValue() as string | undefined;
+
+  return (
+    <DropdownMenuRoot>
+      <DropdownMenuTrigger asChild>
+        <Button variant={value ? 'secondary' : 'outline'} size="sm" className="h-8 gap-1">
+          Category
+          {value && (
+            <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+              {value}
+            </Badge>
+          )}
+          <ChevronDown className="h-3.5 w-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        {categories.map((c) => (
+          <DropdownMenuItem key={c} onClick={() => column?.setFilterValue(value === c ? undefined : c)}>
+            {value === c ? <Check className="mr-2 h-4 w-4" /> : <span className="mr-2 w-4" />}
+            {c}
+          </DropdownMenuItem>
+        ))}
+        {value && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => column?.setFilterValue(undefined)}>Clear filter</DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenuRoot>
+  );
+};
+
 // ─── TABLE COMPONENTS ───
 
 // Full featured — all options enabled
@@ -194,6 +300,10 @@ const InvoicesTable = () => {
     <DataTable
       table={table}
       enableSearch={{ placeholder: 'Search invoices...' }}
+      filters={[
+        { slug: 'status', label: 'Status', node: <StatusFilter table={table} /> },
+        { slug: 'category', label: 'Category', node: <CategoryFilter table={table} /> },
+      ]}
       toolbarActions={{
         actions: (
           <>
@@ -281,7 +391,7 @@ export const App = () => {
 
         <Section
           title="5. Full Featured"
-          description="Everything: selection, sorting, search, column settings with pin/visibility, row density, pagination, row actions, empty state."
+          description="Everything: selection, sorting, search, filters panel, column settings with pin/visibility, row density, pagination, row actions, empty state."
         >
           <InvoicesTable />
         </Section>

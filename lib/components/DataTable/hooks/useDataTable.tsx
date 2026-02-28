@@ -51,7 +51,7 @@ export function useDataTable<TData>({
 
   const tanstackState = useDataTableStore((s) => s.tables[slug]);
 
-  const { lockedColumnSizing, lastAccessed: _, ...state } = tanstackState ?? {};
+  const { lockedColumnSizing, filterOrder, filterVisibility, lastAccessed: _, ...state } = tanstackState ?? {};
 
   const rawLabel = label ?? slug;
   const capitalizedLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
@@ -63,8 +63,13 @@ export function useDataTable<TData>({
       plural: pluralize.plural(capitalizedLabel),
       lockedColumnSizing,
       toggleLockColumnSizing: () => updateField(slug, 'lockedColumnSizing', !lockedColumnSizing),
+      filterOrder: filterOrder ?? [],
+      filterVisibility: filterVisibility ?? {},
+      setFilterOrder: (order: string[]) => updateField(slug, 'filterOrder', order),
+      toggleFilterVisibility: (id: string) =>
+        updateField(slug, 'filterVisibility', (prev) => ({ ...prev, [id]: !(prev[id] ?? true) })),
     }),
-    [slug, capitalizedLabel, lockedColumnSizing, updateField],
+    [slug, capitalizedLabel, lockedColumnSizing, filterOrder, filterVisibility, updateField],
   );
 
   const table = useReactTable({
