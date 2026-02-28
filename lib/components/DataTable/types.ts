@@ -30,6 +30,8 @@ export type DensityType = 'compact' | 'normal' | 'comfortable';
 
 export interface DataTableMeta {
   slug: string;
+  singular: string;
+  plural: string;
   lockedColumnSizing: boolean;
   toggleLockColumnSizing: () => void;
 }

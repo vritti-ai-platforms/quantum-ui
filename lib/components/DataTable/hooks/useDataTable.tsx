@@ -6,6 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import pluralize from 'pluralize-esm';
 import { useMemo, useRef } from 'react';
 import { useDataTableStore } from '../store/store';
 
@@ -13,6 +14,7 @@ interface UseDataTableOptions<TData> {
   data: TData[];
   columns: ColumnDef<TData, unknown>[];
   slug: string;
+  label?: string;
   initialState?: InitialTableState;
   enableSorting?: boolean;
   enableMultiSort?: boolean;
@@ -27,6 +29,7 @@ export function useDataTable<TData>({
   data,
   columns,
   slug,
+  label,
   initialState = { pagination: { pageIndex: 0, pageSize: 10 } },
   enableGlobalFilter = true,
   enableMultiSort = true,
@@ -50,13 +53,18 @@ export function useDataTable<TData>({
 
   const { lockedColumnSizing, lastAccessed: _, ...state } = tanstackState ?? {};
 
+  const rawLabel = label ?? slug;
+  const capitalizedLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+
   const meta = useMemo(
     () => ({
       slug,
+      singular: pluralize.singular(capitalizedLabel),
+      plural: pluralize.plural(capitalizedLabel),
       lockedColumnSizing,
       toggleLockColumnSizing: () => updateField(slug, 'lockedColumnSizing', !lockedColumnSizing),
     }),
-    [slug, lockedColumnSizing, updateField],
+    [slug, capitalizedLabel, lockedColumnSizing, updateField],
   );
 
   const table = useReactTable({

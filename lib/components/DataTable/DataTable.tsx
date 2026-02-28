@@ -65,7 +65,7 @@ export function DataTable<TData>({
 
       {/* Selection bar */}
       {selectActions && selectedCount > 0 && (
-        <DataTableSelectionBar count={selectedCount} onClear={() => table.toggleAllRowsSelected(false)} itemLabel={meta?.slug}>
+        <DataTableSelectionBar count={selectedCount} onClear={() => table.toggleAllRowsSelected(false)} singular={meta?.singular} plural={meta?.plural}>
           {selectActions(table.getFilteredSelectedRowModel().rows)}
         </DataTableSelectionBar>
       )}

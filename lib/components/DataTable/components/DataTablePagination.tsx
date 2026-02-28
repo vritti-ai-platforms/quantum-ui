@@ -1,6 +1,5 @@
 import type { Table } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import pluralize from 'pluralize-esm';
 import { useState } from 'react';
 import { Input } from '../../../../shadcn/shadcnInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shadcn/shadcnSelect';
@@ -28,9 +27,9 @@ export function DataTablePagination<TData>({
   const totalPages = table.getPageCount();
   const start = totalRows === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalRows);
-  const rawSlug = (table.options.meta as DataTableMeta | undefined)?.slug ?? 'row';
-  const slug = rawSlug.charAt(0).toUpperCase() + rawSlug.slice(1);
-  const itemLabel = pluralize(slug, totalRows);
+  const meta = table.options.meta as DataTableMeta | undefined;
+  const singular = meta?.singular ?? 'Row';
+  const plural = meta?.plural ?? 'Rows';
 
   // Navigates to the page number entered in the inline page input
   function handleGoToPage() {
@@ -46,14 +45,14 @@ export function DataTablePagination<TData>({
       {/* Left: showing info */}
       <div className="flex items-center gap-4">
         <span className="text-sm text-muted-foreground">
-          showing {start} to {end} of {totalRows} {itemLabel}
+          showing {start} to {end} of {totalRows} {totalRows === 1 ? singular : plural}
         </span>
       </div>
 
       {/* Right: rows per page + nav buttons */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium whitespace-nowrap">{pluralize(slug, 2)} per page</p>
+          <p className="text-sm font-medium whitespace-nowrap">{plural} per page</p>
           <Select value={`${pageSize}`} onValueChange={(value) => table.setPageSize(Number(value))}>
             <SelectTrigger size="sm" className="w-[70px]">
               <SelectValue placeholder={`${pageSize}`} />
