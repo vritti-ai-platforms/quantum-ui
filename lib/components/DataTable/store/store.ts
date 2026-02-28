@@ -19,11 +19,12 @@ export interface TableState {
   columnOrder: ColumnOrderState;
   columnSizing: ColumnSizingState;
   lockedColumnSizing: boolean;
+  lastAccessed: number;
 }
 
 export interface TableSlice {
   tables: Record<string, TableState>;
-  initTable: (slug: string) => void;
+  initTable: (slug: string, options?: { pinSelectColumn?: boolean }) => void;
   updateField: <K extends keyof TableState>(slug: string, field: K, updaterOrValue: Updater<TableState[K]>) => void;
 }
 
@@ -31,10 +32,11 @@ const DEFAULT_TABLE_STATE: TableState = {
   sorting: [],
   columnFilters: [],
   columnVisibility: {},
-  columnPinning: { left: ['select'], right: [] },
+  columnPinning: { left: [], right: [] },
   columnOrder: [],
   columnSizing: {},
   lockedColumnSizing: false,
+  lastAccessed: 0,
 };
 
 // Resolves TanStack's Updater<T> pattern — value or function
@@ -46,8 +48,8 @@ function resolveUpdater<T>(updaterOrValue: Updater<T>, current: T): T {
 export const useDataTableStore = create<TableSlice>((set, get) => ({
   tables: {},
 
-  // Creates a table entry if absent — evicts oldest when exceeding MAX_TABLES
-  initTable: (slug) => {
+  // Creates a table entry if absent — evicts least-recently-used when exceeding MAX_TABLES
+  initTable: (slug, options) => {
     if (get().tables[slug]) return;
 
     set((state) => {
@@ -55,10 +57,20 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
       const keys = Object.keys(tables);
 
       if (keys.length >= MAX_TABLES) {
-        delete tables[keys[0]];
+        const lruKey = keys.reduce((oldest, key) =>
+          tables[key].lastAccessed < tables[oldest].lastAccessed ? key : oldest,
+        );
+        delete tables[lruKey];
       }
 
-      tables[slug] = { ...DEFAULT_TABLE_STATE };
+      tables[slug] = {
+        ...DEFAULT_TABLE_STATE,
+        columnPinning: {
+          left: options?.pinSelectColumn ? ['select'] : [],
+          right: [],
+        },
+        lastAccessed: Date.now(),
+      };
       return { tables };
     });
   },
@@ -74,7 +86,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
       return {
         tables: {
           ...state.tables,
-          [slug]: { ...currentTable, [field]: newValue },
+          [slug]: { ...currentTable, [field]: newValue, lastAccessed: Date.now() },
         },
       };
     });

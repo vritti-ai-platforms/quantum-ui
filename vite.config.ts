@@ -26,7 +26,7 @@ export default defineConfig({
         // Main entry point
         index: resolve(__dirname, 'lib/index.ts'),
         // Component entries
-        'components/Sidebar': resolve(__dirname, 'lib/components/AppSidebar/index.ts'),
+        'components/Sidebar': resolve(__dirname, 'lib/components/Sidebar/index.ts'),
         'components/Breadcrumb': resolve(__dirname, 'lib/components/Breadcrumb/index.ts'),
         'components/Alert': resolve(__dirname, 'lib/components/Alert/index.ts'),
         'components/Avatar': resolve(__dirname, 'lib/components/Avatar/index.ts'),

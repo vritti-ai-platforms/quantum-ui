@@ -38,16 +38,17 @@ export function useDataTable<TData>({
   const initTable = useDataTableStore((s) => s.initTable);
   const updateField = useDataTableStore((s) => s.updateField);
 
-  // Synchronous init — ensures store entry exists before selector reads
+  // Synchronous init during render — intentional side-effect pattern.
+  // The useRef guard prevents re-runs and initTable is idempotent (no-ops if slug exists).
   const initializedSlug = useRef<string | null>(null);
   if (initializedSlug.current !== slug) {
-    initTable(slug);
+    initTable(slug, { pinSelectColumn: enableRowSelection });
     initializedSlug.current = slug;
   }
 
   const tanstackState = useDataTableStore((s) => s.tables[slug]);
 
-  const { lockedColumnSizing, ...state } = tanstackState ?? {};
+  const { lockedColumnSizing, lastAccessed: _, ...state } = tanstackState ?? {};
 
   const meta = useMemo(
     () => ({

@@ -1,8 +1,7 @@
 export * from './Alert';
-export * from './AppSidebar';
 export * from './Avatar';
-export * from './Breadcrumb';
 export * from './Badge';
+export * from './Breadcrumb';
 export * from './Button';
 export * from './Card';
 export * from './Chart';
@@ -21,6 +20,7 @@ export * from './PhoneField';
 export * from './Progress';
 export * from './Select';
 export * from './Separator';
+export * from './Sidebar';
 export * from './Skeleton';
 export * from './Sonner';
 export * from './Sortable';

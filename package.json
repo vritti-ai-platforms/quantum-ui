@@ -37,7 +37,7 @@
       "import": "./dist/index.js"
     },
     "./Sidebar": {
-      "types": "./dist/lib/components/AppSidebar/index.d.ts",
+      "types": "./dist/lib/components/Sidebar/index.d.ts",
       "import": "./dist/components/Sidebar.js"
     },
     "./Breadcrumb": {

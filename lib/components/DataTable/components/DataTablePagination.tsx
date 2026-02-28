@@ -33,6 +33,10 @@ export function DataTablePagination<TData>({
   const end = Math.min(currentPage * pageSize, totalRows);
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
 
+  const parsedPage = Number.parseInt(pageInputValue, 10);
+  const isValidPageInput =
+    pageInputValue !== '' && !Number.isNaN(parsedPage) && parsedPage >= 1 && parsedPage <= totalPages;
+
   const handleGoToPage = () => {
     const pageNumber = Number.parseInt(pageInputValue, 10);
     if (!Number.isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
@@ -72,7 +76,7 @@ export function DataTablePagination<TData>({
               placeholder={currentPage.toString()}
               className="w-16 h-8 px-2 text-sm text-center"
             />
-            <Button size="sm" variant="outline" onClick={handleGoToPage} disabled={!pageInputValue} className="h-8">
+            <Button size="sm" variant="outline" onClick={handleGoToPage} disabled={!isValidPageInput} className="h-8">
               Go
             </Button>
           </div>

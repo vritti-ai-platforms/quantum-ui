@@ -1,6 +1,6 @@
 import type { Table } from '@tanstack/react-table';
 import { Search, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import {
@@ -28,9 +28,13 @@ export function DataTableSearch<TData>({ table, className }: DataTableSearchProp
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get filterable columns (exclude select/checkbox column)
-  const filterableColumns = table
-    .getAllLeafColumns()
-    .filter((c) => typeof c.accessorFn !== 'undefined' && c.getCanFilter() && c.id !== 'select');
+  const filterableColumns = useMemo(
+    () =>
+      table
+        .getAllLeafColumns()
+        .filter((c) => typeof c.accessorFn !== 'undefined' && c.getCanFilter() && c.id !== 'select'),
+    [table],
+  );
 
   // Derive initial selection from persisted columnFilters — falls back to first filterable column
   const [selectedColumnId, setSelectedColumnId] = useState(() => {

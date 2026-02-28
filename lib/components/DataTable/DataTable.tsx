@@ -34,6 +34,7 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   const [density, setDensity] = useState<DensityType>('normal');
 
+  const meta = table.options.meta as DataTableMeta | undefined;
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
   const columnCount = table.getAllColumns().length;
   const isFiltered = table.getState().columnFilters.length > 0;
@@ -82,13 +83,22 @@ export function DataTable<TData>({
                       colSpan={header.colSpan}
                       style={{ width: header.getSize() }}
                       className="relative group/resize"
+                      aria-sort={
+                        header.column.getCanSort()
+                          ? header.column.getIsSorted() === 'asc'
+                            ? 'ascending'
+                            : header.column.getIsSorted() === 'desc'
+                              ? 'descending'
+                              : 'none'
+                          : undefined
+                      }
                     >
                       {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
                         <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
                       ) : (
                         flexRender(header.column.columnDef.header, header.getContext())
                       )}
-                      {!(table.options.meta as DataTableMeta)?.lockedColumnSizing && header.column.getCanResize() && (
+                      {!meta?.lockedColumnSizing && header.column.getCanResize() && (
                         <div
                           onPointerDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}

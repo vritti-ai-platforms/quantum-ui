@@ -69,6 +69,8 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
 
 // Column settings popover with drag-to-reorder, pin, and visibility controls
 export function DataTableViewOptions<TData>({ table, className }: DataTableViewOptionsProps<TData>) {
+  const meta = table.options.meta as DataTableMeta | undefined;
+
   // getAllLeafColumns respects columnOrder — getAllColumns does NOT
   const columns = table
     .getAllLeafColumns()
@@ -108,19 +110,21 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
         </div>
 
         {/* Resize Lock */}
-        {(table.options.meta as DataTableMeta)?.toggleLockColumnSizing && (
+        {meta?.toggleLockColumnSizing && (
           <div className="flex items-center justify-between px-3 py-2.5 border-b">
             <div className="flex items-center gap-2">
               <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
               <div>
                 <span className="text-sm">Resize Lock</span>
-                <p className="text-xs text-muted-foreground">Columns can be resized</p>
+                <p className="text-xs text-muted-foreground">
+                  {meta?.lockedColumnSizing ? 'Column sizes are locked' : 'Columns can be resized'}
+                </p>
               </div>
             </div>
             <Switch
               size="sm"
-              checked={(table.options.meta as DataTableMeta)?.lockedColumnSizing ?? false}
-              onCheckedChange={() => (table.options.meta as DataTableMeta)?.toggleLockColumnSizing()}
+              checked={meta?.lockedColumnSizing ?? false}
+              onCheckedChange={() => meta?.toggleLockColumnSizing()}
               aria-label="Lock column sizes"
             />
           </div>
