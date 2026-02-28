@@ -37,6 +37,7 @@ export default defineConfig({
         'components/Checkbox': resolve(__dirname, 'lib/components/Checkbox/index.ts'),
         'components/Collapsible': resolve(__dirname, 'lib/components/Collapsible/index.ts'),
         'components/OTPField': resolve(__dirname, 'lib/components/OTPField/index.ts'),
+        'components/PageHeader': resolve(__dirname, 'lib/components/PageHeader/index.ts'),
         'components/PasswordField': resolve(__dirname, 'lib/components/PasswordField/index.ts'),
         'components/PhoneField': resolve(__dirname, 'lib/components/PhoneField/index.ts'),
         'components/Progress': resolve(__dirname, 'lib/components/Progress/index.ts'),

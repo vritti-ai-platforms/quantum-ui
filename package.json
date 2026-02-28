@@ -120,6 +120,10 @@
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
     },
+    "./PageHeader": {
+      "types": "./dist/lib/components/PageHeader/index.d.ts",
+      "import": "./dist/components/PageHeader.js"
+    },
     "./TextArea": {
       "types": "./dist/lib/components/TextArea/index.d.ts",
       "import": "./dist/components/TextArea.js"
@@ -279,6 +283,7 @@
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.562.0",
     "pluralize-esm": "^9.0.5",
