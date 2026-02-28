@@ -1,6 +1,5 @@
 import type { Table } from '@tanstack/react-table';
 import { Download } from 'lucide-react';
-import pluralize from 'pluralize-esm';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import type { DataTableMeta } from '../types';
@@ -17,7 +16,8 @@ export function DataTableSelectionBar<TData>({ table, children, className }: Dat
   const meta = table.options.meta as DataTableMeta | undefined;
   const selectedRows = table.getFilteredSelectedRowModel().rows;
   const count = selectedRows.length;
-  const itemLabel = meta?.slug ?? 'row';
+  const singular = meta?.singular ?? 'row';
+  const plural = meta?.plural ?? 'rows';
 
   if (count === 0) return null;
 
