@@ -1,5 +1,5 @@
 import { flexRender } from '@tanstack/react-table';
-import { Funnel, SlidersHorizontal, X } from 'lucide-react';
+import { Funnel, X } from 'lucide-react';
 import { useState } from 'react';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';

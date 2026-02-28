@@ -63,28 +63,25 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   if (!metaRaw) return null;
   const meta: DataTableMeta = metaRaw;
 
+  const filterMap = new Map(filters.map((f) => [f.slug, f]));
+
   // Effective order: stored order (filtered to existing slugs) + any new filters appended at end
   const effectiveOrder = [
-    ...meta.filterOrder.filter((slug) => filters.some((f) => f.slug === slug)),
+    ...meta.filterOrder.filter((slug) => filterMap.has(slug)),
     ...filters.filter((f) => !meta.filterOrder.includes(f.slug)).map((f) => f.slug),
   ];
 
   const visibleFilters = effectiveOrder
-    .map((slug) => filters.find((f) => f.slug === slug))
+    .map((slug) => filterMap.get(slug))
     .filter((f): f is DataTableFilterItem => f !== undefined && meta.filterVisibility[f.slug] !== false);
 
-  // Reorder stored order array, preserving any slugs not in the current filter set
   function handleReorder(reordered: { id: string }[]) {
-    const reorderedSlugs = reordered.map((r) => r.id);
-    const filterSet = new Set(filters.map((f) => f.slug));
-    let idx = 0;
-    const newOrder = effectiveOrder.map((slug) => (filterSet.has(slug) ? reorderedSlugs[idx++] : slug));
-    meta.setFilterOrder(newOrder);
+    meta.setFilterOrder(reordered.map((r) => r.id));
   }
 
   const sortableItems = effectiveOrder
     .map((slug) => {
-      const filter = filters.find((f) => f.slug === slug);
+      const filter = filterMap.get(slug);
       return filter ? { id: slug, filter } : null;
     })
     .filter((item): item is { id: string; filter: DataTableFilterItem } => item !== null);
