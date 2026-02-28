@@ -6,6 +6,7 @@ interface UseMultiSelectStateProps {
   groups?: SelectGroup[];
   value?: SelectValue[];
   onChange?: (values: SelectValue[]) => void;
+  onOptionsSelect?: (options: SelectOption[]) => void;
   defaultValue?: SelectValue[];
   remoteSearch?: boolean;
 }
@@ -16,6 +17,7 @@ export function useMultiSelect({
   groups,
   value: controlledValue,
   onChange,
+  onOptionsSelect,
   defaultValue,
   remoteSearch,
 }: UseMultiSelectStateProps) {
@@ -65,23 +67,30 @@ export function useMultiSelect({
       const nextValues = current.includes(optionValue)
         ? current.filter((v) => v !== optionValue)
         : [...current, optionValue];
+      const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
+      onOptionsSelect?.(nextOptions);
       updateSelection(nextValues);
     },
-    [optionMap, updateSelection],
+    [optionMap, updateSelection, onOptionsSelect],
   );
 
   // Preserve already-selected disabled options when selecting all
   const selectAll = useCallback(() => {
     const enabledValues = options.filter((o) => !o.disabled).map((o) => o.value);
     const currentDisabledValues = selectedValuesRef.current.filter((v) => optionMap.get(v)?.disabled);
-    updateSelection([...new Set([...currentDisabledValues, ...enabledValues])]);
-  }, [options, optionMap, updateSelection]);
+    const nextValues = [...new Set([...currentDisabledValues, ...enabledValues])];
+    const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
+    onOptionsSelect?.(nextOptions);
+    updateSelection(nextValues);
+  }, [options, optionMap, updateSelection, onOptionsSelect]);
 
   // Retain disabled options that are currently selected when clearing
   const clearAll = useCallback(() => {
     const currentDisabledValues = selectedValuesRef.current.filter((v) => optionMap.get(v)?.disabled);
+    const remainingOptions = currentDisabledValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
+    onOptionsSelect?.(remainingOptions);
     updateSelection(currentDisabledValues);
-  }, [optionMap, updateSelection]);
+  }, [optionMap, updateSelection, onOptionsSelect]);
 
   // Reset search when popover closes
   useEffect(() => {

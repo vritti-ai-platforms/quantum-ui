@@ -1,5 +1,6 @@
 import type { UseMutationResult } from '@tanstack/react-query';
-import * as React from 'react';
+import type React from 'react';
+import { Children, cloneElement, Fragment, isValidElement, useCallback } from 'react';
 import {
   Controller,
   type ControllerProps,
@@ -8,11 +9,14 @@ import {
   FormProvider,
   type UseFormReturn,
 } from 'react-hook-form';
+import type { Country } from 'react-phone-number-input';
 import { cn } from '../../../shadcn/utils';
+import { axios } from '../../utils/axios';
 import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Alert } from '../Alert';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
+import { PhoneField } from '../PhoneField';
 import { Switch } from '../Switch';
 
 // Re-export Controller for explicit usage
@@ -30,15 +34,16 @@ function processChildren<
   children: React.ReactNode,
   control: ControllerProps<TFieldValues, FieldPath<TFieldValues>, TTransformedValues>['control'],
   isSubmitting: boolean,
+  setValue: UseFormReturn<TFieldValues, _TContext, TTransformedValues>['setValue'],
 ): React.ReactNode {
-  return React.Children.map(children, (child) => {
+  return Children.map(children, (child) => {
     // Handle non-element children (strings, numbers, null, etc.)
-    if (!React.isValidElement(child)) {
+    if (!isValidElement(child)) {
       return child;
     }
 
     const childProps = child.props as any;
-    const isFragment = child.type === React.Fragment;
+    const isFragment = child.type === Fragment;
 
     // Handle form fields with name prop (but not Fragments)
     if (!isFragment && childProps.name && typeof childProps.name === 'string') {
@@ -53,6 +58,7 @@ function processChildren<
             // Check if this is a Checkbox or Switch component - map value to checked
             const isCheckbox = child.type === Checkbox;
             const isSwitch = child.type === Switch;
+            const isPhone = child.type === PhoneField;
 
             const fieldProps =
               isCheckbox || isSwitch
@@ -62,9 +68,16 @@ function processChildren<
                     onBlur: field.onBlur,
                     ref: field.ref,
                   }
-                : field;
+                : isPhone
+                  ? {
+                      ...field,
+                      onCountryChange: (country: Country | undefined) => {
+                        setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
+                      },
+                    }
+                  : field;
 
-            return React.cloneElement(child, {
+            return cloneElement(child, {
               ...childProps,
               ...fieldProps,
               error: fieldState.error?.message || (fieldState.error ? 'Invalid' : undefined),
@@ -81,7 +94,7 @@ function processChildren<
         child.type === Button || (typeof child.type === 'function' && (child.type as any).displayName === 'Button');
 
       if (isButtonElement) {
-        return React.cloneElement(child, {
+        return cloneElement(child, {
           ...childProps,
           isLoading: isSubmitting,
         });
@@ -90,14 +103,14 @@ function processChildren<
 
     // Handle React Fragments - process their children directly
     if (isFragment) {
-      return processChildren(childProps.children, control, isSubmitting);
+      return processChildren(childProps.children, control, isSubmitting, setValue);
     }
 
     // Recurse into children for container elements (divs, FieldGroups, etc.)
     if (childProps.children != null) {
-      return React.cloneElement(child, {
+      return cloneElement(child, {
         ...childProps,
-        children: processChildren(childProps.children, control, isSubmitting),
+        children: processChildren(childProps.children, control, isSubmitting, setValue),
       });
     }
 
@@ -166,7 +179,7 @@ export interface FormProps<
    * Form only adds `mapApiErrorsToForm` as an extra error handling layer.
    * Optional - you can use `onSubmit` instead for forms that don't use mutations.
    */
-  mutation: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
+  mutation?: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
 
   /**
    * Transform form data to mutation variables before submission.
@@ -218,13 +231,14 @@ export function Form<
   form,
   onSubmit,
   children,
-  showRootError = true,
+  showRootError = false,
   rootErrorPosition = 'bottom',
   rootErrorClassName,
   rootErrorAction,
   fieldMapping,
   mutation,
   transformSubmit,
+  className,
   ...props
 }: FormProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
   // Compute isSubmitting from both form state and mutation state
@@ -232,8 +246,14 @@ export function Form<
 
   // Wrap the submit handler with automatic error mapping (always enabled)
   // Form only adds mapApiErrorsToForm - the mutation's own callbacks fire automatically
-  const wrappedOnSubmit = React.useCallback(
+  const wrappedOnSubmit = useCallback(
     async (data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues) => {
+      // Suppress error toasts during form submission — Form handles errors inline
+      const interceptorId = axios.interceptors.request.use((config) => ({
+        ...config,
+        showErrorToast: false,
+      }));
+
       try {
         if (mutation) {
           const variables = transformSubmit ? transformSubmit(data) : data;
@@ -252,6 +272,8 @@ export function Form<
         // Log error for debugging
         console.error('[Form Submission Error]', error);
         // Error is swallowed, not re-thrown (mutation's onError already fired)
+      } finally {
+        axios.interceptors.request.eject(interceptorId);
       }
     },
     [onSubmit, mutation, transformSubmit, fieldMapping, form, showRootError],
@@ -260,11 +282,11 @@ export function Form<
   const handleSubmit = form.handleSubmit(wrappedOnSubmit as any);
 
   // Process children recursively to automatically wrap with Controller
-  const processedChildren = processChildren(children, form.control, isSubmitting);
+  const processedChildren = processChildren(children, form.control, isSubmitting, form.setValue);
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit} {...props}>
+      <form onSubmit={handleSubmit} className={cn('space-y-4', className)} {...props}>
         {/* Top position error */}
         {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
           <Alert

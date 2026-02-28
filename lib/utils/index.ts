@@ -5,3 +5,4 @@ export {
   type MapApiErrorsOptions,
   mapApiErrorsToForm,
 } from './formHelpers';
+export { buildSlug, parseSlug, slugify } from './slug';

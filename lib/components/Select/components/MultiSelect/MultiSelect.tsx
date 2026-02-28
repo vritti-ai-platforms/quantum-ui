@@ -1,5 +1,6 @@
 import { Loader2, X } from 'lucide-react';
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef } from 'react';
 import { Badge } from '../../../../../shadcn/shadcnBadge';
 import {
   MultiSelectActions,
@@ -26,6 +27,7 @@ export interface MultiSelectProps {
   groups?: SelectGroup[];
   value?: SelectValue[];
   onChange?: (values: SelectValue[]) => void;
+  onOptionsSelect?: (options: SelectOption[]) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
@@ -40,7 +42,7 @@ export interface MultiSelectProps {
 }
 
 // Multi-value select with checkbox options, search, and badge chips
-export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
+export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
   (
     {
       label,
@@ -51,6 +53,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       groups,
       value: controlledValue,
       onChange,
+      onOptionsSelect,
       onBlur,
       name,
       disabled = false,
@@ -70,6 +73,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       groups,
       value: controlledValue,
       onChange,
+      onOptionsSelect,
       defaultValue,
       remoteSearch: !!asyncState,
     });

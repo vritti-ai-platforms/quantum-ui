@@ -20,6 +20,8 @@ export {
 export * from './context';
 // Hooks
 export * from './hooks';
+// Selects
+export * from './selects';
 
 // Axios with token management and CSRF support
 export {

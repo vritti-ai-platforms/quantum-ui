@@ -6,6 +6,7 @@ interface UseSingleSelectStateProps {
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
+  onOptionSelect?: (option: SelectOption | null) => void;
   defaultValue?: SelectValue;
   remoteSearch?: boolean;
 }
@@ -17,6 +18,7 @@ export function useSingleSelect({
   groups,
   value: controlledValue,
   onChange,
+  onOptionSelect,
   defaultValue,
   remoteSearch,
 }: UseSingleSelectStateProps) {
@@ -57,17 +59,19 @@ export function useSingleSelect({
     (optionValue: SelectValue) => {
       const option = optionMap.get(optionValue);
       if (option?.disabled) return;
+      onOptionSelect?.(option ?? null);
       updateSelection(optionValue);
       setOpen(false);
     },
-    [optionMap, updateSelection],
+    [optionMap, updateSelection, onOptionSelect],
   );
 
   // Clear the selection and close the popover
   const clearSelection = useCallback(() => {
+    onOptionSelect?.(null);
     updateSelection('');
     setOpen(false);
-  }, [updateSelection]);
+  }, [updateSelection, onOptionSelect]);
 
   // Reset search when popover closes
   useEffect(() => {

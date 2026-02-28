@@ -3,6 +3,7 @@ export type SelectValue = string | number | boolean;
 export interface SelectOption {
   value: SelectValue;
   label: string;
+  description?: string;
   disabled?: boolean;
   groupId?: string | number;
 }
@@ -32,5 +33,6 @@ export type SelectVariant = 'default' | 'filter';
 export interface SelectFieldKeys {
   valueKey?: string;
   labelKey?: string;
+  descriptionKey?: string;
   groupIdKey?: string;
 }

@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.9",
+  "version": "0.2.10",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -36,6 +36,14 @@
       "types": "./dist/lib/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./Sidebar": {
+      "types": "./dist/lib/components/AppSidebar/index.d.ts",
+      "import": "./dist/components/Sidebar.js"
+    },
+    "./Breadcrumb": {
+      "types": "./dist/lib/components/Breadcrumb/index.d.ts",
+      "import": "./dist/components/Breadcrumb.js"
+    },
     "./Alert": {
       "types": "./dist/lib/components/Alert/index.d.ts",
       "import": "./dist/components/Alert.js"
@@ -59,6 +67,10 @@
     "./Chart": {
       "types": "./dist/lib/components/Chart/index.d.ts",
       "import": "./dist/components/Chart.js"
+    },
+    "./Collapsible": {
+      "types": "./dist/lib/components/Collapsible/index.d.ts",
+      "import": "./dist/components/Collapsible.js"
     },
     "./DataTable": {
       "types": "./dist/lib/components/DataTable/index.d.ts",
@@ -100,6 +112,14 @@
       "types": "./dist/lib/components/Sortable/index.d.ts",
       "import": "./dist/components/Sortable.js"
     },
+    "./selects/IndustrySelect": {
+      "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
+      "import": "./dist/selects/IndustrySelect.js"
+    },
+    "./IndustrySelect": {
+      "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
+      "import": "./dist/selects/IndustrySelect.js"
+    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
@@ -115,6 +135,10 @@
     "./DatePicker": {
       "types": "./dist/lib/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
+    },
+    "./Dialog": {
+      "types": "./dist/lib/components/Dialog/index.d.ts",
+      "import": "./dist/components/Dialog.js"
     },
     "./DropdownMenu": {
       "types": "./dist/lib/components/DropdownMenu/index.d.ts",
@@ -136,6 +160,10 @@
       "types": "./dist/lib/components/Spinner/index.d.ts",
       "import": "./dist/components/Spinner.js"
     },
+    "./StepProgressIndicator": {
+      "types": "./dist/lib/components/StepProgressIndicator/index.d.ts",
+      "import": "./dist/components/StepProgressIndicator.js"
+    },
     "./Switch": {
       "types": "./dist/lib/components/Switch/index.d.ts",
       "import": "./dist/components/Switch.js"
@@ -144,6 +172,14 @@
       "types": "./dist/lib/components/Toggle/index.d.ts",
       "import": "./dist/components/Toggle.js"
     },
+    "./FilePreview": {
+      "types": "./dist/lib/components/FilePreview/index.d.ts",
+      "import": "./dist/components/FilePreview.js"
+    },
+    "./UploadFile": {
+      "types": "./dist/lib/components/UploadFile/index.d.ts",
+      "import": "./dist/components/UploadFile.js"
+    },
     "./Field": {
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
@@ -151,6 +187,10 @@
     "./axios": {
       "types": "./dist/lib/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
+    },
+    "./utils/slug": {
+      "types": "./dist/lib/utils/slug.d.ts",
+      "import": "./dist/utils/slug.js"
     },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",
@@ -226,6 +266,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.8",

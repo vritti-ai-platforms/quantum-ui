@@ -1,5 +1,5 @@
 import { ChevronDownIcon, Loader2 } from 'lucide-react';
-import * as React from 'react';
+import { forwardRef } from 'react';
 import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
 import {
   SingleSelectClear,
@@ -35,7 +35,7 @@ export interface SingleSelectFilterProps {
 }
 
 // Compact single-select filter trigger with inline label display
-export const SingleSelectFilter = React.forwardRef<HTMLButtonElement, SingleSelectFilterProps>(
+export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilterProps>(
   (
     {
       label,
@@ -75,6 +75,7 @@ export const SingleSelectFilter = React.forwardRef<HTMLButtonElement, SingleSele
         <SingleSelectRow
           key={String(option.value)}
           name={option.label}
+          description={option.description}
           selected={state.selectedValue === option.value}
           onSelect={() => {
             state.selectOption(option.value);

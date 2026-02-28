@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type React from 'react';
+import { Fragment } from 'react';
 import {
   DropdownMenuCheckboxItem as ShadcnDropdownMenuCheckboxItem,
   DropdownMenuContent as ShadcnDropdownMenuContent,
@@ -128,7 +129,7 @@ const renderMenuItem = (item: MenuItem, index: number): React.ReactNode => {
           </DropdownMenuItem>
         );
       }
-      return <React.Fragment key={item.id}>{content}</React.Fragment>;
+      return <Fragment key={item.id}>{content}</Fragment>;
     }
 
     default:

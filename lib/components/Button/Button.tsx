@@ -1,32 +1,19 @@
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef } from 'react';
 import { buttonVariants, Button as ShadcnButton } from '../../../shadcn/shadcnButton';
 import { cn } from '../../../shadcn/utils';
 import { Spinner } from '../Spinner';
 
 export interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
-  /** Shows loading spinner and disables button */
   isLoading?: boolean;
-  /** Text to display while loading (defaults to children) */
   loadingText?: string;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
 }
 
-/**
- * Button component with built-in loading state support.
- *
- * @example
- * ```tsx
- * // Basic usage
- * <Button>Click me</Button>
- *
- * // Loading state
- * <Button isLoading>Submit</Button>
- *
- * // Loading with custom text
- * <Button isLoading loadingText="Submitting...">Submit</Button>
- * ```
- */
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, isLoading = false, loadingText, disabled, className, ...props }, ref) => {
+// Button with built-in loading state and adornment support
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, isLoading = false, loadingText, startAdornment, endAdornment, disabled, className, ...props }, ref) => {
     return (
       <ShadcnButton
         ref={ref}
@@ -41,7 +28,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             {loadingText ?? children}
           </>
         ) : (
-          children
+          <>
+            {startAdornment}
+            {children}
+            {endAdornment}
+          </>
         )}
       </ShadcnButton>
     );

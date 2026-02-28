@@ -25,6 +25,7 @@ declare module 'axios' {
 // Type for API error response
 interface ApiErrorResponse {
   title?: string;
+  label?: string;
   status?: number;
   detail?: string;
   message?: string;
@@ -56,6 +57,9 @@ export const getToken = (): string | null => accessToken;
 export const clearToken = (): void => {
   accessToken = null;
   cancelTokenRefresh();
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth-state-change'));
+  }
 };
 
 // =============================================================================
@@ -95,8 +99,14 @@ export async function recoverToken(): Promise<{ success: boolean; expiresIn: num
     }
 
     return { success: false, expiresIn: 0 };
-  } catch {
+  } catch (error) {
     clearToken();
+    // Show toast with RFC 9457 label and detail when session is invalid
+    if (Axios.isAxiosError(error) && error.response?.status === 401) {
+      const data = error.response.data as ApiErrorResponse;
+      const title = data?.label || data?.title || 'Session expired';
+      toast.error(title, { description: data?.detail });
+    }
     return { success: false, expiresIn: 0 };
   }
 }
@@ -142,7 +152,7 @@ export function scheduleTokenRefresh(expiresIn: number): void {
     const config = getConfig();
 
     try {
-      const response = await Axios.post<{ accessToken: string; expiresIn: number }>(
+      const response = await axios.post<{ accessToken: string; expiresIn: number }>(
         config.auth.refreshEndpoint,
         {},
         {
@@ -158,7 +168,6 @@ export function scheduleTokenRefresh(expiresIn: number): void {
       }
     } catch {
       clearToken();
-      redirectToLogin();
     }
   }, refreshAt);
 }
@@ -208,12 +217,6 @@ async function fetchCsrfToken(): Promise<string | null> {
 // Helpers
 // =============================================================================
 
-function redirectToLogin(): void {
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
-  }
-}
-
 function getSubdomain(): string | null {
   if (typeof window === 'undefined') return null;
 
@@ -257,7 +260,6 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   if (!isPublicRequest) {
     const hasSession = await recoverTokenIfNeeded();
     if (!hasSession) {
-      redirectToLogin();
       return Promise.reject(new Error('No valid session'));
     }
   }
@@ -334,15 +336,17 @@ axios.interceptors.response.use(
     const isPublicRequest = (config as { public?: boolean })?.public === true;
     const toastId = (config as { _toastId?: string })?._toastId;
 
-    // Handle 401 - redirect to login
+    // Handle 401 - clear session and let event listeners handle navigation
     if (status === 401 && !isPublicRequest) {
-      // Dismiss loading toast if exists
+      const errorTitle = errorData?.label || errorData?.title || 'Session expired';
+      const errorDescription = errorData?.detail;
       if (toastId) {
-        toast.error('Session expired', { id: toastId });
+        toast.error(errorTitle, { id: toastId, description: errorDescription });
+      } else {
+        toast.error(errorTitle, { description: errorDescription });
       }
       clearToken();
       cancelTokenRefresh();
-      redirectToLogin();
       return Promise.reject(error);
     }
 
@@ -356,8 +360,8 @@ axios.interceptors.response.use(
       }
     }
 
-    // Show toast for network errors
-    if (showError && !error.response) {
+    // Show toast for actual network errors only — not internal session rejections
+    if (showError && !error.response && Axios.isAxiosError(error)) {
       if (toastId) {
         toast.error('Network Error', { id: toastId, description: 'Please check your internet connection.' });
       } else {
@@ -365,14 +369,16 @@ axios.interceptors.response.use(
       }
     }
 
-    // For 4xx errors with loading toast, dismiss it with the error message
-    if (toastId && status && status >= 400 && status < 500 && status !== 401) {
-      const errorMessage = errorData?.message || errorData?.detail || 'Request failed';
-      toast.error(errorMessage, { id: toastId });
+    // Show toast for 4xx errors (non-401) — Form suppresses via showErrorToast: false
+    if (showError && status && status >= 400 && status < 500 && status !== 401) {
+      const errorTitle = errorData?.label || errorData?.title || 'Request failed';
+      const errorDescription = errorData?.detail;
+      if (toastId) {
+        toast.error(errorTitle, { id: toastId, description: errorDescription });
+      } else {
+        toast.error(errorTitle, { description: errorDescription });
+      }
     }
-
-    // Note: 4xx errors (validation) without loading toast are handled by form inline errors
-    // to avoid duplicate feedback - no toast needed
 
     return Promise.reject(error);
   },

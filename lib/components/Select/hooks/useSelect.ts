@@ -1,5 +1,5 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { axios } from '../../../utils/axios';
 import type { SelectFieldKeys, SelectGroup, SelectOption, SelectOptionsResponse, SelectValue } from '../types';
@@ -46,7 +46,6 @@ export function useSelect({
   selectedValues,
 }: UseSelectProps): UseSelectReturn {
   const isAsync = !!optionsEndpoint;
-  const instanceId = useId();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -74,7 +73,7 @@ export function useSelect({
 
   // Query 1: Resolve selected values to full option objects
   const { data: resolvedSelected } = useQuery({
-    queryKey: ['select-resolve', instanceId, optionsEndpoint, JSON.stringify(selectedValues)],
+    queryKey: ['select-resolve', optionsEndpoint, stableStringify(fieldKeys), stableStringify(params), JSON.stringify(selectedValues)],
     queryFn: () =>
       axios
         .get<SelectOptionsResponse>(optionsEndpoint ?? '', {
@@ -92,7 +91,6 @@ export function useSelect({
   const { data, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: [
       'select-search',
-      instanceId,
       optionsEndpoint,
       debouncedSearch,
       stableStringify(fieldKeys),

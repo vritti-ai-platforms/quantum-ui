@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type React from 'react';
+import { forwardRef } from 'react';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import { MultiSelectFilter, type MultiSelectFilterProps } from './components/MultiSelect/MultiSelectFilter';
 import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
@@ -27,7 +28,7 @@ interface SelectMultiProps extends MultiSelectProps, SelectBaseProps {
 export type SelectProps = SelectSingleProps | SelectMultiProps;
 
 // Unified select field supporting single/multi selection and default/filter variants
-export const Select = React.forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
+export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
   const { multiple, type = 'default', optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, ...rest } = props;
 
   const selectData = useSelect({

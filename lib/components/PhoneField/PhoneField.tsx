@@ -21,6 +21,11 @@ export interface PhoneFieldProps {
   onChange?: (value: Value | undefined) => void;
 
   /**
+   * Callback when country changes
+   */
+  onCountryChange?: (country: Country | undefined) => void;
+
+  /**
    * Default country code (e.g., 'US', 'IN', 'GB')
    */
   defaultCountry?: Country;
@@ -63,6 +68,7 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
       name: _name,
       value,
       onChange = () => {},
+      onCountryChange,
       defaultCountry = 'IN',
       label,
       description,
@@ -86,6 +92,7 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
             defaultCountry={defaultCountry}
             value={value}
             onChange={onChange}
+            onCountryChange={onCountryChange}
             disabled={disabled}
             placeholder={placeholder}
             aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
@@ -94,23 +101,15 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
               'flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-sm shadow-xs transition-[color,box-shadow]',
               'placeholder:text-muted-foreground',
               'focus-within:outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[1px]',
-              'disabled:cursor-not-allowed disabled:opacity-50',
+              disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
               hasError && 'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
               className,
             )}
             numberInputProps={{
-              className: cn(
-                'flex-1 bg-transparent outline-none',
-                'placeholder:text-muted-foreground',
-                'disabled:cursor-not-allowed',
-              ),
+              className: cn('flex-1 bg-transparent outline-none', 'placeholder:text-muted-foreground'),
             }}
             countrySelectProps={{
-              className: cn(
-                'mr-2 bg-transparent border-none outline-none',
-                'focus:ring-0',
-                'disabled:cursor-not-allowed',
-              ),
+              className: cn('mr-2 bg-transparent border-none outline-none', 'focus:ring-0'),
             }}
           />
 
