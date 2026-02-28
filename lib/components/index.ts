@@ -16,6 +16,7 @@ export * from './Field';
 export * from './FilePreview';
 export * from './Form';
 export * from './OTPField';
+export * from './PageHeader';
 export * from './PasswordField';
 export * from './PhoneField';
 export * from './Progress';
