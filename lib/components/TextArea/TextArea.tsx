@@ -1,50 +1,35 @@
 import React from 'react';
-import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 import { Textarea } from '../../../shadcn/shadcnTextarea';
 import { cn } from '../../../shadcn/utils';
+import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 
 export interface TextAreaProps extends React.ComponentProps<'textarea'> {
-  /**
-   * Label for the field
-   */
   label?: string;
-
-  /**
-   * Helper text or description to display below the field
-   */
   description?: React.ReactNode;
-
-  /**
-   * Error message to display below the field
-   */
   error?: string;
 }
 
-// TextArea molecule - Textarea + Label composition with Field system
+// TextArea molecule - Textarea + Label composition using Field system
 export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({ label, description, error, className, id, ...props }, ref) => {
+  ({ label, description, error, className, id, disabled, ...props }, ref) => {
     const generatedId = React.useId();
     const fieldId = id || generatedId;
-    const hasError = !!error;
 
     return (
-      <Field>
+      <Field data-disabled={disabled}>
         {label && <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>}
 
-        <FieldContent>
-          <Textarea
-            ref={ref}
-            id={fieldId}
-            className={cn(className)}
-            aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
-            aria-invalid={hasError}
-            {...props}
-          />
+        <Textarea
+          ref={ref}
+          id={fieldId}
+          disabled={disabled}
+          className={cn(className)}
+          aria-invalid={!!error}
+          {...props}
+        />
 
-          {description && <FieldDescription id={`${fieldId}-description`}>{description}</FieldDescription>}
-
-          {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
-        </FieldContent>
+        {description && !error && <FieldDescription>{description}</FieldDescription>}
+        {error && <FieldError>{error}</FieldError>}
       </Field>
     );
   },

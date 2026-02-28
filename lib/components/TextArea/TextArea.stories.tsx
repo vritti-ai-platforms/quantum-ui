@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { TextArea } from './TextArea';
 
@@ -82,7 +83,7 @@ export const SuccessState: Story = {
       label="Review"
       placeholder="Write your review"
       defaultValue="This product exceeded my expectations! The quality is outstanding and the customer service was excellent."
-      className="border-green-500 focus-visible:ring-green-200"
+      className="border-success focus-visible:ring-success/20"
       description="✓ Review submitted successfully"
     />
   ),
@@ -94,7 +95,7 @@ export const WarningState: Story = {
       label="Description"
       placeholder="Enter description"
       defaultValue="This is a brief description."
-      className="border-yellow-500 focus-visible:ring-yellow-200"
+      className="border-warning focus-visible:ring-warning/20"
       description="Consider adding more details (minimum 50 characters recommended)"
     />
   ),
@@ -204,7 +205,7 @@ export const AllStates: Story = {
         label="Success State"
         placeholder="Success textarea"
         defaultValue="Valid input with sufficient content"
-        className="border-green-500 focus-visible:ring-green-200"
+        className="border-success focus-visible:ring-success/20"
         description="✓ This input is valid"
         rows={4}
       />
@@ -212,7 +213,7 @@ export const AllStates: Story = {
         label="Warning State"
         placeholder="Warning textarea"
         defaultValue="Short text"
-        className="border-yellow-500 focus-visible:ring-yellow-200"
+        className="border-warning focus-visible:ring-warning/20"
         description="Consider adding more detail"
         rows={4}
       />
@@ -247,11 +248,11 @@ export const WithCharacterCounter: Story = {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           rows={5}
-          className={isOverLimit ? 'border-red-500 focus-visible:ring-red-200' : ''}
+          className={isOverLimit ? 'border-destructive focus-visible:ring-destructive/20' : ''}
           description={
             <div className="flex justify-between items-center">
               <span>Maximum {maxLength} characters</span>
-              <span className={isOverLimit ? 'text-red-500' : isNearLimit ? 'text-yellow-600' : ''}>
+              <span className={isOverLimit ? 'text-destructive' : isNearLimit ? 'text-warning' : ''}>
                 {remaining} remaining
               </span>
             </div>
@@ -288,7 +289,7 @@ export const WithValidation: Story = {
             if (!touched) setTouched(true);
           }}
           rows={6}
-          className={showSuccess ? 'border-green-500 focus-visible:ring-green-200' : ''}
+          className={showSuccess ? 'border-success focus-visible:ring-success/20' : ''}
           error={showError ? `Please write at least ${minLength} characters (${value.length}/${minLength})` : undefined}
           description={
             showError
@@ -333,4 +334,3 @@ export const MarkdownEditor: Story = {
   },
 };
 
-import React from 'react';
