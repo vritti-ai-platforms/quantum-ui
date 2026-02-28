@@ -23,11 +23,11 @@ const densityClasses: Record<DensityType, string> = {
 // Renders a full-featured data table from a raw TanStack Table instance
 export function DataTable<TData>({
   table,
-  search,
-  pagination,
-  selection,
-  empty,
-  toolbar,
+  enableSearch,
+  paginationConfig,
+  selectActions,
+  emptyStateConfig,
+  toolbarActions,
   isLoading = false,
   maxHeight = '600px',
   className,
@@ -39,7 +39,7 @@ export function DataTable<TData>({
   const columnCount = table.getAllColumns().length;
   const isFiltered = table.getState().columnFilters.length > 0;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = search || visibilityEnabled || toolbar;
+  const showToolbar = enableSearch || visibilityEnabled || toolbarActions;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -55,18 +55,18 @@ export function DataTable<TData>({
             )}
           </div>
           <div className="flex items-center gap-2">
-            {search && <DataTableSearch table={table} />}
+            {enableSearch && <DataTableSearch table={table} />}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity density={density} onDensityChange={setDensity} />
-            {toolbar?.actions}
+            {toolbarActions?.actions}
           </div>
         </div>
       )}
 
       {/* Selection bar */}
-      {selection && selectedCount > 0 && (
-        <DataTableSelectionBar count={selectedCount} onClear={() => table.toggleAllRowsSelected(false)}>
-          {selection.actions}
+      {selectActions && selectedCount > 0 && (
+        <DataTableSelectionBar count={selectedCount} onClear={() => table.toggleAllRowsSelected(false)} itemLabel={meta?.slug}>
+          {selectActions(table.getFilteredSelectedRowModel().rows)}
         </DataTableSelectionBar>
       )}
 
@@ -145,10 +145,10 @@ export function DataTable<TData>({
                 <TableRow>
                   <TableCell colSpan={columnCount} className="h-24 text-center">
                     <DataTableEmpty
-                      icon={empty?.icon}
-                      title={empty?.title}
-                      description={empty?.description}
-                      action={empty?.action}
+                      icon={emptyStateConfig?.icon}
+                      title={emptyStateConfig?.title}
+                      description={emptyStateConfig?.description}
+                      action={emptyStateConfig?.action}
                     />
                   </TableCell>
                 </TableRow>
@@ -159,15 +159,10 @@ export function DataTable<TData>({
       </div>
 
       {/* Pagination */}
-      {pagination && (
-        <DataTablePagination
-          table={table}
-          pageSizeOptions={pagination.pageSizeOptions}
-          itemLabel={pagination.itemLabel}
-          showGoToPage={pagination.showGoToPage}
-          showSelectedCount={!!selection}
-        />
-      )}
+      <DataTablePagination
+        table={table}
+        pageSizeOptions={paginationConfig?.pageSizeOptions}
+      />
     </div>
   );
 }

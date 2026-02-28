@@ -21,7 +21,7 @@ export type {
   DataTablePaginationConfig,
   DataTableProps,
   DataTableSearchConfig,
-  DataTableSelectionConfig,
+  SelectActions,
   DataTableToolbarConfig,
   DensityType,
 } from './types';

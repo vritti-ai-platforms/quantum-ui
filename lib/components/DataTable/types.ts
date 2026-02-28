@@ -1,4 +1,4 @@
-import type { PaginationState, Table } from '@tanstack/react-table';
+import type { PaginationState, Row, Table } from '@tanstack/react-table';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
@@ -10,14 +10,10 @@ export interface DataTableSearchConfig {
 
 export interface DataTablePaginationConfig {
   pageSizeOptions?: number[];
-  itemLabel?: string;
-  showGoToPage?: boolean;
   initial?: PaginationState;
 }
 
-export interface DataTableSelectionConfig {
-  actions?: React.ReactNode;
-}
+export type SelectActions<TData> = (selectedRows: Row<TData>[]) => React.ReactNode;
 
 export interface DataTableEmptyConfig {
   icon?: React.ElementType;
@@ -33,6 +29,7 @@ export interface DataTableToolbarConfig {
 export type DensityType = 'compact' | 'normal' | 'comfortable';
 
 export interface DataTableMeta {
+  slug: string;
   lockedColumnSizing: boolean;
   toggleLockColumnSizing: () => void;
 }
@@ -41,11 +38,11 @@ export interface DataTableMeta {
 
 export interface DataTableProps<TData> {
   table: Table<TData>;
-  search?: DataTableSearchConfig;
-  pagination?: DataTablePaginationConfig;
-  selection?: DataTableSelectionConfig;
-  empty?: DataTableEmptyConfig;
-  toolbar?: DataTableToolbarConfig;
+  enableSearch?: DataTableSearchConfig;
+  paginationConfig?: DataTablePaginationConfig;
+  selectActions?: SelectActions<TData>;
+  emptyStateConfig?: DataTableEmptyConfig;
+  toolbarActions?: DataTableToolbarConfig;
   isLoading?: boolean;
   maxHeight?: string;
   className?: string;

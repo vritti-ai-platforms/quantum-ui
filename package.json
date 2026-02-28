@@ -116,10 +116,6 @@
       "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
       "import": "./dist/selects/IndustrySelect.js"
     },
-    "./IndustrySelect": {
-      "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
-      "import": "./dist/selects/IndustrySelect.js"
-    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
@@ -285,6 +281,7 @@
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.562.0",
+    "pluralize-esm": "^9.0.5",
     "react-day-picker": "^9.13.0",
     "react-hook-form": "^7.71.1",
     "react-intersection-observer": "^10.0.2",

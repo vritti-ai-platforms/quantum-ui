@@ -52,10 +52,11 @@ export function useDataTable<TData>({
 
   const meta = useMemo(
     () => ({
+      slug,
       lockedColumnSizing,
       toggleLockColumnSizing: () => updateField(slug, 'lockedColumnSizing', !lockedColumnSizing),
     }),
-    [lockedColumnSizing, updateField, slug],
+    [slug, lockedColumnSizing, updateField],
   );
 
   const table = useReactTable({

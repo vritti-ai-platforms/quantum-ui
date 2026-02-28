@@ -51,7 +51,7 @@ const selectionColumns: ColumnDef<Payment, unknown>[] = [getSelectionColumn<Paym
 
 function DefaultStory() {
   const table = useDataTable({ data: sampleData, columns, slug: 'story-default' });
-  return <DataTable table={table} search={{}} pagination={{ pageSizeOptions: [5, 10, 20] }} />;
+  return <DataTable table={table} enableSearch={{}} paginationConfig={{ pageSizeOptions: [5, 10, 20] }} />;
 }
 
 function WithSelectionStory() {
@@ -59,16 +59,14 @@ function WithSelectionStory() {
   return (
     <DataTable
       table={table}
-      search={{}}
-      pagination={{ pageSizeOptions: [5, 10] }}
-      selection={{
-        actions: (
-          <Button variant="destructive" size="sm">
-            <Trash2 className="h-4 w-4 mr-1" />
-            Delete selected
-          </Button>
-        ),
-      }}
+      enableSearch={{}}
+      paginationConfig={{ pageSizeOptions: [5, 10] }}
+      selectActions={(rows) => (
+        <Button variant="destructive" size="sm" onClick={() => console.log('Delete', rows.map((r) => r.original.id))}>
+          <Trash2 className="h-4 w-4 mr-1" />
+          Delete {rows.length} item{rows.length !== 1 ? 's' : ''}
+        </Button>
+      )}
     />
   );
 }
@@ -83,9 +81,9 @@ function EmptyStateStory() {
   return (
     <DataTable
       table={table}
-      search={{}}
-      pagination={{ pageSizeOptions: [5, 10] }}
-      empty={{
+      enableSearch={{}}
+      paginationConfig={{ pageSizeOptions: [5, 10] }}
+      emptyStateConfig={{
         icon: FileX2,
         title: 'No payments found',
         description: 'There are no payments matching your criteria.',
@@ -97,7 +95,7 @@ function EmptyStateStory() {
 
 function LoadingStory() {
   const table = useDataTable({ data: [] as Payment[], columns, slug: 'story-loading' });
-  return <DataTable table={table} isLoading pagination={{ pageSizeOptions: [5, 10] }} />;
+  return <DataTable table={table} isLoading paginationConfig={{ pageSizeOptions: [5, 10] }} />;
 }
 
 function CustomPaginationStory() {
@@ -110,8 +108,8 @@ function CustomPaginationStory() {
   return (
     <DataTable
       table={table}
-      search={{}}
-      pagination={{ pageSizeOptions: [3, 6, 12], itemLabel: 'payment(s)', showGoToPage: true }}
+      enableSearch={{}}
+      paginationConfig={{ pageSizeOptions: [3, 6, 12] }}
     />
   );
 }
