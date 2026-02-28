@@ -35,7 +35,6 @@ export function DataTable<TData>({
   const [density, setDensity] = useState<DensityType>('normal');
 
   const meta = table.options.meta as DataTableMeta | undefined;
-  const selectedCount = table.getFilteredSelectedRowModel().rows.length;
   const columnCount = table.getAllColumns().length;
   const isFiltered = table.getState().columnFilters.length > 0;
   const visibilityEnabled = table.options.enableHiding !== false;
@@ -64,11 +63,9 @@ export function DataTable<TData>({
       )}
 
       {/* Selection bar */}
-      {selectActions && selectedCount > 0 && (
-        <DataTableSelectionBar count={selectedCount} onClear={() => table.toggleAllRowsSelected(false)} singular={meta?.singular} plural={meta?.plural}>
-          {selectActions(table.getFilteredSelectedRowModel().rows)}
-        </DataTableSelectionBar>
-      )}
+      <DataTableSelectionBar table={table}>
+        {selectActions?.(table.getFilteredSelectedRowModel().rows)}
+      </DataTableSelectionBar>
 
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
@@ -159,10 +156,7 @@ export function DataTable<TData>({
       </div>
 
       {/* Pagination */}
-      <DataTablePagination
-        table={table}
-        pageSizeOptions={paginationConfig?.pageSizeOptions}
-      />
+      <DataTablePagination table={table} pageSizeOptions={paginationConfig?.pageSizeOptions} />
     </div>
   );
 }

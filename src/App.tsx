@@ -194,11 +194,6 @@ const InvoicesTable = () => {
     <DataTable
       table={table}
       enableSearch={{ placeholder: 'Search invoices...' }}
-      selectActions={(rows) => (
-        <Button variant="outline" size="sm" className="h-7" onClick={() => console.log('Export', rows.map((r) => r.original.id))}>
-          <Download className="mr-1.5 h-3.5 w-3.5" /> Export {rows.length} selected
-        </Button>
-      )}
       toolbarActions={{
         actions: (
           <>

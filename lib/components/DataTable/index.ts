@@ -27,4 +27,4 @@ export type {
 } from './types';
 
 // Utility
-export { getSelectionColumn } from './utils';
+export { exportToCSV, getSelectionColumn } from './utils';
