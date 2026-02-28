@@ -137,12 +137,12 @@ const invoiceColumns: ColumnDef<Invoice, unknown>[] = [
   {
     accessorKey: 'client',
     header: 'Client',
-    cell: ({ row }) => (
-      <div>
-        <p className="font-medium">{row.getValue('client')}</p>
-        <p className="text-xs text-muted-foreground">{row.original.email}</p>
-      </div>
-    ),
+    // cell: ({ row }) => (
+    //   <div>
+    //     <p className="font-medium">{row.getValue('client')}</p>
+    //     <p className="text-xs text-muted-foreground">{row.original.email}</p>
+    //   </div>
+    // ),
   },
   {
     accessorKey: 'category',

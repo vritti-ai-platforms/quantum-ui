@@ -58,5 +58,6 @@ export interface DataTableProps<TData> {
   filters?: DataTableFilterItem[];
   isLoading?: boolean;
   maxHeight?: string;
+  minHeight?: string;
   className?: string;
 }

@@ -31,7 +31,8 @@ export function DataTable<TData>({
   toolbarActions,
   filters,
   isLoading = false,
-  maxHeight = '600px',
+  maxHeight = '700px',
+  minHeight = '700px',
   className,
 }: DataTableProps<TData>) {
   const [density, setDensity] = useState<DensityType>('normal');
@@ -96,45 +97,51 @@ export function DataTable<TData>({
             </div>
           </div>
         )}
-        <div className="relative w-full overflow-auto" style={{ maxHeight }}>
+        <div className="relative w-full overflow-auto" style={{ maxHeight, minHeight }}>
           <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{ width: header.getSize() }}
-                      className="relative group/resize"
-                      aria-sort={
-                        header.column.getCanSort()
-                          ? header.column.getIsSorted() === 'asc'
-                            ? 'ascending'
-                            : header.column.getIsSorted() === 'desc'
-                              ? 'descending'
-                              : 'none'
-                          : undefined
-                      }
-                    >
-                      {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
-                        <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
-                      ) : (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      )}
-                      {!meta?.lockedColumnSizing && header.column.getCanResize() && (
-                        <div
-                          onPointerDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                          className={cn(
-                            'absolute top-0 right-0 w-1 h-full cursor-col-resize select-none touch-none',
-                            'opacity-0 group-hover/resize:opacity-100 hover:bg-primary/50',
-                            header.column.getIsResizing() && 'opacity-100 bg-primary',
-                          )}
-                        />
-                      )}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header, index) => {
+                    const isActions = header.column.id === 'actions';
+                    const headerAlignClass = isActions ? 'justify-end' : index > 0 ? 'justify-center' : undefined;
+                    return (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{ width: isActions ? '52px' : header.getSize() }}
+                        className={cn('relative group/resize', isActions ? 'text-right' : index > 0 && 'text-center')}
+                        aria-sort={
+                          header.column.getCanSort()
+                            ? header.column.getIsSorted() === 'asc'
+                              ? 'ascending'
+                              : header.column.getIsSorted() === 'desc'
+                                ? 'descending'
+                                : 'none'
+                            : undefined
+                        }
+                      >
+                        {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
+                          <div className={cn('flex', headerAlignClass)}>
+                            <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
+                          </div>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
+                        {!meta?.lockedColumnSizing && header.column.getCanResize() && (
+                          <div
+                            onPointerDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={cn(
+                              'absolute top-0 right-0 w-1 h-full cursor-col-resize select-none touch-none',
+                              'opacity-0 group-hover/resize:opacity-100 hover:bg-primary/50',
+                              header.column.getIsResizing() && 'opacity-100 bg-primary',
+                            )}
+                          />
+                        )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -154,11 +161,14 @@ export function DataTable<TData>({
               ) : table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map((cell) => (
+                    {row.getVisibleCells().map((cell, index) => (
                       <TableCell
                         key={cell.id}
-                        className={densityClasses[density]}
-                        style={{ width: cell.column.getSize() }}
+                        className={cn(
+                          densityClasses[density],
+                          cell.column.id === 'actions' ? 'text-right' : index > 0 && 'text-center',
+                        )}
+                        style={{ width: cell.column.id === 'actions' ? '52px' : cell.column.getSize() }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
