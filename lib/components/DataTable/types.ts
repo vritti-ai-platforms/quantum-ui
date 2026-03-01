@@ -1,83 +1,85 @@
-import type {
-  Column,
-  ColumnDef,
-  ColumnFiltersState,
-  PaginationState,
-  SortingState,
-  Table,
-  VisibilityState,
-} from '@tanstack/react-table';
+import type { PaginationState, Row, Table } from '@tanstack/react-table';
+import type { DensityType, FilterCondition } from '../../types/table-filter';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
-export interface UseDataTableOptions<TData> {
-  data: TData[];
-  columns: ColumnDef<TData, unknown>[];
-  enableSorting?: boolean;
-  enableFiltering?: boolean;
-  enablePagination?: boolean;
-  enableRowSelection?: boolean;
-  enableColumnVisibility?: boolean;
-  enableMultiSort?: boolean;
-  enableGlobalFilter?: boolean;
-  initialSorting?: SortingState;
-  initialPagination?: PaginationState;
-  initialColumnVisibility?: VisibilityState;
-  initialColumnFilters?: ColumnFiltersState;
+// Re-export DensityType for backward compatibility
+export type { DensityType } from '../../types/table-filter';
+
+// --- Feature config types ---
+
+export type SearchState = { columnId: string; value: string } | null;
+
+export interface DataTableSearchConfig {
+  value: SearchState;
+  onChange: (search: SearchState) => void;
+}
+
+export interface DataTablePaginationConfig {
   pageSizeOptions?: number[];
-  manualPagination?: boolean;
-  manualSorting?: boolean;
-  manualFiltering?: boolean;
-  pageCount?: number;
-  rowCount?: number;
+  initial?: PaginationState;
 }
 
-export interface UseDataTableReturn<TData> {
-  table: Table<TData>;
-  globalFilter: string;
-  setGlobalFilter: (value: string) => void;
-}
+export type SelectActions<TData> = (selectedRows: Row<TData>[]) => React.ReactNode;
 
-export interface DataTableProps<TData> {
-  table: Table<TData>;
-  toolbar?: React.ReactNode;
-  pagination?: React.ReactNode;
-  emptyState?: React.ReactNode;
-  isLoading?: boolean;
-  className?: string;
-}
-
-export interface DataTableColumnHeaderProps<TData, TValue> {
-  column: Column<TData, TValue>;
-  title: string;
-  className?: string;
-}
-
-export interface DataTablePaginationProps<TData> {
-  table: Table<TData>;
-  pageSizeOptions?: number[];
-  showSelectedCount?: boolean;
-  className?: string;
-}
-
-export interface DataTableToolbarProps<TData> {
-  table: Table<TData>;
-  globalFilter: string;
-  onGlobalFilterChange: (value: string) => void;
-  searchPlaceholder?: string;
-  children?: React.ReactNode;
-  className?: string;
-}
-
-export interface DataTableViewOptionsProps<TData> {
-  table: Table<TData>;
-  className?: string;
-}
-
-export interface DataTableEmptyProps {
+export interface DataTableEmptyConfig {
   icon?: React.ElementType;
   title?: string;
   description?: string;
   action?: React.ReactNode;
+}
+
+export interface DataTableToolbarConfig {
+  actions?: React.ReactNode;
+}
+
+export interface DataTableFilterItem {
+  slug: string;
+  label: string;
+  node: React.ReactNode;
+}
+
+export interface DataTableMeta {
+  slug: string;
+  singular: string;
+  plural: string;
+  lockedColumnSizing: boolean;
+  toggleLockColumnSizing: () => void;
+  filterOrder: string[];
+  filterVisibility: Record<string, boolean>;
+  setFilterOrder: (order: string[]) => void;
+  toggleFilterVisibility: (slug: string) => void;
+  density: DensityType;
+  setDensity: (d: DensityType) => void;
+  isViewDirty: boolean;
+  pendingFilters: FilterCondition[];
+  updatePendingFilter: (field: string, condition: FilterCondition | undefined) => void;
+  applyFilters: () => void;
+  resetFilters: () => void;
+  isFilterDirty: boolean;
+}
+
+// --- Views config ---
+
+export interface DataTableViewsConfig {
+  tableSlug: string;
+  defaultLabel?: string;
+  onStateApplied?: () => void;
+}
+
+// --- DataTable component props ---
+
+export interface DataTableProps<TData> {
+  table: Table<TData>;
+  enableSearch?: DataTableSearchConfig;
+  paginationConfig?: DataTablePaginationConfig;
+  selectActions?: SelectActions<TData>;
+  emptyStateConfig?: DataTableEmptyConfig;
+  toolbarActions?: DataTableToolbarConfig;
+  filters?: DataTableFilterItem[];
+  viewsConfig?: DataTableViewsConfig;
+  isLoading?: boolean;
+  maxHeight?: string;
+  minHeight?: string;
   className?: string;
 }

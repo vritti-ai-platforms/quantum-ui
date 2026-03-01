@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Breadcrumb as ShadcnBreadcrumb,
   BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  Breadcrumb as ShadcnBreadcrumb,
 } from '../../../shadcn/shadcnBreadcrumb';
 import { cn } from '../../../shadcn/utils';
 
@@ -41,18 +41,11 @@ function humanizeSegment(segment: string): string {
 }
 
 // Returns items with null as ellipsis placeholder when count exceeds maxItems
-function applyMaxItems(
-  items: BreadcrumbSegment[],
-  maxItems: number,
-): (BreadcrumbSegment | null)[] {
+function applyMaxItems(items: BreadcrumbSegment[], maxItems: number): (BreadcrumbSegment | null)[] {
   if (maxItems <= 0 || items.length <= maxItems) return items;
   // Show first 1 + ellipsis + last (maxItems - 1)
   const tailCount = maxItems - 1;
-  return [
-    ...items.slice(0, 1),
-    null,
-    ...items.slice(items.length - tailCount),
-  ];
+  return [...items.slice(0, 1), null, ...items.slice(items.length - tailCount)];
 }
 
 // Route-aware breadcrumb driven by the current URL pathname

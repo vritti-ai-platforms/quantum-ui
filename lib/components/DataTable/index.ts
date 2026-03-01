@@ -3,24 +3,32 @@
 // Sub-components
 export { DataTableColumnHeader } from './components/DataTableColumnHeader';
 export { DataTableEmpty } from './components/DataTableEmpty';
+export { DataTableFilters } from './components/DataTableFilters';
 export { DataTablePagination } from './components/DataTablePagination';
-export { DataTableToolbar } from './components/DataTableToolbar';
+export { DataTableRowDensity } from './components/DataTableRowDensity';
+export { DataTableSearch } from './components/DataTableSearch';
+export { DataTableSelectionBar } from './components/DataTableSelectionBar';
 export { DataTableViewOptions } from './components/DataTableViewOptions';
 export { DataTable } from './DataTable';
-
-// Hook
 export { useDataTable } from './hooks/useDataTable';
+export type { TableSlice, TableState } from './store/store';
+export { useDataTableStore } from './store/store';
+
 // Types
 export type {
   ColumnDef,
-  DataTableColumnHeaderProps,
-  DataTableEmptyProps,
-  DataTablePaginationProps,
+  DataTableEmptyConfig,
+  DataTableFilterItem,
+  DataTableMeta,
+  DataTablePaginationConfig,
   DataTableProps,
-  DataTableToolbarProps,
-  DataTableViewOptionsProps,
-  UseDataTableOptions,
-  UseDataTableReturn,
+  DataTableSearchConfig,
+  DataTableViewsConfig,
+  SearchState,
+  SelectActions,
+  DataTableToolbarConfig,
+  DensityType,
 } from './types';
+
 // Utility
-export { getSelectionColumn } from './utils';
+export { exportToCSV, getSelectionColumn } from './utils';

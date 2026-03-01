@@ -1,25 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
-import { Badge } from '../Badge';
+import { FileX2, Trash2 } from 'lucide-react';
 import { Button } from '../Button';
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRoot,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../DropdownMenu/DropdownMenu';
-import { DataTableColumnHeader } from './components/DataTableColumnHeader';
-import { DataTableEmpty } from './components/DataTableEmpty';
-import { DataTablePagination } from './components/DataTablePagination';
-import { DataTableToolbar } from './components/DataTableToolbar';
 import { DataTable } from './DataTable';
 import { useDataTable } from './hooks/useDataTable';
+import type { DataTableProps } from './types';
 import { getSelectionColumn } from './utils';
 
-// Mock data types
+// ─── Sample data ───
+
 interface Payment {
   id: string;
   amount: number;
@@ -27,235 +16,109 @@ interface Payment {
   email: string;
 }
 
-// Mock data generator
-function makePayments(count: number): Payment[] {
-  const statuses: Payment['status'][] = ['pending', 'processing', 'success', 'failed'];
-  const names = ['alice', 'bob', 'charlie', 'diana', 'eve', 'frank', 'grace', 'henry', 'iris', 'jack'];
-  return Array.from({ length: count }, (_, i) => ({
-    id: `PAY-${String(i + 1).padStart(4, '0')}`,
-    amount: Math.round(Math.random() * 500 * 100) / 100,
-    status: statuses[i % statuses.length],
-    email: `${names[i % names.length]}@example.com`,
-  }));
+const sampleData: Payment[] = [
+  { id: 'pay_001', amount: 316, status: 'success', email: 'alice@example.com' },
+  { id: 'pay_002', amount: 242, status: 'success', email: 'bob@example.com' },
+  { id: 'pay_003', amount: 837, status: 'processing', email: 'carol@example.com' },
+  { id: 'pay_004', amount: 874, status: 'success', email: 'dave@example.com' },
+  { id: 'pay_005', amount: 721, status: 'failed', email: 'eve@example.com' },
+  { id: 'pay_006', amount: 190, status: 'pending', email: 'frank@example.com' },
+  { id: 'pay_007', amount: 450, status: 'success', email: 'grace@example.com' },
+  { id: 'pay_008', amount: 125, status: 'processing', email: 'henry@example.com' },
+  { id: 'pay_009', amount: 560, status: 'success', email: 'iris@example.com' },
+  { id: 'pay_010', amount: 333, status: 'pending', email: 'jack@example.com' },
+  { id: 'pay_011', amount: 150, status: 'failed', email: 'kate@example.com' },
+  { id: 'pay_012', amount: 999, status: 'success', email: 'leo@example.com' },
+];
+
+const columns: ColumnDef<Payment, unknown>[] = [
+  { accessorKey: 'id', header: 'ID', enableSorting: false },
+  { accessorKey: 'email', header: 'Email' },
+  { accessorKey: 'status', header: 'Status' },
+  {
+    accessorKey: 'amount',
+    header: 'Amount',
+    cell: ({ row }) => {
+      const amount = Number.parseFloat(row.getValue('amount'));
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    },
+  },
+];
+
+const selectionColumns: ColumnDef<Payment, unknown>[] = [getSelectionColumn<Payment>(), ...columns];
+
+// ─── Story wrappers ───
+
+function DefaultStory() {
+  const table = useDataTable({ data: sampleData, columns, slug: 'story-default' });
+  return <DataTable table={table} enableSearch={{}} paginationConfig={{ pageSizeOptions: [5, 10, 20] }} />;
 }
 
-const payments = makePayments(42);
-
-// Base columns without sorting
-const baseColumns: ColumnDef<Payment, unknown>[] = [
-  {
-    accessorKey: 'id',
-    header: 'ID',
-    cell: ({ row }) => <span className="font-medium">{row.getValue('id')}</span>,
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const status = row.getValue('status') as string;
-      const variant =
-        status === 'success'
-          ? 'default'
-          : status === 'failed'
-            ? 'destructive'
-            : status === 'processing'
-              ? 'secondary'
-              : 'outline';
-      return <Badge variant={variant}>{status}</Badge>;
-    },
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-  },
-  {
-    accessorKey: 'amount',
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('amount'));
-      const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
-  },
-];
-
-// Columns with sortable headers
-const sortableColumns: ColumnDef<Payment, unknown>[] = [
-  {
-    accessorKey: 'id',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
-    cell: ({ row }) => <span className="font-medium">{row.getValue('id')}</span>,
-  },
-  {
-    accessorKey: 'status',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) => {
-      const status = row.getValue('status') as string;
-      const variant =
-        status === 'success'
-          ? 'default'
-          : status === 'failed'
-            ? 'destructive'
-            : status === 'processing'
-              ? 'secondary'
-              : 'outline';
-      return <Badge variant={variant}>{status}</Badge>;
-    },
-    filterFn: (row, id, value) => value.includes(row.getValue(id)),
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-  },
-  {
-    accessorKey: 'amount',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Amount" className="justify-end" />,
-    cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('amount'));
-      const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
-  },
-];
-
-// Columns with row actions
-const columnsWithActions: ColumnDef<Payment, unknown>[] = [
-  ...sortableColumns,
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original;
-      return (
-        <DropdownMenuRoot>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenuRoot>
-      );
-    },
-  },
-];
-
-// Story wrapper components
-
-const DefaultStory = () => {
-  const { table } = useDataTable({ data: payments, columns: baseColumns });
-  return <DataTable table={table} pagination={<DataTablePagination table={table} />} />;
-};
-
-const WithSortingStory = () => {
-  const { table } = useDataTable({ data: payments, columns: sortableColumns });
-  return <DataTable table={table} pagination={<DataTablePagination table={table} />} />;
-};
-
-const WithSearchStory = () => {
-  const { table, globalFilter, setGlobalFilter } = useDataTable({ data: payments, columns: sortableColumns });
+function WithSelectionStory() {
+  const table = useDataTable({ data: sampleData, columns: selectionColumns, slug: 'story-selection' });
   return (
     <DataTable
       table={table}
-      toolbar={
-        <DataTableToolbar
-          table={table}
-          globalFilter={globalFilter}
-          onGlobalFilterChange={setGlobalFilter}
-          searchPlaceholder="Filter payments..."
-        />
-      }
-      pagination={<DataTablePagination table={table} />}
+      enableSearch={{}}
+      paginationConfig={{ pageSizeOptions: [5, 10] }}
+      selectActions={(rows) => (
+        <Button variant="destructive" size="sm" onClick={() => console.log('Delete', rows.map((r) => r.original.id))}>
+          <Trash2 className="h-4 w-4 mr-1" />
+          Delete {rows.length} item{rows.length !== 1 ? 's' : ''}
+        </Button>
+      )}
     />
   );
-};
+}
 
-const WithRowSelectionStory = () => {
-  const { table } = useDataTable({
-    data: payments,
-    columns: [getSelectionColumn<Payment>(), ...sortableColumns],
-    enableRowSelection: true,
-  });
-  return <DataTable table={table} pagination={<DataTablePagination table={table} showSelectedCount />} />;
-};
-
-const WithColumnVisibilityStory = () => {
-  const { table, globalFilter, setGlobalFilter } = useDataTable({
-    data: payments,
-    columns: sortableColumns,
-    initialColumnVisibility: { status: false },
+function EmptyStateStory() {
+  const table = useDataTable({
+    data: [] as Payment[],
+    columns,
+    slug: 'story-empty',
+    enableRowSelection: false,
   });
   return (
     <DataTable
       table={table}
-      toolbar={
-        <DataTableToolbar
-          table={table}
-          globalFilter={globalFilter}
-          onGlobalFilterChange={setGlobalFilter}
-          searchPlaceholder="Filter payments..."
-        />
-      }
-      pagination={<DataTablePagination table={table} />}
+      enableSearch={{}}
+      paginationConfig={{ pageSizeOptions: [5, 10] }}
+      emptyStateConfig={{
+        icon: FileX2,
+        title: 'No payments found',
+        description: 'There are no payments matching your criteria.',
+        action: <Button size="sm">Create payment</Button>,
+      }}
     />
   );
-};
+}
 
-const EmptyStateStory = () => {
-  const { table } = useDataTable({ data: [] as Payment[], columns: baseColumns });
-  return (
-    <DataTable
-      table={table}
-      emptyState={
-        <DataTableEmpty
-          title="No payments found"
-          description="There are no payments to display yet."
-          action={<Button size="sm">Create payment</Button>}
-        />
-      }
-    />
-  );
-};
+function LoadingStory() {
+  const table = useDataTable({ data: [] as Payment[], columns, slug: 'story-loading' });
+  return <DataTable table={table} isLoading paginationConfig={{ pageSizeOptions: [5, 10] }} />;
+}
 
-const LoadingStory = () => {
-  const { table } = useDataTable({ data: [] as Payment[], columns: baseColumns });
-  return <DataTable table={table} isLoading pagination={<DataTablePagination table={table} />} />;
-};
-
-const FullFeaturedStory = () => {
-  const { table, globalFilter, setGlobalFilter } = useDataTable({
-    data: payments,
-    columns: [getSelectionColumn<Payment>(), ...columnsWithActions],
-    enableRowSelection: true,
+function CustomPaginationStory() {
+  const table = useDataTable({
+    data: sampleData,
+    columns,
+    slug: 'story-pagination',
+    initialState: { pagination: { pageIndex: 0, pageSize: 3 } },
   });
   return (
     <DataTable
       table={table}
-      toolbar={
-        <DataTableToolbar
-          table={table}
-          globalFilter={globalFilter}
-          onGlobalFilterChange={setGlobalFilter}
-          searchPlaceholder="Filter payments..."
-        />
-      }
-      pagination={<DataTablePagination table={table} pageSizeOptions={[10, 20, 50, 100]} showSelectedCount />}
-      emptyState={<DataTableEmpty title="No results" description="No payments match your search." />}
+      enableSearch={{}}
+      paginationConfig={{ pageSizeOptions: [3, 6, 12] }}
     />
   );
-};
+}
 
-// Meta
-const meta: Meta = {
+// ─── Meta ───
+
+const meta: Meta<typeof DataTable> = {
   title: 'Components/DataTable',
+  component: DataTable,
   parameters: {
     layout: 'padded',
   },
@@ -263,36 +126,24 @@ const meta: Meta = {
 };
 
 export default meta;
+type Story = StoryObj<DataTableProps<Payment>>;
 
-// Stories
-export const Default: StoryObj = {
+export const Default: Story = {
   render: () => <DefaultStory />,
 };
 
-export const WithSorting: StoryObj = {
-  render: () => <WithSortingStory />,
+export const WithSelection: Story = {
+  render: () => <WithSelectionStory />,
 };
 
-export const WithSearch: StoryObj = {
-  render: () => <WithSearchStory />,
-};
-
-export const WithRowSelection: StoryObj = {
-  render: () => <WithRowSelectionStory />,
-};
-
-export const WithColumnVisibility: StoryObj = {
-  render: () => <WithColumnVisibilityStory />,
-};
-
-export const EmptyState: StoryObj = {
+export const EmptyState: Story = {
   render: () => <EmptyStateStory />,
 };
 
-export const Loading: StoryObj = {
+export const Loading: Story = {
   render: () => <LoadingStory />,
 };
 
-export const FullFeatured: StoryObj = {
-  render: () => <FullFeaturedStory />,
+export const CustomPagination: Story = {
+  render: () => <CustomPaginationStory />,
 };

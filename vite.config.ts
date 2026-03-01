@@ -26,7 +26,7 @@ export default defineConfig({
         // Main entry point
         index: resolve(__dirname, 'lib/index.ts'),
         // Component entries
-        'components/Sidebar': resolve(__dirname, 'lib/components/AppSidebar/index.ts'),
+        'components/Sidebar': resolve(__dirname, 'lib/components/Sidebar/index.ts'),
         'components/Breadcrumb': resolve(__dirname, 'lib/components/Breadcrumb/index.ts'),
         'components/Alert': resolve(__dirname, 'lib/components/Alert/index.ts'),
         'components/Avatar': resolve(__dirname, 'lib/components/Avatar/index.ts'),
@@ -43,8 +43,8 @@ export default defineConfig({
         'components/Progress': resolve(__dirname, 'lib/components/Progress/index.ts'),
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
+        'components/Sortable': resolve(__dirname, 'lib/components/Sortable/index.ts'),
         'selects/IndustrySelect': resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
-        IndustrySelect: resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),
@@ -62,6 +62,8 @@ export default defineConfig({
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
         'components/FilePreview': resolve(__dirname, 'lib/components/FilePreview/index.ts'),
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),
+        'components/ValueFilter': resolve(__dirname, 'lib/components/ValueFilter/index.ts'),
+        'components/ViewTabs': resolve(__dirname, 'lib/components/ViewTabs/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Hooks entries
@@ -70,6 +72,8 @@ export default defineConfig({
         'context/index': resolve(__dirname, 'lib/context/index.ts'),
         // Theme entries (consolidated theme exports for Module Federation)
         'theme/index': resolve(__dirname, 'lib/theme/index.ts'),
+        // Types entries
+        'types/table-filter': resolve(__dirname, 'lib/types/table-filter.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
         'utils/slug': resolve(__dirname, 'lib/utils/slug.ts'),

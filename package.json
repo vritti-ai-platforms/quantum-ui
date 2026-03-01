@@ -37,7 +37,7 @@
       "import": "./dist/index.js"
     },
     "./Sidebar": {
-      "types": "./dist/lib/components/AppSidebar/index.d.ts",
+      "types": "./dist/lib/components/Sidebar/index.d.ts",
       "import": "./dist/components/Sidebar.js"
     },
     "./Breadcrumb": {
@@ -108,11 +108,11 @@
       "types": "./dist/lib/components/Select/index.d.ts",
       "import": "./dist/components/Select.js"
     },
-    "./selects/IndustrySelect": {
-      "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
-      "import": "./dist/selects/IndustrySelect.js"
+    "./Sortable": {
+      "types": "./dist/lib/components/Sortable/index.d.ts",
+      "import": "./dist/components/Sortable.js"
     },
-    "./IndustrySelect": {
+    "./selects/IndustrySelect": {
       "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
       "import": "./dist/selects/IndustrySelect.js"
     },
@@ -180,9 +180,21 @@
       "types": "./dist/lib/components/UploadFile/index.d.ts",
       "import": "./dist/components/UploadFile.js"
     },
+    "./ValueFilter": {
+      "types": "./dist/lib/components/ValueFilter/index.d.ts",
+      "import": "./dist/components/ValueFilter.js"
+    },
+    "./ViewTabs": {
+      "types": "./dist/lib/components/ViewTabs/index.d.ts",
+      "import": "./dist/components/ViewTabs.js"
+    },
     "./Field": {
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
+    },
+    "./table-filter": {
+      "types": "./dist/lib/types/table-filter.d.ts",
+      "import": "./dist/types/table-filter.js"
     },
     "./axios": {
       "types": "./dist/lib/utils/axios.d.ts",
@@ -260,6 +272,9 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -283,6 +298,7 @@
     "date-fns": "^4.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.562.0",
+    "pluralize-esm": "^9.0.5",
     "react-day-picker": "^9.13.0",
     "react-hook-form": "^7.71.1",
     "react-intersection-observer": "^10.0.2",
@@ -290,6 +306,7 @@
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.3.5"
+    "zod": "^4.3.5",
+    "zustand": "^5.0.11"
   }
 }
