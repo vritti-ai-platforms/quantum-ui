@@ -29,6 +29,7 @@ export * from './Sortable';
 export * from './Spinner';
 export * from './StepProgressIndicator';
 export * from './Switch';
+export * from './Tabs';
 export * from './TextArea';
 export * from './TextField';
 export * from './ThemeToggle';
