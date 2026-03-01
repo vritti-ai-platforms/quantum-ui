@@ -56,3 +56,7 @@ export function Tabs({ tabs, listClassName, contentClassName, disabled, mountStr
 }
 
 Tabs.displayName = 'Tabs';
+
+export const TabsList = ShadcnTabsList;
+export const TabsContent = ShadcnTabsContent;
+export const TabsTrigger = ShadcnTabsTrigger;

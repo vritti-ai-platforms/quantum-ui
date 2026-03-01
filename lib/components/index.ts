@@ -12,6 +12,7 @@ export * from './DatePicker';
 export * from './Dialog';
 export * from './ErrorBoundary';
 export * from './DropdownMenu';
+export * from './Empty';
 export * from './Field';
 export * from './FilePreview';
 export * from './Form';
