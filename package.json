@@ -140,6 +140,10 @@
       "types": "./dist/lib/components/DropdownMenu/index.d.ts",
       "import": "./dist/components/DropdownMenu.js"
     },
+    "./Empty": {
+      "types": "./dist/lib/components/Empty/index.d.ts",
+      "import": "./dist/components/Empty.js"
+    },
     "./Separator": {
       "types": "./dist/lib/components/Separator/index.d.ts",
       "import": "./dist/components/Separator.js"

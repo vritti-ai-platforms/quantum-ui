@@ -52,6 +52,7 @@ export default defineConfig({
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
         'components/Dialog': resolve(__dirname, 'lib/components/Dialog/index.ts'),
         'components/DropdownMenu': resolve(__dirname, 'lib/components/DropdownMenu/index.ts'),
+        'components/Empty': resolve(__dirname, 'lib/components/Empty/index.ts'),
         'components/Separator': resolve(__dirname, 'lib/components/Separator/index.ts'),
         'components/Skeleton': resolve(__dirname, 'lib/components/Skeleton/index.ts'),
         'components/Sonner': resolve(__dirname, 'lib/components/Sonner/index.ts'),
