@@ -1,9 +1,9 @@
 import type { Column, Table } from '@tanstack/react-table';
 import { Columns, Eye, EyeOff, GripVertical, Lock, Pin } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shadcnPopover';
 import { Switch } from '../../../../shadcn/shadcnSwitch';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
+import { DropdownMenu } from '../../DropdownMenu';
 import { SortableItem, SortableList } from '../../Sortable';
 import type { DataTableMeta } from '../types';
 
@@ -67,7 +67,7 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
   );
 }
 
-// Column settings popover with drag-to-reorder, pin, and visibility controls
+// Column settings dropdown with drag-to-reorder, pin, and visibility controls
 export function DataTableViewOptions<TData>({ table, className }: DataTableViewOptionsProps<TData>) {
   const meta = table.options.meta as DataTableMeta | undefined;
 
@@ -85,7 +85,6 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
         ? table.getState().columnOrder
         : table.getAllLeafColumns().map((c) => c.id);
 
-    // Replace reorderable column positions while preserving non-reorderable ones (select, etc.)
     const reorderedIds = reordered.map((r) => r.id);
     const reorderableSet = new Set(columns.map((c) => c.id));
     let idx = 0;
@@ -95,51 +94,64 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
   }
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className={cn('h-8 w-8 p-0', className)}>
-          <Columns className="h-4 w-4" />
-          <span className="sr-only">Column settings</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-[260px] p-0">
-        {/* Header */}
-        <div className="px-3 py-3 border-b">
-          <span className="text-sm font-medium">Column Settings</span>
-          <p className="text-xs text-muted-foreground mt-0.5">Drag to reorder, pin, or hide columns</p>
-        </div>
-
-        {/* Resize Lock */}
-        {meta?.toggleLockColumnSizing && (
-          <div className="flex items-center justify-between px-3 py-2.5 border-b">
-            <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div>
-                <span className="text-sm">Resize Lock</span>
-                <p className="text-xs text-muted-foreground">
-                  {meta?.lockedColumnSizing ? 'Column sizes are locked' : 'Columns can be resized'}
-                </p>
+    <DropdownMenu
+      trigger={{
+        children: (
+          <Button variant="outline" size="sm" className={cn('h-8 w-8 p-0', className)}>
+            <Columns className="h-4 w-4" />
+            <span className="sr-only">Column settings</span>
+          </Button>
+        ),
+      }}
+      contentClassName="w-[260px] p-0"
+      align="end"
+      items={[
+        {
+          type: 'custom',
+          id: 'column-settings-panel',
+          asMenuItem: false,
+          render: (
+            <>
+              {/* Header */}
+              <div className="px-3 py-3 border-b">
+                <span className="text-sm font-medium">Column Settings</span>
+                <p className="text-xs text-muted-foreground mt-0.5">Drag to reorder, pin, or hide columns</p>
               </div>
-            </div>
-            <Switch
-              size="sm"
-              checked={meta?.lockedColumnSizing ?? false}
-              onCheckedChange={() => meta?.toggleLockColumnSizing()}
-              aria-label="Lock column sizes"
-            />
-          </div>
-        )}
 
-        {/* Column list */}
-        <div className="max-h-[300px] overflow-y-auto py-1">
-          <SortableList items={sortableColumns} onReorder={handleReorder}>
-            {sortableColumns.map((item) => (
-              <SortableColumnItem key={item.id} column={item.column} />
-            ))}
-          </SortableList>
-        </div>
-      </PopoverContent>
-    </Popover>
+              {/* Resize Lock */}
+              {meta?.toggleLockColumnSizing && (
+                <div className="flex items-center justify-between px-3 py-2.5 border-b">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <span className="text-sm">Resize Lock</span>
+                      <p className="text-xs text-muted-foreground">
+                        {meta?.lockedColumnSizing ? 'Column sizes are locked' : 'Columns can be resized'}
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    size="sm"
+                    checked={meta?.lockedColumnSizing ?? false}
+                    onCheckedChange={() => meta?.toggleLockColumnSizing()}
+                    aria-label="Lock column sizes"
+                  />
+                </div>
+              )}
+
+              {/* Column list */}
+              <div className="max-h-[300px] overflow-y-auto py-1">
+                <SortableList items={sortableColumns} onReorder={handleReorder}>
+                  {sortableColumns.map((item) => (
+                    <SortableColumnItem key={item.id} column={item.column} />
+                  ))}
+                </SortableList>
+              </div>
+            </>
+          ),
+        },
+      ]}
+    />
   );
 }
 

@@ -14,6 +14,9 @@ import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { useDataTableStore } from '../store/store';
 import type { DataTableViewsConfig } from '../types';
 
+// Stable module-level fallback to avoid creating new references on every selector call
+const NO_PENDING: FilterCondition[] = [];
+
 interface UseDataTableOptions<TData> {
   data: TData[];
   columns: ColumnDef<TData, unknown>[];
@@ -63,10 +66,9 @@ export function useDataTable<TData>({
     }
   }, [slug, enableRowSelection]);
 
-  const tableEntry = useDataTableStore((s) => s.tables[slug]);
-  const activeState = tableEntry?.activeState ?? EMPTY_TABLE_STATE;
-  const pendingFilters = tableEntry?.pendingFilters ?? [];
-  const isViewDirty = tableEntry?.isViewDirty ?? false;
+  const activeState = useDataTableStore((s) => s.tables[slug]?.activeState ?? EMPTY_TABLE_STATE);
+  const pendingFilters = useDataTableStore((s) => s.tables[slug]?.pendingFilters ?? NO_PENDING);
+  const isViewDirty = useDataTableStore((s) => s.tables[slug]?.isViewDirty ?? false);
 
   // Derive TanStack state from activeState — fallbacks guard against old server payloads
   const sorting = useMemo(() => sortConditionsToTanstack(activeState.sort ?? []), [activeState.sort]);
@@ -86,10 +88,7 @@ export function useDataTable<TData>({
   const storeUpdatePendingFilter = useDataTableStore((s) => s.updatePendingFilter);
   const storeApplyFilters = useDataTableStore((s) => s.applyFilters);
   const storeResetFilters = useDataTableStore((s) => s.resetFilters);
-  const isFilterDirty = useMemo(
-    () => JSON.stringify(pendingFilters) !== JSON.stringify(activeState.filters),
-    [pendingFilters, activeState.filters],
-  );
+  const isFilterDirty = pendingFilters !== activeState.filters;
 
   const meta = useMemo(
     () => ({
