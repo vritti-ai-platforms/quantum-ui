@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shad
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { SortableItem, SortableList } from '../../Sortable';
+import { useDataTableStore } from '../store/store';
 import type { DataTableFilterItem, DataTableMeta } from '../types';
 
 interface DataTableFiltersProps<TData> {
@@ -11,7 +12,7 @@ interface DataTableFiltersProps<TData> {
   table: Table<TData>;
 }
 
-// Filter row in the settings popover — drag to reorder, Eye/EyeOff to hide
+// Filter row in the settings popover -- drag to reorder, Eye/EyeOff to hide
 function SortableFilterItem({
   filter,
   isVisible,
@@ -60,19 +61,22 @@ function SortableFilterItem({
 // Renders the active filter bar with ordered/visible filters and a settings popover
 export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProps<TData>) {
   const metaRaw = table.options.meta as DataTableMeta | undefined;
+  const updatePendingFilter = useDataTableStore((s) => s.updatePendingFilter);
+
   if (!metaRaw) return null;
   const meta: DataTableMeta = metaRaw;
+  const slug = meta.slug;
 
   const filterMap = new Map(filters.map((f) => [f.slug, f]));
 
   // Effective order: stored order (filtered to existing slugs) + any new filters appended at end
   const effectiveOrder = [
-    ...meta.filterOrder.filter((slug) => filterMap.has(slug)),
+    ...meta.filterOrder.filter((s) => filterMap.has(s)),
     ...filters.filter((f) => !meta.filterOrder.includes(f.slug)).map((f) => f.slug),
   ];
 
   const visibleFilters = effectiveOrder
-    .map((slug) => filterMap.get(slug))
+    .map((s) => filterMap.get(s))
     .filter((f): f is DataTableFilterItem => f !== undefined && meta.filterVisibility[f.slug] !== false);
 
   function handleReorder(reordered: { id: string }[]) {
@@ -80,9 +84,9 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   }
 
   const sortableItems = effectiveOrder
-    .map((slug) => {
-      const filter = filterMap.get(slug);
-      return filter ? { id: slug, filter } : null;
+    .map((s) => {
+      const filter = filterMap.get(s);
+      return filter ? { id: s, filter } : null;
     })
     .filter((item): item is { id: string; filter: DataTableFilterItem } => item !== null);
 
@@ -92,10 +96,22 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
         <span key={f.slug}>{f.node}</span>
       ))}
 
-      {/* Settings popover — far right */}
+      {/* Apply/Reset buttons -- always available via store state */}
+      <div className="flex items-center gap-2 ml-auto">
+        {(meta.pendingFilters.length > 0 || meta.isFilterDirty) && (
+          <Button variant="ghost" size="sm" onClick={() => meta.resetFilters()}>
+            Reset
+          </Button>
+        )}
+        <Button size="sm" onClick={() => meta.applyFilters()} disabled={!meta.isFilterDirty}>
+          Apply
+        </Button>
+      </div>
+
+      {/* Settings popover -- far right */}
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="ml-auto h-8 w-8 p-0">
+          <Button variant="outline" size="sm" className="h-8 w-8 p-0">
             <Settings className="h-4 w-4" />
             <span className="sr-only">Filter settings</span>
           </Button>
@@ -115,7 +131,7 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
                   onToggleVisibility={() => {
                     const isCurrentlyVisible = meta.filterVisibility[id] !== false;
                     if (isCurrentlyVisible) {
-                      table.getColumn(id)?.setFilterValue(undefined);
+                      updatePendingFilter(slug, id, undefined);
                     }
                     meta.toggleFilterVisibility(id);
                   }}

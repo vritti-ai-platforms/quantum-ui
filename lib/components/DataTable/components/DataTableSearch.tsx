@@ -1,18 +1,15 @@
 import type { Table } from '@tanstack/react-table';
-import { Search, X } from 'lucide-react';
+import { ChevronDown, Search, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
-import {
-  SingleSelectContent,
-  SingleSelectList,
-  SingleSelectRoot,
-  SingleSelectRow,
-  SingleSelectTrigger,
-} from '../../Select';
+import { SingleSelect } from '../../Select';
+import type { SearchState } from '../types';
 
 interface DataTableSearchProps<TData> {
   table: Table<TData>;
+  search: SearchState;
+  onSearchChange: (search: SearchState) => void;
   className?: string;
 }
 
@@ -21,58 +18,62 @@ function getColumnLabel(columnDef: { header?: unknown }, fallbackId: string): st
   return typeof columnDef.header === 'string' ? columnDef.header : fallbackId;
 }
 
-// Column-specific search with dropdown selector — collapsed icon button, expanded search bar
-export function DataTableSearch<TData>({ table, className }: DataTableSearchProps<TData>) {
+// Column-specific search with dropdown selector -- collapsed icon button, expanded search bar
+export function DataTableSearch<TData>({ table, search, onSearchChange, className }: DataTableSearchProps<TData>) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [columnSelectorOpen, setColumnSelectorOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Get filterable columns (exclude select/checkbox column)
-  const filterableColumns = useMemo(
-    () =>
-      table
-        .getAllLeafColumns()
-        .filter((c) => typeof c.accessorFn !== 'undefined' && c.getCanFilter() && c.id !== 'select'),
+  // Get searchable columns (exclude select/checkbox column)
+  const searchableColumns = useMemo(
+    () => table.getAllLeafColumns().filter((c) => typeof c.accessorFn !== 'undefined' && c.id !== 'select'),
     [table],
   );
 
-  // Derive initial selection from persisted columnFilters — falls back to first filterable column
+  const options = useMemo(
+    () => searchableColumns.map((c) => ({ value: c.id, label: getColumnLabel(c.columnDef, c.id) })),
+    [searchableColumns],
+  );
+
+  // Derive initial column selection from persisted search state or fall back to first column
   const [selectedColumnId, setSelectedColumnId] = useState(() => {
-    const activeFilter = table.getState().columnFilters[0];
-    if (activeFilter && filterableColumns.some((c) => c.id === activeFilter.id)) {
-      return activeFilter.id;
+    if (search?.columnId && searchableColumns.some((c) => c.id === search.columnId)) {
+      return search.columnId;
     }
-    return filterableColumns[0]?.id ?? '';
+    return searchableColumns[0]?.id ?? '';
   });
 
   // Reset to first available if selected column is hidden/removed
   useEffect(() => {
-    if (!filterableColumns.some((c) => c.id === selectedColumnId)) {
-      setSelectedColumnId(filterableColumns[0]?.id ?? '');
+    if (!searchableColumns.some((c) => c.id === selectedColumnId)) {
+      setSelectedColumnId(searchableColumns[0]?.id ?? '');
     }
-  }, [filterableColumns, selectedColumnId]);
+  }, [searchableColumns, selectedColumnId]);
 
   const selectedColumn = table.getColumn(selectedColumnId);
-  const filterValue = (selectedColumn?.getFilterValue() as string) ?? '';
   const selectedLabel = selectedColumn ? getColumnLabel(selectedColumn.columnDef, selectedColumn.id) : '';
+
+  // Displayed input value comes from the prop
+  const inputValue = search?.columnId === selectedColumnId ? (search?.value ?? '') : '';
 
   // Auto-focus when expanding
   useEffect(() => {
     if (isExpanded) inputRef.current?.focus();
   }, [isExpanded]);
 
-  // Clears the active column filter and collapses
+  // Clears the search and collapses
   function handleCollapse() {
-    selectedColumn?.setFilterValue(undefined);
+    onSearchChange(null);
     setIsExpanded(false);
   }
 
-  // Switches to a different filter column — clears the old filter
+  // Switches to a different search column
   function handleColumnChange(columnId: string) {
-    selectedColumn?.setFilterValue(undefined);
     setSelectedColumnId(columnId);
-    setColumnSelectorOpen(false);
-    inputRef.current?.focus();
+    if (inputValue) {
+      onSearchChange({ columnId, value: inputValue });
+    }
+    // Defer focus until after Radix closes the popover and restores its own focus
+    setTimeout(() => inputRef.current?.focus(), 0);
   }
 
   if (!isExpanded) {
@@ -89,27 +90,21 @@ export function DataTableSearch<TData>({ table, className }: DataTableSearchProp
       className={cn('flex items-center border border-input rounded-lg bg-background overflow-hidden h-9', className)}
     >
       {/* Column selector */}
-      <SingleSelectRoot open={columnSelectorOpen} onOpenChange={setColumnSelectorOpen}>
-        <SingleSelectTrigger className="border-0 shadow-none rounded-none border-r border-input min-h-0 h-full px-2.5 py-0 gap-1">
-          <span className="capitalize">{selectedLabel}</span>
-        </SingleSelectTrigger>
-        <SingleSelectContent align="start" className="w-[160px]">
-          <SingleSelectList>
-            {filterableColumns.map((column) => {
-              const label = getColumnLabel(column.columnDef, column.id);
-              return (
-                <SingleSelectRow
-                  key={column.id}
-                  name={label}
-                  selected={column.id === selectedColumnId}
-                  onSelect={() => handleColumnChange(column.id)}
-                  className="capitalize"
-                />
-              );
-            })}
-          </SingleSelectList>
-        </SingleSelectContent>
-      </SingleSelectRoot>
+      <SingleSelect
+        value={selectedColumnId}
+        onChange={(val) => handleColumnChange(String(val))}
+        options={options}
+        contentClassName="w-[160px]"
+        anchor={() => (
+          <button
+            type="button"
+            className="flex items-center gap-1 h-full px-2.5 border-r border-input text-sm capitalize hover:bg-accent/50 transition-colors shrink-0"
+          >
+            {selectedLabel}
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>
+        )}
+      />
 
       {/* Search input */}
       <div className="flex items-center px-2 flex-1">
@@ -117,8 +112,11 @@ export function DataTableSearch<TData>({ table, className }: DataTableSearchProp
         <input
           ref={inputRef}
           type="text"
-          value={filterValue}
-          onChange={(e) => selectedColumn?.setFilterValue(e.target.value || undefined)}
+          value={inputValue}
+          onChange={(e) => {
+            const value = e.target.value;
+            onSearchChange(value ? { columnId: selectedColumnId, value } : null);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Escape') handleCollapse();
           }}

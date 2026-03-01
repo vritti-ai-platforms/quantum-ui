@@ -23,6 +23,8 @@ export type {
   DataTablePaginationConfig,
   DataTableProps,
   DataTableSearchConfig,
+  DataTableViewsConfig,
+  SearchState,
   SelectActions,
   DataTableToolbarConfig,
   DensityType,

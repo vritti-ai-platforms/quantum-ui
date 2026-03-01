@@ -1,13 +1,12 @@
+import type { Table } from '@tanstack/react-table';
 import { AlignJustify } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
-
-type DensityType = 'compact' | 'normal' | 'comfortable';
+import type { DataTableMeta, DensityType } from '../types';
 
 interface DataTableRowDensityProps {
-  density: DensityType;
-  onDensityChange: (density: DensityType) => void;
+  table: Table<unknown>;
   className?: string;
 }
 
@@ -18,7 +17,11 @@ const densityOptions: { value: DensityType; label: string; description: string }
 ];
 
 // Renders a row density toggle popover with compact/normal/comfortable options
-export function DataTableRowDensity({ density, onDensityChange, className }: DataTableRowDensityProps) {
+export function DataTableRowDensity({ table, className }: DataTableRowDensityProps) {
+  const meta = table.options.meta as DataTableMeta;
+  const density = meta.density;
+  const setDensity = meta.setDensity;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -38,7 +41,7 @@ export function DataTableRowDensity({ density, onDensityChange, className }: Dat
                 'w-full text-left p-3 rounded-md border transition-colors',
                 density === option.value ? 'bg-accent border-primary' : 'hover:bg-accent border-transparent',
               )}
-              onClick={() => onDensityChange(option.value)}
+              onClick={() => setDensity(option.value)}
             >
               <div className="font-medium text-sm">{option.label}</div>
               <div className="text-xs text-muted-foreground">{option.description}</div>

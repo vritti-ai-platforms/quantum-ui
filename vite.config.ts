@@ -62,6 +62,8 @@ export default defineConfig({
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
         'components/FilePreview': resolve(__dirname, 'lib/components/FilePreview/index.ts'),
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),
+        'components/ValueFilter': resolve(__dirname, 'lib/components/ValueFilter/index.ts'),
+        'components/ViewTabs': resolve(__dirname, 'lib/components/ViewTabs/index.ts'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Hooks entries
@@ -70,6 +72,8 @@ export default defineConfig({
         'context/index': resolve(__dirname, 'lib/context/index.ts'),
         // Theme entries (consolidated theme exports for Module Federation)
         'theme/index': resolve(__dirname, 'lib/theme/index.ts'),
+        // Types entries
+        'types/table-filter': resolve(__dirname, 'lib/types/table-filter.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
         'utils/slug': resolve(__dirname, 'lib/utils/slug.ts'),

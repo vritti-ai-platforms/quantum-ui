@@ -1,58 +1,41 @@
-import type {
-  ColumnFiltersState,
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
-  SortingState,
-  Updater,
-  VisibilityState,
-} from '@tanstack/react-table';
 import { create } from 'zustand';
+import type { FilterCondition, TableViewState } from '../../../types/table-filter';
+import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 
 const MAX_TABLES = 20;
 
 export interface TableState {
-  sorting: SortingState;
-  columnFilters: ColumnFiltersState;
-  columnVisibility: VisibilityState;
-  columnPinning: ColumnPinningState;
-  columnOrder: ColumnOrderState;
-  columnSizing: ColumnSizingState;
-  lockedColumnSizing: boolean;
-  filterOrder: string[];
-  filterVisibility: Record<string, boolean>;
+  activeState: TableViewState;
+  isViewDirty: boolean;
+  activeViewId: string | null;
+  pendingFilters: FilterCondition[];
   lastAccessed: number;
 }
 
 export interface TableSlice {
   tables: Record<string, TableState>;
   initTable: (slug: string, options?: { pinSelectColumn?: boolean }) => void;
-  updateField: <K extends keyof TableState>(slug: string, field: K, updaterOrValue: Updater<TableState[K]>) => void;
+  loadViewState: (slug: string, state: TableViewState, viewId: string | null) => void;
+  updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
+  updatePendingFilter: (slug: string, field: string, condition: FilterCondition | undefined) => void;
+  applyFilters: (slug: string) => void;
+  resetFilters: (slug: string) => void;
+  markClean: (slug: string) => void;
 }
 
 const DEFAULT_TABLE_STATE: TableState = {
-  sorting: [],
-  columnFilters: [],
-  columnVisibility: {},
-  columnPinning: { left: [], right: [] },
-  columnOrder: [],
-  columnSizing: {},
-  lockedColumnSizing: false,
-  filterOrder: [],
-  filterVisibility: {},
+  activeState: EMPTY_TABLE_STATE,
+  isViewDirty: false,
+  activeViewId: null,
+  pendingFilters: [],
   lastAccessed: 0,
 };
-
-// Resolves TanStack's Updater<T> pattern — value or function
-function resolveUpdater<T>(updaterOrValue: Updater<T>, current: T): T {
-  return typeof updaterOrValue === 'function' ? (updaterOrValue as (prev: T) => T)(current) : updaterOrValue;
-}
 
 // Persists per-table state across renders with oldest-first eviction at capacity
 export const useDataTableStore = create<TableSlice>((set, get) => ({
   tables: {},
 
-  // Creates a table entry if absent — evicts least-recently-used when exceeding MAX_TABLES
+  // Creates a table entry if absent -- evicts least-recently-used when exceeding MAX_TABLES
   initTable: (slug, options) => {
     if (get().tables[slug]) return;
 
@@ -67,30 +50,144 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
         delete tables[lruKey];
       }
 
+      const pinning = options?.pinSelectColumn
+        ? { left: ['select'], right: [] }
+        : { left: [], right: [] };
+
       tables[slug] = {
         ...DEFAULT_TABLE_STATE,
-        columnPinning: {
-          left: options?.pinSelectColumn ? ['select'] : [],
-          right: [],
-        },
+        activeState: { ...EMPTY_TABLE_STATE, columnPinning: pinning },
         lastAccessed: Date.now(),
       };
       return { tables };
     });
   },
 
-  // Generic setter for any TableState field — resolves Updater pattern
-  updateField: (slug, field, updaterOrValue) => {
-    set((state) => {
-      const currentTable = state.tables[slug];
-      if (!currentTable) return state;
+  // Sets activeState, pendingFilters, activeViewId, and resets isViewDirty.
+  // Merges with EMPTY_TABLE_STATE so old server payloads missing new fields still work.
+  loadViewState: (slug, state, viewId) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
 
-      const newValue = resolveUpdater(updaterOrValue, currentTable[field]);
+      const mergedState = { ...EMPTY_TABLE_STATE, ...state };
 
       return {
         tables: {
-          ...state.tables,
-          [slug]: { ...currentTable, [field]: newValue, lastAccessed: Date.now() },
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            activeState: mergedState,
+            pendingFilters: mergedState.filters,
+            activeViewId: viewId,
+            isViewDirty: false,
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Applies an updater function to activeState and marks dirty if a view is active
+  updateActiveState: (slug, updater) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      const newActiveState = updater(currentTable.activeState);
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            activeState: newActiveState,
+            isViewDirty: currentTable.activeViewId !== null ? true : currentTable.isViewDirty,
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Updates only pendingFilters -- removes old field entry and adds new one if condition given
+  updatePendingFilter: (slug, field, condition) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      const filtered = currentTable.pendingFilters.filter((f) => f.field !== field);
+      const newPending = condition ? [...filtered, condition] : filtered;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            pendingFilters: newPending,
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Commits pendingFilters into activeState.filters and marks dirty if a view is active
+  applyFilters: (slug) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      const newFilters = currentTable.pendingFilters;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            activeState: { ...currentTable.activeState, filters: newFilters },
+            isViewDirty: currentTable.activeViewId !== null ? true : currentTable.isViewDirty,
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Clears both pendingFilters and activeState.filters
+  resetFilters: (slug) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            pendingFilters: [],
+            activeState: { ...currentTable.activeState, filters: [] },
+            isViewDirty: currentTable.activeViewId !== null ? true : currentTable.isViewDirty,
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Resets isViewDirty to false
+  markClean: (slug) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            isViewDirty: false,
+          },
         },
       };
     });

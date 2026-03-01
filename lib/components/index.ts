@@ -34,3 +34,5 @@ export * from './ThemeToggle';
 export * from './Toggle';
 export * from './Typography';
 export * from './UploadFile';
+export * from './ValueFilter';
+export * from './ViewTabs';

@@ -180,9 +180,21 @@
       "types": "./dist/lib/components/UploadFile/index.d.ts",
       "import": "./dist/components/UploadFile.js"
     },
+    "./ValueFilter": {
+      "types": "./dist/lib/components/ValueFilter/index.d.ts",
+      "import": "./dist/components/ValueFilter.js"
+    },
+    "./ViewTabs": {
+      "types": "./dist/lib/components/ViewTabs/index.d.ts",
+      "import": "./dist/components/ViewTabs.js"
+    },
     "./Field": {
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
+    },
+    "./table-filter": {
+      "types": "./dist/lib/types/table-filter.d.ts",
+      "import": "./dist/types/table-filter.js"
     },
     "./axios": {
       "types": "./dist/lib/utils/axios.d.ts",

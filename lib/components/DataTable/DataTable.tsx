@@ -1,5 +1,5 @@
 import { flexRender } from '@tanstack/react-table';
-import { Funnel, X } from 'lucide-react';
+import { Funnel } from 'lucide-react';
 import { useState } from 'react';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
@@ -13,6 +13,8 @@ import { DataTableRowDensity } from './components/DataTableRowDensity';
 import { DataTableSearch } from './components/DataTableSearch';
 import { DataTableSelectionBar } from './components/DataTableSelectionBar';
 import { DataTableViewOptions } from './components/DataTableViewOptions';
+import { DataTableViewsMenu } from './components/DataTableViewsMenu';
+import { DataTableViewTabs } from './components/DataTableViewTabs';
 import type { DataTableMeta, DataTableProps, DensityType } from './types';
 
 const densityClasses: Record<DensityType, string> = {
@@ -30,35 +32,35 @@ export function DataTable<TData>({
   emptyStateConfig,
   toolbarActions,
   filters,
+  viewsConfig,
   isLoading = false,
   maxHeight = '700px',
   minHeight = '700px',
   className,
 }: DataTableProps<TData>) {
-  const [density, setDensity] = useState<DensityType>('normal');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const meta = table.options.meta as DataTableMeta | undefined;
+  const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
-  const isFiltered = table.getState().columnFilters.length > 0;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = enableSearch || visibilityEnabled || toolbarActions || filters;
+  const showToolbar = enableSearch || visibilityEnabled || toolbarActions || filters || viewsConfig;
 
   return (
     <div className={cn('space-y-2', className)}>
       {/* Toolbar */}
       {showToolbar && (
         <div className="flex items-center gap-4">
-          <div className="flex flex-1 items-center gap-2">
-            {isFiltered && (
-              <Button variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
-                Reset
-                <X className="ml-2 h-4 w-4" />
-              </Button>
-            )}
+          {/* LEFT: view tabs (flex-1) when viewsConfig set; otherwise spacer */}
+          <div className={cn('flex min-w-0', viewsConfig ? 'flex-1' : 'flex-1')}>
+            {viewsConfig && <DataTableViewTabs config={viewsConfig} />}
           </div>
-          <div className="flex items-center gap-2">
-            {enableSearch && <DataTableSearch table={table} />}
+
+          {/* RIGHT: icon buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            {enableSearch && (
+              <DataTableSearch table={table} search={enableSearch.value} onSearchChange={enableSearch.onChange} />
+            )}
             {filters && (
               <Button
                 variant={filtersOpen ? 'secondary' : 'outline'}
@@ -71,7 +73,8 @@ export function DataTable<TData>({
               </Button>
             )}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
-            <DataTableRowDensity density={density} onDensityChange={setDensity} />
+            <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />
+            {viewsConfig && <DataTableViewsMenu config={viewsConfig} />}
             {toolbarActions?.actions}
           </div>
         </div>

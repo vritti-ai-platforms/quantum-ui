@@ -1,11 +1,18 @@
 import type { PaginationState, Row, Table } from '@tanstack/react-table';
+import type { DensityType, FilterCondition } from '../../types/table-filter';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
-// ─── Feature config types ───
+// Re-export DensityType for backward compatibility
+export type { DensityType } from '../../types/table-filter';
+
+// --- Feature config types ---
+
+export type SearchState = { columnId: string; value: string } | null;
 
 export interface DataTableSearchConfig {
-  placeholder?: string;
+  value: SearchState;
+  onChange: (search: SearchState) => void;
 }
 
 export interface DataTablePaginationConfig {
@@ -26,8 +33,6 @@ export interface DataTableToolbarConfig {
   actions?: React.ReactNode;
 }
 
-export type DensityType = 'compact' | 'normal' | 'comfortable';
-
 export interface DataTableFilterItem {
   slug: string;
   label: string;
@@ -44,9 +49,25 @@ export interface DataTableMeta {
   filterVisibility: Record<string, boolean>;
   setFilterOrder: (order: string[]) => void;
   toggleFilterVisibility: (slug: string) => void;
+  density: DensityType;
+  setDensity: (d: DensityType) => void;
+  isViewDirty: boolean;
+  pendingFilters: FilterCondition[];
+  updatePendingFilter: (field: string, condition: FilterCondition | undefined) => void;
+  applyFilters: () => void;
+  resetFilters: () => void;
+  isFilterDirty: boolean;
 }
 
-// ─── DataTable component props ───
+// --- Views config ---
+
+export interface DataTableViewsConfig {
+  tableSlug: string;
+  defaultLabel?: string;
+  onStateApplied?: () => void;
+}
+
+// --- DataTable component props ---
 
 export interface DataTableProps<TData> {
   table: Table<TData>;
@@ -56,6 +77,7 @@ export interface DataTableProps<TData> {
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
   filters?: DataTableFilterItem[];
+  viewsConfig?: DataTableViewsConfig;
   isLoading?: boolean;
   maxHeight?: string;
   minHeight?: string;

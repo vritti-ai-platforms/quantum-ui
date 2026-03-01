@@ -1,4 +1,4 @@
-import type { ColumnDef, InitialTableState } from '@tanstack/react-table';
+import type { ColumnDef, InitialTableState, SortingState } from '@tanstack/react-table';
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -7,8 +7,12 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import pluralize from 'pluralize-esm';
-import { useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { upsertTableState } from '../../../services/table-views.service';
+import type { DensityType, FilterCondition, SortCondition, TableViewState } from '../../../types/table-filter';
+import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { useDataTableStore } from '../store/store';
+import type { DataTableViewsConfig } from '../types';
 
 interface UseDataTableOptions<TData> {
   data: TData[];
@@ -22,6 +26,13 @@ interface UseDataTableOptions<TData> {
   enableRowSelection?: boolean;
   enableHiding?: boolean;
   enableColumnResizing?: boolean;
+  onSortChange?: (sort: SortCondition[]) => void;
+  viewsConfig?: DataTableViewsConfig;
+}
+
+// Converts SortCondition[] to TanStack SortingState
+function sortConditionsToTanstack(sort: SortCondition[]): SortingState {
+  return sort.map((s) => ({ id: s.field, desc: s.direction === 'desc' }));
 }
 
 // Creates a fully configured TanStack Table instance with persisted state
@@ -37,24 +48,48 @@ export function useDataTable<TData>({
   enableHiding = true,
   enableSorting = true,
   enableColumnResizing = true,
+  onSortChange,
+  viewsConfig,
 }: UseDataTableOptions<TData>) {
-  const initTable = useDataTableStore((s) => s.initTable);
-  const updateField = useDataTableStore((s) => s.updateField);
+  const updateActiveState = useDataTableStore((s) => s.updateActiveState);
 
-  // Synchronous init during render — intentional side-effect pattern.
-  // The useRef guard prevents re-runs and initTable is idempotent (no-ops if slug exists).
+  // Init in useLayoutEffect to avoid mutating the Zustand store during the render phase,
+  // which would cause React's useSyncExternalStore consistency check to fail.
   const initializedSlug = useRef<string | null>(null);
-  if (initializedSlug.current !== slug) {
-    initTable(slug, { pinSelectColumn: enableRowSelection });
-    initializedSlug.current = slug;
-  }
+  useLayoutEffect(() => {
+    if (initializedSlug.current !== slug) {
+      useDataTableStore.getState().initTable(slug, { pinSelectColumn: enableRowSelection });
+      initializedSlug.current = slug;
+    }
+  }, [slug, enableRowSelection]);
 
-  const tanstackState = useDataTableStore((s) => s.tables[slug]);
+  const tableEntry = useDataTableStore((s) => s.tables[slug]);
+  const activeState = tableEntry?.activeState ?? EMPTY_TABLE_STATE;
+  const pendingFilters = tableEntry?.pendingFilters ?? [];
+  const isViewDirty = tableEntry?.isViewDirty ?? false;
 
-  const { lockedColumnSizing, filterOrder, filterVisibility, lastAccessed: _, ...state } = tanstackState ?? {};
+  // Derive TanStack state from activeState — fallbacks guard against old server payloads
+  const sorting = useMemo(() => sortConditionsToTanstack(activeState.sort ?? []), [activeState.sort]);
+  const columnVisibility = activeState.columnVisibility ?? {};
+  const columnOrder = activeState.columnOrder ?? [];
+  const columnSizing = activeState.columnSizing ?? {};
+  const columnPinning = activeState.columnPinning ?? { left: [], right: [] };
+  const lockedColumnSizing = activeState.lockedColumnSizing ?? false;
+  const filterOrder = activeState.filterOrder ?? [];
+  const filterVisibility = activeState.filterVisibility ?? {};
+  const density = activeState.density ?? 'normal';
 
   const rawLabel = label ?? slug;
   const capitalizedLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+
+  // Store actions for meta
+  const storeUpdatePendingFilter = useDataTableStore((s) => s.updatePendingFilter);
+  const storeApplyFilters = useDataTableStore((s) => s.applyFilters);
+  const storeResetFilters = useDataTableStore((s) => s.resetFilters);
+  const isFilterDirty = useMemo(
+    () => JSON.stringify(pendingFilters) !== JSON.stringify(activeState.filters),
+    [pendingFilters, activeState.filters],
+  );
 
   const meta = useMemo(
     () => ({
@@ -62,31 +97,128 @@ export function useDataTable<TData>({
       singular: pluralize.singular(capitalizedLabel),
       plural: pluralize.plural(capitalizedLabel),
       lockedColumnSizing,
-      toggleLockColumnSizing: () => updateField(slug, 'lockedColumnSizing', !lockedColumnSizing),
-      filterOrder: filterOrder ?? [],
-      filterVisibility: filterVisibility ?? {},
-      setFilterOrder: (order: string[]) => updateField(slug, 'filterOrder', order),
+      toggleLockColumnSizing: () =>
+        updateActiveState(slug, (prev) => ({ ...prev, lockedColumnSizing: !prev.lockedColumnSizing })),
+      filterOrder,
+      filterVisibility,
+      setFilterOrder: (order: string[]) => updateActiveState(slug, (prev) => ({ ...prev, filterOrder: order })),
       toggleFilterVisibility: (id: string) =>
-        updateField(slug, 'filterVisibility', (prev) => ({ ...prev, [id]: !(prev[id] ?? true) })),
+        updateActiveState(slug, (prev) => ({
+          ...prev,
+          filterVisibility: { ...prev.filterVisibility, [id]: !(prev.filterVisibility[id] ?? true) },
+        })),
+      density,
+      setDensity: (d: DensityType) => updateActiveState(slug, (prev) => ({ ...prev, density: d })),
+      isViewDirty,
+      pendingFilters,
+      updatePendingFilter: (field: string, condition: FilterCondition | undefined) =>
+        storeUpdatePendingFilter(slug, field, condition),
+      applyFilters: () => storeApplyFilters(slug),
+      resetFilters: () => storeResetFilters(slug),
+      isFilterDirty,
     }),
-    [slug, capitalizedLabel, lockedColumnSizing, filterOrder, filterVisibility, updateField],
+    [
+      slug,
+      capitalizedLabel,
+      lockedColumnSizing,
+      filterOrder,
+      filterVisibility,
+      density,
+      isViewDirty,
+      pendingFilters,
+      isFilterDirty,
+      updateActiveState,
+      storeUpdatePendingFilter,
+      storeApplyFilters,
+      storeResetFilters,
+    ],
   );
+
+  // Converts TanStack SortingState to SortCondition[] for the onSortChange callback
+  const onSortChangeRef = useRef(onSortChange);
+  onSortChangeRef.current = onSortChange;
+
+  const viewsConfigRef = useRef(viewsConfig);
+  viewsConfigRef.current = viewsConfig;
+
+  const handleSortingChange = useCallback(
+    (updater: SortingState | ((prev: SortingState) => SortingState)) => {
+      const currentSorting = sorting;
+      const newSorting = typeof updater === 'function' ? updater(currentSorting) : updater;
+      const sortConditions: SortCondition[] = newSorting.map((s) => ({
+        field: s.id,
+        direction: s.desc ? ('desc' as const) : ('asc' as const),
+      }));
+
+      updateActiveState(slug, (prev) => ({ ...prev, sort: sortConditions }));
+
+      // Notify external callback if provided
+      onSortChangeRef.current?.(sortConditions);
+    },
+    [slug, sorting, updateActiveState],
+  );
+
+  // Auto-upsert via useEffect watching activeState with 150ms debounce
+  const prevActiveStateRef = useRef<TableViewState>(activeState);
+  const hasInitializedRef = useRef(false);
+
+  useEffect(() => {
+    // Skip initial render
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      prevActiveStateRef.current = activeState;
+      return;
+    }
+
+    // Skip if same reference (no change)
+    if (prevActiveStateRef.current === activeState) return;
+    prevActiveStateRef.current = activeState;
+
+    const vc = viewsConfigRef.current;
+    if (!vc) return;
+
+    const timer = setTimeout(() => {
+      upsertTableState(vc.tableSlug, activeState).then(() => vc.onStateApplied?.());
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [activeState]);
 
   const table = useReactTable({
     data,
     columns,
-    state,
-    onSortingChange: (updater) => updateField(slug, 'sorting', updater),
-    onColumnFiltersChange: (updater) => updateField(slug, 'columnFilters', updater),
-    onColumnVisibilityChange: (updater) => updateField(slug, 'columnVisibility', updater),
-    onColumnPinningChange: (updater) => updateField(slug, 'columnPinning', updater),
-    onColumnOrderChange: (updater) => updateField(slug, 'columnOrder', updater),
+    state: {
+      sorting,
+      columnVisibility,
+      columnOrder,
+      columnSizing,
+      columnPinning,
+    },
+    onSortingChange: handleSortingChange,
+    onColumnVisibilityChange: (updater) => {
+      const current = activeState.columnVisibility;
+      const newVal = typeof updater === 'function' ? updater(current) : updater;
+      updateActiveState(slug, (prev) => ({ ...prev, columnVisibility: newVal }));
+    },
+    onColumnPinningChange: (updater) => {
+      const current = activeState.columnPinning;
+      const raw = typeof updater === 'function' ? updater(current) : updater;
+      const newVal = { left: raw.left ?? [], right: raw.right ?? [] };
+      updateActiveState(slug, (prev) => ({ ...prev, columnPinning: newVal }));
+    },
+    onColumnOrderChange: (updater) => {
+      const current = activeState.columnOrder;
+      const newVal = typeof updater === 'function' ? updater(current) : updater;
+      updateActiveState(slug, (prev) => ({ ...prev, columnOrder: newVal }));
+    },
     onColumnSizingChange: (updater) => {
       if (!lockedColumnSizing) {
-        updateField(slug, 'columnSizing', updater);
+        const current = activeState.columnSizing;
+        const newVal = typeof updater === 'function' ? updater(current) : updater;
+        updateActiveState(slug, (prev) => ({ ...prev, columnSizing: newVal }));
       }
     },
-    columnResizeMode: 'onChange',
+    columnResizeMode: 'onEnd',
     enableColumnResizing: enableColumnResizing && !lockedColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
