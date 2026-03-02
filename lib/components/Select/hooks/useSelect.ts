@@ -73,7 +73,13 @@ export function useSelect({
 
   // Query 1: Resolve selected values to full option objects
   const { data: resolvedSelected } = useQuery({
-    queryKey: ['select-resolve', optionsEndpoint, stableStringify(fieldKeys), stableStringify(params), JSON.stringify(selectedValues)],
+    queryKey: [
+      'select-resolve',
+      optionsEndpoint,
+      stableStringify(fieldKeys),
+      stableStringify(params),
+      JSON.stringify(selectedValues),
+    ],
     queryFn: () =>
       axios
         .get<SelectOptionsResponse>(optionsEndpoint ?? '', {
@@ -89,13 +95,7 @@ export function useSelect({
 
   // Query 2: Paginated search results, excluding selected IDs
   const { data, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: [
-      'select-search',
-      optionsEndpoint,
-      debouncedSearch,
-      stableStringify(fieldKeys),
-      stableStringify(params),
-    ],
+    queryKey: ['select-search', optionsEndpoint, debouncedSearch, stableStringify(fieldKeys), stableStringify(params)],
     queryFn: ({ pageParam = 0 }) =>
       axios
         .get<SelectOptionsResponse>(optionsEndpoint ?? '', {

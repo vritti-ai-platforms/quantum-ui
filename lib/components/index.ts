@@ -1,8 +1,8 @@
 export * from './Alert';
 export * from './AppSidebar';
 export * from './Avatar';
-export * from './Breadcrumb';
 export * from './Badge';
+export * from './Breadcrumb';
 export * from './Button';
 export * from './Card';
 export * from './Chart';
@@ -30,6 +30,7 @@ export * from './Switch';
 export * from './TextArea';
 export * from './TextField';
 export * from './ThemeToggle';
+export * from './TimePicker';
 export * from './Toggle';
 export * from './Typography';
 export * from './UploadFile';
