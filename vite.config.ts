@@ -59,7 +59,6 @@ export default defineConfig({
         'components/Spinner': resolve(__dirname, 'lib/components/Spinner/index.ts'),
         'components/StepProgressIndicator': resolve(__dirname, 'lib/components/StepProgressIndicator/index.ts'),
         'components/Switch': resolve(__dirname, 'lib/components/Switch/index.ts'),
-        'components/TimePicker': resolve(__dirname, 'lib/components/TimePicker/index.ts'),
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
         'components/FilePreview': resolve(__dirname, 'lib/components/FilePreview/index.ts'),
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),

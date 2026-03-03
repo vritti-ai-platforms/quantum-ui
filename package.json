@@ -168,10 +168,6 @@
       "types": "./dist/lib/components/Switch/index.d.ts",
       "import": "./dist/components/Switch.js"
     },
-    "./TimePicker": {
-      "types": "./dist/lib/components/TimePicker/index.d.ts",
-      "import": "./dist/components/TimePicker.js"
-    },
     "./Toggle": {
       "types": "./dist/lib/components/Toggle/index.d.ts",
       "import": "./dist/components/Toggle.js"
