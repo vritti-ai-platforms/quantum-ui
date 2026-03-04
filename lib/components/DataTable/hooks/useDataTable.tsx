@@ -11,7 +11,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { upsertTableState } from '../../../services/table-views.service';
 import type { DensityType, FilterCondition, SortCondition, TableViewState } from '../../../types/table-filter';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
-import { useDataTableStore } from '../store/store';
+import { useDataTableStore, viewStatesEqual } from '../store/store';
 import type { DataTableViewsConfig } from '../types';
 
 // Stable module-level fallback to avoid creating new references on every selector call
@@ -67,8 +67,13 @@ export function useDataTable<TData>({
   }, [slug, enableRowSelection]);
 
   const activeState = useDataTableStore((s) => s.tables[slug]?.activeState ?? EMPTY_TABLE_STATE);
+  const activeViewId = useDataTableStore((s) => s.tables[slug]?.activeViewId ?? null);
   const pendingFilters = useDataTableStore((s) => s.tables[slug]?.pendingFilters ?? NO_PENDING);
-  const isViewDirty = useDataTableStore((s) => s.tables[slug]?.isViewDirty ?? false);
+  const isViewDirty = useDataTableStore((s) => {
+    const t = s.tables[slug];
+    if (!t?.activeViewState) return false;
+    return !viewStatesEqual(t.activeState, t.activeViewState);
+  });
 
   // Derive TanStack state from activeState — fallbacks guard against old server payloads
   const sorting = useMemo(() => sortConditionsToTanstack(activeState.sort ?? []), [activeState.sort]);
@@ -186,11 +191,11 @@ export function useDataTable<TData>({
     if (!vc) return;
 
     const timer = setTimeout(() => {
-      upsertTableState(vc.tableSlug, activeState).then(() => vc.onStateApplied?.());
+      upsertTableState(vc.tableSlug, activeState, activeViewId).then(() => vc.onStateApplied?.());
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [activeState, slug]);
+  }, [activeState, activeViewId, slug]);
 
   const table = useReactTable({
     data,

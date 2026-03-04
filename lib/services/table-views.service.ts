@@ -62,7 +62,7 @@ function statesUrl() {
   return getConfig().views?.statesEndpoint ?? 'table-states';
 }
 
-// Upserts the live table state (filters, sort, columnVisibility)
-export function upsertTableState(tableSlug: string, state: TableViewState): Promise<void> {
-  return axios.post(statesUrl(), { tableSlug, state }, silent).then(() => undefined);
+// Upserts the live table state (filters, sort, columnVisibility) along with the active view
+export function upsertTableState(tableSlug: string, state: TableViewState, activeViewId: string | null): Promise<void> {
+  return axios.post(statesUrl(), { tableSlug, state, activeViewId }, silent).then(() => undefined);
 }

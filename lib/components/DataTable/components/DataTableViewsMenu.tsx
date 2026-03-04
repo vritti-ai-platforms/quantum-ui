@@ -11,7 +11,7 @@ import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
 import { TextField } from '../../TextField';
-import { useDataTableStore } from '../store/store';
+import { useDataTableStore, viewStatesEqual } from '../store/store';
 import type { DataTableViewsConfig } from '../types';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
@@ -200,7 +200,11 @@ export function DataTableViewsMenu({ config }: { config: DataTableViewsConfig })
   const [renameInitialName, setRenameInitialName] = useState('');
 
   const qc = useQueryClient();
-  const isViewDirty = useDataTableStore((s) => s.tables[tableSlug]?.isViewDirty ?? false);
+  const isViewDirty = useDataTableStore((s) => {
+    const t = s.tables[tableSlug];
+    if (!t?.activeViewState) return false;
+    return !viewStatesEqual(t.activeState, t.activeViewState);
+  });
   const activeViewId = useDataTableStore((s) => s.tables[tableSlug]?.activeViewId ?? null);
   const hasNonEmptyState = useDataTableStore((s) => {
     const st = s.tables[tableSlug]?.activeState;
@@ -214,7 +218,7 @@ export function DataTableViewsMenu({ config }: { config: DataTableViewsConfig })
       st.columnPinning.right.length > 0
     );
   });
-  const markClean = useDataTableStore((s) => s.markClean);
+  const syncActiveViewState = useDataTableStore((s) => s.syncActiveViewState);
 
   const hasView = activeViewId !== null;
   const showSave = hasView;
@@ -226,7 +230,7 @@ export function DataTableViewsMenu({ config }: { config: DataTableViewsConfig })
   const saveMut = useMutation({
     mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) => updateView(id, state),
     onSuccess: () => {
-      markClean(tableSlug);
+      syncActiveViewState(tableSlug);
     },
   });
 

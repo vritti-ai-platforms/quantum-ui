@@ -1,8 +1,9 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { fetchViews, upsertTableState } from '../../../services/table-views.service';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { fetchViews } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
-import { useDataTableStore } from '../store/store';
+import { useDataTableStore, viewStatesEqual } from '../store/store';
 import type { DataTableViewsConfig } from '../types';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
@@ -17,26 +18,33 @@ export function DataTableViewTabs({ config }: { config: DataTableViewsConfig }) 
   });
 
   const activeViewId = useDataTableStore((s) => s.tables[tableSlug]?.activeViewId ?? null);
-  const isViewDirty = useDataTableStore((s) => s.tables[tableSlug]?.isViewDirty ?? false);
   const loadViewState = useDataTableStore((s) => s.loadViewState);
+  const setActiveViewState = useDataTableStore((s) => s.setActiveViewState);
 
-  const upsertMut = useMutation({
-    mutationFn: ({ state }: { state: typeof EMPTY_TABLE_STATE }) => upsertTableState(tableSlug, state),
-    onSuccess: () => {
-      config.onStateApplied?.();
-    },
+  // On page reload, activeViewState is null until views load — set it once from the DB view
+  useEffect(() => {
+    if (!activeViewId || views.length === 0) return;
+    const hasBaseline = useDataTableStore.getState().tables[tableSlug]?.activeViewState !== null;
+    if (hasBaseline) return;
+    const view = views.find((v) => v.id === activeViewId);
+    if (view) setActiveViewState(tableSlug, view.state);
+  }, [views, activeViewId, tableSlug, setActiveViewState]);
+
+  // Dirty if activeState differs from the saved view state
+  const isViewDirty = useDataTableStore((s) => {
+    const t = s.tables[tableSlug];
+    if (!t?.activeViewState) return false;
+    return !viewStatesEqual(t.activeState, t.activeViewState);
   });
 
   // Activates a view; clicking the already-active view clears state and deactivates
   function activate(viewId: string) {
     if (activeViewId === viewId) {
-      loadViewState(tableSlug, EMPTY_TABLE_STATE, null);
-      upsertMut.mutate({ state: EMPTY_TABLE_STATE });
+      loadViewState(tableSlug, EMPTY_TABLE_STATE, null, false);
     } else {
       const view = views.find((v) => v.id === viewId);
       if (view) {
-        loadViewState(tableSlug, view.state, viewId);
-        upsertMut.mutate({ state: view.state });
+        loadViewState(tableSlug, view.state, viewId, false);
       }
     }
   }

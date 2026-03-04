@@ -1,12 +1,18 @@
+import { deepEqual } from 'fast-equals';
 import { create } from 'zustand';
 import type { FilterCondition, TableViewState } from '../../../types/table-filter';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 
 const MAX_TABLES = 20;
 
+// Compares two view states for equality — used by all dirty-check selectors
+export function viewStatesEqual(a: TableViewState, b: TableViewState): boolean {
+  return deepEqual(a, b);
+}
+
 export interface TableState {
   activeState: TableViewState;
-  isViewDirty: boolean;
+  activeViewState: TableViewState | null;
   activeViewId: string | null;
   pendingFilters: FilterCondition[];
   lastAccessed: number;
@@ -16,17 +22,18 @@ export interface TableState {
 export interface TableSlice {
   tables: Record<string, TableState>;
   initTable: (slug: string, options?: { pinSelectColumn?: boolean }) => void;
-  loadViewState: (slug: string, state: TableViewState, viewId: string | null) => void;
+  loadViewState: (slug: string, state: TableViewState, viewId: string | null, skipUpsert?: boolean) => void;
   updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
   updatePendingFilter: (slug: string, field: string, condition: FilterCondition | undefined) => void;
   applyFilters: (slug: string) => void;
   resetFilters: (slug: string) => void;
-  markClean: (slug: string) => void;
+  setActiveViewState: (slug: string, viewState: TableViewState) => void;
+  syncActiveViewState: (slug: string) => void;
 }
 
 const DEFAULT_TABLE_STATE: TableState = {
   activeState: EMPTY_TABLE_STATE,
-  isViewDirty: false,
+  activeViewState: null,
   activeViewId: null,
   pendingFilters: [],
   lastAccessed: 0,
@@ -65,9 +72,10 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState, pendingFilters, activeViewId, and resets isViewDirty.
+  // Sets activeState, pendingFilters, activeViewId, and activeViewState.
   // Merges with EMPTY_TABLE_STATE so old server payloads missing new fields still work.
-  loadViewState: (slug, state, viewId) => {
+  // skipUpsert defaults to true (page-load); pass false for user-driven tab activation.
+  loadViewState: (slug, state, viewId, skipUpsert = true) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
       if (!currentTable) return prev;
@@ -82,8 +90,10 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
             activeState: mergedState,
             pendingFilters: mergedState.filters,
             activeViewId: viewId,
-            isViewDirty: false,
-            _skipUpsert: true,
+            // On page-load (skipUpsert=true), activeViewState is set later via setActiveViewState
+            // once the views list loads. On user tab activation, set it immediately.
+            activeViewState: !skipUpsert && viewId !== null ? mergedState : null,
+            _skipUpsert: skipUpsert,
             lastAccessed: Date.now(),
           },
         },
@@ -91,7 +101,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Applies an updater function to activeState and marks dirty if a view is active
+  // Applies an updater function to activeState
   updateActiveState: (slug, updater) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
@@ -105,7 +115,6 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: newActiveState,
-            isViewDirty: currentTable.activeViewId !== null ? true : currentTable.isViewDirty,
             lastAccessed: Date.now(),
           },
         },
@@ -135,7 +144,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Commits pendingFilters into activeState.filters and marks dirty if a view is active
+  // Commits pendingFilters into activeState.filters
   applyFilters: (slug) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
@@ -149,7 +158,6 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: { ...currentTable.activeState, filters: newFilters },
-            isViewDirty: currentTable.activeViewId !== null ? true : currentTable.isViewDirty,
             lastAccessed: Date.now(),
           },
         },
@@ -170,7 +178,6 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
             ...currentTable,
             pendingFilters: [],
             activeState: { ...currentTable.activeState, filters: [] },
-            isViewDirty: currentTable.activeViewId !== null ? true : currentTable.isViewDirty,
             lastAccessed: Date.now(),
           },
         },
@@ -178,8 +185,22 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Resets isViewDirty to false
-  markClean: (slug) => {
+  // Sets activeViewState to the DB view's saved state — called once after views load on page reload
+  setActiveViewState: (slug, viewState) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: { ...currentTable, activeViewState: { ...EMPTY_TABLE_STATE, ...viewState } },
+        },
+      };
+    });
+  },
+
+  // Syncs activeViewState to current activeState after a view is saved in-place
+  syncActiveViewState: (slug) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
       if (!currentTable) return prev;
@@ -189,7 +210,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           ...prev.tables,
           [slug]: {
             ...currentTable,
-            isViewDirty: false,
+            activeViewState: currentTable.activeState,
           },
         },
       };
