@@ -1,238 +1,128 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookmarkPlus, LayoutList, Pencil, Save, Settings2, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { BookmarkPlus, EyeOff, LayoutList, Pencil, Save, Settings2, Share2, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import type { TableViewRecord } from '../../../services/table-views.service';
-import { createView, deleteView, fetchViews, updateView } from '../../../services/table-views.service';
+import { createView, deleteView, fetchViews, renameView, toggleShareView, updateView } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
-import { DropdownMenu, DropdownMenuItem } from '../../DropdownMenu';
+import { DropdownMenu } from '../../DropdownMenu';
 import { TextField } from '../../TextField';
 import { useDataTableStore } from '../store/store';
 import type { DataTableViewsConfig } from '../types';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
 
-// ─── Create View ─────────────────────────────────────────────────────────────
+const viewNameSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
+});
 
-// Menu item + dialog that creates a named view from current table state
-function CreateViewMenuItem({ tableSlug }: { tableSlug: string }) {
+type ViewNameForm = z.infer<typeof viewNameSchema>;
+
+type ViewDialog = 'create' | 'rename' | 'manage';
+
+interface DialogComponentProps {
+  tableSlug: string;
+  open: boolean;
+  onClose: () => void;
+}
+
+// ─── Create View Dialog ──────────────────────────────────────────────────────
+
+// Dialog that creates a named view from current table state
+function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentProps) {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
   const loadViewState = useDataTableStore((s) => s.loadViewState);
+  const form = useForm<ViewNameForm>({ resolver: zodResolver(viewNameSchema), defaultValues: { name: '' } });
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (open) form.reset();
+  }, [open, form]);
 
   const mut = useMutation({
     mutationFn: createView,
     onSuccess: (view) => {
       qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
       loadViewState(tableSlug, view.state, view.id);
-      setOpen(false);
-      setName('');
+      onClose();
     },
   });
 
   return (
-    <>
-      <DropdownMenuItem onClick={() => { setName(''); setOpen(true); }}>
-        <BookmarkPlus className="mr-2 h-4 w-4" />
-        Create New View
-      </DropdownMenuItem>
-
-      <Dialog
-        open={open}
-        onOpenChange={setOpen}
-        title="Create New View"
-        description="Save the current filters and sort as a named view."
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button
-              disabled={!name.trim() || mut.isPending}
-              onClick={() =>
-                mut.mutate({
-                  name: name.trim(),
-                  tableSlug,
-                  state: useDataTableStore.getState().tables[tableSlug]?.activeState ?? EMPTY_TABLE_STATE,
-                })
-              }
-            >
-              {mut.isPending ? 'Saving...' : 'Save'}
-            </Button>
-          </>
-        }
-      >
-        <TextField
-          name="viewName"
-          label="View name"
-          placeholder="e.g. High Region Providers"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </Dialog>
-    </>
+    <Dialog
+      mode="form"
+      open={open}
+      onOpenChange={(v) => { if (!v) onClose(); }}
+      title="Create New View"
+      description="Save the current filters and sort as a named view."
+      form={form}
+      mutation={mut}
+      transformSubmit={(data: ViewNameForm) => ({
+        name: data.name.trim(),
+        tableSlug,
+        state: useDataTableStore.getState().tables[tableSlug]?.activeState ?? EMPTY_TABLE_STATE,
+      })}
+      submitLabel="Save"
+    >
+      <TextField name="name" label="View name" placeholder="e.g. High Region Providers" />
+    </Dialog>
   );
 }
 
-// ─── Save View ────────────────────────────────────────────────────────────────
+// ─── Rename View Dialog ──────────────────────────────────────────────────────
 
-// Menu item that saves current activeState to the active view, or opens create dialog when no view is loaded
-function SaveViewMenuItem({ tableSlug }: { tableSlug: string }) {
-  const qc = useQueryClient();
-  const isViewDirty = useDataTableStore((s) => s.tables[tableSlug]?.isViewDirty ?? false);
-  const activeViewId = useDataTableStore((s) => s.tables[tableSlug]?.activeViewId ?? null);
-  const hasActiveFilters = useDataTableStore((s) => (s.tables[tableSlug]?.activeState?.filters?.length ?? 0) > 0);
-  const markClean = useDataTableStore((s) => s.markClean);
-  const loadViewState = useDataTableStore((s) => s.loadViewState);
-
-  // Create dialog reused when no view is active but filters exist
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createName, setCreateName] = useState('');
-
-  const saveMut = useMutation({
-    mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) => updateView(id, { state }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
-      markClean(tableSlug);
-    },
-  });
-
-  const createMut = useMutation({
-    mutationFn: createView,
-    onSuccess: (view) => {
-      qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
-      loadViewState(tableSlug, view.state, view.id);
-      setCreateOpen(false);
-      setCreateName('');
-    },
-  });
-
-  const canSave = (activeViewId !== null && isViewDirty) || (activeViewId === null && hasActiveFilters);
-
-  function handleClick() {
-    if (activeViewId !== null && isViewDirty) {
-      const state = useDataTableStore.getState().tables[tableSlug]?.activeState;
-      if (state) saveMut.mutate({ id: activeViewId, state });
-    } else if (activeViewId === null && hasActiveFilters) {
-      setCreateName('');
-      setCreateOpen(true);
-    }
-  }
-
-  return (
-    <>
-      <DropdownMenuItem disabled={!canSave} onClick={handleClick}>
-        <Save className="mr-2 h-4 w-4" />
-        Save View
-      </DropdownMenuItem>
-
-      <Dialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        title="Save as New View"
-        description="Save the current filters as a named view."
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button
-              disabled={!createName.trim() || createMut.isPending}
-              onClick={() =>
-                createMut.mutate({
-                  name: createName.trim(),
-                  tableSlug,
-                  state: useDataTableStore.getState().tables[tableSlug]?.activeState ?? EMPTY_TABLE_STATE,
-                })
-              }
-            >
-              {createMut.isPending ? 'Saving...' : 'Save'}
-            </Button>
-          </>
-        }
-      >
-        <TextField
-          name="saveViewName"
-          label="View name"
-          placeholder="e.g. AWS Providers"
-          value={createName}
-          onChange={(e) => setCreateName(e.target.value)}
-        />
-      </Dialog>
-    </>
-  );
+interface RenameDialogProps extends DialogComponentProps {
+  initialName: string;
 }
 
-// ─── Rename View ──────────────────────────────────────────────────────────────
-
-// Menu item + dialog that renames the currently active view
-function RenameViewMenuItem({ tableSlug }: { tableSlug: string }) {
+// Dialog that renames the currently active view
+function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialogProps) {
   const qc = useQueryClient();
   const activeViewId = useDataTableStore((s) => s.tables[tableSlug]?.activeViewId ?? null);
+  const form = useForm<ViewNameForm>({ resolver: zodResolver(viewNameSchema), defaultValues: { name: '' } });
 
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [originalName, setOriginalName] = useState('');
+  // Reset form with initial name when dialog opens
+  useEffect(() => {
+    if (open) form.reset({ name: initialName });
+  }, [open, initialName, form]);
 
   const mut = useMutation({
-    mutationFn: ({ id, name: n }: { id: string; name: string }) => updateView(id, { name: n }),
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameView(id, name),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
-      setOpen(false);
+      onClose();
     },
   });
 
-  // Reads the view name from cache — DataTableViewTabs keeps the cache warm
-  function handleClick() {
-    if (!activeViewId) return;
-    const cached = qc.getQueryData<TableViewRecord[]>(VIEWS_QK(tableSlug)) ?? [];
-    const view = cached.find((v) => v.id === activeViewId);
-    if (!view) return;
-    setOriginalName(view.name ?? '');
-    setName(view.name ?? '');
-    setOpen(true);
-  }
-
   return (
-    <>
-      <DropdownMenuItem disabled={activeViewId === null} onClick={handleClick}>
-        <Pencil className="mr-2 h-4 w-4" />
-        Rename View
-      </DropdownMenuItem>
-
-      <Dialog
-        open={open}
-        onOpenChange={setOpen}
-        title="Rename View"
-        description={`Change the name of "${originalName}".`}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button
-              disabled={!name.trim() || mut.isPending}
-              onClick={() => activeViewId && mut.mutate({ id: activeViewId, name: name.trim() })}
-            >
-              {mut.isPending ? 'Renaming...' : 'Rename'}
-            </Button>
-          </>
-        }
-      >
-        <TextField
-          name="renameName"
-          label="View name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </Dialog>
-    </>
+    <Dialog
+      mode="form"
+      open={open}
+      onOpenChange={(v) => { if (!v) onClose(); }}
+      title="Rename View"
+      description={`Change the name of "${initialName}".`}
+      form={form}
+      mutation={mut}
+      transformSubmit={(data: ViewNameForm) => ({
+        id: activeViewId ?? '',
+        name: data.name.trim(),
+      })}
+      submitLabel="Rename"
+    >
+      <TextField name="name" label="View name" />
+    </Dialog>
   );
 }
 
-// ─── Manage Views ─────────────────────────────────────────────────────────────
+// ─── Manage Views Dialog ─────────────────────────────────────────────────────
 
-// Menu item + dialog that lists all views with delete buttons — owns the views query
-function ManageViewsMenuItem({ tableSlug }: { tableSlug: string }) {
+// Dialog that lists all views with delete buttons
+function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-
   const activeViewId = useDataTableStore((s) => s.tables[tableSlug]?.activeViewId ?? null);
   const loadViewState = useDataTableStore((s) => s.loadViewState);
 
@@ -249,72 +139,149 @@ function ManageViewsMenuItem({ tableSlug }: { tableSlug: string }) {
     },
   });
 
-  return (
-    <>
-      <DropdownMenuItem onClick={() => setOpen(true)}>
-        <LayoutList className="mr-2 h-4 w-4" />
-        Manage Views
-      </DropdownMenuItem>
+  const shareMut = useMutation({
+    mutationFn: ({ id, isShared }: { id: string; isShared: boolean }) => toggleShareView(id, isShared),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
+    },
+  });
 
-      <Dialog
-        open={open}
-        onOpenChange={setOpen}
-        title="Manage Views"
-        description="Delete saved views for this table."
-        footer={<Button variant="outline" onClick={() => setOpen(false)}>Close</Button>}
-      >
-        <div className="flex flex-col gap-1 py-2 max-h-64 overflow-y-auto">
-          {views.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">No saved views yet.</p>
-          )}
-          {views.map((view) => (
-            <div key={view.id} className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent/50">
-              <span className="text-sm truncate">{view.name}</span>
-              {view.isOwn && (
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => { if (!v) onClose(); }}
+      title="Manage Views"
+      description="Share or delete saved views for this table."
+      footer={<Button variant="outline" onClick={onClose}>Close</Button>}
+    >
+      <div className="flex flex-col gap-1 py-2 max-h-64 overflow-y-auto">
+        {views.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">No saved views yet.</p>
+        )}
+        {views.map((view) => (
+          <div key={view.id} className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent/50">
+            <span className="text-sm truncate">{view.name}</span>
+            {view.isOwn && (
+              <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 shrink-0 text-destructive hover:text-destructive"
+                  className="size-7 text-muted-foreground hover:text-foreground"
+                  title={view.isShared ? 'Make private' : 'Share with everyone'}
+                  onClick={() => shareMut.mutate({ id: view.id, isShared: !view.isShared })}
+                  disabled={shareMut.isPending}
+                >
+                  {view.isShared ? <EyeOff className="size-4" /> : <Share2 className="size-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 text-destructive hover:text-destructive"
                   onClick={() => deleteMut.mutate(view.id)}
                   disabled={deleteMut.isPending}
                 >
                   <Trash2 className="size-4" />
                 </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </Dialog>
-    </>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </Dialog>
   );
 }
 
 // ─── Dropdown shell ───────────────────────────────────────────────────────────
 
-// Composes independent menu items — no mutations, no queries, no store subscriptions here
+// Composes the dropdown menu with dialogs rendered outside the dropdown tree
 export function DataTableViewsMenu({ config }: { config: DataTableViewsConfig }) {
   const { tableSlug } = config;
+  const [activeDialog, setActiveDialog] = useState<ViewDialog | null>(null);
+  const [renameInitialName, setRenameInitialName] = useState('');
+
+  const qc = useQueryClient();
+  const isViewDirty = useDataTableStore((s) => s.tables[tableSlug]?.isViewDirty ?? false);
+  const activeViewId = useDataTableStore((s) => s.tables[tableSlug]?.activeViewId ?? null);
+  const hasNonEmptyState = useDataTableStore((s) => {
+    const st = s.tables[tableSlug]?.activeState;
+    if (!st) return false;
+    return (
+      st.filters.length > 0 ||
+      st.sort.length > 0 ||
+      Object.keys(st.columnVisibility).length > 0 ||
+      st.density !== 'normal' ||
+      st.columnPinning.left.filter((c) => c !== 'select').length > 0 ||
+      st.columnPinning.right.length > 0
+    );
+  });
+  const markClean = useDataTableStore((s) => s.markClean);
+
+  const hasView = activeViewId !== null;
+  const showSave = hasView;
+  const canSave = hasView && isViewDirty;
+  const showCreate = hasView ? isViewDirty : true;
+  const canCreate = hasView ? isViewDirty : hasNonEmptyState;
+
+  // Save-in-place mutation (no dialog needed)
+  const saveMut = useMutation({
+    mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) => updateView(id, state),
+    onSuccess: () => {
+      markClean(tableSlug);
+    },
+  });
+
+  // Saves current state in place on the active view
+  function handleSaveClick() {
+    if (!activeViewId || !isViewDirty) return;
+    const state = useDataTableStore.getState().tables[tableSlug]?.activeState;
+    if (state) saveMut.mutate({ id: activeViewId, state });
+  }
+
+  // Reads the active view name from cache for the rename dialog
+  function handleRenameClick() {
+    if (!activeViewId) return;
+    const cached = qc.getQueryData<TableViewRecord[]>(VIEWS_QK(tableSlug)) ?? [];
+    const view = cached.find((v) => v.id === activeViewId);
+    if (!view) return;
+    setRenameInitialName(view.name ?? '');
+    setActiveDialog('rename');
+  }
+
+  const close = () => setActiveDialog(null);
 
   return (
-    <DropdownMenu
-      trigger={{
-        children: (
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="View options">
-            <Settings2 className="h-4 w-4" />
-          </Button>
-        ),
-      }}
-      contentClassName="w-[180px]"
-      align="end"
-      items={[
-        { type: 'custom', id: 'create-view',  asMenuItem: false, render: <CreateViewMenuItem  tableSlug={tableSlug} /> },
-        { type: 'separator' },
-        { type: 'custom', id: 'save-view',    asMenuItem: false, render: <SaveViewMenuItem    tableSlug={tableSlug} /> },
-        { type: 'custom', id: 'rename-view',  asMenuItem: false, render: <RenameViewMenuItem  tableSlug={tableSlug} /> },
-        { type: 'separator' },
-        { type: 'custom', id: 'manage-views', asMenuItem: false, render: <ManageViewsMenuItem tableSlug={tableSlug} /> },
-      ]}
-    />
+    <>
+      <DropdownMenu
+        trigger={{
+          children: (
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="View options">
+              <Settings2 className="h-4 w-4" />
+            </Button>
+          ),
+        }}
+        contentClassName="w-[180px]"
+        align="end"
+        items={[
+          ...(showSave
+            ? [{ type: 'item' as const, id: 'save-view', label: 'Save View', icon: Save,
+                 disabled: !canSave, onClick: handleSaveClick }]
+            : []),
+          ...(showCreate
+            ? [{ type: 'item' as const, id: 'create-view', label: 'Create New View', icon: BookmarkPlus,
+                 disabled: !canCreate, onClick: () => setActiveDialog('create' as ViewDialog) }]
+            : []),
+          { type: 'separator' },
+          { type: 'item', id: 'rename-view', label: 'Rename View', icon: Pencil,
+            disabled: !hasView, onClick: handleRenameClick },
+          { type: 'separator' },
+          { type: 'item', id: 'manage-views', label: 'Manage Views', icon: LayoutList,
+            onClick: () => setActiveDialog('manage') },
+        ]}
+      />
+      <CreateViewDialog tableSlug={tableSlug} open={activeDialog === 'create'} onClose={close} />
+      <RenameViewDialog tableSlug={tableSlug} open={activeDialog === 'rename'} onClose={close} initialName={renameInitialName} />
+      <ManageViewsDialog tableSlug={tableSlug} open={activeDialog === 'manage'} onClose={close} />
+    </>
   );
 }
 

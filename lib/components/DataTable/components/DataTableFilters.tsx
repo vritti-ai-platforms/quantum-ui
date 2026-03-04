@@ -83,6 +83,8 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
     meta.setFilterOrder(reordered.map((r) => r.id));
   }
 
+  const hiddenFilterCount = filters.filter((f) => meta.filterVisibility[f.slug] === false).length;
+
   const sortableItems = effectiveOrder
     .map((s) => {
       const filter = filterMap.get(s);
@@ -109,9 +111,14 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
       </div>
 
       {/* Settings popover -- far right */}
+      <div className="relative">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+          <Button
+            variant={hiddenFilterCount > 0 ? 'secondary' : 'outline'}
+            size="sm"
+            className={cn('h-8 w-8 p-0', hiddenFilterCount > 0 && 'border-transparent')}
+          >
             <Settings className="h-4 w-4" />
             <span className="sr-only">Filter settings</span>
           </Button>
@@ -141,6 +148,12 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
           </div>
         </PopoverContent>
       </Popover>
+      {hiddenFilterCount > 0 && (
+        <span className="pointer-events-none absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[10px] font-medium text-primary-foreground">
+          {hiddenFilterCount}
+        </span>
+      )}
+      </div>
     </div>
   );
 }

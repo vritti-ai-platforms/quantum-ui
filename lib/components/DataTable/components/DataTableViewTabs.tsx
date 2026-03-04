@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { cn } from '../../../../shadcn/utils';
-import { fetchViews } from '../../../services/table-views.service';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { fetchViews, upsertTableState } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
 import { useDataTableStore } from '../store/store';
@@ -21,14 +20,24 @@ export function DataTableViewTabs({ config }: { config: DataTableViewsConfig }) 
   const isViewDirty = useDataTableStore((s) => s.tables[tableSlug]?.isViewDirty ?? false);
   const loadViewState = useDataTableStore((s) => s.loadViewState);
 
+  const upsertMut = useMutation({
+    mutationFn: ({ state }: { state: typeof EMPTY_TABLE_STATE }) => upsertTableState(tableSlug, state),
+    onSuccess: () => {
+      config.onStateApplied?.();
+    },
+  });
+
   // Activates a view; clicking the already-active view clears state and deactivates
   function activate(viewId: string) {
     if (activeViewId === viewId) {
       loadViewState(tableSlug, EMPTY_TABLE_STATE, null);
-      // auto-upsert in useDataTable fires automatically
+      upsertMut.mutate({ state: EMPTY_TABLE_STATE });
     } else {
       const view = views.find((v) => v.id === viewId);
-      if (view) loadViewState(tableSlug, view.state, viewId);
+      if (view) {
+        loadViewState(tableSlug, view.state, viewId);
+        upsertMut.mutate({ state: view.state });
+      }
     }
   }
 
@@ -39,15 +48,10 @@ export function DataTableViewTabs({ config }: { config: DataTableViewsConfig }) 
       {views.map((view) => (
         <Button
           key={view.id}
-          variant="ghost"
+          variant={activeViewId === view.id ? 'default' : 'outline'}
           size="sm"
           onClick={() => activate(view.id)}
-          className={cn(
-            'h-8 shrink-0 rounded-lg px-3 text-sm font-medium transition-colors whitespace-nowrap',
-            activeViewId === view.id
-              ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80',
-          )}
+          className="h-8 shrink-0 rounded-md px-3 text-sm whitespace-nowrap"
         >
           <span className="relative inline-flex items-center gap-1.5">
             {view.name}

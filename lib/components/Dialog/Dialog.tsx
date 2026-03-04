@@ -1,5 +1,7 @@
+import type { UseMutationResult } from '@tanstack/react-query';
 import type React from 'react';
 import { useState } from 'react';
+import type { FieldValues, UseFormReturn } from 'react-hook-form';
 import {
   Dialog as ShadcnDialog,
   DialogContent as ShadcnDialogContent,
@@ -9,6 +11,9 @@ import {
   DialogTitle as ShadcnDialogTitle,
   DialogTrigger as ShadcnDialogTrigger,
 } from '../../../shadcn/shadcnDialog';
+import type { FieldMapping } from '../../utils/formHelpers';
+import { Button } from '../Button';
+import { Form } from '../Form';
 
 export interface DialogProps {
   // Controlled mode — omit both to let Dialog manage its own state
@@ -25,6 +30,16 @@ export interface DialogProps {
   children?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  // Form mode — wraps children+footer in a Form component
+  mode?: 'default' | 'form';
+  form?: UseFormReturn<any, any, any>;
+  mutation?: UseMutationResult<any, any, any, any>;
+  onFormSubmit?: (data: any) => Promise<void>;
+  transformSubmit?: (data: any) => any;
+  submitLabel?: string;
+  cancelLabel?: string;
+  showRootError?: boolean;
+  fieldMapping?: FieldMapping;
 }
 
 // Composite dialog — manages its own open state unless open/onOpenChange are provided
@@ -39,6 +54,15 @@ export const Dialog: React.FC<DialogProps> = ({
   children,
   footer,
   className,
+  mode = 'default',
+  form,
+  mutation,
+  onFormSubmit,
+  transformSubmit,
+  submitLabel,
+  cancelLabel,
+  showRootError,
+  fieldMapping,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -60,6 +84,44 @@ export const Dialog: React.FC<DialogProps> = ({
     onOpenChange?.(val);
   };
 
+  // Render the body+footer content — shared between default and form modes
+  const renderBody = () => {
+    if (content) return content(closeDialog);
+
+    if (mode === 'form' && form) {
+      return (
+        <Form
+          form={form}
+          mutation={mutation}
+          onSubmit={onFormSubmit as any}
+          transformSubmit={transformSubmit}
+          showRootError={showRootError}
+          fieldMapping={fieldMapping}
+          className="space-y-4"
+        >
+          {children}
+          <ShadcnDialogFooter>
+            {footer ?? (
+              <>
+                <Button variant="outline" type="button" onClick={closeDialog}>
+                  {cancelLabel ?? 'Cancel'}
+                </Button>
+                <Button type="submit">{submitLabel ?? 'Save'}</Button>
+              </>
+            )}
+          </ShadcnDialogFooter>
+        </Form>
+      );
+    }
+
+    return (
+      <>
+        {children}
+        {footer && <ShadcnDialogFooter>{footer}</ShadcnDialogFooter>}
+      </>
+    );
+  };
+
   return (
     <ShadcnDialog open={isOpen} onOpenChange={handleOpenChange}>
       {anchor ? anchor(openDialog) : trigger && <ShadcnDialogTrigger asChild>{trigger}</ShadcnDialogTrigger>}
@@ -70,8 +132,7 @@ export const Dialog: React.FC<DialogProps> = ({
             {description && <ShadcnDialogDescription>{description}</ShadcnDialogDescription>}
           </ShadcnDialogHeader>
         )}
-        {content ? content(closeDialog) : children}
-        {footer && <ShadcnDialogFooter>{footer}</ShadcnDialogFooter>}
+        {renderBody()}
       </ShadcnDialogContent>
     </ShadcnDialog>
   );

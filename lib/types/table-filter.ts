@@ -1,11 +1,13 @@
 export type StringOperator = 'equals' | 'notEquals' | 'contains' | 'notContains';
 export type NumberOperator = 'equals' | 'notEquals' | 'gt' | 'gte' | 'lt' | 'lte';
-export type FilterOperator = StringOperator | NumberOperator;
+export type SelectOperator = 'equals' | 'notEquals';
+export type MultiSelectOperator = 'isAnyOf' | 'isNotAnyOf';
+export type FilterOperator = StringOperator | NumberOperator | SelectOperator | MultiSelectOperator;
 
 export interface FilterCondition {
   field: string;
   operator: FilterOperator;
-  value: string | number;
+  value: string | number | string[];
 }
 
 export interface SortCondition {

@@ -108,6 +108,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
       <PopoverTrigger asChild>
         <button
           type="button"
+          role="combobox"
           aria-controls={popoverId}
           aria-expanded={open}
           className={cn(
@@ -120,7 +121,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
         >
           <span className="truncate">
             {hasValue
-              ? `${label}: ${getOperatorLabel(value.operator, fieldType)} \u00B7 ${value.value}`
+              ? `${label}: ${getOperatorLabel(value.operator, fieldType)} ${value.value}`
               : label}
           </span>
           {hasValue ? (
@@ -132,12 +133,10 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
       </PopoverTrigger>
 
       <PopoverContent id={popoverId} className="w-[280px] p-0" align="start">
-        <div className="px-4 pt-4 pb-2">
-          <span className="text-sm font-medium">{label}</span>
-        </div>
-        <div className="space-y-3 px-4 pb-4">
+        <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px]">
+          <span className="text-sm text-muted-foreground">{label}</span>
           <Select value={draftOperator} onValueChange={(v) => setDraftOperator(v as FilterOperator)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 shadow-none text-sm font-medium text-foreground focus-visible:ring-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -148,7 +147,8 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
               ))}
             </SelectContent>
           </Select>
-
+        </div>
+        <div className="space-y-3 px-4 py-4">
           <Input
             type={fieldType === 'number' ? 'number' : 'text'}
             placeholder={`Enter ${label.toLowerCase()}...`}

@@ -1,5 +1,6 @@
-import { ChevronDownIcon, Loader2 } from 'lucide-react';
-import { forwardRef } from 'react';
+import { ChevronDownIcon, Loader2, X } from 'lucide-react';
+import type React from 'react';
+import { forwardRef, useState } from 'react';
 import {
   MultiSelectActions,
   MultiSelectContent,
@@ -12,24 +13,44 @@ import {
   MultiSelectSearch,
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../../../shadcn/shadcnSelect';
 import { cn } from '../../../../../shadcn/utils';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
-import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
+import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue as SelectValueType } from '../../types';
+
+export interface MultiSelectFilterOperator {
+  value: string;
+  label: string;
+}
+
+const DEFAULT_MULTI_OPERATORS: MultiSelectFilterOperator[] = [
+  { value: 'isAnyOf', label: 'is any of' },
+  { value: 'isNotAnyOf', label: 'is not any of' },
+];
 
 export interface MultiSelectFilterProps {
   label?: string;
   placeholder?: string;
   options?: SelectOption[];
   groups?: SelectGroup[];
-  value?: SelectValue[];
-  onChange?: (values: SelectValue[]) => void;
+  value?: SelectValueType[];
+  onChange?: (values: SelectValueType[]) => void;
+  operator?: string;
+  onOperatorChange?: (operator: string) => void;
+  operators?: MultiSelectFilterOperator[];
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
   id?: string;
-  defaultValue?: SelectValue[];
+  defaultValue?: SelectValueType[];
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
 }
@@ -44,6 +65,9 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       groups,
       value: controlledValue,
       onChange,
+      operator: controlledOperator,
+      onOperatorChange,
+      operators = DEFAULT_MULTI_OPERATORS,
       onBlur,
       name,
       disabled = false,
@@ -56,6 +80,14 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
     },
     ref,
   ) => {
+    const [internalOperator, setInternalOperator] = useState(operators[0]?.value ?? 'isAnyOf');
+    const activeOperator = controlledOperator ?? internalOperator;
+
+    function handleOperatorChange(value: string) {
+      setInternalOperator(value);
+      onOperatorChange?.(value);
+    }
+
     const state = useMultiSelect({
       options: options ?? [],
       groups,
@@ -118,7 +150,16 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
 
     const hasValues = state.selectedValues.length > 0;
 
-    const triggerText = hasValues ? `${label} = ${state.selectedValues.length} selected` : (label ?? placeholder);
+    const operatorLabel = operators.find((o) => o.value === activeOperator)?.label ?? activeOperator;
+    const triggerText = hasValues
+      ? `${label}: ${operatorLabel} ${state.selectedValues.length} selected`
+      : (label ?? placeholder);
+
+    // Clears inline from the chip without opening the popover
+    function handleInlineClear(e: React.MouseEvent) {
+      e.stopPropagation();
+      state.clearAll();
+    }
 
     return (
       <>
@@ -144,11 +185,33 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
               )}
             >
               <span className="truncate">{triggerText}</span>
-              <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
+              {hasValues ? (
+                <X className="size-3.5 shrink-0 opacity-70 hover:opacity-100" onClick={handleInlineClear} />
+              ) : (
+                <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
+              )}
             </button>
           </PopoverTrigger>
 
           <MultiSelectContent className="w-[250px]">
+            {label && (
+              <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
+                <span className="text-sm text-muted-foreground">{label}</span>
+                <Select value={activeOperator} onValueChange={handleOperatorChange}>
+                  <SelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 shadow-none text-sm font-medium text-foreground focus-visible:ring-0">
+                    <SelectValue />
+                    <ChevronDownIcon className="size-3.5 text-muted-foreground" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {operators.map((op) => (
+                      <SelectItem key={op.value} value={op.value}>
+                        {op.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
 
             <MultiSelectList id={state.listboxId}>

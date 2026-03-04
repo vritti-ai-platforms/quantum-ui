@@ -173,6 +173,15 @@ export function useDataTable<TData>({
     if (prevActiveStateRef.current === activeState) return;
     prevActiveStateRef.current = activeState;
 
+    // Skip upsert when state was loaded from server (loadViewState sets this flag)
+    const tableEntry = useDataTableStore.getState().tables[slug];
+    if (tableEntry?._skipUpsert) {
+      useDataTableStore.setState((prev) => ({
+        tables: { ...prev.tables, [slug]: { ...prev.tables[slug], _skipUpsert: false } },
+      }));
+      return;
+    }
+
     const vc = viewsConfigRef.current;
     if (!vc) return;
 
@@ -181,7 +190,7 @@ export function useDataTable<TData>({
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [activeState]);
+  }, [activeState, slug]);
 
   const table = useReactTable({
     data,

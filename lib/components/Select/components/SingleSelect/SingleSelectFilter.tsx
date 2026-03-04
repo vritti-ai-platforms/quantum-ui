@@ -1,6 +1,14 @@
-import { ChevronDownIcon, Loader2 } from 'lucide-react';
-import { forwardRef } from 'react';
+import { ChevronDownIcon, Loader2, X } from 'lucide-react';
+import type React from 'react';
+import { forwardRef, useState } from 'react';
 import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
+import {
+  Select as RadixSelect,
+  SelectContent as RadixSelectContent,
+  SelectItem as RadixSelectItem,
+  SelectTrigger as RadixSelectTrigger,
+  SelectValue as RadixSelectValue,
+} from '../../../../../shadcn/shadcnSelect';
 import {
   SingleSelectClear,
   SingleSelectContent,
@@ -16,6 +24,16 @@ import { cn } from '../../../../../shadcn/utils';
 import { useSingleSelect } from '../../hooks/useSingleSelect';
 import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
+export interface SelectFilterOperator {
+  value: string;
+  label: string;
+}
+
+const DEFAULT_OPERATORS: SelectFilterOperator[] = [
+  { value: 'equals', label: 'equals' },
+  { value: 'notEquals', label: 'not equals' },
+];
+
 export interface SingleSelectFilterProps {
   label?: string;
   placeholder?: string;
@@ -23,6 +41,9 @@ export interface SingleSelectFilterProps {
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
+  operator?: string;
+  onOperatorChange?: (operator: string) => void;
+  operators?: SelectFilterOperator[];
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
@@ -44,6 +65,9 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       groups,
       value: controlledValue,
       onChange,
+      operator: controlledOperator,
+      onOperatorChange,
+      operators = DEFAULT_OPERATORS,
       onBlur,
       name,
       disabled = false,
@@ -56,6 +80,14 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     },
     ref,
   ) => {
+    const [internalOperator, setInternalOperator] = useState(operators[0]?.value ?? 'equals');
+    const operator = controlledOperator ?? internalOperator;
+
+    function handleOperatorChange(value: string) {
+      setInternalOperator(value);
+      onOperatorChange?.(value);
+    }
+
     const state = useSingleSelect({
       options: options ?? [],
       groups,
@@ -117,7 +149,16 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       );
     }
 
-    const triggerText = state.selectedOption ? `${label} = ${state.selectedOption.label}` : (label ?? placeholder);
+    const operatorLabel = operators.find((o) => o.value === operator)?.label ?? operator;
+    const triggerText = state.selectedOption
+      ? `${label}: ${operatorLabel} ${state.selectedOption.label}`
+      : (label ?? placeholder);
+
+    // Clears inline from the chip without opening the popover
+    function handleInlineClear(e: React.MouseEvent) {
+      e.stopPropagation();
+      state.clearSelection();
+    }
 
     return (
       <>
@@ -143,11 +184,32 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               )}
             >
               <span className="truncate">{triggerText}</span>
-              <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
+              {state.selectedOption ? (
+                <X className="size-3.5 shrink-0 opacity-70 hover:opacity-100" onClick={handleInlineClear} />
+              ) : (
+                <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
+              )}
             </button>
           </PopoverTrigger>
 
           <SingleSelectContent className="w-[250px]">
+            {label && (
+              <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
+                <span className="text-sm text-muted-foreground">{label}</span>
+                <RadixSelect value={operator} onValueChange={handleOperatorChange}>
+                  <RadixSelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 shadow-none text-sm font-medium text-foreground focus-visible:ring-0">
+                    <RadixSelectValue />
+                  </RadixSelectTrigger>
+                  <RadixSelectContent>
+                    {operators.map((op) => (
+                      <RadixSelectItem key={op.value} value={op.value}>
+                        {op.label}
+                      </RadixSelectItem>
+                    ))}
+                  </RadixSelectContent>
+                </RadixSelect>
+              </div>
+            )}
             <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
 
             <SingleSelectList id={state.listboxId}>

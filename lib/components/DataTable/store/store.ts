@@ -10,6 +10,7 @@ export interface TableState {
   activeViewId: string | null;
   pendingFilters: FilterCondition[];
   lastAccessed: number;
+  _skipUpsert: boolean;
 }
 
 export interface TableSlice {
@@ -29,6 +30,7 @@ const DEFAULT_TABLE_STATE: TableState = {
   activeViewId: null,
   pendingFilters: [],
   lastAccessed: 0,
+  _skipUpsert: false,
 };
 
 // Persists per-table state across renders with oldest-first eviction at capacity
@@ -81,6 +83,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
             pendingFilters: mergedState.filters,
             activeViewId: viewId,
             isViewDirty: false,
+            _skipUpsert: true,
             lastAccessed: Date.now(),
           },
         },

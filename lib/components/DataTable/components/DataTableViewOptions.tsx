@@ -77,6 +77,7 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
     .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide());
 
   const sortableColumns = columns.map((col) => ({ id: col.id, column: col }));
+  const hiddenColumnCount = columns.filter((col) => !col.getIsVisible()).length;
 
   // Reorders the full column order array and persists via table.setColumnOrder
   function handleReorder(reordered: { id: string; column: Column<TData, unknown> }[]) {
@@ -94,10 +95,15 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
   }
 
   return (
+    <div className="relative">
     <DropdownMenu
       trigger={{
         children: (
-          <Button variant="outline" size="sm" className={cn('h-8 w-8 p-0', className)}>
+          <Button
+            variant={hiddenColumnCount > 0 ? 'secondary' : 'outline'}
+            size="sm"
+            className={cn('h-8 w-8 p-0', hiddenColumnCount > 0 && 'border-transparent', className)}
+          >
             <Columns className="h-4 w-4" />
             <span className="sr-only">Column settings</span>
           </Button>
@@ -152,6 +158,12 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
         },
       ]}
     />
+    {hiddenColumnCount > 0 && (
+      <span className="pointer-events-none absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[10px] font-medium text-primary-foreground">
+        {hiddenColumnCount}
+      </span>
+    )}
+    </div>
   );
 }
 

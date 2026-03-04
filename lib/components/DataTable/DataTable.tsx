@@ -1,6 +1,7 @@
 import { flexRender } from '@tanstack/react-table';
 import { Funnel } from 'lucide-react';
 import { useState } from 'react';
+import { useDataTableStore } from './store/store';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { Button } from '../Button';
@@ -41,6 +42,10 @@ export function DataTable<TData>({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const meta = table.options.meta as DataTableMeta | undefined;
+  const slug = meta?.slug;
+  const appliedFilterCount = useDataTableStore(
+    (s) => (slug ? (s.tables[slug]?.activeState?.filters?.length ?? 0) : 0),
+  );
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
@@ -62,15 +67,22 @@ export function DataTable<TData>({
               <DataTableSearch table={table} search={enableSearch.value} onSearchChange={enableSearch.onChange} />
             )}
             {filters && (
-              <Button
-                variant={filtersOpen ? 'secondary' : 'outline'}
-                size="sm"
-                className={cn('h-8 w-8 p-0', filtersOpen && 'border border-transparent')}
-                onClick={() => setFiltersOpen((v) => !v)}
-                aria-label="Toggle filters"
-              >
-                <Funnel className="h-4 w-4" />
-              </Button>
+              <div className="relative">
+                <Button
+                  variant={filtersOpen || appliedFilterCount > 0 ? 'secondary' : 'outline'}
+                  size="sm"
+                  className={cn('h-8 w-8 p-0', (filtersOpen || appliedFilterCount > 0) && 'border border-transparent')}
+                  onClick={() => setFiltersOpen((v) => !v)}
+                  aria-label="Toggle filters"
+                >
+                  <Funnel className="h-4 w-4" />
+                </Button>
+                {appliedFilterCount > 0 && (
+                  <span className="pointer-events-none absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[10px] font-medium text-primary-foreground">
+                    {appliedFilterCount}
+                  </span>
+                )}
+              </div>
             )}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />

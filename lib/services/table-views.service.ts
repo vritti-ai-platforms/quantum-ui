@@ -37,12 +37,19 @@ export function createView(dto: {
   return axios.post<TableViewRecord>(viewsUrl(), dto, silent).then((r) => r.data);
 }
 
-// Updates an existing view's name, state, or sharing setting
-export function updateView(
-  id: string,
-  dto: { name?: string; state?: TableViewState; isShared?: boolean },
-): Promise<TableViewRecord> {
-  return axios.patch<TableViewRecord>(viewsUrl(`/${id}`), dto, silent).then((r) => r.data);
+// Saves updated state to an existing view
+export function updateView(id: string, state: TableViewState): Promise<TableViewRecord> {
+  return axios.patch<TableViewRecord>(viewsUrl(`/${id}`), { state }, silent).then((r) => r.data);
+}
+
+// Toggles whether a view is shared with all users
+export function toggleShareView(id: string, isShared: boolean): Promise<TableViewRecord> {
+  return axios.patch<TableViewRecord>(viewsUrl(`/${id}/share`), { isShared }, silent).then((r) => r.data);
+}
+
+// Renames an existing view
+export function renameView(id: string, name: string): Promise<TableViewRecord> {
+  return axios.patch<TableViewRecord>(viewsUrl(`/${id}/rename`), { name }, silent).then((r) => r.data);
 }
 
 // Deletes a named view by ID

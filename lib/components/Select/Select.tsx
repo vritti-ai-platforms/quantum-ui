@@ -13,6 +13,10 @@ interface SelectBaseProps {
   limit?: number;
   fieldKeys?: SelectFieldKeys;
   params?: Record<string, string | number | boolean>;
+  // Filter-variant operator props (used when type === 'filter')
+  operator?: string;
+  onOperatorChange?: (operator: string) => void;
+  operators?: Array<{ value: string; label: string }>;
 }
 
 interface SelectSingleProps extends SingleSelectProps, SelectBaseProps {
@@ -29,7 +33,7 @@ export type SelectProps = SelectSingleProps | SelectMultiProps;
 
 // Unified select field supporting single/multi selection and default/filter variants
 export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
-  const { multiple, type = 'default', optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, ...rest } = props;
+  const { multiple, type = 'default', optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, operator, onOperatorChange, operators, ...rest } = props;
 
   const selectData = useSelect({
     options: rest.options,
@@ -63,10 +67,10 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
   };
 
   if (multiple) {
-    if (type === 'filter') return <MultiSelectFilter ref={ref} {...(childProps as MultiSelectFilterProps)} />;
+    if (type === 'filter') return <MultiSelectFilter ref={ref} {...(childProps as MultiSelectFilterProps)} operator={operator} onOperatorChange={onOperatorChange} operators={operators} />;
     return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} />;
   }
-  if (type === 'filter') return <SingleSelectFilter ref={ref} {...(childProps as SingleSelectFilterProps)} />;
+  if (type === 'filter') return <SingleSelectFilter ref={ref} {...(childProps as SingleSelectFilterProps)} operator={operator} onOperatorChange={onOperatorChange} operators={operators} />;
   return <SingleSelect ref={ref} {...(childProps as SingleSelectProps)} />;
 }) as React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLButtonElement>>;
 
