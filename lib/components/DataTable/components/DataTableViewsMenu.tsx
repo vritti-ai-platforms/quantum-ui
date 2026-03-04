@@ -61,7 +61,7 @@ function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentProps) {
       description="Save the current filters and sort as a named view."
       form={form}
       mutation={mut}
-      transformSubmit={(data: ViewNameForm) => ({
+      transformSubmit={(data) => ({
         name: data.name.trim(),
         tableSlug,
         state: useDataTableStore.getState().tables[tableSlug]?.activeState ?? EMPTY_TABLE_STATE,
@@ -107,7 +107,7 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
       description={`Change the name of "${initialName}".`}
       form={form}
       mutation={mut}
-      transformSubmit={(data: ViewNameForm) => ({
+      transformSubmit={(data) => ({
         id: activeViewId ?? '',
         name: data.name.trim(),
       })}

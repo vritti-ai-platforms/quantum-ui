@@ -13,9 +13,16 @@ import {
 } from '../../../shadcn/shadcnDialog';
 import type { FieldMapping } from '../../utils/formHelpers';
 import { Button } from '../Button';
-import { Form } from '../Form';
+import { Form, type FormProps } from '../Form';
 
-export interface DialogProps {
+export interface DialogProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TContext = any,
+  TTransformedValues extends FieldValues | undefined = TFieldValues,
+  TMutationData = unknown,
+  TMutationError = Error,
+  TMutationVariables = any,
+> {
   // Controlled mode — omit both to let Dialog manage its own state
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -32,10 +39,17 @@ export interface DialogProps {
   className?: string;
   // Form mode — wraps children+footer in a Form component
   mode?: 'default' | 'form';
-  form?: UseFormReturn<any, any, any>;
-  mutation?: UseMutationResult<any, any, any, any>;
-  onFormSubmit?: (data: any) => Promise<void>;
-  transformSubmit?: (data: any) => any;
+  form?: UseFormReturn<TFieldValues, TContext, TTransformedValues>;
+  mutation?: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
+  onFormSubmit?: FormProps<TFieldValues, TContext, TTransformedValues>['onSubmit'];
+  transformSubmit?: FormProps<
+    TFieldValues,
+    TContext,
+    TTransformedValues,
+    TMutationData,
+    TMutationError,
+    TMutationVariables
+  >['transformSubmit'];
   submitLabel?: string;
   cancelLabel?: string;
   showRootError?: boolean;
@@ -43,7 +57,14 @@ export interface DialogProps {
 }
 
 // Composite dialog — manages its own open state unless open/onOpenChange are provided
-export const Dialog: React.FC<DialogProps> = ({
+export function Dialog<
+  TFieldValues extends FieldValues = FieldValues,
+  TContext = any,
+  TTransformedValues extends FieldValues | undefined = TFieldValues,
+  TMutationData = unknown,
+  TMutationError = Error,
+  TMutationVariables = any,
+>({
   open: controlledOpen,
   onOpenChange,
   anchor,
@@ -63,7 +84,7 @@ export const Dialog: React.FC<DialogProps> = ({
   cancelLabel,
   showRootError,
   fieldMapping,
-}) => {
+}: DialogProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
   const [internalOpen, setInternalOpen] = useState(false);
 
   const isControlled = controlledOpen !== undefined;
@@ -93,7 +114,7 @@ export const Dialog: React.FC<DialogProps> = ({
         <Form
           form={form}
           mutation={mutation}
-          onSubmit={onFormSubmit as any}
+          onSubmit={onFormSubmit}
           transformSubmit={transformSubmit}
           showRootError={showRootError}
           fieldMapping={fieldMapping}
@@ -136,6 +157,6 @@ export const Dialog: React.FC<DialogProps> = ({
       </ShadcnDialogContent>
     </ShadcnDialog>
   );
-};
+}
 
 Dialog.displayName = 'Dialog';
