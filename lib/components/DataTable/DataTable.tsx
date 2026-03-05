@@ -16,7 +16,7 @@ import { DataTableViewOptions } from './components/DataTableViewOptions';
 import { DataTableViewsMenu } from './components/DataTableViewsMenu';
 import { DataTableViewTabs } from './components/DataTableViewTabs';
 import { useDataTableStore } from './store/store';
-import type { DataTableMeta, DataTableProps, DensityType } from './types';
+import type { DataTableMeta, DataTableProps, DensityType, SearchState } from './types';
 
 const densityClasses: Record<DensityType, string> = {
   compact: 'py-1 px-2 text-xs',
@@ -27,7 +27,7 @@ const densityClasses: Record<DensityType, string> = {
 // Renders a full-featured data table from a raw TanStack Table instance
 export function DataTable<TData>({
   table,
-  enableSearch,
+  searchConfig,
   paginationConfig,
   selectActions,
   emptyStateConfig,
@@ -47,7 +47,10 @@ export function DataTable<TData>({
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = enableSearch || visibilityEnabled || toolbarActions || filters || onStateApplied;
+  const showToolbar = searchConfig || visibilityEnabled || toolbarActions || filters || onStateApplied;
+
+  const search = meta?.search ?? null;
+  const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -59,8 +62,13 @@ export function DataTable<TData>({
 
           {/* RIGHT: icon buttons */}
           <div className="flex items-center gap-2 shrink-0">
-            {enableSearch && (
-              <DataTableSearch table={table} search={enableSearch.value} onSearchChange={enableSearch.onChange} />
+            {searchConfig && (
+              <DataTableSearch
+                columns={searchConfig.columns}
+                searchAll={searchConfig.searchAll}
+                search={search}
+                onSearchChange={onSearchChange}
+              />
             )}
             {filters && (
               <div className="relative">
@@ -173,13 +181,18 @@ export function DataTable<TData>({
                     ))
                   : table.getRowModel().rows.map((row) => (
                       <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                        {row.getVisibleCells().map((cell, index) => (
+                        {row.getVisibleCells().map((cell) => (
                           <TableCell
                             key={cell.id}
                             className={densityClasses[density]}
                             style={{ width: cell.column.id === 'actions' ? '52px' : cell.column.getSize() }}
                           >
-                            <div className={cn('flex items-center', cell.column.id === 'actions' ? 'justify-end' : 'justify-center')}>
+                            <div
+                              className={cn(
+                                'flex items-center',
+                                cell.column.id === 'actions' ? 'justify-end' : 'justify-center',
+                              )}
+                            >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </div>
                           </TableCell>

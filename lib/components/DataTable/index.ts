@@ -24,6 +24,7 @@ export type {
   DataTableSearchConfig,
   DataTableToolbarConfig,
   DensityType,
+  SearchColumn,
   SearchState,
   SelectActions,
 } from './types';

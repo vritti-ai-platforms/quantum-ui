@@ -1,56 +1,48 @@
-import type { Table } from '@tanstack/react-table';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { SingleSelect } from '../../Select';
-import type { SearchState } from '../types';
+import type { SearchColumn, SearchState } from '../types';
 
-interface DataTableSearchProps<TData> {
-  table: Table<TData>;
+const ALL_COLUMNS_ID = 'all';
+
+interface DataTableSearchProps {
+  columns: SearchColumn[];
   search: SearchState;
   onSearchChange: (search: SearchState) => void;
+  searchAll?: boolean;
   className?: string;
 }
 
-// Gets the display label for a column from its header definition
-function getColumnLabel(columnDef: { header?: unknown }, fallbackId: string): string {
-  return typeof columnDef.header === 'string' ? columnDef.header : fallbackId;
-}
-
 // Column-specific search with dropdown selector -- collapsed icon button, expanded search bar
-export function DataTableSearch<TData>({ table, search, onSearchChange, className }: DataTableSearchProps<TData>) {
+export function DataTableSearch({ columns, search, onSearchChange, searchAll, className }: DataTableSearchProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Get searchable columns (exclude select/checkbox column)
-  const searchableColumns = useMemo(
-    () => table.getAllLeafColumns().filter((c) => typeof c.accessorFn !== 'undefined' && c.id !== 'select'),
-    [table],
-  );
+  const options = useMemo(() => {
+    const cols = columns.map((c) => ({ value: c.id, label: c.label }));
+    return searchAll ? [{ value: ALL_COLUMNS_ID, label: 'All' }, ...cols] : cols;
+  }, [columns, searchAll]);
 
-  const options = useMemo(
-    () => searchableColumns.map((c) => ({ value: c.id, label: getColumnLabel(c.columnDef, c.id) })),
-    [searchableColumns],
-  );
+  const defaultColumnId = options[0]?.value ?? '';
 
-  // Derive initial column selection from persisted search state or fall back to first column
+  // Derive initial column selection from persisted search state or fall back to first option
   const [selectedColumnId, setSelectedColumnId] = useState(() => {
-    if (search?.columnId && searchableColumns.some((c) => c.id === search.columnId)) {
+    if (search?.columnId && options.some((o) => o.value === search.columnId)) {
       return search.columnId;
     }
-    return searchableColumns[0]?.id ?? '';
+    return defaultColumnId;
   });
 
-  // Reset to first available if selected column is hidden/removed
+  // Reset to first available if selected column no longer exists in options
   useEffect(() => {
-    if (!searchableColumns.some((c) => c.id === selectedColumnId)) {
-      setSelectedColumnId(searchableColumns[0]?.id ?? '');
+    if (!options.some((o) => o.value === selectedColumnId)) {
+      setSelectedColumnId(defaultColumnId);
     }
-  }, [searchableColumns, selectedColumnId]);
+  }, [options, selectedColumnId, defaultColumnId]);
 
-  const selectedColumn = table.getColumn(selectedColumnId);
-  const selectedLabel = selectedColumn ? getColumnLabel(selectedColumn.columnDef, selectedColumn.id) : '';
+  const selectedLabel = options.find((o) => o.value === selectedColumnId)?.label ?? '';
 
   // Displayed input value comes from the prop
   const inputValue = search?.columnId === selectedColumnId ? (search?.value ?? '') : '';

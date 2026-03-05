@@ -1,6 +1,6 @@
 import type { SortingState } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
-import type { FilterCondition, TableViewState } from '../../../types/table-filter';
+import type { FilterCondition, SearchState, TableViewState } from '../../../types/table-filter';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { sortConditionsToTanstack, tanstackToSortConditions } from '../utils';
 import { useDataTableStore, viewStatesEqual } from './store';
@@ -17,6 +17,7 @@ export function useTableSlice(slug: string) {
 
   const _updateActiveState = useDataTableStore((s) => s.updateActiveState);
   const _setFilters = useDataTableStore((s) => s.setFilters);
+  const _setSearch = useDataTableStore((s) => s.setSearch);
   const _consumeSkipUpsert = useDataTableStore((s) => s.consumeSkipUpsert);
 
   // Pre-bind slug so callers don't repeat it on every call
@@ -26,6 +27,7 @@ export function useTableSlice(slug: string) {
   );
 
   const setFilters = useCallback((filters: FilterCondition[]) => _setFilters(slug, filters), [slug, _setFilters]);
+  const setSearch = useCallback((search: SearchState) => _setSearch(slug, search), [slug, _setSearch]);
 
   const consumeSkipUpsert = useCallback(() => _consumeSkipUpsert(slug), [slug, _consumeSkipUpsert]);
 
@@ -47,6 +49,7 @@ export function useTableSlice(slug: string) {
     isViewDirty,
     updateActiveState,
     setFilters,
+    setSearch,
     handleSortingChange,
     consumeSkipUpsert,
   };

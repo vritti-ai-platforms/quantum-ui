@@ -1,18 +1,22 @@
 import type { PaginationState, Row, Table } from '@tanstack/react-table';
-import type { DensityType, FilterCondition } from '../../types/table-filter';
+import type { DensityType, FilterCondition, SearchState } from '../../types/table-filter';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
-// Re-export DensityType for backward compatibility
-export type { DensityType } from '../../types/table-filter';
+// Re-export for consumers
+export type { DensityType, SearchState } from '../../types/table-filter';
 
 // --- Feature config types ---
 
-export type SearchState = { columnId: string; value: string } | null;
+export interface SearchColumn {
+  id: string;
+  label: string;
+}
 
 export interface DataTableSearchConfig {
-  value: SearchState;
-  onChange: (search: SearchState) => void;
+  columns: SearchColumn[];
+  // When true, prepends an "All" option that searches across all provided columns
+  searchAll?: boolean;
 }
 
 export interface DataTablePaginationConfig {
@@ -47,13 +51,15 @@ export interface DataTableMeta {
   setDensity: (d: DensityType) => void;
   isViewDirty: boolean;
   setFilters: (filters: FilterCondition[]) => void;
+  search: SearchState;
+  setSearch: (search: SearchState) => void;
 }
 
 // --- DataTable component props ---
 
 export interface DataTableProps<TData> {
   table: Table<TData>;
-  enableSearch?: DataTableSearchConfig;
+  searchConfig?: DataTableSearchConfig;
   paginationConfig?: DataTablePaginationConfig;
   selectActions?: SelectActions<TData>;
   emptyStateConfig?: DataTableEmptyConfig;

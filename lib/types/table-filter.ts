@@ -17,6 +17,8 @@ export interface SortCondition {
 
 export type DensityType = 'compact' | 'normal' | 'comfortable';
 
+export type SearchState = { columnId: string; value: string } | null;
+
 export interface TableViewState {
   filters: FilterCondition[];
   sort: SortCondition[];
@@ -28,6 +30,7 @@ export interface TableViewState {
   density: DensityType;
   filterOrder: string[];
   filterVisibility: Record<string, boolean>;
+  search: SearchState;
 }
 
 export const EMPTY_TABLE_STATE: TableViewState = {
@@ -41,4 +44,5 @@ export const EMPTY_TABLE_STATE: TableViewState = {
   density: 'normal',
   filterOrder: [],
   filterVisibility: {},
+  search: null,
 };

@@ -54,6 +54,7 @@ export function useDataTable<TData>({
     // Actions
     updateActiveState,
     setFilters,
+    setSearch,
     handleSortingChange,
     consumeSkipUpsert,
   } = useTableSlice(slug);
@@ -114,6 +115,10 @@ export function useDataTable<TData>({
 
       // Filters
       setFilters: (filters: Parameters<typeof setFilters>[0]) => setFilters(filters),
+
+      // Search
+      search: activeState.search,
+      setSearch,
     }),
     [
       slug,
@@ -125,6 +130,8 @@ export function useDataTable<TData>({
       isViewDirty,
       updateActiveState,
       setFilters,
+      activeState.search,
+      setSearch,
     ],
   );
 

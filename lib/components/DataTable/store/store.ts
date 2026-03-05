@@ -1,6 +1,6 @@
 import { deepEqual } from 'fast-equals';
 import { create } from 'zustand';
-import type { FilterCondition, TableViewState } from '../../../types/table-filter';
+import type { FilterCondition, SearchState, TableViewState } from '../../../types/table-filter';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 
 const MAX_TABLES = 20;
@@ -24,6 +24,7 @@ export interface TableSlice {
   loadViewState: (slug: string, state: TableViewState, viewId: string | null, skipUpsert?: boolean) => void;
   updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
   setFilters: (slug: string, filters: FilterCondition[]) => void;
+  setSearch: (slug: string, search: SearchState) => void;
   setActiveViewState: (slug: string, viewState: TableViewState) => void;
   syncActiveViewState: (slug: string) => void;
   // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
@@ -129,6 +130,25 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: { ...currentTable.activeState, filters },
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Sets activeState.search directly
+  setSearch: (slug, search) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            activeState: { ...currentTable.activeState, search },
             lastAccessed: Date.now(),
           },
         },
