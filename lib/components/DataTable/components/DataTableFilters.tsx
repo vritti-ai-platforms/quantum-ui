@@ -85,14 +85,13 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   const activeViewId = useDataTableStore((s) => s.tables[slug]?.activeViewId ?? null);
 
   // Build default values from active filters, keyed by view to reset form on view change
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally keyed by view — form resets on view switch, not on every filter change
   const defaultValues = useMemo(
     () =>
       activeFilters.reduce<Record<string, FilterCondition>>((acc, f) => {
         acc[f.field] = f;
         return acc;
       }, {}),
-    [activeViewId],
+    [activeFilters],
   );
 
   // Extract metadata from filter ReactNodes
@@ -151,7 +150,7 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   return (
     <div className="flex items-center gap-2 px-4 py-3 border-b flex-wrap">
       <FilterWrapper
-        key={activeViewId ?? 'default'}
+        key={activeViewId + JSON.stringify(defaultValues)}
         defaultValues={defaultValues}
         activeFilters={activeFilters}
         onSubmit={handleApply}
