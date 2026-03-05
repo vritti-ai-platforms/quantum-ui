@@ -203,6 +203,24 @@ export interface CustomMenuItem {
 }
 
 /**
+ * Dialog menu item that opens a Dialog when selected
+ */
+export interface DialogMenuItem extends MenuItemBase {
+  type: 'dialog';
+  /** Dialog configuration */
+  dialog: {
+    /** Dialog title */
+    title: string;
+    /** Optional dialog description */
+    description?: string;
+    /** Render prop for dialog body — receives a close function */
+    content?: (close: () => void) => ReactNode;
+    /** Static footer content */
+    footer?: ReactNode;
+  };
+}
+
+/**
  * Union type of all possible menu item types
  */
 export type MenuItem =
@@ -213,7 +231,8 @@ export type MenuItem =
   | SeparatorItem
   | LabelItem
   | GroupItem
-  | CustomMenuItem;
+  | CustomMenuItem
+  | DialogMenuItem;
 
 /**
  * Props for configuring the dropdown trigger button

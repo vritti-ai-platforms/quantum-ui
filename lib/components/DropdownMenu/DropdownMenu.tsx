@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import {
   DropdownMenuCheckboxItem as ShadcnDropdownMenuCheckboxItem,
   DropdownMenuContent as ShadcnDropdownMenuContent,
@@ -18,7 +18,8 @@ import {
   DropdownMenuTrigger as ShadcnDropdownMenuTrigger,
 } from '../../../shadcn/shadcnDropdownMenu';
 import { Button } from '../Button';
-import type { DropdownMenuProps, MenuItem } from './types';
+import { Dialog } from '../Dialog';
+import type { DialogMenuItem, DropdownMenuProps, MenuItem } from './types';
 
 // Export all primitive parts with proper aliases
 export const DropdownMenuRoot = ShadcnDropdownMenuRoot;
@@ -37,11 +38,12 @@ export const DropdownMenuSubContent = ShadcnDropdownMenuSubContent;
 export const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
 export const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
 
-/**
- * Helper function to recursively render menu items based on their type
- * Supports all menu item types including nested submenus
- */
-const renderMenuItem = (item: MenuItem, index: number): React.ReactNode => {
+// Renders a single menu item based on its type — supports nested submenus
+const renderMenuItem = (
+  item: MenuItem,
+  index: number,
+  onDialogSelect?: (id: string) => void,
+): React.ReactNode => {
   switch (item.type) {
     case 'separator':
       return <DropdownMenuSeparator key={item.id ?? `separator-${index}`} />;
@@ -105,7 +107,7 @@ const renderMenuItem = (item: MenuItem, index: number): React.ReactNode => {
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
-              {item.items.map((subItem, subIndex) => renderMenuItem(subItem, subIndex))}
+              {item.items.map((subItem, subIndex) => renderMenuItem(subItem, subIndex, onDialogSelect))}
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
@@ -116,9 +118,26 @@ const renderMenuItem = (item: MenuItem, index: number): React.ReactNode => {
       return (
         <DropdownMenuGroup key={item.id}>
           {item.label && <DropdownMenuLabel>{item.label}</DropdownMenuLabel>}
-          {item.items.map((groupItem, groupIndex) => renderMenuItem(groupItem, groupIndex))}
+          {item.items.map((groupItem, groupIndex) => renderMenuItem(groupItem, groupIndex, onDialogSelect))}
         </DropdownMenuGroup>
       );
+
+    case 'dialog': {
+      const Icon = item.icon;
+      return (
+        <DropdownMenuItem
+          key={item.id}
+          disabled={item.disabled}
+          onSelect={(e) => {
+            e.preventDefault();
+            onDialogSelect?.(item.id);
+          }}
+        >
+          {Icon && <Icon className="mr-2 h-4 w-4" />}
+          <span>{item.label}</span>
+        </DropdownMenuItem>
+      );
+    }
 
     case 'custom': {
       const content = typeof item.render === 'function' ? item.render() : item.render;
@@ -189,22 +208,50 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   align = 'end',
   side,
 }) => {
+  const [activeDialogId, setActiveDialogId] = useState<string | null>(null);
   const TriggerIcon = trigger.icon;
 
+  // Collect all dialog-type items (including nested) for rendering outside the Radix root
+  const collectDialogItems = (menuItems: MenuItem[]): DialogMenuItem[] => {
+    const result: DialogMenuItem[] = [];
+    for (const item of menuItems) {
+      if (item.type === 'dialog') result.push(item);
+      if (item.type === 'sub' || item.type === 'group') result.push(...collectDialogItems(item.items));
+    }
+    return result;
+  };
+
+  const dialogItems = collectDialogItems(items);
+
   return (
-    <DropdownMenuRoot>
-      <DropdownMenuTrigger asChild>
-        {trigger.children ?? (
-          <Button variant={trigger.variant} className={trigger.className}>
-            {TriggerIcon && <TriggerIcon className="mr-2 h-4 w-4" />}
-            {trigger.label}
-          </Button>
-        )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className={contentClassName} align={align} side={side}>
-        {items.map((item, index) => renderMenuItem(item, index))}
-      </DropdownMenuContent>
-    </DropdownMenuRoot>
+    <>
+      <DropdownMenuRoot>
+        <DropdownMenuTrigger asChild>
+          {trigger.children ?? (
+            <Button variant={trigger.variant} className={trigger.className}>
+              {TriggerIcon && <TriggerIcon className="mr-2 h-4 w-4" />}
+              {trigger.label}
+            </Button>
+          )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className={contentClassName} align={align} side={side}>
+          {items.map((item, index) => renderMenuItem(item, index, setActiveDialogId))}
+        </DropdownMenuContent>
+      </DropdownMenuRoot>
+      {dialogItems.map((item) => (
+        <Dialog
+          key={item.id}
+          open={activeDialogId === item.id}
+          onOpenChange={(open) => {
+            if (!open) setActiveDialogId(null);
+          }}
+          title={item.dialog.title}
+          description={item.dialog.description}
+          content={item.dialog.content}
+          footer={item.dialog.footer}
+        />
+      ))}
+    </>
   );
 };
 
