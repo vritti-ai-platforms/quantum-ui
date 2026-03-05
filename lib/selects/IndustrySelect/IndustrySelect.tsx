@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Select } from '../../components/Select/Select';
-import type { SelectOption, SelectValue, SelectVariant } from '../../components/Select/types';
+import type { SelectOption, SelectValue } from '../../components/Select/types';
 
 export interface IndustrySelectProps {
   value?: SelectValue;
@@ -16,7 +16,6 @@ export interface IndustrySelectProps {
   clearable?: boolean;
   className?: string;
   id?: string;
-  type?: SelectVariant;
 }
 
 // Pre-configured Select for industry selection with async search
