@@ -18,6 +18,7 @@ export function useTableSlice(slug: string) {
   const _updateActiveState = useDataTableStore((s) => s.updateActiveState);
   const _setFilters = useDataTableStore((s) => s.setFilters);
   const _setSearch = useDataTableStore((s) => s.setSearch);
+  const _setPagination = useDataTableStore((s) => s.setPagination);
   const _consumeSkipUpsert = useDataTableStore((s) => s.consumeSkipUpsert);
 
   // Pre-bind slug so callers don't repeat it on every call
@@ -28,6 +29,10 @@ export function useTableSlice(slug: string) {
 
   const setFilters = useCallback((filters: FilterCondition[]) => _setFilters(slug, filters), [slug, _setFilters]);
   const setSearch = useCallback((search: SearchState) => _setSearch(slug, search), [slug, _setSearch]);
+  const setPagination = useCallback(
+    (pagination: { pageIndex: number; pageSize: number }) => _setPagination(slug, pagination),
+    [slug, _setPagination],
+  );
 
   const consumeSkipUpsert = useCallback(() => _consumeSkipUpsert(slug), [slug, _consumeSkipUpsert]);
 
@@ -50,6 +55,7 @@ export function useTableSlice(slug: string) {
     updateActiveState,
     setFilters,
     setSearch,
+    setPagination,
     handleSortingChange,
     consumeSkipUpsert,
   };

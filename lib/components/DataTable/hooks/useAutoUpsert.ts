@@ -7,11 +7,11 @@ export function useAutoUpsert(
   slug: string,
   activeState: TableViewState,
   activeViewId: string | null,
-  onStateApplied: (() => void) | undefined,
+  onStatePush: (() => void) | undefined,
   consumeSkipUpsert: () => boolean,
 ) {
-  const onStateAppliedRef = useRef(onStateApplied);
-  onStateAppliedRef.current = onStateApplied;
+  const onStatePushRef = useRef(onStatePush);
+  onStatePushRef.current = onStatePush;
 
   const prevActiveStateRef = useRef<TableViewState>(activeState);
   const hasInitializedRef = useRef(false);
@@ -32,7 +32,7 @@ export function useAutoUpsert(
     if (consumeSkipUpsert()) return;
 
     const timer = setTimeout(() => {
-      pushTableState(slug, activeState, activeViewId).then(() => onStateAppliedRef.current?.());
+      pushTableState(slug, activeState, activeViewId).then(() => onStatePushRef.current?.());
     }, 150);
 
     return () => clearTimeout(timer);

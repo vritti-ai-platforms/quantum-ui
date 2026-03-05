@@ -1,8 +1,7 @@
-import type { ColumnDef, InitialTableState } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import {
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
@@ -13,36 +12,38 @@ import { useDataTableStore } from '../store/store';
 import { useTableSlice } from '../store/useTableSlice';
 import { useAutoUpsert } from './useAutoUpsert';
 
+export interface DataTableServerState<TData> {
+  result?: TData[];
+  count?: number;
+  state?: TableViewState;
+  activeViewId?: string | null;
+}
+
 interface UseDataTableOptions<TData> {
-  data: TData[];
   columns: ColumnDef<TData, unknown>[];
   slug: string;
   label: string;
-  // Server-returned state loaded once on mount — enables init without boilerplate in the page
-  serverState?: { state?: TableViewState; activeViewId?: string | null };
-  initialState?: InitialTableState;
+  serverState?: DataTableServerState<TData>;
   enableSorting?: boolean;
   enableMultiSort?: boolean;
   enableRowSelection?: boolean;
   enableHiding?: boolean;
   enableColumnResizing?: boolean;
-  onStateApplied?: () => void;
+  onStatePush?: () => void;
 }
 
 // Creates a fully configured TanStack Table instance with persisted state
 export function useDataTable<TData>({
-  data,
   columns,
   slug,
   label,
   serverState,
-  initialState = { pagination: { pageIndex: 0, pageSize: 10 } },
   enableMultiSort = true,
   enableRowSelection = true,
   enableHiding = true,
   enableSorting = true,
   enableColumnResizing = true,
-  onStateApplied,
+  onStatePush,
 }: UseDataTableOptions<TData>) {
   const {
     // State
@@ -55,6 +56,7 @@ export function useDataTable<TData>({
     updateActiveState,
     setFilters,
     setSearch,
+    setPagination,
     handleSortingChange,
     consumeSkipUpsert,
   } = useTableSlice(slug);
@@ -135,7 +137,10 @@ export function useDataTable<TData>({
     ],
   );
 
-  useAutoUpsert(slug, activeState, activeViewId, onStateApplied, consumeSkipUpsert);
+  useAutoUpsert(slug, activeState, activeViewId, onStatePush, consumeSkipUpsert);
+
+  const data = serverState?.result ?? [];
+  const totalRows = serverState?.count;
 
   const table = useReactTable({
     data,
@@ -146,8 +151,14 @@ export function useDataTable<TData>({
       columnOrder,
       columnSizing,
       columnPinning,
+      pagination: activeState.pagination,
     },
     onSortingChange: handleSortingChange,
+    onPaginationChange: (updater) => {
+      const current = activeState.pagination;
+      const newVal = typeof updater === 'function' ? updater(current) : updater;
+      setPagination(newVal);
+    },
     onColumnVisibilityChange: (updater) => {
       const current = activeState.columnVisibility;
       const newVal = typeof updater === 'function' ? updater(current) : updater;
@@ -176,12 +187,12 @@ export function useDataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    rowCount: totalRows ?? 0,
     enableSorting,
     enableMultiSort,
     enableRowSelection,
     enableHiding,
-    initialState,
     meta,
   });
 

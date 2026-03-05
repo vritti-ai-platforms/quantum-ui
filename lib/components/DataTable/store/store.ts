@@ -25,6 +25,7 @@ export interface TableSlice {
   updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
   setFilters: (slug: string, filters: FilterCondition[]) => void;
   setSearch: (slug: string, search: SearchState) => void;
+  setPagination: (slug: string, pagination: { pageIndex: number; pageSize: number }) => void;
   setActiveViewState: (slug: string, viewState: TableViewState) => void;
   syncActiveViewState: (slug: string) => void;
   // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
@@ -149,6 +150,25 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: { ...currentTable.activeState, search },
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Sets activeState.pagination directly
+  setPagination: (slug, pagination) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            activeState: { ...currentTable.activeState, pagination },
             lastAccessed: Date.now(),
           },
         },

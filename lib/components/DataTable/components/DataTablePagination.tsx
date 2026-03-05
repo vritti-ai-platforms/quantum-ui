@@ -40,6 +40,8 @@ export function DataTablePagination<TData>({
     setPageInputValue(null);
   }
 
+  if (totalPages <= 1) return null;
+
   return (
     <div className={cn('flex items-center justify-between px-2 py-2', className)}>
       {/* Left: showing info */}

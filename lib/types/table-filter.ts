@@ -31,6 +31,7 @@ export interface TableViewState {
   filterOrder: string[];
   filterVisibility: Record<string, boolean>;
   search: SearchState;
+  pagination: { pageIndex: number; pageSize: number };
 }
 
 export const EMPTY_TABLE_STATE: TableViewState = {
@@ -45,4 +46,5 @@ export const EMPTY_TABLE_STATE: TableViewState = {
   filterOrder: [],
   filterVisibility: {},
   search: null,
+  pagination: { pageIndex: 0, pageSize: 20 },
 };

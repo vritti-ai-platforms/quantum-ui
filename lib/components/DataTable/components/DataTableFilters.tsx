@@ -18,7 +18,8 @@ function getFilterProps(node: React.ReactNode): { id: string; label: string } | 
   if (!isValidElement(node)) return null;
   const props = node.props as Record<string, unknown>;
   const id = typeof props.name === 'string' ? props.name : null;
-  const label = typeof props.label === 'string' ? props.label : '';
+  const componentDefault = (node.type as { defaultLabel?: string }).defaultLabel;
+  const label = typeof props.label === 'string' ? props.label : (componentDefault ?? '');
   if (!id) return null;
   return { id, label };
 }

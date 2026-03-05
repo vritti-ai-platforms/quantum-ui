@@ -1,4 +1,4 @@
-import type { PaginationState, Row, Table } from '@tanstack/react-table';
+import type { Row, Table } from '@tanstack/react-table';
 import type { DensityType, FilterCondition, SearchState } from '../../types/table-filter';
 
 export type { ColumnDef } from '@tanstack/react-table';
@@ -17,11 +17,6 @@ export interface DataTableSearchConfig {
   columns: SearchColumn[];
   // When true, prepends an "All" option that searches across all provided columns
   searchAll?: boolean;
-}
-
-export interface DataTablePaginationConfig {
-  pageSizeOptions?: number[];
-  initial?: PaginationState;
 }
 
 export type SelectActions<TData> = (selectedRows: Row<TData>[]) => React.ReactNode;
@@ -60,14 +55,14 @@ export interface DataTableMeta {
 export interface DataTableProps<TData> {
   table: Table<TData>;
   searchConfig?: DataTableSearchConfig;
-  paginationConfig?: DataTablePaginationConfig;
   selectActions?: SelectActions<TData>;
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
-  onStateApplied?: () => void;
+  onStatePush?: () => void;
   isLoading?: boolean;
   maxHeight?: string;
   minHeight?: string;
   className?: string;
+  enableViews?: boolean;
 }

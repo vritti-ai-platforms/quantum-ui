@@ -44,6 +44,7 @@ export default defineConfig({
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
         'components/Sortable': resolve(__dirname, 'lib/components/Sortable/index.ts'),
+        'selects/CloudProviderFilter': resolve(__dirname, 'lib/selects/CloudProviderFilter/index.ts'),
         'selects/IndustrySelect': resolve(__dirname, 'lib/selects/IndustrySelect/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),

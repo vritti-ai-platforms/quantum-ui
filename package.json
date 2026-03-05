@@ -112,6 +112,10 @@
       "types": "./dist/lib/components/Sortable/index.d.ts",
       "import": "./dist/components/Sortable.js"
     },
+    "./selects/CloudProviderFilter": {
+      "types": "./dist/lib/selects/CloudProviderFilter/index.d.ts",
+      "import": "./dist/selects/CloudProviderFilter.js"
+    },
     "./selects/IndustrySelect": {
       "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
       "import": "./dist/selects/IndustrySelect.js"

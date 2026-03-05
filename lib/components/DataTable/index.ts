@@ -19,7 +19,6 @@ export type {
   ColumnDef,
   DataTableEmptyConfig,
   DataTableMeta,
-  DataTablePaginationConfig,
   DataTableProps,
   DataTableSearchConfig,
   DataTableToolbarConfig,

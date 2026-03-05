@@ -28,16 +28,16 @@ const densityClasses: Record<DensityType, string> = {
 export function DataTable<TData>({
   table,
   searchConfig,
-  paginationConfig,
   selectActions,
   emptyStateConfig,
   toolbarActions,
   filters,
-  onStateApplied,
+  onStatePush,
   isLoading = false,
   maxHeight = '700px',
   minHeight = '700px',
   className,
+  enableViews = true,
 }: DataTableProps<TData>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -47,7 +47,7 @@ export function DataTable<TData>({
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = searchConfig || visibilityEnabled || toolbarActions || filters || onStateApplied;
+  const showToolbar = searchConfig || visibilityEnabled || toolbarActions || filters || onStatePush;
 
   const search = meta?.search ?? null;
   const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
@@ -58,7 +58,7 @@ export function DataTable<TData>({
       {showToolbar && (
         <div className="flex items-center gap-4">
           {/* LEFT: view tabs (flex-1) when viewsConfig set; otherwise spacer */}
-          <div className="flex min-w-0 flex-1">{onStateApplied && slug && <DataTableViewTabs slug={slug} />}</div>
+          <div className="flex min-w-0 flex-1">{enableViews && onStatePush && slug && <DataTableViewTabs slug={slug} />}</div>
 
           {/* RIGHT: icon buttons */}
           <div className="flex items-center gap-2 shrink-0">
@@ -90,7 +90,7 @@ export function DataTable<TData>({
             )}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />
-            {onStateApplied && slug && <DataTableViewsMenu slug={slug} />}
+            {enableViews && onStatePush && slug && <DataTableViewsMenu slug={slug} />}
             {toolbarActions?.actions}
           </div>
         </div>
@@ -168,7 +168,7 @@ export function DataTable<TData>({
               <TableBody>
                 {isLoading
                   ? Array.from(
-                      { length: table.getState().pagination?.pageSize ?? 10 },
+                      { length: table.getState().pagination?.pageSize ?? 20 },
                       (_, i) => `skeleton-row-${i}`,
                     ).map((rowKey) => (
                       <TableRow key={rowKey}>
@@ -216,7 +216,7 @@ export function DataTable<TData>({
       </div>
 
       {/* Pagination */}
-      <DataTablePagination table={table} pageSizeOptions={paginationConfig?.pageSizeOptions} />
+      <DataTablePagination table={table} />
     </div>
   );
 }
