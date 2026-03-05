@@ -1,17 +1,25 @@
+import { deepEqual } from 'fast-equals';
 import type React from 'react';
 import { Children, cloneElement, isValidElement, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type { FilterCondition } from '../../../types/table-filter';
-import { Button } from '../../Button';
 
 type FilterFormValues = Record<string, FilterCondition | null | undefined>;
 
-// Recursively processes children — wraps named fields with Controller, injects isLoading into submit buttons, handles reset buttons
+// Normalizes form values to a keyed map of FilterCondition, excluding null/undefined entries
+function normalizeFormValues(values: FilterFormValues): Record<string, FilterCondition> {
+  return Object.fromEntries(Object.entries(values).filter(([, v]) => v != null)) as Record<string, FilterCondition>;
+}
+
+// Normalizes active filters array to a keyed map
+function normalizeActiveFilters(filters: FilterCondition[]): Record<string, FilterCondition> {
+  return Object.fromEntries(filters.map((f) => [f.field, f]));
+}
+
+// Recursively processes children — wraps named fields with Controller
 function processChildren(
   children: React.ReactNode,
   control: ReturnType<typeof useForm<FilterFormValues>>['control'],
-  isSubmitting: boolean,
-  onReset: () => void,
 ): React.ReactNode {
   return Children.map(children, (child) => {
     if (!isValidElement(child)) return child;
@@ -39,29 +47,11 @@ function processChildren(
       );
     }
 
-    // Submit buttons — inject isLoading
-    if (
-      props.type === 'submit' &&
-      (el.type === Button ||
-        (typeof el.type === 'function' && (el.type as { displayName?: string }).displayName === 'Button'))
-    ) {
-      return cloneElement(el, { ...props, isLoading: isSubmitting });
-    }
-
-    // Reset buttons — prevent HTML default, call form.reset({}) + onReset
-    if (
-      props.type === 'reset' &&
-      (el.type === Button ||
-        (typeof el.type === 'function' && (el.type as { displayName?: string }).displayName === 'Button'))
-    ) {
-      return cloneElement(el, { ...props, type: 'button', onClick: onReset });
-    }
-
     // Recurse into container children
     if (props.children != null) {
       return cloneElement(el, {
         ...props,
-        children: processChildren(props.children as React.ReactNode, control, isSubmitting, onReset),
+        children: processChildren(props.children as React.ReactNode, control),
       });
     }
 
@@ -73,13 +63,25 @@ interface FilterWrapperProps extends Omit<React.FormHTMLAttributes<HTMLFormEleme
   onSubmit: (data: FilterFormValues) => void | Promise<void>;
   onReset?: () => void;
   defaultValues?: FilterFormValues;
+  activeFilters?: FilterCondition[];
+  renderActions?: (opts: { isPending: boolean; isSubmitting: boolean }) => React.ReactNode;
   children: React.ReactNode;
 }
 
 // Form wrapper for filter panels — manages draft state via react-hook-form
-export function FilterWrapper({ onSubmit, onReset, defaultValues, children, ...props }: FilterWrapperProps) {
+export function FilterWrapper({
+  onSubmit,
+  onReset,
+  defaultValues,
+  activeFilters,
+  renderActions,
+  children,
+  ...props
+}: FilterWrapperProps) {
   const form = useForm<FilterFormValues>({ defaultValues: defaultValues ?? {} });
   const isSubmitting = form.formState.isSubmitting;
+  const formValues = form.watch();
+  const isPending = !deepEqual(normalizeFormValues(formValues), normalizeActiveFilters(activeFilters ?? []));
 
   const onResetRef = useRef(onReset);
   onResetRef.current = onReset;
@@ -94,8 +96,9 @@ export function FilterWrapper({ onSubmit, onReset, defaultValues, children, ...p
   });
 
   return (
-    <form onSubmit={handleSubmit} {...props}>
-      {processChildren(children, form.control, isSubmitting, handleReset)}
+    <form onSubmit={handleSubmit} onReset={handleReset} {...props}>
+      {processChildren(children, form.control)}
+      {renderActions?.({ isPending, isSubmitting })}
     </form>
   );
 }

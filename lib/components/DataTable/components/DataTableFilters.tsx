@@ -153,23 +153,28 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
       <FilterWrapper
         key={activeViewId ?? 'default'}
         defaultValues={defaultValues}
+        activeFilters={activeFilters}
         onSubmit={handleApply}
         onReset={handleReset}
         className="flex items-center gap-2 flex-1 flex-wrap"
+        renderActions={({ isPending, isSubmitting }) => (
+          <div className="flex items-center gap-2 ml-auto">
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" type="reset">
+                Reset
+              </Button>
+            )}
+            {isPending && (
+              <Button size="sm" type="submit" isLoading={isSubmitting}>
+                Apply
+              </Button>
+            )}
+          </div>
+        )}
       >
         {visibleFilters.map((f) => (
           <span key={f.id}>{f.node}</span>
         ))}
-        <div className="flex items-center gap-2 ml-auto">
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" type="reset">
-              Reset
-            </Button>
-          )}
-          <Button size="sm" type="submit">
-            Apply
-          </Button>
-        </div>
       </FilterWrapper>
 
       {/* Settings popover — outside FilterWrapper */}
