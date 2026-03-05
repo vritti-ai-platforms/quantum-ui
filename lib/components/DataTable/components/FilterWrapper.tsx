@@ -64,6 +64,7 @@ interface FilterWrapperProps extends Omit<React.FormHTMLAttributes<HTMLFormEleme
   onReset?: () => void;
   defaultValues?: FilterFormValues;
   activeFilters?: FilterCondition[];
+  resetValues?: FilterFormValues;
   renderActions?: (opts: { isPending: boolean; isSubmitting: boolean }) => React.ReactNode;
   children: React.ReactNode;
 }
@@ -74,6 +75,7 @@ export function FilterWrapper({
   onReset,
   defaultValues,
   activeFilters,
+  resetValues,
   renderActions,
   children,
   ...props
@@ -87,7 +89,7 @@ export function FilterWrapper({
   onResetRef.current = onReset;
 
   function handleReset() {
-    form.reset({});
+    form.reset(resetValues ?? {});
     onResetRef.current?.();
   }
 

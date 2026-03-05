@@ -1,4 +1,5 @@
 import type { Table } from '@tanstack/react-table';
+import { deepEqual } from 'fast-equals';
 import { Eye, EyeOff, GripVertical, Settings } from 'lucide-react';
 import { isValidElement, useMemo } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shadcnPopover';
@@ -83,8 +84,9 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
 
   const activeFilters = useDataTableStore((s) => s.tables[slug]?.activeState?.filters ?? NO_FILTERS);
   const activeViewId = useDataTableStore((s) => s.tables[slug]?.activeViewId ?? null);
+  const activeViewStateFilters = useDataTableStore((s) => s.tables[slug]?.activeViewState?.filters ?? NO_FILTERS);
 
-  // Build default values from active filters, keyed by view to reset form on view change
+  // Build default values from active filters
   const defaultValues = useMemo(
     () =>
       activeFilters.reduce<Record<string, FilterCondition>>((acc, f) => {
@@ -92,6 +94,18 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
         return acc;
       }, {}),
     [activeFilters],
+  );
+
+  // Reset target: view's saved filters when a view is active, empty otherwise
+  const resetValues = useMemo(
+    () =>
+      activeViewId !== null
+        ? activeViewStateFilters.reduce<FilterFormValues>((acc, f) => {
+            acc[f.field] = f;
+            return acc;
+          }, {})
+        : {},
+    [activeViewId, activeViewStateFilters],
   );
 
   // Extract metadata from filter ReactNodes
@@ -134,10 +148,14 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   }
 
   function handleReset() {
-    meta.setFilters([]);
+    meta.setFilters(activeViewId !== null ? activeViewStateFilters : []);
   }
 
-  const hasActiveFilters = activeFilters.length > 0;
+  const toFilterMap = (filters: FilterCondition[]) => Object.fromEntries(filters.map((f) => [f.field, f]));
+  const hasResetChanges =
+    activeViewId !== null
+      ? !deepEqual(toFilterMap(activeFilters), toFilterMap(activeViewStateFilters))
+      : activeFilters.length > 0;
   const hiddenFilterCount = filterEntries.filter((f) => meta.filterVisibility[f.id] === false).length;
 
   const sortableItems = effectiveOrder
@@ -153,12 +171,13 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
         key={activeViewId + JSON.stringify(defaultValues)}
         defaultValues={defaultValues}
         activeFilters={activeFilters}
+        resetValues={resetValues}
         onSubmit={handleApply}
         onReset={handleReset}
         className="flex items-center gap-2 flex-1 flex-wrap"
         renderActions={({ isPending, isSubmitting }) => (
           <div className="flex items-center gap-2 ml-auto">
-            {hasActiveFilters && (
+            {hasResetChanges && (
               <Button variant="ghost" size="sm" type="reset">
                 Reset
               </Button>
