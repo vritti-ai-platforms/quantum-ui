@@ -1,5 +1,5 @@
 import { Inbox } from 'lucide-react';
-import { cn } from '../../../../shadcn/utils';
+import { Empty } from '../../Empty';
 
 interface DataTableEmptyProps {
   icon?: React.ElementType;
@@ -9,7 +9,7 @@ interface DataTableEmptyProps {
   className?: string;
 }
 
-// Renders an empty state for the data table
+// Renders an empty state for the data table using the Empty component
 export function DataTableEmpty({
   icon: Icon = Inbox,
   title = 'No results',
@@ -18,14 +18,13 @@ export function DataTableEmpty({
   className,
 }: DataTableEmptyProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-12', className)}>
-      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-muted">
-        <Icon className="h-8 w-8 text-muted-foreground" />
-      </div>
-      <h3 className="mt-4 text-lg font-semibold text-foreground">{title}</h3>
-      {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
-      {action && <div className="mt-4">{action}</div>}
-    </div>
+    <Empty
+      icon={<Icon />}
+      title={title}
+      description={description}
+      action={action}
+      className={className}
+    />
   );
 }
 

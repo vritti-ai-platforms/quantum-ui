@@ -110,7 +110,7 @@ export function DataTable<TData>({
             </div>
           </div>
         )}
-        <div className="relative w-full overflow-auto" style={{ maxHeight, minHeight }}>
+        <div className="relative flex w-full flex-col overflow-auto" style={{ maxHeight, minHeight }}>
           <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -158,6 +158,7 @@ export function DataTable<TData>({
                 </TableRow>
               ))}
             </TableHeader>
+            {(isLoading || table.getRowModel().rows.length > 0) && (
             <TableBody>
               {isLoading ? (
                 Array.from({ length: table.getState().pagination?.pageSize ?? 10 }, (_, i) => `skeleton-row-${i}`).map(
@@ -171,7 +172,7 @@ export function DataTable<TData>({
                     </TableRow>
                   ),
                 )
-              ) : table.getRowModel().rows.length > 0 ? (
+              ) : (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell, index) => (
@@ -188,20 +189,20 @@ export function DataTable<TData>({
                     ))}
                   </TableRow>
                 ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columnCount} className="h-24 text-center">
-                    <DataTableEmpty
-                      icon={emptyStateConfig?.icon}
-                      title={emptyStateConfig?.title}
-                      description={emptyStateConfig?.description}
-                      action={emptyStateConfig?.action}
-                    />
-                  </TableCell>
-                </TableRow>
               )}
             </TableBody>
+            )}
           </table>
+          {!isLoading && table.getRowModel().rows.length === 0 && (
+            <div className="flex flex-1 items-center justify-center">
+              <DataTableEmpty
+                icon={emptyStateConfig?.icon}
+                title={emptyStateConfig?.title}
+                description={emptyStateConfig?.description}
+                action={emptyStateConfig?.action}
+              />
+            </div>
+          )}
         </div>
       </div>
 
