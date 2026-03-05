@@ -287,6 +287,56 @@ export const MyComponent = React.forwardRef<HTMLDivElement, MyComponentProps>(
 MyComponent.displayName = 'MyComponent';
 ```
 
+## Hooks (`lib/hooks/`)
+
+Custom hooks live in `lib/hooks/` and are exported from `@vritti/quantum-ui/hooks`.
+
+### `useDialog`
+Controls a dialog's open/close state. Returns `{ isOpen, open, close }`.
+
+```typescript
+import { useDialog } from '@vritti/quantum-ui/hooks';
+const dialog = useDialog();
+// dialog.open()    — opens
+// dialog.close()   — closes
+// dialog.isOpen    — current state
+```
+
+### `useSlugParams`
+Reads the `:slug` route param (format: `name~uuid`) and returns `{ name, id }`.
+
+```typescript
+import { useSlugParams } from '@vritti/quantum-ui/hooks';
+const { name, id } = useSlugParams(); // id = UUID for API calls
+```
+
+Route param must be named `:slug`. Build slugs with `buildSlug` from `@vritti/quantum-ui/utils/slug`.
+
+---
+
+## DropdownMenu — `dialog` item type
+
+The `DropdownMenu` `items` array supports a `dialog` type that renders a Dialog outside the dropdown content (so it survives unmount when the dropdown closes):
+
+```typescript
+{
+  type: 'dialog' as const,
+  id: 'edit',
+  label: 'Edit',
+  icon: Pencil,
+  dialog: {
+    title: 'Edit Item',
+    description: 'Optional description',
+    content: (close) => <MyForm onSuccess={close} onCancel={close} />,
+    footer?: ReactNode,  // optional custom footer
+  },
+}
+```
+
+The DropdownMenu tracks `activeDialogId` internally and renders all dialog-type items' Dialogs as siblings outside the Radix `DropdownMenuRoot`.
+
+---
+
 ## Troubleshooting
 
 ### Build Errors

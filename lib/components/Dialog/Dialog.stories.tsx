@@ -45,13 +45,8 @@ type Story = StoryObj<typeof meta>;
 // Basic dialog with a trigger button
 export const Default: Story = {
   render: () => (
-    <Dialog
-      trigger={<Button>Open Dialog</Button>}
-      title="Dialog Title"
-    >
-      <p className="text-sm text-muted-foreground">
-        This is the dialog body. You can put any content here.
-      </p>
+    <Dialog trigger={<Button>Open Dialog</Button>} title="Dialog Title">
+      <p className="text-sm text-muted-foreground">This is the dialog body. You can put any content here.</p>
     </Dialog>
   ),
 };
@@ -64,9 +59,7 @@ export const WithDescription: Story = {
       title="Edit Profile"
       description="Make changes to your profile here. Click save when you're done."
     >
-      <p className="text-sm text-muted-foreground">
-        Profile form content would go here.
-      </p>
+      <p className="text-sm text-muted-foreground">Profile form content would go here.</p>
     </Dialog>
   ),
 };
@@ -87,9 +80,7 @@ export const WithFooter: Story = {
         </>
       }
     >
-      <p className="text-sm text-muted-foreground">
-        Review your changes before saving.
-      </p>
+      <p className="text-sm text-muted-foreground">Review your changes before saving.</p>
     </Dialog>
   ),
 };
@@ -171,8 +162,8 @@ export const LowLevelAPI: Story = {
         <DialogHeader>
           <DialogTitle>Low-level API</DialogTitle>
           <DialogDescription>
-            This dialog is built using the composable low-level primitives: DialogRoot, DialogTrigger,
-            DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter.
+            This dialog is built using the composable low-level primitives: DialogRoot, DialogTrigger, DialogContent,
+            DialogHeader, DialogTitle, DialogDescription, DialogFooter.
           </DialogDescription>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">

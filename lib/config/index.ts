@@ -109,6 +109,23 @@ export interface AuthConfig {
 }
 
 /**
+ * Views management configuration
+ */
+export interface ViewsConfig {
+  /**
+   * Endpoint for named view CRUD operations
+   * @default 'table-views'
+   */
+  viewsEndpoint?: string;
+
+  /**
+   * Endpoint for live state upsert
+   * @default 'table-states'
+   */
+  statesEndpoint?: string;
+}
+
+/**
  * Complete quantum-ui configuration interface
  */
 export interface QuantumUIConfig {
@@ -126,6 +143,11 @@ export interface QuantumUIConfig {
    * Authentication configuration
    */
   auth?: Partial<AuthConfig>;
+
+  /**
+   * Table views management configuration
+   */
+  views?: ViewsConfig;
 }
 
 /**
@@ -135,6 +157,7 @@ const defaultConfig: Required<{
   csrf: CsrfConfig;
   axios: AxiosConfig;
   auth: AuthConfig;
+  views: Required<ViewsConfig>;
 }> = {
   csrf: {
     endpoint: 'csrf/token',
@@ -156,6 +179,10 @@ const defaultConfig: Required<{
     tokenEndpoint: 'cloud-api/auth/token',
     refreshEndpoint: 'cloud-api/auth/refresh',
     sessionRecoveryEnabled: true,
+  },
+  views: {
+    viewsEndpoint: 'table-views',
+    statesEndpoint: 'table-states',
   },
 };
 
@@ -240,6 +267,10 @@ export function configureQuantumUI(userConfig: QuantumUIConfig): void {
     auth: {
       ...defaultConfig.auth,
       ...(userConfig.auth || {}),
+    },
+    views: {
+      ...defaultConfig.views,
+      ...(userConfig.views || {}),
     },
   };
   setGlobalConfig(newConfig);

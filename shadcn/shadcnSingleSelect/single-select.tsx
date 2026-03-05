@@ -92,16 +92,18 @@ interface SingleSelectSearchProps {
 
 function SingleSelectSearch({ value, onValueChange, placeholder = 'Search...', className }: SingleSelectSearchProps) {
   return (
-    <div data-slot="single-select-search" className={cn('flex items-center gap-2 border-b px-3', className)}>
-      <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
-      <input
-        type="text"
-        aria-label="Search options"
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        placeholder={placeholder}
-        className="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-      />
+    <div data-slot="single-select-search" className={cn('px-3 py-2', className)}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 h-9">
+        <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          type="text"
+          aria-label="Search options"
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
     </div>
   );
 }
@@ -189,7 +191,7 @@ const SingleSelectRow = memo(function SingleSelectRow({
       aria-disabled={disabled}
       tabIndex={disabled ? undefined : 0}
       className={cn(
-        'relative flex w-full cursor-default flex-col items-start rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none',
+        'relative flex w-full cursor-default flex-col items-start rounded-md h-8 justify-center pr-8 px-2 text-sm outline-hidden select-none',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,

@@ -1,88 +1,149 @@
 import type { Table } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { useState } from 'react';
+import { Input } from '../../../../shadcn/shadcnInput';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shadcn/shadcnSelect';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
+import type { DataTableMeta } from '../types';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
   pageSizeOptions?: number[];
-  showSelectedCount?: boolean;
   className?: string;
 }
 
-// Renders pagination controls with page navigation and page size selector
+// Renders pagination in a single row with info, controls, and nav buttons
 export function DataTablePagination<TData>({
   table,
   pageSizeOptions = [10, 20, 30, 50],
-  showSelectedCount = false,
   className,
 }: DataTablePaginationProps<TData>) {
+  const [pageInputValue, setPageInputValue] = useState<string | null>(null);
+
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const pageSize = table.getState().pagination.pageSize;
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const totalPages = table.getPageCount();
+  const start = totalRows === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalRows);
+  const meta = table.options.meta as DataTableMeta | undefined;
+  const singular = meta?.singular ?? 'Row';
+  const plural = meta?.plural ?? 'Rows';
+
+  // Navigates to the page number entered in the inline page input
+  function handleGoToPage() {
+    const pageNumber = Number.parseInt(pageInputValue ?? '', 10);
+    if (!Number.isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
+      table.setPageIndex(pageNumber - 1);
+    }
+    setPageInputValue(null);
+  }
+
   return (
-    <div className={cn('flex items-center justify-between px-2 py-4', className)}>
-      {showSelectedCount ? (
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
+    <div className={cn('flex items-center justify-between px-2 py-2', className)}>
+      {/* Left: showing info */}
+      <div className="flex items-center gap-4">
+        <span className="text-sm text-muted-foreground">
+          showing {start} to {end} of {totalRows} {totalRows === 1 ? singular : plural}
+        </span>
+      </div>
+
+      {/* Right: rows per page + nav buttons */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium whitespace-nowrap">{plural} per page</p>
+          <Select value={`${pageSize}`} onValueChange={(value) => table.setPageSize(Number(value))}>
+            <SelectTrigger size="sm" className="w-[70px]">
+              <SelectValue placeholder={`${pageSize}`} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      ) : (
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} row(s) total.
-        </div>
-      )}
-      <div className="flex items-center space-x-6 lg:space-x-8">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
-          <select
-            className="h-8 w-[70px] rounded-md border border-input bg-transparent px-2 py-1 text-sm"
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => table.setPageSize(Number(e.target.value))}
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </div>
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-center space-x-1">
           <Button
             variant="outline"
             size="icon"
-            className="hidden h-8 w-8 lg:flex"
+            className="size-8"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
-            <ChevronsLeft className="h-4 w-4" />
+            <span className="sr-only">Go to first page</span>
+            <ChevronsLeft className="size-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Go to previous page</span>
+            <ChevronLeft className="size-4" />
           </Button>
+          <span className="flex items-center justify-center text-sm font-medium gap-1 px-1">
+            <Input
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={pageInputValue ?? currentPage}
+              onFocus={(e) => {
+                setPageInputValue(String(currentPage));
+                requestAnimationFrame(() => e.target.select());
+              }}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '' || /^\d+$/.test(val)) setPageInputValue(val);
+              }}
+              onBlur={handleGoToPage}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleGoToPage();
+                  (e.target as HTMLInputElement).blur();
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  if (table.getCanNextPage()) {
+                    table.nextPage();
+                    setPageInputValue(null);
+                  }
+                } else if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  if (table.getCanPreviousPage()) {
+                    table.previousPage();
+                    setPageInputValue(null);
+                  }
+                }
+              }}
+              className="w-10 h-8 px-1 text-sm text-center"
+              aria-label="Current page"
+            />
+            <span className="text-muted-foreground">of {totalPages}</span>
+          </span>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Go to next page</span>
+            <ChevronRight className="size-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="hidden h-8 w-8 lg:flex"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            className="size-8"
+            onClick={() => table.setPageIndex(totalPages - 1)}
             disabled={!table.getCanNextPage()}
           >
-            <ChevronsRight className="h-4 w-4" />
+            <span className="sr-only">Go to last page</span>
+            <ChevronsRight className="size-4" />
           </Button>
         </div>
       </div>
