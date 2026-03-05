@@ -10,6 +10,7 @@ export * from './Collapsible';
 export * from './DataTable';
 export * from './DatePicker';
 export * from './Dialog';
+export * from './ErrorBoundary';
 export * from './DropdownMenu';
 export * from './Field';
 export * from './FilePreview';

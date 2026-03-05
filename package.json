@@ -144,6 +144,10 @@
       "types": "./dist/lib/components/DropdownMenu/index.d.ts",
       "import": "./dist/components/DropdownMenu.js"
     },
+    "./ErrorBoundary": {
+      "types": "./dist/lib/components/ErrorBoundary/index.d.ts",
+      "import": "./dist/components/ErrorBoundary.js"
+    },
     "./Separator": {
       "types": "./dist/lib/components/Separator/index.d.ts",
       "import": "./dist/components/Separator.js"
@@ -301,6 +305,7 @@
     "lucide-react": "^0.562.0",
     "pluralize-esm": "^9.0.5",
     "react-day-picker": "^9.13.0",
+    "react-error-boundary": "^6.1.1",
     "react-hook-form": "^7.71.1",
     "react-intersection-observer": "^10.0.2",
     "react-phone-number-input": "^3.4.14",

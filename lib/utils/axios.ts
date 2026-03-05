@@ -330,7 +330,9 @@ axios.interceptors.response.use(
   },
   (error: AxiosError<ApiErrorResponse>) => {
     const config = error.config;
-    const showError = config?.showErrorToast ?? true;
+    const method = config?.method?.toUpperCase();
+    const isGet = method === 'GET';
+    const showError = isGet ? false : (config?.showErrorToast ?? true);
     const status = error.response?.status;
     const errorData = error.response?.data;
     const isPublicRequest = (config as { public?: boolean })?.public === true;
@@ -338,12 +340,14 @@ axios.interceptors.response.use(
 
     // Handle 401 - clear session and let event listeners handle navigation
     if (status === 401 && !isPublicRequest) {
-      const errorTitle = errorData?.label || errorData?.title || 'Session expired';
-      const errorDescription = errorData?.detail;
-      if (toastId) {
-        toast.error(errorTitle, { id: toastId, description: errorDescription });
-      } else {
-        toast.error(errorTitle, { description: errorDescription });
+      if (showError) {
+        const errorTitle = errorData?.label || errorData?.title || 'Session expired';
+        const errorDescription = errorData?.detail;
+        if (toastId) {
+          toast.error(errorTitle, { id: toastId, description: errorDescription });
+        } else {
+          toast.error(errorTitle, { description: errorDescription });
+        }
       }
       clearToken();
       cancelTokenRefresh();
