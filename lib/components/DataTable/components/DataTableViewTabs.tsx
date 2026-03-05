@@ -4,13 +4,12 @@ import { fetchViews } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
-import type { DataTableViewsConfig } from '../types';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
 
 // Renders horizontal pill-style tabs for named views only — no default "All" tab
-export function DataTableViewTabs({ config }: { config: DataTableViewsConfig }) {
-  const { tableSlug } = config;
+export function DataTableViewTabs({ slug }: { slug: string }) {
+  const tableSlug = slug;
 
   const { data: views = [] } = useQuery({
     queryKey: VIEWS_QK(tableSlug),

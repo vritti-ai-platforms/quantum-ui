@@ -1,7 +1,6 @@
 import { flexRender } from '@tanstack/react-table';
 import { Funnel } from 'lucide-react';
 import { useState } from 'react';
-import { useDataTableStore } from './store/store';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { Button } from '../Button';
@@ -16,6 +15,7 @@ import { DataTableSelectionBar } from './components/DataTableSelectionBar';
 import { DataTableViewOptions } from './components/DataTableViewOptions';
 import { DataTableViewsMenu } from './components/DataTableViewsMenu';
 import { DataTableViewTabs } from './components/DataTableViewTabs';
+import { useDataTableStore } from './store/store';
 import type { DataTableMeta, DataTableProps, DensityType } from './types';
 
 const densityClasses: Record<DensityType, string> = {
@@ -43,9 +43,7 @@ export function DataTable<TData>({
 
   const meta = table.options.meta as DataTableMeta | undefined;
   const slug = meta?.slug;
-  const appliedFilterCount = useDataTableStore(
-    (s) => (slug ? (s.tables[slug]?.activeState?.filters?.length ?? 0) : 0),
-  );
+  const appliedFilterCount = useDataTableStore((s) => (slug ? (s.tables[slug]?.activeState?.filters?.length ?? 0) : 0));
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
@@ -58,7 +56,7 @@ export function DataTable<TData>({
         <div className="flex items-center gap-4">
           {/* LEFT: view tabs (flex-1) when viewsConfig set; otherwise spacer */}
           <div className={cn('flex min-w-0', viewsConfig ? 'flex-1' : 'flex-1')}>
-            {viewsConfig && <DataTableViewTabs config={viewsConfig} />}
+            {viewsConfig && slug && <DataTableViewTabs slug={slug} />}
           </div>
 
           {/* RIGHT: icon buttons */}
@@ -86,7 +84,7 @@ export function DataTable<TData>({
             )}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />
-            {viewsConfig && <DataTableViewsMenu config={viewsConfig} />}
+            {viewsConfig && slug && <DataTableViewsMenu slug={slug} />}
             {toolbarActions?.actions}
           </div>
         </div>

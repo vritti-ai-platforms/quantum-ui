@@ -33,12 +33,6 @@ export interface DataTableToolbarConfig {
   actions?: React.ReactNode;
 }
 
-export interface DataTableFilterItem {
-  slug: string;
-  label: string;
-  node: React.ReactNode;
-}
-
 export interface DataTableMeta {
   slug: string;
   singular: string;
@@ -52,18 +46,12 @@ export interface DataTableMeta {
   density: DensityType;
   setDensity: (d: DensityType) => void;
   isViewDirty: boolean;
-  pendingFilters: FilterCondition[];
-  updatePendingFilter: (field: string, condition: FilterCondition | undefined) => void;
-  applyFilters: () => void;
-  resetFilters: () => void;
-  isFilterDirty: boolean;
+  setFilters: (filters: FilterCondition[]) => void;
 }
 
 // --- Views config ---
 
 export interface DataTableViewsConfig {
-  tableSlug: string;
-  defaultLabel?: string;
   onStateApplied?: () => void;
 }
 
@@ -76,7 +64,7 @@ export interface DataTableProps<TData> {
   selectActions?: SelectActions<TData>;
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
-  filters?: DataTableFilterItem[];
+  filters?: React.ReactNode[];
   viewsConfig?: DataTableViewsConfig;
   isLoading?: boolean;
   maxHeight?: string;

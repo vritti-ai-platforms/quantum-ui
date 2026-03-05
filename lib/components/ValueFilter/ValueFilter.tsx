@@ -2,23 +2,17 @@ import { ChevronDownIcon, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../shadcn/shadcnSelect';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shadcn/shadcnSelect';
 import { cn } from '../../../shadcn/utils';
 import type { FilterCondition, FilterOperator, NumberOperator, StringOperator } from '../../types/table-filter';
 import { Button } from '../Button';
 
 export interface ValueFilterProps {
+  name: string;
   label: string;
-  fieldKey: string;
   fieldType: 'string' | 'number';
   value?: FilterCondition;
-  onChange: (value: FilterCondition | undefined) => void;
+  onChange?: (value: FilterCondition | undefined) => void;
   className?: string;
 }
 
@@ -53,7 +47,7 @@ function getOperatorLabel(operator: FilterOperator, fieldType: 'string' | 'numbe
 }
 
 // Compact filter chip with operator/value popover for building filter conditions
-export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, fieldType, value, onChange, className }) => {
+export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType, value, onChange, className }) => {
   const popoverId = useId();
   const [open, setOpen] = useState(false);
   const [draftOperator, setDraftOperator] = useState<FilterOperator>(
@@ -64,14 +58,10 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
   // Sync draft state when the external value changes while popover is closed
   useEffect(() => {
     if (!open) {
-      setDraftOperator(
-        value?.operator ?? (fieldType === 'string' ? DEFAULT_STRING_OPERATOR : DEFAULT_NUMBER_OPERATOR),
-      );
+      setDraftOperator(value?.operator ?? (fieldType === 'string' ? DEFAULT_STRING_OPERATOR : DEFAULT_NUMBER_OPERATOR));
       setDraftValue(value?.value !== undefined ? String(value.value) : '');
     }
   }, [value, fieldType, open]);
-
-  const operators = fieldType === 'string' ? STRING_OPERATORS : NUMBER_OPERATORS;
 
   // Commits the draft filter condition to the parent
   const handleApply = useCallback(() => {
@@ -80,13 +70,13 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
     const parsedValue = fieldType === 'number' ? Number(draftValue) : draftValue;
     if (fieldType === 'number' && Number.isNaN(parsedValue)) return;
 
-    onChange({ field: fieldKey, operator: draftOperator, value: parsedValue });
+    onChange?.({ field: name, operator: draftOperator, value: parsedValue });
     setOpen(false);
-  }, [draftValue, draftOperator, fieldKey, fieldType, onChange]);
+  }, [draftValue, draftOperator, name, fieldType, onChange]);
 
   // Clears the filter condition
   const handleClear = useCallback(() => {
-    onChange(undefined);
+    onChange?.(undefined);
     setDraftOperator(fieldType === 'string' ? DEFAULT_STRING_OPERATOR : DEFAULT_NUMBER_OPERATOR);
     setDraftValue('');
     setOpen(false);
@@ -101,6 +91,15 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
     [handleClear],
   );
 
+  if (!name) {
+    return (
+      <span className="inline-flex items-center rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        ValueFilter: missing required `name` prop
+      </span>
+    );
+  }
+
+  const operators = fieldType === 'string' ? STRING_OPERATORS : NUMBER_OPERATORS;
   const hasValue = value !== undefined;
 
   return (
@@ -120,9 +119,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ label, fieldKey, field
           )}
         >
           <span className="truncate">
-            {hasValue
-              ? `${label}: ${getOperatorLabel(value.operator, fieldType)} ${value.value}`
-              : label}
+            {hasValue ? `${label}: ${getOperatorLabel(value.operator, fieldType)} ${value.value}` : label}
           </span>
           {hasValue ? (
             <X className="size-3.5 shrink-0 opacity-70 hover:opacity-100" onClick={handleInlineClear} />

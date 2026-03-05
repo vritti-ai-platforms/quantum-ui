@@ -62,7 +62,16 @@ function WithSelectionStory() {
       enableSearch={{}}
       paginationConfig={{ pageSizeOptions: [5, 10] }}
       selectActions={(rows) => (
-        <Button variant="destructive" size="sm" onClick={() => console.log('Delete', rows.map((r) => r.original.id))}>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() =>
+            console.log(
+              'Delete',
+              rows.map((r) => r.original.id),
+            )
+          }
+        >
           <Trash2 className="h-4 w-4 mr-1" />
           Delete {rows.length} item{rows.length !== 1 ? 's' : ''}
         </Button>
@@ -105,13 +114,7 @@ function CustomPaginationStory() {
     slug: 'story-pagination',
     initialState: { pagination: { pageIndex: 0, pageSize: 3 } },
   });
-  return (
-    <DataTable
-      table={table}
-      enableSearch={{}}
-      paginationConfig={{ pageSizeOptions: [3, 6, 12] }}
-    />
-  );
+  return <DataTable table={table} enableSearch={{}} paginationConfig={{ pageSizeOptions: [3, 6, 12] }} />;
 }
 
 // ─── Meta ───

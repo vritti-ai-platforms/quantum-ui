@@ -13,13 +13,7 @@ import {
   MultiSelectSearch,
 } from '../../../../../shadcn/shadcnMultiSelect';
 import { PopoverTrigger } from '../../../../../shadcn/shadcnPopover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../../../shadcn/shadcnSelect';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../../shadcn/shadcnSelect';
 import { cn } from '../../../../../shadcn/utils';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
 import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue as SelectValueType } from '../../types';
@@ -45,7 +39,7 @@ export interface MultiSelectFilterProps {
   onOperatorChange?: (operator: string) => void;
   operators?: MultiSelectFilterOperator[];
   onBlur?: () => void;
-  name?: string;
+  name: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
@@ -145,6 +139,14 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
             </MultiSelectGroup>
           ))}
         </>
+      );
+    }
+
+    if (!name) {
+      return (
+        <span className="inline-flex items-center rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          Select: missing required `name` prop
+        </span>
       );
     }
 

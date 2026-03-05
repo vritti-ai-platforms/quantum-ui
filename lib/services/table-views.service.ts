@@ -1,5 +1,5 @@
-import type { TableViewState } from '../types/table-filter';
 import { getConfig } from '../config';
+import type { TableViewState } from '../types/table-filter';
 import { axios } from '../utils/axios';
 
 export interface TableViewRecord {
@@ -62,7 +62,7 @@ function statesUrl() {
   return getConfig().views?.statesEndpoint ?? 'table-states';
 }
 
-// Upserts the live table state (filters, sort, columnVisibility) along with the active view
-export function upsertTableState(tableSlug: string, state: TableViewState, activeViewId: string | null): Promise<void> {
+// Pushes the live table state (filters, sort, columnVisibility) along with the active view to Redis
+export function pushTableState(tableSlug: string, state: TableViewState, activeViewId: string | null): Promise<void> {
   return axios.post(statesUrl(), { tableSlug, state, activeViewId }, silent).then(() => undefined);
 }

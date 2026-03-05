@@ -14,7 +14,6 @@ export interface TableState {
   activeState: TableViewState;
   activeViewState: TableViewState | null;
   activeViewId: string | null;
-  pendingFilters: FilterCondition[];
   lastAccessed: number;
   _skipUpsert: boolean;
 }
@@ -24,18 +23,17 @@ export interface TableSlice {
   initTable: (slug: string, options?: { pinSelectColumn?: boolean }) => void;
   loadViewState: (slug: string, state: TableViewState, viewId: string | null, skipUpsert?: boolean) => void;
   updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
-  updatePendingFilter: (slug: string, field: string, condition: FilterCondition | undefined) => void;
-  applyFilters: (slug: string) => void;
-  resetFilters: (slug: string) => void;
+  setFilters: (slug: string, filters: FilterCondition[]) => void;
   setActiveViewState: (slug: string, viewState: TableViewState) => void;
   syncActiveViewState: (slug: string) => void;
+  // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
+  consumeSkipUpsert: (slug: string) => boolean;
 }
 
 const DEFAULT_TABLE_STATE: TableState = {
   activeState: EMPTY_TABLE_STATE,
   activeViewState: null,
   activeViewId: null,
-  pendingFilters: [],
   lastAccessed: 0,
   _skipUpsert: false,
 };
@@ -59,9 +57,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
         delete tables[lruKey];
       }
 
-      const pinning = options?.pinSelectColumn
-        ? { left: ['select'], right: [] }
-        : { left: [], right: [] };
+      const pinning = options?.pinSelectColumn ? { left: ['select'], right: [] } : { left: [], right: [] };
 
       tables[slug] = {
         ...DEFAULT_TABLE_STATE,
@@ -72,7 +68,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState, pendingFilters, activeViewId, and activeViewState.
+  // Sets activeState, activeViewId, and activeViewState.
   // Merges with EMPTY_TABLE_STATE so old server payloads missing new fields still work.
   // skipUpsert defaults to true (page-load); pass false for user-driven tab activation.
   loadViewState: (slug, state, viewId, skipUpsert = true) => {
@@ -88,7 +84,6 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: mergedState,
-            pendingFilters: mergedState.filters,
             activeViewId: viewId,
             // On page-load (skipUpsert=true), activeViewState is set later via setActiveViewState
             // once the views list loads. On user tab activation, set it immediately.
@@ -122,51 +117,8 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Updates only pendingFilters -- removes old field entry and adds new one if condition given
-  updatePendingFilter: (slug, field, condition) => {
-    set((prev) => {
-      const currentTable = prev.tables[slug];
-      if (!currentTable) return prev;
-
-      const filtered = currentTable.pendingFilters.filter((f) => f.field !== field);
-      const newPending = condition ? [...filtered, condition] : filtered;
-
-      return {
-        tables: {
-          ...prev.tables,
-          [slug]: {
-            ...currentTable,
-            pendingFilters: newPending,
-            lastAccessed: Date.now(),
-          },
-        },
-      };
-    });
-  },
-
-  // Commits pendingFilters into activeState.filters
-  applyFilters: (slug) => {
-    set((prev) => {
-      const currentTable = prev.tables[slug];
-      if (!currentTable) return prev;
-
-      const newFilters = currentTable.pendingFilters;
-
-      return {
-        tables: {
-          ...prev.tables,
-          [slug]: {
-            ...currentTable,
-            activeState: { ...currentTable.activeState, filters: newFilters },
-            lastAccessed: Date.now(),
-          },
-        },
-      };
-    });
-  },
-
-  // Clears both pendingFilters and activeState.filters
-  resetFilters: (slug) => {
+  // Sets activeState.filters directly
+  setFilters: (slug, filters) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
       if (!currentTable) return prev;
@@ -176,8 +128,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           ...prev.tables,
           [slug]: {
             ...currentTable,
-            pendingFilters: [],
-            activeState: { ...currentTable.activeState, filters: [] },
+            activeState: { ...currentTable.activeState, filters },
             lastAccessed: Date.now(),
           },
         },
@@ -197,6 +148,16 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
         },
       };
     });
+  },
+
+  // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
+  consumeSkipUpsert: (slug) => {
+    const table = get().tables[slug];
+    if (!table?._skipUpsert) return false;
+    set((prev) => ({
+      tables: { ...prev.tables, [slug]: { ...prev.tables[slug], _skipUpsert: false } },
+    }));
+    return true;
   },
 
   // Syncs activeViewState to current activeState after a view is saved in-place

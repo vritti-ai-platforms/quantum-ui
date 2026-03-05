@@ -18,16 +18,15 @@ export { useDataTableStore } from './store/store';
 export type {
   ColumnDef,
   DataTableEmptyConfig,
-  DataTableFilterItem,
   DataTableMeta,
   DataTablePaginationConfig,
   DataTableProps,
   DataTableSearchConfig,
+  DataTableToolbarConfig,
   DataTableViewsConfig,
+  DensityType,
   SearchState,
   SelectActions,
-  DataTableToolbarConfig,
-  DensityType,
 } from './types';
 
 // Utility

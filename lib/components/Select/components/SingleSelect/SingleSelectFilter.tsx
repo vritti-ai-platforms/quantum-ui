@@ -45,7 +45,7 @@ export interface SingleSelectFilterProps {
   onOperatorChange?: (operator: string) => void;
   operators?: SelectFilterOperator[];
   onBlur?: () => void;
-  name?: string;
+  name: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
@@ -146,6 +146,14 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
             </SingleSelectGroup>
           ))}
         </>
+      );
+    }
+
+    if (!name) {
+      return (
+        <span className="inline-flex items-center rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          Select: missing required `name` prop
+        </span>
       );
     }
 

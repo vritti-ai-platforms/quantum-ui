@@ -5,14 +5,20 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import type { TableViewRecord } from '../../../services/table-views.service';
-import { createView, deleteView, fetchViews, renameView, toggleShareView, updateView } from '../../../services/table-views.service';
+import {
+  createView,
+  deleteView,
+  fetchViews,
+  renameView,
+  toggleShareView,
+  updateView,
+} from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
 import { TextField } from '../../TextField';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
-import type { DataTableViewsConfig } from '../types';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
 
@@ -56,7 +62,9 @@ function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentProps) {
     <Dialog
       mode="form"
       open={open}
-      onOpenChange={(v) => { if (!v) onClose(); }}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
       title="Create New View"
       description="Save the current filters and sort as a named view."
       form={form}
@@ -102,7 +110,9 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
     <Dialog
       mode="form"
       open={open}
-      onOpenChange={(v) => { if (!v) onClose(); }}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
       title="Rename View"
       description={`Change the name of "${initialName}".`}
       form={form}
@@ -149,15 +159,19 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
   return (
     <Dialog
       open={open}
-      onOpenChange={(v) => { if (!v) onClose(); }}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
       title="Manage Views"
       description="Share or delete saved views for this table."
-      footer={<Button variant="outline" onClick={onClose}>Close</Button>}
+      footer={
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
+      }
     >
       <div className="flex flex-col gap-1 py-2 max-h-64 overflow-y-auto">
-        {views.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">No saved views yet.</p>
-        )}
+        {views.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No saved views yet.</p>}
         {views.map((view) => (
           <div key={view.id} className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent/50">
             <span className="text-sm truncate">{view.name}</span>
@@ -194,8 +208,7 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
 // ─── Dropdown shell ───────────────────────────────────────────────────────────
 
 // Composes the dropdown menu with dialogs rendered outside the dropdown tree
-export function DataTableViewsMenu({ config }: { config: DataTableViewsConfig }) {
-  const { tableSlug } = config;
+export function DataTableViewsMenu({ slug: tableSlug }: { slug: string }) {
   const [activeDialog, setActiveDialog] = useState<ViewDialog | null>(null);
   const [renameInitialName, setRenameInitialName] = useState('');
 
@@ -267,23 +280,55 @@ export function DataTableViewsMenu({ config }: { config: DataTableViewsConfig })
         align="end"
         items={[
           ...(showSave
-            ? [{ type: 'item' as const, id: 'save-view', label: 'Save View', icon: Save,
-                 disabled: !canSave, onClick: handleSaveClick }]
+            ? [
+                {
+                  type: 'item' as const,
+                  id: 'save-view',
+                  label: 'Save View',
+                  icon: Save,
+                  disabled: !canSave,
+                  onClick: handleSaveClick,
+                },
+              ]
             : []),
           ...(showCreate
-            ? [{ type: 'item' as const, id: 'create-view', label: 'Create New View', icon: BookmarkPlus,
-                 disabled: !canCreate, onClick: () => setActiveDialog('create' as ViewDialog) }]
+            ? [
+                {
+                  type: 'item' as const,
+                  id: 'create-view',
+                  label: 'Create New View',
+                  icon: BookmarkPlus,
+                  disabled: !canCreate,
+                  onClick: () => setActiveDialog('create' as ViewDialog),
+                },
+              ]
             : []),
           { type: 'separator' },
-          { type: 'item', id: 'rename-view', label: 'Rename View', icon: Pencil,
-            disabled: !hasView, onClick: handleRenameClick },
+          {
+            type: 'item',
+            id: 'rename-view',
+            label: 'Rename View',
+            icon: Pencil,
+            disabled: !hasView,
+            onClick: handleRenameClick,
+          },
           { type: 'separator' },
-          { type: 'item', id: 'manage-views', label: 'Manage Views', icon: LayoutList,
-            onClick: () => setActiveDialog('manage') },
+          {
+            type: 'item',
+            id: 'manage-views',
+            label: 'Manage Views',
+            icon: LayoutList,
+            onClick: () => setActiveDialog('manage'),
+          },
         ]}
       />
       <CreateViewDialog tableSlug={tableSlug} open={activeDialog === 'create'} onClose={close} />
-      <RenameViewDialog tableSlug={tableSlug} open={activeDialog === 'rename'} onClose={close} initialName={renameInitialName} />
+      <RenameViewDialog
+        tableSlug={tableSlug}
+        open={activeDialog === 'rename'}
+        onClose={close}
+        initialName={renameInitialName}
+      />
       <ManageViewsDialog tableSlug={tableSlug} open={activeDialog === 'manage'} onClose={close} />
     </>
   );

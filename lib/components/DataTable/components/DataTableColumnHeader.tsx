@@ -36,7 +36,7 @@ export function DataTableColumnHeader<TData, TValue>({
         'flex items-center gap-2 cursor-pointer select-none group bg-transparent border-0 p-0 text-inherit',
         className,
       )}
-      onClick={column.getToggleSortingHandler()}
+      onClick={(e) => column.getToggleSortingHandler()?.(e)}
     >
       <span className="font-medium">{title}</span>
       {pinnedBadge}
