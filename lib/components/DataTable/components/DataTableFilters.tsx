@@ -10,7 +10,7 @@ import { useDataTableStore } from '../store/store';
 import type { DataTableMeta } from '../types';
 import { FilterWrapper } from './FilterWrapper';
 
-type FilterFormValues = Record<string, FilterCondition | undefined>;
+type FilterFormValues = Record<string, FilterCondition | null | undefined>;
 
 // Extracts id and label from a ReactNode's props
 function getFilterProps(node: React.ReactNode): { id: string; label: string } | null {
@@ -130,7 +130,7 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   }
 
   function handleApply(data: FilterFormValues) {
-    const applied = Object.values(data).filter((c): c is FilterCondition => c !== undefined);
+    const applied = Object.values(data).filter((c): c is FilterCondition => c != null);
     meta.setFilters(applied);
   }
 

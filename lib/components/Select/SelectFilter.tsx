@@ -34,7 +34,7 @@ interface SelectFilterSingleProps
   multiple?: false;
   // Accepts a FilterResult (when controlled by Form) or a plain SelectValue (standalone)
   value?: FilterResult | SelectValue;
-  onChange?: (result: FilterResult) => void;
+  onChange?: (result: FilterResult | null | undefined) => void;
 }
 
 interface SelectFilterMultiProps
@@ -43,7 +43,7 @@ interface SelectFilterMultiProps
   multiple: true;
   // Accepts a FilterResult (when controlled by Form) or a plain SelectValue[] (standalone)
   value?: FilterResult | SelectValue[];
-  onChange?: (result: FilterResult) => void;
+  onChange?: (result: FilterResult | null | undefined) => void;
 }
 
 export type SelectFilterProps = SelectFilterSingleProps | SelectFilterMultiProps;
@@ -114,8 +114,12 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
   };
 
   if (multiple) {
-    // Wrap multi onChange to emit FilterResult
+    // Wrap multi onChange to emit FilterResult — emit undefined when selection is cleared
     function handleMultiChange(rawValues: SelectValue[]) {
+      if (rawValues.length === 0) {
+        onChange?.(null);
+        return;
+      }
       onChange?.({ field, operator: currentOperator, value: rawValues.map(String) });
     }
 
@@ -129,8 +133,12 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     );
   }
 
-  // Wrap single onChange to emit FilterResult
+  // Wrap single onChange to emit FilterResult — emit undefined when selection is cleared
   function handleSingleChange(rawVal: SelectValue) {
+    if (rawVal === '' || rawVal == null) {
+      onChange?.(null);
+      return;
+    }
     onChange?.({ field, operator: currentOperator, value: rawVal as string | number });
   }
 

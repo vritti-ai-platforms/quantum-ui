@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import type { FilterCondition } from '../../../types/table-filter';
 import { Button } from '../../Button';
 
-type FilterFormValues = Record<string, FilterCondition | undefined>;
+type FilterFormValues = Record<string, FilterCondition | null | undefined>;
 
 // Recursively processes children — wraps named fields with Controller, injects isLoading into submit buttons, handles reset buttons
 function processChildren(

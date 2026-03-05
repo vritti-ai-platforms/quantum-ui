@@ -11,8 +11,8 @@ export interface ValueFilterProps {
   name: string;
   label: string;
   fieldType: 'string' | 'number';
-  value?: FilterCondition;
-  onChange?: (value: FilterCondition | undefined) => void;
+  value?: FilterCondition | null;
+  onChange?: (value: FilterCondition | null | undefined) => void;
   className?: string;
 }
 
@@ -76,7 +76,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
 
   // Clears the filter condition
   const handleClear = useCallback(() => {
-    onChange?.(undefined);
+    onChange?.(null);
     setDraftOperator(fieldType === 'string' ? DEFAULT_STRING_OPERATOR : DEFAULT_NUMBER_OPERATOR);
     setDraftValue('');
     setOpen(false);
@@ -100,7 +100,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
   }
 
   const operators = fieldType === 'string' ? STRING_OPERATORS : NUMBER_OPERATORS;
-  const hasValue = value !== undefined;
+  const hasValue = value != null;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
