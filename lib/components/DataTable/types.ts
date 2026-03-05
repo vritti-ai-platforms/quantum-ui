@@ -49,12 +49,6 @@ export interface DataTableMeta {
   setFilters: (filters: FilterCondition[]) => void;
 }
 
-// --- Views config ---
-
-export interface DataTableViewsConfig {
-  onStateApplied?: () => void;
-}
-
 // --- DataTable component props ---
 
 export interface DataTableProps<TData> {
@@ -65,7 +59,7 @@ export interface DataTableProps<TData> {
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
-  viewsConfig?: DataTableViewsConfig;
+  onStateApplied?: () => void;
   isLoading?: boolean;
   maxHeight?: string;
   minHeight?: string;

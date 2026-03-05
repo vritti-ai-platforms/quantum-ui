@@ -23,7 +23,6 @@ export type {
   DataTableProps,
   DataTableSearchConfig,
   DataTableToolbarConfig,
-  DataTableViewsConfig,
   DensityType,
   SearchState,
   SelectActions,

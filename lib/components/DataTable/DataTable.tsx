@@ -33,7 +33,7 @@ export function DataTable<TData>({
   emptyStateConfig,
   toolbarActions,
   filters,
-  viewsConfig,
+  onStateApplied,
   isLoading = false,
   maxHeight = '700px',
   minHeight = '700px',
@@ -47,7 +47,7 @@ export function DataTable<TData>({
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = enableSearch || visibilityEnabled || toolbarActions || filters || viewsConfig;
+  const showToolbar = enableSearch || visibilityEnabled || toolbarActions || filters || onStateApplied;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -55,8 +55,8 @@ export function DataTable<TData>({
       {showToolbar && (
         <div className="flex items-center gap-4">
           {/* LEFT: view tabs (flex-1) when viewsConfig set; otherwise spacer */}
-          <div className={cn('flex min-w-0', viewsConfig ? 'flex-1' : 'flex-1')}>
-            {viewsConfig && slug && <DataTableViewTabs slug={slug} />}
+          <div className="flex min-w-0 flex-1">
+            {onStateApplied && slug && <DataTableViewTabs slug={slug} />}
           </div>
 
           {/* RIGHT: icon buttons */}
@@ -84,7 +84,7 @@ export function DataTable<TData>({
             )}
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />
-            {viewsConfig && slug && <DataTableViewsMenu slug={slug} />}
+            {onStateApplied && slug && <DataTableViewsMenu slug={slug} />}
             {toolbarActions?.actions}
           </div>
         </div>

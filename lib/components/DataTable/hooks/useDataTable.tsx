@@ -11,7 +11,6 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import type { DensityType, TableViewState } from '../../../types/table-filter';
 import { useDataTableStore } from '../store/store';
 import { useTableSlice } from '../store/useTableSlice';
-import type { DataTableViewsConfig } from '../types';
 import { useAutoUpsert } from './useAutoUpsert';
 
 interface UseDataTableOptions<TData> {
@@ -27,7 +26,7 @@ interface UseDataTableOptions<TData> {
   enableRowSelection?: boolean;
   enableHiding?: boolean;
   enableColumnResizing?: boolean;
-  viewsConfig?: DataTableViewsConfig;
+  onStateApplied?: () => void;
 }
 
 // Creates a fully configured TanStack Table instance with persisted state
@@ -43,7 +42,7 @@ export function useDataTable<TData>({
   enableHiding = true,
   enableSorting = true,
   enableColumnResizing = true,
-  viewsConfig,
+  onStateApplied,
 }: UseDataTableOptions<TData>) {
   const {
     // State
@@ -129,7 +128,7 @@ export function useDataTable<TData>({
     ],
   );
 
-  useAutoUpsert(slug, activeState, activeViewId, viewsConfig?.onStateApplied, consumeSkipUpsert);
+  useAutoUpsert(slug, activeState, activeViewId, onStateApplied, consumeSkipUpsert);
 
   const table = useReactTable({
     data,
