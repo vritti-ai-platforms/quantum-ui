@@ -28,7 +28,13 @@ export interface AsyncSelectState {
   sentinelRef: (node?: Element | null) => void;
 }
 
-export type SelectVariant = 'default' | 'filter';
+export type FilterOperator = string;
+
+export interface FilterResult {
+  field: string;
+  operator: FilterOperator;
+  value: string | number | string[];
+}
 
 export interface SelectFieldKeys {
   valueKey?: string;

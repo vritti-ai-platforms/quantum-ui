@@ -164,7 +164,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
               Clear
             </Button>
             <Button size="sm" onClick={handleApply} disabled={draftValue.trim() === ''}>
-              Apply
+              Save
             </Button>
           </div>
         </div>

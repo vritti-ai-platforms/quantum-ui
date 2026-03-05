@@ -14,14 +14,17 @@ export type { UseSelectProps, UseSelectReturn } from './hooks/useSelect';
 export { useSelect } from './hooks/useSelect';
 export type { SelectProps } from './Select';
 export { Select } from './Select';
+export type { SelectFilterProps } from './SelectFilter';
+export { SelectFilter } from './SelectFilter';
 export type {
   AsyncSelectState,
+  FilterOperator,
+  FilterResult,
   SelectFieldKeys,
   SelectGroup,
   SelectOption,
   SelectOptionsResponse,
   SelectValue,
-  SelectVariant,
 } from './types';
 
 // Compound primitives for custom multi-select layouts
