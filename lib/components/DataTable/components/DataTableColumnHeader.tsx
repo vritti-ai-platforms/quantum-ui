@@ -33,7 +33,7 @@ export function DataTableColumnHeader<TData, TValue>({
     <button
       type="button"
       className={cn(
-        'flex items-center gap-2 cursor-pointer select-none group bg-transparent border-0 p-0 text-inherit',
+        'flex items-center cursor-pointer select-none group bg-transparent border-0 p-0 text-inherit',
         className,
       )}
       onClick={(e) => column.getToggleSortingHandler()?.(e)}
@@ -41,11 +41,11 @@ export function DataTableColumnHeader<TData, TValue>({
       <span className="font-medium">{title}</span>
       {pinnedBadge}
       {column.getIsSorted() === 'desc' ? (
-        <ArrowDown className="h-4 w-4" />
+        <ArrowDown className="h-4 w-4 ml-2" />
       ) : column.getIsSorted() === 'asc' ? (
-        <ArrowUp className="h-4 w-4" />
+        <ArrowUp className="h-4 w-4 ml-2" />
       ) : (
-        <ArrowUp className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ArrowUp className="h-4 w-0 overflow-hidden opacity-0 group-hover:w-4 group-hover:ml-2 group-hover:opacity-100 transition-all" />
       )}
     </button>
   );

@@ -62,13 +62,6 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
 
     return (
       <Field orientation="horizontal" data-disabled={props.disabled} data-invalid={hasError}>
-        <ShadcnSwitch
-          {...props}
-          ref={ref}
-          id={fieldId}
-          aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
-          aria-invalid={hasError}
-        />
         <FieldContent>
           {label && (
             <FieldLabel htmlFor={fieldId} className="font-normal cursor-pointer">
@@ -80,6 +73,14 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
 
           {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
         </FieldContent>
+        <ShadcnSwitch
+          {...props}
+          ref={ref}
+          id={fieldId}
+          className={`self-center ${props.className ?? ''}`}
+          aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
+          aria-invalid={hasError}
+        />
       </Field>
     );
   },

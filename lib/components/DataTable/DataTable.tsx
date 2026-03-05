@@ -20,8 +20,8 @@ import type { DataTableMeta, DataTableProps, DensityType } from './types';
 
 const densityClasses: Record<DensityType, string> = {
   compact: 'py-1 px-2 text-xs',
-  normal: 'py-2 px-4 text-sm',
-  comfortable: 'py-4 px-4 text-sm',
+  normal: 'py-2 px-3 text-sm',
+  comfortable: 'py-4 px-3 text-sm',
 };
 
 // Renders a full-featured data table from a raw TanStack Table instance
@@ -55,9 +55,7 @@ export function DataTable<TData>({
       {showToolbar && (
         <div className="flex items-center gap-4">
           {/* LEFT: view tabs (flex-1) when viewsConfig set; otherwise spacer */}
-          <div className="flex min-w-0 flex-1">
-            {onStateApplied && slug && <DataTableViewTabs slug={slug} />}
-          </div>
+          <div className="flex min-w-0 flex-1">{onStateApplied && slug && <DataTableViewTabs slug={slug} />}</div>
 
           {/* RIGHT: icon buttons */}
           <div className="flex items-center gap-2 shrink-0">
@@ -115,15 +113,15 @@ export function DataTable<TData>({
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header, index) => {
+                  {headerGroup.headers.map((header) => {
                     const isActions = header.column.id === 'actions';
-                    const headerAlignClass = isActions ? 'justify-end' : index > 0 ? 'justify-center' : undefined;
+                    const headerAlignClass = isActions ? 'justify-end' : 'justify-center';
                     return (
                       <TableHead
                         key={header.id}
                         colSpan={header.colSpan}
                         style={{ width: isActions ? '52px' : header.getSize() }}
-                        className={cn('relative group/resize', isActions ? 'text-right' : index > 0 && 'text-center')}
+                        className={cn('relative group/resize', isActions ? 'text-right' : 'text-center')}
                         aria-sort={
                           header.column.getCanSort()
                             ? header.column.getIsSorted() === 'asc'
@@ -159,38 +157,36 @@ export function DataTable<TData>({
               ))}
             </TableHeader>
             {(isLoading || table.getRowModel().rows.length > 0) && (
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: table.getState().pagination?.pageSize ?? 10 }, (_, i) => `skeleton-row-${i}`).map(
-                  (rowKey) => (
-                    <TableRow key={rowKey}>
-                      {Array.from({ length: columnCount }, (_, i) => `${rowKey}-cell-${i}`).map((cellKey) => (
-                        <TableCell key={cellKey} className={densityClasses[density]}>
-                          <Skeleton className="h-5 w-full" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ),
-                )
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map((cell, index) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          densityClasses[density],
-                          cell.column.id === 'actions' ? 'text-right' : index > 0 && 'text-center',
-                        )}
-                        style={{ width: cell.column.id === 'actions' ? '52px' : cell.column.getSize() }}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+              <TableBody>
+                {isLoading
+                  ? Array.from(
+                      { length: table.getState().pagination?.pageSize ?? 10 },
+                      (_, i) => `skeleton-row-${i}`,
+                    ).map((rowKey) => (
+                      <TableRow key={rowKey}>
+                        {Array.from({ length: columnCount }, (_, i) => `${rowKey}-cell-${i}`).map((cellKey) => (
+                          <TableCell key={cellKey} className={densityClasses[density]}>
+                            <Skeleton className="h-5 w-full" />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  : table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                        {row.getVisibleCells().map((cell, index) => (
+                          <TableCell
+                            key={cell.id}
+                            className={densityClasses[density]}
+                            style={{ width: cell.column.id === 'actions' ? '52px' : cell.column.getSize() }}
+                          >
+                            <div className={cn('flex items-center', cell.column.id === 'actions' ? 'justify-end' : 'justify-center')}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </div>
+                          </TableCell>
+                        ))}
+                      </TableRow>
                     ))}
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
+              </TableBody>
             )}
           </table>
           {!isLoading && table.getRowModel().rows.length === 0 && (
