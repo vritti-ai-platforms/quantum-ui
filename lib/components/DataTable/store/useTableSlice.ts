@@ -30,7 +30,7 @@ export function useTableSlice(slug: string) {
   const setFilters = useCallback((filters: FilterCondition[]) => _setFilters(slug, filters), [slug, _setFilters]);
   const setSearch = useCallback((search: SearchState) => _setSearch(slug, search), [slug, _setSearch]);
   const setPagination = useCallback(
-    (pagination: { pageIndex: number; pageSize: number }) => _setPagination(slug, pagination),
+    (pagination: { limit: number; offset: number }) => _setPagination(slug, pagination),
     [slug, _setPagination],
   );
 

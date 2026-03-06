@@ -151,13 +151,19 @@ export function useDataTable<TData>({
       columnOrder,
       columnSizing,
       columnPinning,
-      pagination: activeState.pagination,
+      pagination: {
+        pageIndex: activeState.pagination.limit > 0 ? activeState.pagination.offset / activeState.pagination.limit : 0,
+        pageSize: activeState.pagination.limit,
+      },
     },
     onSortingChange: handleSortingChange,
     onPaginationChange: (updater) => {
-      const current = activeState.pagination;
+      const current = {
+        pageIndex: activeState.pagination.limit > 0 ? activeState.pagination.offset / activeState.pagination.limit : 0,
+        pageSize: activeState.pagination.limit,
+      };
       const newVal = typeof updater === 'function' ? updater(current) : updater;
-      setPagination(newVal);
+      setPagination({ limit: newVal.pageSize, offset: newVal.pageIndex * newVal.pageSize });
     },
     onColumnVisibilityChange: (updater) => {
       const current = activeState.columnVisibility;

@@ -25,7 +25,7 @@ export interface TableSlice {
   updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
   setFilters: (slug: string, filters: FilterCondition[]) => void;
   setSearch: (slug: string, search: SearchState) => void;
-  setPagination: (slug: string, pagination: { pageIndex: number; pageSize: number }) => void;
+  setPagination: (slug: string, pagination: { limit: number; offset: number }) => void;
   setActiveViewState: (slug: string, viewState: TableViewState) => void;
   syncActiveViewState: (slug: string) => void;
   // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
