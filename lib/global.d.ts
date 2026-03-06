@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 // Global type declarations for CSS imports
 declare module '*.css' {
   const content: Record<string, string>;

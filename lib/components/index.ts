@@ -39,3 +39,4 @@ export * from './Typography';
 export * from './UploadFile';
 export * from './ValueFilter';
 export * from './ViewTabs';
+export * from './Editor';

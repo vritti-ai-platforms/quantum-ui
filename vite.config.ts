@@ -68,6 +68,7 @@ export default defineConfig({
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),
         'components/ValueFilter': resolve(__dirname, 'lib/components/ValueFilter/index.ts'),
         'components/ViewTabs': resolve(__dirname, 'lib/components/ViewTabs/index.ts'),
+        'components/RichTextEditor': resolve(__dirname, 'lib/components/Editor/index.tsx'),
         // shadcn entries
         'shadcn/shadcnField': resolve(__dirname, 'shadcn/shadcnField/index.ts'),
         // Hooks entries
