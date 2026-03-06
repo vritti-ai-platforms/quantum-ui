@@ -4,6 +4,8 @@ import { Button } from '../lib/components/Button';
 import { Form } from '../lib/components/Form/Form';
 import { SelectFilter } from '../lib/components/Select/SelectFilter';
 import type { FilterResult } from '../lib/components/Select/types';
+import { ConfirmProvider } from '../lib/context/ConfirmContext';
+import { useConfirm } from '../lib/hooks/useConfirm';
 
 const Section = ({
   title,
@@ -74,18 +76,89 @@ const SelectFilterSection = () => {
   );
 };
 
+// ─── CONFIRM EXAMPLES ───
+
+const ConfirmSection = () => {
+  const confirm = useConfirm();
+  const [result, setResult] = useState<string | undefined>();
+
+  // A. No args — all defaults
+  const handleDefault = async () => {
+    const confirmed = await confirm();
+    setResult(`A → ${confirmed ? 'confirmed' : 'cancelled'}`);
+  };
+
+  // B. Custom title only
+  const handleCustomTitle = async () => {
+    const confirmed = await confirm({ title: 'Remove this member?' });
+    setResult(`B → ${confirmed ? 'confirmed' : 'cancelled'}`);
+  };
+
+  // C. Destructive with description
+  const handleDestructive = async () => {
+    const confirmed = await confirm({
+      title: 'Delete deployment?',
+      description: 'This action cannot be undone. All associated data will be permanently removed.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+    setResult(`C → ${confirmed ? 'confirmed' : 'cancelled'}`);
+  };
+
+  // D. Custom labels (non-destructive)
+  const handleCustomLabels = async () => {
+    const confirmed = await confirm({
+      title: 'Save changes?',
+      description: 'Your unsaved changes will be lost if you leave.',
+      confirmLabel: 'Save & Continue',
+      cancelLabel: 'Discard',
+    });
+    setResult(`D → ${confirmed ? 'confirmed' : 'cancelled'}`);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-3">
+        <Button variant="outline" onClick={handleDefault}>
+          A. Default (no args)
+        </Button>
+        <Button variant="outline" onClick={handleCustomTitle}>
+          B. Custom title
+        </Button>
+        <Button variant="destructive" onClick={handleDestructive}>
+          C. Destructive
+        </Button>
+        <Button variant="outline" onClick={handleCustomLabels}>
+          D. Custom labels
+        </Button>
+      </div>
+      {result && (
+        <pre className="rounded-md bg-muted p-3 text-xs">{result}</pre>
+      )}
+    </div>
+  );
+};
+
 // ─── APP ───
 export const App = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
-        <Section
-          title="SelectFilter"
-          description="Standalone (single/multi) and Form-integrated examples — onChange emits FilterResult."
-        >
-          <SelectFilterSection />
-        </Section>
+    <ConfirmProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
+          <Section
+            title="useConfirm"
+            description="Imperative Promise-based confirm dialog — await confirm(options) returns true/false."
+          >
+            <ConfirmSection />
+          </Section>
+          <Section
+            title="SelectFilter"
+            description="Standalone (single/multi) and Form-integrated examples — onChange emits FilterResult."
+          >
+            <SelectFilterSection />
+          </Section>
+        </div>
       </div>
-    </div>
+    </ConfirmProvider>
   );
 };

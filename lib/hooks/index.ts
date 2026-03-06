@@ -1,3 +1,4 @@
+export { type ConfirmOptions, useConfirm } from './useConfirm';
 export { type DialogHandle, useDialog } from './useDialog';
 export { useIsMobile } from './useIsMobile';
 export { useSlugParams } from './useSlugParams';

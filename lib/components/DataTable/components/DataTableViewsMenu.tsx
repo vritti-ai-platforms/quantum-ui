@@ -18,6 +18,7 @@ import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
 import { TextField } from '../../TextField';
+import { useConfirm } from '../../../hooks/useConfirm';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
@@ -156,6 +157,8 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
     },
   });
 
+  const confirm = useConfirm();
+
   return (
     <Dialog
       open={open}
@@ -191,7 +194,15 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
                   variant="ghost"
                   size="icon"
                   className="size-7 text-destructive hover:text-destructive"
-                  onClick={() => deleteMut.mutate(view.id)}
+                  onClick={async () => {
+                    const confirmed = await confirm({
+                      title: `Delete "${view.name}"?`,
+                      description: 'This view will be permanently removed.',
+                      confirmLabel: 'Delete',
+                      variant: 'destructive',
+                    });
+                    if (confirmed) deleteMut.mutate(view.id);
+                  }}
                   disabled={deleteMut.isPending}
                 >
                   <Trash2 className="size-4" />
