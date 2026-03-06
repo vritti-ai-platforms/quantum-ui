@@ -39,7 +39,7 @@ interface DialogComponentProps {
 // ─── Create View Dialog ──────────────────────────────────────────────────────
 
 // Dialog that creates a named view from current table state
-function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentProps) {
+export function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentProps) {
   const qc = useQueryClient();
   const loadViewState = useDataTableStore((s) => s.loadViewState);
   const form = useForm<ViewNameForm>({ resolver: zodResolver(viewNameSchema), defaultValues: { name: '' } });
