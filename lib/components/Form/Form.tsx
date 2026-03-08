@@ -17,6 +17,7 @@ import { Alert } from '../Alert';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 import { PhoneField } from '../PhoneField';
+import { RadioGroup } from '../RadioGroup';
 import { Switch } from '../Switch';
 
 // Re-export Controller for explicit usage
@@ -55,9 +56,10 @@ function processChildren<
           control={control}
           name={name}
           render={({ field, fieldState }) => {
-            // Check if this is a Checkbox or Switch component - map value to checked
+            // Check if this is a Checkbox, Switch, or RadioGroup component
             const isCheckbox = child.type === Checkbox;
             const isSwitch = child.type === Switch;
+            const isRadioGroup = child.type === RadioGroup;
             const isPhone = child.type === PhoneField;
 
             const fieldProps =
@@ -68,14 +70,20 @@ function processChildren<
                     onBlur: field.onBlur,
                     ref: field.ref,
                   }
-                : isPhone
+                : isRadioGroup
                   ? {
-                      ...field,
-                      onCountryChange: (country: Country | undefined) => {
-                        setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
-                      },
+                      value: field.value,
+                      onValueChange: field.onChange,
+                      onBlur: field.onBlur,
                     }
-                  : field;
+                  : isPhone
+                    ? {
+                        ...field,
+                        onCountryChange: (country: Country | undefined) => {
+                          setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
+                        },
+                      }
+                    : field;
 
             return cloneElement(child, {
               ...childProps,

@@ -42,6 +42,7 @@ export default defineConfig({
         'components/PhoneField': resolve(__dirname, 'lib/components/PhoneField/index.ts'),
         'components/Progress': resolve(__dirname, 'lib/components/Progress/index.ts'),
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
+        'components/RadioGroup': resolve(__dirname, 'lib/components/RadioGroup/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
         'components/Sortable': resolve(__dirname, 'lib/components/Sortable/index.ts'),
         'selects/CloudProviderFilter': resolve(__dirname, 'lib/selects/CloudProviderFilter/index.ts'),

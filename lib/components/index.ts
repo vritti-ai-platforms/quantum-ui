@@ -21,6 +21,7 @@ export * from './PageHeader';
 export * from './PasswordField';
 export * from './PhoneField';
 export * from './Progress';
+export * from './RadioGroup';
 export * from './Select';
 export * from './Separator';
 export * from './Sidebar';
