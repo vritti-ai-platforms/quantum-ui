@@ -86,7 +86,7 @@ const FlatItem: React.FC<{
   navigate: (path: string) => void;
 }> = ({ item, pathname, navigate }) => (
   <ShadcnSidebarMenuItem>
-    <ShadcnSidebarMenuButton tooltip={item.title} isActive={pathname === item.path} onClick={() => navigate(item.path)}>
+    <ShadcnSidebarMenuButton tooltip={item.title} isActive={pathname === item.path || pathname.startsWith(`${item.path}/`)} onClick={() => navigate(item.path)}>
       <item.icon />
       <span>{item.title}</span>
     </ShadcnSidebarMenuButton>
