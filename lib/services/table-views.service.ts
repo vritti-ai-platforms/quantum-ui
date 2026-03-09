@@ -16,7 +16,7 @@ export interface TableViewRecord {
 
 // Resolves the views endpoint from config at call time
 function viewsUrl(path = '') {
-  return `${getConfig().views?.viewsEndpoint ?? 'table-views'}${path}`;
+  return `${getConfig().views.viewsEndpoint}${path}`;
 }
 
 // Silence toasts — these are silent background operations
@@ -59,7 +59,7 @@ export function deleteView(id: string): Promise<void> {
 
 // Resolves the states endpoint from config at call time
 function statesUrl() {
-  return getConfig().views?.statesEndpoint ?? 'table-states';
+  return getConfig().views.statesEndpoint;
 }
 
 // Pushes the live table state (filters, sort, columnVisibility) along with the active view to Redis

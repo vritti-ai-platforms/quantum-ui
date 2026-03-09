@@ -114,15 +114,13 @@ export interface AuthConfig {
 export interface ViewsConfig {
   /**
    * Endpoint for named view CRUD operations
-   * @default 'table-views'
    */
-  viewsEndpoint?: string;
+  viewsEndpoint: string;
 
   /**
    * Endpoint for live state upsert
-   * @default 'table-states'
    */
-  statesEndpoint?: string;
+  statesEndpoint: string;
 }
 
 /**
@@ -147,7 +145,7 @@ export interface QuantumUIConfig {
   /**
    * Table views management configuration
    */
-  views?: ViewsConfig;
+  views: ViewsConfig;
 }
 
 /**
