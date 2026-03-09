@@ -7,6 +7,7 @@ export * from './Card';
 export * from './Chart';
 export * from './Checkbox';
 export * from './Collapsible';
+export * from './DangerZone';
 export * from './DataTable';
 export * from './DatePicker';
 export * from './Dialog';

@@ -64,6 +64,10 @@
       "types": "./dist/lib/components/Card/index.d.ts",
       "import": "./dist/components/Card.js"
     },
+    "./DangerZone": {
+      "types": "./dist/lib/components/DangerZone/index.d.ts",
+      "import": "./dist/components/DangerZone.js"
+    },
     "./Chart": {
       "types": "./dist/lib/components/Chart/index.d.ts",
       "import": "./dist/components/Chart.js"

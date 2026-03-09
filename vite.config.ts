@@ -41,6 +41,7 @@ export default defineConfig({
         'components/PasswordField': resolve(__dirname, 'lib/components/PasswordField/index.ts'),
         'components/PhoneField': resolve(__dirname, 'lib/components/PhoneField/index.ts'),
         'components/Progress': resolve(__dirname, 'lib/components/Progress/index.ts'),
+        'components/DangerZone': resolve(__dirname, 'lib/components/DangerZone/index.ts'),
         'components/DataTable': resolve(__dirname, 'lib/components/DataTable/index.ts'),
         'components/RadioGroup': resolve(__dirname, 'lib/components/RadioGroup/index.ts'),
         'components/Select': resolve(__dirname, 'lib/components/Select/index.ts'),
