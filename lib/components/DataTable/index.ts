@@ -11,6 +11,7 @@ export { DataTableSelectionBar } from './components/DataTableSelectionBar';
 export { DataTableViewOptions } from './components/DataTableViewOptions';
 export { DataTable } from './DataTable';
 export { useDataTable } from './hooks/useDataTable';
+export type { DataTableServerState } from './hooks/useDataTable';
 export type { TableSlice, TableState } from './store/store';
 export { useDataTableStore } from './store/store';
 
