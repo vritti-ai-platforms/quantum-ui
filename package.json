@@ -144,6 +144,10 @@
       "types": "./dist/lib/selects/plan/index.d.ts",
       "import": "./dist/selects/plan.js"
     },
+    "./selects/currency": {
+      "types": "./dist/lib/selects/currency/index.d.ts",
+      "import": "./dist/selects/currency.js"
+    },
     "./selects/deployment": {
       "types": "./dist/lib/selects/deployment/index.d.ts",
       "import": "./dist/selects/deployment.js"

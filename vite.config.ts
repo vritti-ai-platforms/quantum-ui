@@ -52,6 +52,7 @@ export default defineConfig({
         'selects/IndustrySelect': resolve(__dirname, 'lib/selects/industry/index.ts'),
         'selects/region': resolve(__dirname, 'lib/selects/region/index.ts'),
         'selects/plan': resolve(__dirname, 'lib/selects/plan/index.ts'),
+        'selects/currency': resolve(__dirname, 'lib/selects/currency/index.ts'),
         'selects/deployment': resolve(__dirname, 'lib/selects/deployment/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
