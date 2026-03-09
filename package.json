@@ -120,13 +120,33 @@
       "types": "./dist/lib/components/Sortable/index.d.ts",
       "import": "./dist/components/Sortable.js"
     },
+    "./selects/cloud-provider": {
+      "types": "./dist/lib/selects/cloud-provider/index.d.ts",
+      "import": "./dist/selects/cloud-provider.js"
+    },
     "./selects/CloudProviderFilter": {
-      "types": "./dist/lib/selects/CloudProviderFilter/index.d.ts",
-      "import": "./dist/selects/CloudProviderFilter.js"
+      "types": "./dist/lib/selects/cloud-provider/index.d.ts",
+      "import": "./dist/selects/cloud-provider.js"
+    },
+    "./selects/industry": {
+      "types": "./dist/lib/selects/industry/index.d.ts",
+      "import": "./dist/selects/industry.js"
     },
     "./selects/IndustrySelect": {
-      "types": "./dist/lib/selects/IndustrySelect/index.d.ts",
-      "import": "./dist/selects/IndustrySelect.js"
+      "types": "./dist/lib/selects/industry/index.d.ts",
+      "import": "./dist/selects/industry.js"
+    },
+    "./selects/region": {
+      "types": "./dist/lib/selects/region/index.d.ts",
+      "import": "./dist/selects/region.js"
+    },
+    "./selects/plan": {
+      "types": "./dist/lib/selects/plan/index.d.ts",
+      "import": "./dist/selects/plan.js"
+    },
+    "./selects/deployment": {
+      "types": "./dist/lib/selects/deployment/index.d.ts",
+      "import": "./dist/selects/deployment.js"
     },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",

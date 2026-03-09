@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import { Select } from '../../components/Select/Select';
 import type { SelectOption, SelectValue } from '../../components/Select/types';
 
-export interface IndustrySelectProps {
+export interface IndustrySelectorProps {
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
   onOptionSelect?: (option: SelectOption | null) => void;
@@ -19,20 +19,17 @@ export interface IndustrySelectProps {
 }
 
 // Pre-configured Select for industry selection with async search
-export const IndustrySelect = forwardRef<HTMLButtonElement, IndustrySelectProps>(
-  ({ label = 'Industry', placeholder = 'Select industry', ...props }, ref) => {
-    return (
-      <Select
-        ref={ref}
-        label={label}
-        placeholder={placeholder}
-        searchable
-        optionsEndpoint="cloud-api/industries/select"
-        fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'description' }}
-        {...props}
-      />
-    );
-  },
+export const IndustrySelector = forwardRef<HTMLButtonElement, IndustrySelectorProps>(
+  ({ label = 'Industry', placeholder = 'Select industry', ...props }, ref) => (
+    <Select
+      ref={ref}
+      label={label}
+      placeholder={placeholder}
+      searchable
+      optionsEndpoint="cloud-api/industries/select"
+      fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+      {...props}
+    />
+  ),
 );
-
-IndustrySelect.displayName = 'IndustrySelect';
+IndustrySelector.displayName = 'IndustrySelector';
