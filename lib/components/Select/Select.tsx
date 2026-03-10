@@ -2,7 +2,7 @@ import type React from 'react';
 import { forwardRef, useState } from 'react';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
-import { useSelect } from './hooks/useSelect';
+import { useSelect, stableStringify } from './hooks/useSelect';
 import type { AsyncSelectState, SelectFieldKeys } from './types';
 
 interface SelectBaseProps {
@@ -27,7 +27,10 @@ export type SelectProps = SelectSingleProps | SelectMultiProps;
 export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
   const { multiple, optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, ...rest } = props;
 
-  const [open, setOpen] = useState(false);
+  // Params-keyed latch: enabled once opened for the current params, stays enabled until params change
+  const [openedForParams, setOpenedForParams] = useState<string | null>(null);
+  const currentParamsKey = stableStringify(params);
+  const enabled = openedForParams === currentParamsKey;
 
   const selectData = useSelect({
     options: rest.options,
@@ -38,7 +41,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     fieldKeys,
     params,
     selectedValues: rest.value != null ? (Array.isArray(rest.value) ? rest.value : [rest.value]) : undefined,
-    enabled: open,
+    enabled,
   });
 
   const isAsync = !!optionsEndpoint;
@@ -61,10 +64,15 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     asyncState,
   };
 
+  // Latch open for current params on first open; params change resets enabled via derived state
+  const handleOpenChange = (o: boolean) => {
+    if (o && openedForParams !== currentParamsKey) setOpenedForParams(currentParamsKey);
+  };
+
   if (multiple) {
-    return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} onOpenChange={setOpen} />;
+    return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} onOpenChange={handleOpenChange} />;
   }
-  return <SingleSelect ref={ref} {...(childProps as SingleSelectProps)} onOpenChange={setOpen} />;
+  return <SingleSelect ref={ref} {...(childProps as SingleSelectProps)} onOpenChange={handleOpenChange} />;
 }) as React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLButtonElement>>;
 
 Select.displayName = 'Select';

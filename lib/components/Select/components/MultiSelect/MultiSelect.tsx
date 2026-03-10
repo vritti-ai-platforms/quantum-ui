@@ -81,10 +81,11 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       remoteSearch: !!asyncState,
     });
 
-    // Notifies parent (Select.tsx) of open state changes to gate async queries
+    // Notifies parent (Select.tsx) of open state changes to gate async queries; clears async search on close
     function handleOpenChange(o: boolean) {
       state.setOpen(o);
       onOpenChange?.(o);
+      if (!o) asyncState?.setSearchQuery('');
     }
 
     // Resolve search binding -- async delegates to parent, static uses local state

@@ -30,7 +30,7 @@ export interface UseSelectReturn {
 const NOOP_REF = () => {};
 
 // Stable JSON serialization for query keys (order-independent)
-function stableStringify(obj: object | undefined): string {
+export function stableStringify(obj: object | undefined): string {
   if (!obj) return '';
   return JSON.stringify(obj, Object.keys(obj).sort());
 }
