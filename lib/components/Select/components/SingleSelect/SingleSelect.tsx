@@ -60,6 +60,8 @@ export interface SingleSelectProps {
   footer?: React.ReactNode;
   // Custom className for the popover content panel
   contentClassName?: string;
+  // Called when the popover open state changes
+  onOpenChange?: (open: boolean) => void;
 }
 
 // Single-value form field wrapper built on Popover primitives
@@ -90,6 +92,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       renderOption,
       footer,
       contentClassName,
+      onOpenChange,
     },
     ref,
   ) => {
@@ -102,6 +105,12 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       defaultValue,
       remoteSearch: !!asyncState,
     });
+
+    // Notifies parent (Select.tsx) of open state changes to gate async queries
+    function handleOpenChange(o: boolean) {
+      state.setOpen(o);
+      onOpenChange?.(o);
+    }
 
     // Resolve search binding -- async delegates to parent, static uses local state
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
@@ -196,7 +205,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
     if (anchor) {
       return (
         <>
-          <SingleSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+          <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
             <PopoverTrigger asChild>
               {anchor({ selectedOption: state.selectedOption, open: state.open, disabled })}
             </PopoverTrigger>
@@ -212,7 +221,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
 
-        <SingleSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+        <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
           <SingleSelectTrigger
             ref={ref}
             id={id}

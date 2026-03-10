@@ -1,5 +1,5 @@
 import type React from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
 import { useSelect } from './hooks/useSelect';
@@ -27,6 +27,8 @@ export type SelectProps = SelectSingleProps | SelectMultiProps;
 export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
   const { multiple, optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, ...rest } = props;
 
+  const [open, setOpen] = useState(false);
+
   const selectData = useSelect({
     options: rest.options,
     groups: rest.groups,
@@ -36,6 +38,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     fieldKeys,
     params,
     selectedValues: rest.value != null ? (Array.isArray(rest.value) ? rest.value : [rest.value]) : undefined,
+    enabled: open,
   });
 
   const isAsync = !!optionsEndpoint;
@@ -59,9 +62,9 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
   };
 
   if (multiple) {
-    return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} />;
+    return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} onOpenChange={setOpen} />;
   }
-  return <SingleSelect ref={ref} {...(childProps as SingleSelectProps)} />;
+  return <SingleSelect ref={ref} {...(childProps as SingleSelectProps)} onOpenChange={setOpen} />;
 }) as React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLButtonElement>>;
 
 Select.displayName = 'Select';

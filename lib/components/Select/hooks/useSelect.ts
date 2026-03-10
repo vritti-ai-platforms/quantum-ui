@@ -13,6 +13,7 @@ export interface UseSelectProps {
   fieldKeys?: SelectFieldKeys;
   params?: Record<string, string | number | boolean>;
   selectedValues?: SelectValue[];
+  enabled?: boolean;
 }
 
 export interface UseSelectReturn {
@@ -44,6 +45,7 @@ export function useSelect({
   fieldKeys,
   params,
   selectedValues,
+  enabled,
 }: UseSelectProps): UseSelectReturn {
   const isAsync = !!optionsEndpoint;
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,7 +115,7 @@ export function useSelect({
         .then((r) => r.data),
     getNextPageParam: (lastPage, _allPages, lastPageParam) => (lastPage.hasMore ? lastPageParam + limit : undefined),
     initialPageParam: 0,
-    enabled: isAsync,
+    enabled: isAsync && (enabled !== false),
     placeholderData: keepPreviousData,
   });
 

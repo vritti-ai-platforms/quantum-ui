@@ -39,6 +39,8 @@ export interface MultiSelectProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  // Called when the popover open state changes
+  onOpenChange?: (open: boolean) => void;
 }
 
 // Multi-value select with checkbox options, search, and badge chips
@@ -65,6 +67,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       searchable = false,
       searchPlaceholder = 'Search...',
       asyncState,
+      onOpenChange,
     },
     ref,
   ) => {
@@ -77,6 +80,12 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       defaultValue,
       remoteSearch: !!asyncState,
     });
+
+    // Notifies parent (Select.tsx) of open state changes to gate async queries
+    function handleOpenChange(o: boolean) {
+      state.setOpen(o);
+      onOpenChange?.(o);
+    }
 
     // Resolve search binding -- async delegates to parent, static uses local state
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
@@ -167,7 +176,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
 
-        <MultiSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+        <MultiSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
           <MultiSelectTrigger
             ref={ref}
             id={id}

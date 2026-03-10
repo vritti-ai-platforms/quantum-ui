@@ -16,6 +16,7 @@ export interface CloudProviderSelectorProps {
   clearable?: boolean;
   className?: string;
   id?: string;
+  params?: Record<string, string | number | boolean>;
 }
 
 // Pre-configured Select for cloud provider selection with async search
