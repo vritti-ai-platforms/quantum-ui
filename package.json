@@ -248,6 +248,10 @@
       "types": "./dist/lib/types/table-filter.d.ts",
       "import": "./dist/types/table-filter.js"
     },
+    "./api-response": {
+      "types": "./dist/lib/types/api-response.d.ts",
+      "import": "./dist/types/api-response.js"
+    },
     "./axios": {
       "types": "./dist/lib/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
