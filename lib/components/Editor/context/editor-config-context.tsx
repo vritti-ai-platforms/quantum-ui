@@ -12,11 +12,13 @@ type EditorConfig = Pick<
   | "onMentionSearch"
   | "placeholder"
   | "readOnly"
+  | "contentOnly"
 >
 
 const EditorConfigContext = createContext<EditorConfig>({
   placeholder: "Press / for commands...",
   readOnly: false,
+  contentOnly: false,
 })
 
 export function EditorConfigProvider({

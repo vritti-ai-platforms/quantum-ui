@@ -24,6 +24,7 @@ export interface RichTextEditorProps {
   onImageUpload?: ImageUploadHandler
   className?: string
   editorClassName?: string
+  contentOnly?: boolean
 }
 
 

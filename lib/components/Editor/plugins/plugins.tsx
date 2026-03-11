@@ -103,6 +103,7 @@ export function Plugins({}) {
     maxLength,
     placeholder = "Press / for commands...",
     readOnly = false,
+    contentOnly = false,
   } = useEditorConfig()
   const [floatingAnchorElem, setFloatingAnchorElem] =
     useState<HTMLDivElement | null>(null)
@@ -116,7 +117,7 @@ export function Plugins({}) {
 
   return (
     <div className="relative">
-      <ToolbarPlugin>
+      {!contentOnly && <ToolbarPlugin>
         {({ blockType }) => (
           <div className="vertical-align-middle sticky top-0 z-10 flex items-center gap-2 overflow-auto border-b p-1">
             <HistoryToolbarPlugin />
@@ -160,7 +161,7 @@ export function Plugins({}) {
             )}
           </div>
         )}
-      </ToolbarPlugin>
+      </ToolbarPlugin>}
       <div className="relative">
         {!readOnly && <AutoFocusPlugin />}
         <RichTextPlugin
@@ -254,7 +255,7 @@ export function Plugins({}) {
 
         <ListMaxIndentLevelPlugin />
       </div>
-      <ActionsPlugin>
+      {!contentOnly && <ActionsPlugin>
         <div className="clear-both flex items-center justify-between gap-2 overflow-auto border-t p-1">
           <div className="flex flex-1 justify-start">
             {typeof maxLength === "number" && maxLength > 0 && (
@@ -285,7 +286,7 @@ export function Plugins({}) {
             {import.meta.env.DEV && <TreeViewPlugin />}
           </div>
         </div>
-      </ActionsPlugin>
+      </ActionsPlugin>}
     </div>
   )
 }

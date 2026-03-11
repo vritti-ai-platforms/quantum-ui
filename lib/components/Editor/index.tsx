@@ -35,7 +35,9 @@ export function RichTextEditor({
   onMentionSearch,
   placeholder = "Press / for commands...",
   readOnly = false,
+  contentOnly = false,
 }: RichTextEditorProps) {
+  const isReadOnly = readOnly || contentOnly
   return (
     <div
       className={cn(
@@ -46,7 +48,7 @@ export function RichTextEditor({
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
-          editable: !readOnly,
+          editable: !isReadOnly,
           ...(editorState ? { editorState } : {}),
           ...(editorSerializedState
             ? { editorState: JSON.stringify(editorSerializedState) }
@@ -61,7 +63,8 @@ export function RichTextEditor({
               onImageUpload,
               onMentionSearch,
               placeholder,
-              readOnly,
+              readOnly: isReadOnly,
+              contentOnly,
             }}
           >
             <Plugins />
