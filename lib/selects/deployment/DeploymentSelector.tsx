@@ -16,6 +16,7 @@ export interface DeploymentSelectorProps {
   clearable?: boolean;
   className?: string;
   id?: string;
+  params?: Record<string, string | number | boolean>;
 }
 
 // Pre-configured Select for deployment selection with async search
