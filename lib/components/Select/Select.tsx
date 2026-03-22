@@ -21,6 +21,7 @@ interface SelectMultiProps extends MultiSelectProps, SelectBaseProps {
   multiple: true;
 }
 
+export type { SelectSingleProps, SelectMultiProps };
 export type SelectProps = SelectSingleProps | SelectMultiProps;
 
 // Unified select field supporting single/multi selection and default/filter variants

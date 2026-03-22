@@ -1,34 +1,21 @@
 import { forwardRef } from 'react';
-import { Select } from '../../components/Select/Select';
-import type { SelectOption, SelectValue } from '../../components/Select/types';
+import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
 
-export interface IndustrySelectorProps {
-  value?: SelectValue;
-  onChange?: (value: SelectValue) => void;
-  onOptionSelect?: (option: SelectOption | null) => void;
-  onBlur?: () => void;
-  name?: string;
-  label?: string;
-  placeholder?: string;
-  error?: string;
-  disabled?: boolean;
-  required?: boolean;
-  clearable?: boolean;
-  className?: string;
-  id?: string;
-}
+export interface IndustrySelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
 
 // Pre-configured Select for industry selection with async search
 export const IndustrySelector = forwardRef<HTMLButtonElement, IndustrySelectorProps>(
-  ({ label = 'Industry', placeholder = 'Select industry', ...props }, ref) => (
+  ({ label = 'Industry', placeholder = 'Select industry', searchable = true, fieldKeys, ...props }, ref) => (
     <Select
       ref={ref}
-      label={label}
-      placeholder={placeholder}
-      searchable
-      optionsEndpoint="cloud-api/industries/select"
-      fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
-      {...props}
+      {...({
+        label,
+        placeholder,
+        searchable,
+        optionsEndpoint: 'cloud-api/industries/select',
+        fieldKeys: fieldKeys ?? { valueKey: 'id', labelKey: 'name' },
+        ...props,
+      } as SelectProps)}
     />
   ),
 );

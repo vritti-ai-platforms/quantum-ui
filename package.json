@@ -108,6 +108,10 @@
       "types": "./dist/lib/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"
     },
+    "./CheckboxGroup": {
+      "types": "./dist/lib/components/CheckboxGroup/index.d.ts",
+      "import": "./dist/components/CheckboxGroup.js"
+    },
     "./RadioGroup": {
       "types": "./dist/lib/components/RadioGroup/index.d.ts",
       "import": "./dist/components/RadioGroup.js"
@@ -144,6 +148,18 @@
       "types": "./dist/lib/selects/deployment/index.d.ts",
       "import": "./dist/selects/deployment.js"
     },
+    "./selects/feature": {
+      "types": "./dist/lib/selects/feature/index.d.ts",
+      "import": "./dist/selects/feature.js"
+    },
+    "./selects/app": {
+      "types": "./dist/lib/selects/app/index.d.ts",
+      "import": "./dist/selects/app.js"
+    },
+    "./selects/app-code": {
+      "types": "./dist/lib/selects/app-code/index.d.ts",
+      "import": "./dist/selects/app-code.js"
+    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
@@ -159,6 +175,10 @@
     "./Form": {
       "types": "./dist/lib/components/Form/index.d.ts",
       "import": "./dist/components/Form.js"
+    },
+    "./HierarchyGraph": {
+      "types": "./dist/lib/components/HierarchyGraph/index.d.ts",
+      "import": "./dist/components/HierarchyGraph.js"
     },
     "./DatePicker": {
       "types": "./dist/lib/components/DatePicker/index.d.ts",
@@ -304,6 +324,7 @@
     "@storybook/react-vite": "10.2.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tanstack/react-query": "^5.90.20",
+    "@types/dagre": "^0.7.54",
     "@types/node": "^25.0.9",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
@@ -322,6 +343,7 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^3.0.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -367,6 +389,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-table": "^8.21.3",
     "@types/lodash": "^4.17.24",
+    "@xyflow/react": "^12.10.1",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

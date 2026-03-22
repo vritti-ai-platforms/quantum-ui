@@ -1,34 +1,21 @@
 import { forwardRef } from 'react';
-import { Select } from '../../components/Select/Select';
-import type { SelectOption, SelectValue } from '../../components/Select/types';
+import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
 import { CURRENCIES } from './currencies';
 
-export interface CurrencySelectorProps {
-  value?: SelectValue;
-  onChange?: (value: SelectValue) => void;
-  onOptionSelect?: (option: SelectOption | null) => void;
-  onBlur?: () => void;
-  name?: string;
-  label?: string;
-  placeholder?: string;
-  error?: string;
-  disabled?: boolean;
-  required?: boolean;
-  clearable?: boolean;
-  className?: string;
-  id?: string;
-}
+export interface CurrencySelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
 
 // Pre-configured Select for currency selection with local searchable options
 export const CurrencySelector = forwardRef<HTMLButtonElement, CurrencySelectorProps>(
-  ({ label = 'Currency', placeholder = 'Select currency', ...props }, ref) => (
+  ({ label = 'Currency', placeholder = 'Select currency', searchable = true, options, ...props }, ref) => (
     <Select
       ref={ref}
-      label={label}
-      placeholder={placeholder}
-      searchable
-      options={CURRENCIES}
-      {...props}
+      {...({
+        label,
+        placeholder,
+        searchable,
+        options: options ?? CURRENCIES,
+        ...props,
+      } as SelectProps)}
     />
   ),
 );

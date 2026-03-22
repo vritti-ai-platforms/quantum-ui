@@ -59,7 +59,6 @@ export interface DataTableProps<TData> {
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
-  onStatePush?: () => void;
   isLoading?: boolean;
   maxHeight?: string;
   minHeight?: string;
