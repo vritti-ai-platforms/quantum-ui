@@ -1,22 +1,18 @@
 import { forwardRef } from 'react';
-import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
+import { Select, type SelectProps } from '../../components/Select/Select';
 
-export interface PlanSelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
+export type PlanSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
 // Pre-configured Select for plan selection with async search
-export const PlanSelector = forwardRef<HTMLButtonElement, PlanSelectorProps>(
-  ({ label = 'Plan', placeholder = 'Select plan', searchable = true, fieldKeys, ...props }, ref) => (
-    <Select
-      ref={ref}
-      {...({
-        label,
-        placeholder,
-        searchable,
-        optionsEndpoint: 'admin-api/plans/select',
-        fieldKeys: fieldKeys ?? { valueKey: 'id', labelKey: 'name' },
-        ...props,
-      } as SelectProps)}
-    />
-  ),
-);
+export const PlanSelector = forwardRef<HTMLButtonElement, PlanSelectorProps>((props, ref) => (
+  <Select
+    ref={ref}
+    label="Plan"
+    placeholder="Select plan"
+    searchable
+    optionsEndpoint="select-api/plans"
+    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    {...props}
+  />
+));
 PlanSelector.displayName = 'PlanSelector';

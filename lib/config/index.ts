@@ -91,13 +91,13 @@ export interface AuthConfig {
 
   /**
    * Endpoint for session recovery from httpOnly cookie
-   * @default 'cloud-api/auth/token'
+   * @default 'auth/access-token'
    */
   tokenEndpoint: string;
 
   /**
    * Endpoint for token refresh
-   * @default 'cloud-api/auth/refresh'
+   * @default 'auth/refresh-tokens'
    */
   refreshEndpoint: string;
 
@@ -174,8 +174,8 @@ const defaultConfig: Required<{
   auth: {
     tokenHeaderName: 'Authorization',
     tokenPrefix: 'Bearer',
-    tokenEndpoint: 'cloud-api/auth/token',
-    refreshEndpoint: 'cloud-api/auth/refresh',
+    tokenEndpoint: 'auth/access-token',
+    refreshEndpoint: 'auth/refresh-tokens',
     sessionRecoveryEnabled: true,
   },
   views: {

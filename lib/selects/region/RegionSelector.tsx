@@ -1,22 +1,18 @@
 import { forwardRef } from 'react';
-import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
+import { Select, type SelectProps } from '../../components/Select/Select';
 
-export interface RegionSelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
+export type RegionSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
 // Pre-configured Select for region selection with async search
-export const RegionSelector = forwardRef<HTMLButtonElement, RegionSelectorProps>(
-  ({ label = 'Region', placeholder = 'Select region', searchable = true, fieldKeys, ...props }, ref) => (
-    <Select
-      ref={ref}
-      {...({
-        label,
-        placeholder,
-        searchable,
-        optionsEndpoint: 'admin-api/regions/select',
-        fieldKeys: fieldKeys ?? { valueKey: 'id', labelKey: 'name' },
-        ...props,
-      } as SelectProps)}
-    />
-  ),
-);
+export const RegionSelector = forwardRef<HTMLButtonElement, RegionSelectorProps>((props, ref) => (
+  <Select
+    ref={ref}
+    label="Region"
+    placeholder="Select region"
+    searchable
+    optionsEndpoint="select-api/regions"
+    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    {...props}
+  />
+));
 RegionSelector.displayName = 'RegionSelector';

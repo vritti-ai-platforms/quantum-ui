@@ -1,22 +1,18 @@
 import { forwardRef } from 'react';
-import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
+import { Select, type SelectProps } from '../../components/Select/Select';
 
-export interface CloudProviderSelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
+export type CloudProviderSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
 // Pre-configured Select for cloud provider selection with async search
-export const CloudProviderSelector = forwardRef<HTMLButtonElement, CloudProviderSelectorProps>(
-  ({ label = 'Cloud Provider', placeholder = 'Select provider', searchable = true, fieldKeys, ...props }, ref) => (
-    <Select
-      ref={ref}
-      {...({
-        label,
-        placeholder,
-        searchable,
-        optionsEndpoint: 'admin-api/cloud-providers/select',
-        fieldKeys: fieldKeys ?? { valueKey: 'id', labelKey: 'name' },
-        ...props,
-      } as SelectProps)}
-    />
-  ),
-);
+export const CloudProviderSelector = forwardRef<HTMLButtonElement, CloudProviderSelectorProps>((props, ref) => (
+  <Select
+    ref={ref}
+    label="Cloud Provider"
+    placeholder="Select provider"
+    searchable
+    optionsEndpoint="select-api/cloud-providers"
+    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    {...props}
+  />
+));
 CloudProviderSelector.displayName = 'CloudProviderSelector';

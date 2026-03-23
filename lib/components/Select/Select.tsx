@@ -2,7 +2,7 @@ import type React from 'react';
 import { forwardRef, useState } from 'react';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
-import { useSelect, stableStringify } from './hooks/useSelect';
+import { stableStringify, useSelect } from './hooks/useSelect';
 import type { AsyncSelectState, SelectFieldKeys } from './types';
 
 interface SelectBaseProps {
@@ -13,16 +13,14 @@ interface SelectBaseProps {
   params?: Record<string, string | number | boolean>;
 }
 
-interface SelectSingleProps extends SingleSelectProps, SelectBaseProps {
-  multiple?: false;
+export interface SelectProps extends Omit<SingleSelectProps & MultiSelectProps, 'value' | 'onChange'>, SelectBaseProps {
+  multiple?: boolean;
+  value?: SingleSelectProps['value'] | MultiSelectProps['value'];
+  onChange?: SingleSelectProps['onChange'] | MultiSelectProps['onChange'];
 }
 
-interface SelectMultiProps extends MultiSelectProps, SelectBaseProps {
-  multiple: true;
-}
-
-export type { SelectSingleProps, SelectMultiProps };
-export type SelectProps = SelectSingleProps | SelectMultiProps;
+export type SelectSingleProps = SelectProps;
+export type SelectMultiProps = SelectProps;
 
 // Unified select field supporting single/multi selection and default/filter variants
 export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {

@@ -1,22 +1,18 @@
 import { forwardRef } from 'react';
-import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
+import { Select, type SelectProps } from '../../components/Select/Select';
 
-export interface AppSelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
+export type AppSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
-// Pre-configured Select for app selection with async search
-export const AppSelector = forwardRef<HTMLButtonElement, AppSelectorProps>(
-  ({ label = 'App', placeholder = 'Select app', searchable = true, fieldKeys, ...props }, ref) => (
-    <Select
-      ref={ref}
-      {...({
-        label,
-        placeholder,
-        searchable,
-        optionsEndpoint: 'admin-api/apps/select',
-        fieldKeys: fieldKeys ?? { valueKey: 'id', labelKey: 'name', descriptionKey: 'code' },
-        ...props,
-      } as SelectProps)}
-    />
-  ),
-);
+// Pre-configured Select for app selection with async search (supports single and multi-select)
+export const AppSelector = forwardRef<HTMLButtonElement, AppSelectorProps>((props, ref) => (
+  <Select
+    ref={ref}
+    label="App"
+    placeholder="Select app"
+    searchable
+    optionsEndpoint="select-api/apps"
+    fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'code' }}
+    {...props}
+  />
+));
 AppSelector.displayName = 'AppSelector';

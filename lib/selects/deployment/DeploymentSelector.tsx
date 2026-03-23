@@ -1,22 +1,18 @@
 import { forwardRef } from 'react';
-import { Select, type SelectProps, type SelectSingleProps } from '../../components/Select/Select';
+import { Select, type SelectProps } from '../../components/Select/Select';
 
-export interface DeploymentSelectorProps extends Omit<SelectSingleProps, 'optionsEndpoint'> {}
+export type DeploymentSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
 // Pre-configured Select for deployment selection with async search
-export const DeploymentSelector = forwardRef<HTMLButtonElement, DeploymentSelectorProps>(
-  ({ label = 'Deployment', placeholder = 'Select deployment', searchable = true, fieldKeys, ...props }, ref) => (
-    <Select
-      ref={ref}
-      {...({
-        label,
-        placeholder,
-        searchable,
-        optionsEndpoint: 'admin-api/deployments/select',
-        fieldKeys: fieldKeys ?? { valueKey: 'id', labelKey: 'name' },
-        ...props,
-      } as SelectProps)}
-    />
-  ),
-);
+export const DeploymentSelector = forwardRef<HTMLButtonElement, DeploymentSelectorProps>((props, ref) => (
+  <Select
+    ref={ref}
+    label="Deployment"
+    placeholder="Select deployment"
+    searchable
+    optionsEndpoint="select-api/deployments"
+    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    {...props}
+  />
+));
 DeploymentSelector.displayName = 'DeploymentSelector';

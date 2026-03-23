@@ -17,10 +17,8 @@ function extractRawValue(v: FilterResult | SelectValue | SelectValue[] | undefin
 }
 
 interface SelectFilterBaseProps {
-  // The field identifier included in every FilterResult emitted by onChange
-  field: string;
-  // Used by Form's Controller for registration — Form removes it before passing to the component
-  name?: string;
+  // Used as both the FilterResult field identifier and Form Controller registration key
+  name: string;
   optionsEndpoint?: string;
   searchDebounceMs?: number;
   limit?: number;
@@ -28,32 +26,19 @@ interface SelectFilterBaseProps {
   params?: Record<string, string | number | boolean>;
 }
 
-interface SelectFilterSingleProps
-  extends Omit<SingleSelectFilterProps, 'name' | 'onChange' | 'value'>,
+export interface SelectFilterProps
+  extends Omit<SingleSelectFilterProps & MultiSelectFilterProps, 'name' | 'onChange' | 'value'>,
     SelectFilterBaseProps {
-  multiple?: false;
-  // Accepts a FilterResult (when controlled by Form) or a plain SelectValue (standalone)
-  value?: FilterResult | SelectValue;
+  multiple?: boolean;
+  value?: FilterResult | SelectValue | SelectValue[];
   onChange?: (result: FilterResult | null | undefined) => void;
 }
-
-interface SelectFilterMultiProps
-  extends Omit<MultiSelectFilterProps, 'name' | 'onChange' | 'value'>,
-    SelectFilterBaseProps {
-  multiple: true;
-  // Accepts a FilterResult (when controlled by Form) or a plain SelectValue[] (standalone)
-  value?: FilterResult | SelectValue[];
-  onChange?: (result: FilterResult | null | undefined) => void;
-}
-
-export type SelectFilterProps = SelectFilterSingleProps | SelectFilterMultiProps;
 
 // Unified filter-variant select that emits FilterResult from onChange — supports Form integration
 export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((props, ref) => {
   const {
     multiple,
-    field,
-    name: _name, // consumed by Form for Controller registration — not forwarded
+    name,
     optionsEndpoint,
     searchDebounceMs,
     limit,
@@ -109,8 +94,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     asyncState,
     operator: currentOperator,
     onOperatorChange: handleOperatorChange,
-    // field is always used as name so inner components always have a valid name
-    name: field,
+    name,
   };
 
   if (multiple) {
@@ -120,7 +104,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
         onChange?.(null);
         return;
       }
-      onChange?.({ field, operator: currentOperator, value: rawValues.map(String) });
+      onChange?.({ field: name, operator: currentOperator, value: rawValues.map(String) });
     }
 
     return (
@@ -139,7 +123,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
       onChange?.(null);
       return;
     }
-    onChange?.({ field, operator: currentOperator, value: rawVal as string | number });
+    onChange?.({ field: name, operator: currentOperator, value: rawVal as string | number });
   }
 
   return (
