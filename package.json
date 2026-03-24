@@ -144,6 +144,14 @@
       "types": "./dist/lib/selects/currency/index.d.ts",
       "import": "./dist/selects/currency.js"
     },
+    "./selects/locale": {
+      "types": "./dist/lib/selects/locale/index.d.ts",
+      "import": "./dist/selects/locale.js"
+    },
+    "./selects/timezone": {
+      "types": "./dist/lib/selects/timezone/index.d.ts",
+      "import": "./dist/selects/timezone.js"
+    },
     "./selects/deployment": {
       "types": "./dist/lib/selects/deployment/index.d.ts",
       "import": "./dist/selects/deployment.js"

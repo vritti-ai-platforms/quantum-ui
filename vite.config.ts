@@ -52,6 +52,8 @@ export default defineConfig({
         'selects/region': resolve(__dirname, 'lib/selects/region/index.ts'),
         'selects/plan': resolve(__dirname, 'lib/selects/plan/index.ts'),
         'selects/currency': resolve(__dirname, 'lib/selects/currency/index.ts'),
+        'selects/locale': resolve(__dirname, 'lib/selects/locale/index.ts'),
+        'selects/timezone': resolve(__dirname, 'lib/selects/timezone/index.ts'),
         'selects/deployment': resolve(__dirname, 'lib/selects/deployment/index.ts'),
         'selects/feature': resolve(__dirname, 'lib/selects/feature/index.ts'),
         'selects/app': resolve(__dirname, 'lib/selects/app/index.ts'),
