@@ -1,16 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '../Button/Button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
-} from './Dialog';
+import { Dialog } from './Dialog';
 
 const meta: Meta<typeof Dialog> = {
   title: 'Components/Dialog',
@@ -71,17 +61,18 @@ export const WithFooter: Story = {
       trigger={<Button>Open Dialog</Button>}
       title="Save Changes"
       description="Your changes will be saved to your account."
-      footer={
+      content={(close) => (
         <>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button>Save Changes</Button>
+          <p className="text-sm text-muted-foreground">Review your changes before saving.</p>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={close}>
+              Cancel
+            </Button>
+            <Button onClick={close}>Save Changes</Button>
+          </div>
         </>
-      }
-    >
-      <p className="text-sm text-muted-foreground">Review your changes before saving.</p>
-    </Dialog>
+      )}
+    />
   ),
 };
 
@@ -92,14 +83,16 @@ export const ConfirmationDialog: Story = {
       trigger={<Button variant="destructive">Delete Account</Button>}
       title="Are you absolutely sure?"
       description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
-      footer={
-        <>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button variant="destructive">Delete Account</Button>
-        </>
-      }
+      content={(close) => (
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={close}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={close}>
+            Delete Account
+          </Button>
+        </div>
+      )}
     />
   ),
 };
@@ -111,72 +104,69 @@ export const FormDialog: Story = {
       trigger={<Button>Edit Profile</Button>}
       title="Edit Profile"
       description="Update your personal information."
-      footer={
+      content={(close) => (
         <>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button type="submit">Save Changes</Button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="dialog-name" className="text-sm font-medium">
+                Name
+              </label>
+              <input
+                id="dialog-name"
+                type="text"
+                placeholder="John Doe"
+                className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="dialog-email" className="text-sm font-medium">
+                Email
+              </label>
+              <input
+                id="dialog-email"
+                type="email"
+                placeholder="john@example.com"
+                className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={close}>
+              Cancel
+            </Button>
+            <Button onClick={close}>Save Changes</Button>
+          </div>
         </>
-      }
-    >
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="dialog-name" className="text-sm font-medium">
-            Name
-          </label>
-          <input
-            id="dialog-name"
-            type="text"
-            placeholder="John Doe"
-            className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-          />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="dialog-email" className="text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="dialog-email"
-            type="email"
-            placeholder="john@example.com"
-            className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-          />
-        </div>
-      </div>
-    </Dialog>
+      )}
+    />
   ),
-  parameters: {
-    layout: 'centered',
-  },
 };
 
-// Low-level composable API
-export const LowLevelAPI: Story = {
+// Using the anchor pattern (render prop for trigger)
+export const AnchorPattern: Story = {
   render: () => (
-    <DialogRoot>
-      <DialogTrigger asChild>
-        <Button variant="outline">Open with Low-level API</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Low-level API</DialogTitle>
-          <DialogDescription>
-            This dialog is built using the composable low-level primitives: DialogRoot, DialogTrigger, DialogContent,
-            DialogHeader, DialogTitle, DialogDescription, DialogFooter.
-          </DialogDescription>
-        </DialogHeader>
-        <p className="text-sm text-muted-foreground">
-          Use the low-level API when you need full control over the dialog structure.
-        </p>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Close</Button>
-          </DialogClose>
-          <Button>Confirm</Button>
-        </DialogFooter>
-      </DialogContent>
-    </DialogRoot>
+    <Dialog
+      anchor={(open) => (
+        <Button variant="outline" onClick={open}>
+          Open with Anchor Pattern
+        </Button>
+      )}
+      title="Anchor Pattern"
+      description="This dialog uses the anchor render prop instead of a trigger element."
+      content={(close) => (
+        <>
+          <p className="text-sm text-muted-foreground">
+            The anchor pattern gives you control over when and how the dialog opens.
+          </p>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={close}>
+              Close
+            </Button>
+            <Button onClick={close}>Confirm</Button>
+          </div>
+        </>
+      )}
+    />
   ),
 };
 
@@ -189,9 +179,7 @@ export const AllProps: Story = {
     children: <p className="text-sm text-muted-foreground">Dialog body content.</p>,
     footer: (
       <>
-        <DialogClose asChild>
-          <Button variant="outline">Cancel</Button>
-        </DialogClose>
+        <Button variant="outline">Cancel</Button>
         <Button>Confirm</Button>
       </>
     ),
