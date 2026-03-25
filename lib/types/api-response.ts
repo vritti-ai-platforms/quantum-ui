@@ -10,6 +10,12 @@ export interface SuccessResponse {
   message: string;
 }
 
+export interface CreateResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
 export interface TableResponse<T> {
   result: T[];
   count: number;
