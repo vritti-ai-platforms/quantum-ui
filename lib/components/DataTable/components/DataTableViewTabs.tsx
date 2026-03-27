@@ -25,8 +25,8 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
   const syncActiveViewState = useDataTableStore((s) => s.syncActiveViewState);
 
   const [pendingViewId, setPendingViewId] = useState<string | null>(null);
-  const dirtyGuard = useDialog();
-  const createDialog = useDialog();
+  const dirtyGuard = useDialog({ onClose: () => setPendingViewId(null) });
+  const createDialog = useDialog({ onClose: () => setPendingViewId(null) });
 
   const qc = useQueryClient();
 
@@ -108,13 +108,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
       </div>
 
       <Dialog
-        open={dirtyGuard.isOpen}
-        onOpenChange={(v) => {
-          if (!v) {
-            dirtyGuard.close();
-            setPendingViewId(null);
-          }
-        }}
+        handle={dirtyGuard}
         title="Unsaved Changes"
         description="This view has unsaved changes. What would you like to do?"
         footer={
@@ -155,10 +149,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
       <CreateViewDialog
         tableSlug={tableSlug}
         open={createDialog.isOpen}
-        onClose={() => {
-          createDialog.close();
-          setPendingViewId(null);
-        }}
+        onClose={createDialog.close}
       />
     </>
   );

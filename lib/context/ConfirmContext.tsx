@@ -1,6 +1,7 @@
-import { createContext, type ReactNode, useCallback, useRef, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
+import type { DialogHandle } from '../hooks/useDialog';
 
 // All fields optional — every one has a built-in default
 export interface ConfirmOptions {
@@ -57,17 +58,30 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
     [defaultOptions],
   );
 
+  const handleCancel = useCallback(() => {
+    resolverRef.current?.(false);
+    resolverRef.current = null;
+    setState((prev) => ({ ...prev, open: false }));
+  }, []);
+
   const handleConfirm = useCallback(() => {
     resolverRef.current?.(true);
     resolverRef.current = null;
     setState((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const handleCancel = useCallback(() => {
-    resolverRef.current?.(false);
-    resolverRef.current = null;
-    setState((prev) => ({ ...prev, open: false }));
-  }, []);
+  // Build a DialogHandle-compatible object for the Dialog component
+  const handle: DialogHandle = useMemo(
+    () => ({
+      isOpen: state.open,
+      open: () => setState((prev) => ({ ...prev, open: true })),
+      close: handleCancel,
+      onOpenChange: (val: boolean) => {
+        if (!val) handleCancel();
+      },
+    }),
+    [state.open, handleCancel],
+  );
 
   const { options } = state;
 
@@ -75,10 +89,7 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
       <Dialog
-        open={state.open}
-        onOpenChange={(open) => {
-          if (!open) handleCancel();
-        }}
+        handle={handle}
         title={options.title}
         description={options.description || undefined}
         footer={

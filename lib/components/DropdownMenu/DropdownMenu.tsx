@@ -17,6 +17,7 @@ import {
   DropdownMenuSubTrigger as ShadcnDropdownMenuSubTrigger,
   DropdownMenuTrigger as ShadcnDropdownMenuTrigger,
 } from '../../../shadcn/shadcnDropdownMenu';
+import type { DialogHandle } from '../../hooks/useDialog';
 import { Button } from '../Button';
 import { Dialog } from '../Dialog';
 import type { DialogMenuItem, DropdownMenuProps, MenuItem } from './types';
@@ -238,19 +239,26 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
           {items.map((item, index) => renderMenuItem(item, index, setActiveDialogId))}
         </DropdownMenuContent>
       </DropdownMenuRoot>
-      {dialogItems.map((item) => (
-        <Dialog
-          key={item.id}
-          open={activeDialogId === item.id}
-          onOpenChange={(open) => {
-            if (!open) setActiveDialogId(null);
-          }}
-          title={item.dialog.title}
-          description={item.dialog.description}
-          content={item.dialog.content}
-          footer={item.dialog.footer}
-        />
-      ))}
+      {dialogItems.map((item) => {
+        const handle: DialogHandle = {
+          isOpen: activeDialogId === item.id,
+          open: () => setActiveDialogId(item.id),
+          close: () => setActiveDialogId(null),
+          onOpenChange: (val) => {
+            if (!val) setActiveDialogId(null);
+          },
+        };
+        return (
+          <Dialog
+            key={item.id}
+            handle={handle}
+            title={item.dialog.title}
+            description={item.dialog.description}
+            content={item.dialog.content}
+            footer={item.dialog.footer}
+          />
+        );
+      })}
     </>
   );
 };

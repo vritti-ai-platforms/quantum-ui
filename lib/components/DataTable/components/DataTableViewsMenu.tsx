@@ -14,6 +14,7 @@ import {
   updateView,
 } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
+import type { DialogHandle } from '../../../hooks/useDialog';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
@@ -59,13 +60,17 @@ export function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentPr
     },
   });
 
+  const handle: DialogHandle = {
+    isOpen: open,
+    open: () => {},
+    close: onClose,
+    onOpenChange: (v) => { if (!v) onClose(); },
+  };
+
   return (
     <Dialog
       mode="form"
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
+      handle={handle}
       title="Create New View"
       description="Save the current filters and sort as a named view."
       form={form}
@@ -107,13 +112,17 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
     },
   });
 
+  const handle: DialogHandle = {
+    isOpen: open,
+    open: () => {},
+    close: onClose,
+    onOpenChange: (v) => { if (!v) onClose(); },
+  };
+
   return (
     <Dialog
       mode="form"
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
+      handle={handle}
       title="Rename View"
       description={`Change the name of "${initialName}".`}
       form={form}
@@ -159,12 +168,16 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
 
   const confirm = useConfirm();
 
+  const handle: DialogHandle = {
+    isOpen: open,
+    open: () => {},
+    close: onClose,
+    onOpenChange: (v) => { if (!v) onClose(); },
+  };
+
   return (
     <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
+      handle={handle}
       title="Manage Views"
       description="Share or delete saved views for this table."
       footer={

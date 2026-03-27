@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { MoreVertical } from 'lucide-react';
+import { useDialog } from '../../../hooks/useDialog';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
@@ -27,10 +28,12 @@ export interface RowActionsProps {
 const DirectAction: React.FC<{ action: RowAction }> = ({ action }) => {
   const Icon = action.icon;
   const destructiveClass = action.variant === 'destructive' ? 'text-destructive hover:text-destructive' : '';
+  const dialog = useDialog();
 
   if (action.dialog) {
     return (
       <Dialog
+        handle={dialog}
         title={action.dialog.title}
         description={action.dialog.description}
         anchor={(open) => (
