@@ -27,6 +27,7 @@ export const TabsSkeleton = ({
       <div className="inline-flex h-9 w-fit items-center gap-0.5 rounded-lg bg-muted p-[3px]">
         {Array.from({ length: count }, (_, i) => (
           <Skeleton
+            // biome-ignore lint/suspicious/noArrayIndexKey: <static list of skeletons, not dynamic>
             key={i}
             className={cn('h-7 rounded-md', widths[i % widths.length], i === 0 && 'bg-background')}
           />

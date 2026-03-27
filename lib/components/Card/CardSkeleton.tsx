@@ -12,7 +12,8 @@ export const CardSkeleton = ({ count = 1, className, children, ...props }: CardS
   <>
     {Array.from({ length: count }, (_, i) => (
       <div
-        key={`card-skeleton-${i}`}
+        // biome-ignore lint/suspicious/noArrayIndexKey: <static list of skeletons, not dynamic>
+        key={i}
         className={cn('bg-card text-card-foreground rounded-xl border py-6', className)}
         {...props}
       >
