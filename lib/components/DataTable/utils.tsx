@@ -1,6 +1,8 @@
 import type { CellContext, Column, ColumnDef, HeaderContext, Row, SortingState } from '@tanstack/react-table';
+import * as xlsxLib from 'xlsx';
 import type { SortCondition } from '../../types/table-filter';
 import { Checkbox } from '../Checkbox';
+import type { ImportExportConfig } from './types';
 
 // Converts SortCondition[] to TanStack SortingState
 export function sortConditionsToTanstack(sort: SortCondition[]): SortingState {
@@ -61,4 +63,55 @@ export function exportToCSV<TData>(rows: Row<TData>[], columns: Column<TData, un
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// Downloads a blob as a file
+export function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Transforms selected rows into flat export objects using importExport columns
+function transformRows<TData>(rows: Row<TData>[], config: ImportExportConfig<TData>): Record<string, string>[] {
+  return rows.map((row) => {
+    const transformed = config.transformExportRow
+      ? config.transformExportRow(row.original)
+      : (row.original as Record<string, unknown>);
+    const picked: Record<string, string> = {};
+    for (const col of config.columns) {
+      picked[col.label] = String(transformed[col.key] ?? '');
+    }
+    return picked;
+  });
+}
+
+// Exports selected rows using importExport columns (round-trip compatible with import)
+export function exportSelectedRows<TData>(
+  rows: Row<TData>[],
+  config: ImportExportConfig<TData>,
+  format: 'csv' | 'xlsx',
+): void {
+  const data = transformRows(rows, config);
+
+  if (format === 'csv') {
+    const headers = config.columns.map((c) => c.label);
+    const csvRows = data.map((row) =>
+      config.columns.map((c) => `"${String(row[c.label] ?? '').replace(/"/g, '""')}"`)
+    );
+    const csv = [headers.join(','), ...csvRows.map((r) => r.join(','))].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `${config.filename}.csv`);
+  } else {
+    const { utils, write } = xlsxLib;
+    const ws = utils.json_to_sheet(data);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Sheet1');
+    const buf = write(wb, { type: 'array', bookType: 'xlsx' });
+    downloadBlob(new Blob([buf]), `${config.filename}.xlsx`);
+  }
 }

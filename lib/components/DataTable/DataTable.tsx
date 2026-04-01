@@ -1,13 +1,18 @@
 import { flexRender } from '@tanstack/react-table';
-import { Funnel } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { ArrowDownToLine, ArrowUpFromLine, Funnel, TableProperties } from 'lucide-react';
 import { useState } from 'react';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
+import { useDialog } from '../../hooks/useDialog';
+import { axios } from '../../utils/axios';
 import { Button } from '../Button';
+import { DropdownMenu } from '../DropdownMenu';
 import { Skeleton } from '../Skeleton';
 import { DataTableColumnHeader } from './components/DataTableColumnHeader';
 import { DataTableEmpty } from './components/DataTableEmpty';
 import { DataTableFilters } from './components/DataTableFilters';
+import { DataTableImportDialog } from './components/DataTableImportDialog';
 import { DataTablePagination } from './components/DataTablePagination';
 import { DataTableRowDensity } from './components/DataTableRowDensity';
 import { DataTableSearch } from './components/DataTableSearch';
@@ -17,6 +22,7 @@ import { DataTableViewsMenu } from './components/DataTableViewsMenu';
 import { DataTableViewTabs } from './components/DataTableViewTabs';
 import { useDataTableStore } from './store/store';
 import type { DataTableMeta, DataTableProps, DensityType, SearchState } from './types';
+import { downloadBlob } from './utils';
 
 const densityClasses: Record<DensityType, string> = {
   compact: 'py-1 px-2 text-xs',
@@ -37,8 +43,10 @@ export function DataTable<TData>({
   minHeight = '700px',
   className,
   enableViews = true,
+  importExport,
 }: DataTableProps<TData>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const importDialog = useDialog();
 
   const meta = table.options.meta as DataTableMeta | undefined;
   const slug = meta?.slug;
@@ -46,10 +54,21 @@ export function DataTable<TData>({
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug);
+  const showToolbar = searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || importExport;
 
   const search = meta?.search ?? null;
   const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
+
+  const exportMutation = useMutation({
+    mutationFn: async (format: string) => {
+      if (!importExport) return;
+      const response = await axios.get(`${importExport.exportEndpoint}/${format}`, {
+        responseType: 'blob',
+        showSuccessToast: false,
+      });
+      downloadBlob(response.data, `${importExport.filename}.${format}`);
+    },
+  });
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -90,13 +109,31 @@ export function DataTable<TData>({
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />
             {enableViews && slug && <DataTableViewsMenu slug={slug} />}
+            {importExport && (
+              <DropdownMenu
+                trigger={{ children: <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="Import / Export"><TableProperties className="h-4 w-4" /></Button> }}
+                items={[
+                  { type: 'item' as const, id: 'import', label: 'Import', icon: ArrowUpFromLine, onClick: importDialog.open },
+                  {
+                    type: 'sub' as const, id: 'export', label: 'Export All', icon: ArrowDownToLine,
+                    items: [
+                      { type: 'item' as const, id: 'csv', label: 'CSV (.csv)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('csv') },
+                      { type: 'item' as const, id: 'xlsx', label: 'Excel (.xlsx)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('xlsx') },
+                      { type: 'item' as const, id: 'xls', label: 'Excel 97-2004 (.xls)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('xls') },
+                      { type: 'item' as const, id: 'ods', label: 'OpenDocument (.ods)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('ods') },
+                      { type: 'item' as const, id: 'tsv', label: 'TSV (.tsv)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('tsv') },
+                    ],
+                  },
+                ]}
+              />
+            )}
             {toolbarActions?.actions}
           </div>
         </div>
       )}
 
       {/* Selection bar */}
-      <DataTableSelectionBar table={table}>
+      <DataTableSelectionBar table={table} importExport={importExport}>
         {selectActions?.(table.getFilteredSelectedRowModel().rows)}
       </DataTableSelectionBar>
 
@@ -216,6 +253,18 @@ export function DataTable<TData>({
 
       {/* Pagination */}
       <DataTablePagination table={table} />
+
+      {/* Import dialog */}
+      {importExport && (
+        <DataTableImportDialog
+          handle={importDialog}
+          columns={importExport.columns}
+          sampleData={importExport.sampleData}
+          importEndpoint={importExport.importEndpoint}
+          filename={importExport.filename}
+          onSuccess={importExport.onSuccess}
+        />
+      )}
     </div>
   );
 }

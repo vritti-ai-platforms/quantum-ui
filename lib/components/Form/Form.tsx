@@ -20,6 +20,7 @@ import { CheckboxGroup } from '../CheckboxGroup';
 import { PhoneField } from '../PhoneField';
 import { RadioGroup } from '../RadioGroup';
 import { Switch } from '../Switch';
+import { UploadFile } from '../UploadFile';
 
 // Re-export Controller for explicit usage
 export { Controller } from 'react-hook-form';
@@ -89,11 +90,14 @@ function processChildren<
                       }
                     : field;
 
+            const isUploadFile = child.type === UploadFile;
+
             return cloneElement(child, {
               ...childProps,
               ...fieldProps,
               error: fieldState.error?.message || (fieldState.error ? 'Invalid' : undefined),
               name: undefined, // Remove name to avoid passing it to the underlying input
+              ...(isUploadFile ? { isLoading: isSubmitting } : {}),
             });
           }}
         />

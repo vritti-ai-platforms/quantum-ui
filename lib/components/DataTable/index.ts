@@ -26,6 +26,8 @@ export type {
   DataTableSearchConfig,
   DataTableToolbarConfig,
   DensityType,
+  ImportExportColumn,
+  ImportExportConfig,
   SearchColumn,
   SearchState,
   SelectActions,

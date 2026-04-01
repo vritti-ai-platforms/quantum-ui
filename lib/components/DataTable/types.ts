@@ -50,6 +50,23 @@ export interface DataTableMeta {
   setSearch: (search: SearchState) => void;
 }
 
+// --- Import/Export config ---
+
+export interface ImportExportColumn {
+  key: string;
+  label: string;
+}
+
+export interface ImportExportConfig<TData = unknown> {
+  columns: ImportExportColumn[];
+  sampleData?: Record<string, string>[];
+  importEndpoint: string;
+  exportEndpoint: string;
+  transformExportRow?: (row: TData) => Record<string, unknown>;
+  filename: string;
+  onSuccess?: () => void;
+}
+
 // --- DataTable component props ---
 
 export interface DataTableProps<TData> {
@@ -64,4 +81,5 @@ export interface DataTableProps<TData> {
   minHeight?: string;
   className?: string;
   enableViews?: boolean;
+  importExport?: ImportExportConfig<TData>;
 }

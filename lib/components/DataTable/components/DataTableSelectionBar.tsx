@@ -2,17 +2,19 @@ import type { Table } from '@tanstack/react-table';
 import { Download } from 'lucide-react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
-import type { DataTableMeta } from '../types';
-import { exportToCSV } from '../utils';
+import { DropdownMenu } from '../../DropdownMenu';
+import type { DataTableMeta, ImportExportConfig } from '../types';
+import { exportSelectedRows, exportToCSV } from '../utils';
 
 interface DataTableSelectionBarProps<TData> {
   table: Table<TData>;
   children?: React.ReactNode;
   className?: string;
+  importExport?: ImportExportConfig<TData>;
 }
 
 // Renders a selection info bar showing selected row count with export and clear actions
-export function DataTableSelectionBar<TData>({ table, children, className }: DataTableSelectionBarProps<TData>) {
+export function DataTableSelectionBar<TData>({ table, children, className, importExport }: DataTableSelectionBarProps<TData>) {
   const meta = table.options.meta as DataTableMeta | undefined;
   const selectedRows = table.getFilteredSelectedRowModel().rows;
   const count = selectedRows.length;
@@ -21,8 +23,8 @@ export function DataTableSelectionBar<TData>({ table, children, className }: Dat
 
   if (count === 0) return null;
 
-  // Exports selected rows to CSV using the table slug as filename
-  const handleExport = () => {
+  // Exports selected rows to CSV using the table slug as filename (legacy behavior)
+  const handleLegacyExport = () => {
     exportToCSV(selectedRows, table.getAllColumns(), meta?.slug ?? 'export');
   };
 
@@ -33,10 +35,20 @@ export function DataTableSelectionBar<TData>({ table, children, className }: Dat
       </span>
       {children}
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
+        {importExport ? (
+          <DropdownMenu
+            trigger={{ label: 'Export', variant: 'outline' as const, icon: Download, className: 'h-8 text-sm' }}
+            items={[
+              { type: 'item' as const, id: 'csv', label: 'CSV (.csv)', onClick: () => exportSelectedRows(selectedRows, importExport, 'csv') },
+              { type: 'item' as const, id: 'xlsx', label: 'Excel (.xlsx)', onClick: () => exportSelectedRows(selectedRows, importExport, 'xlsx') },
+            ]}
+          />
+        ) : (
+          <Button variant="outline" size="sm" onClick={handleLegacyExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"
