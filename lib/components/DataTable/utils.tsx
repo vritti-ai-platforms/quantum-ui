@@ -92,26 +92,30 @@ function transformRows<TData>(rows: Row<TData>[], config: ImportExportConfig<TDa
 }
 
 // Exports selected rows using importExport columns (round-trip compatible with import)
+type ExportFormat = 'csv' | 'xlsx' | 'xls' | 'ods' | 'tsv';
+
+const FORMAT_CONFIG: Record<ExportFormat, { ext: string; bookType: string; separator?: string }> = {
+  csv: { ext: 'csv', bookType: 'csv' },
+  xlsx: { ext: 'xlsx', bookType: 'xlsx' },
+  xls: { ext: 'xls', bookType: 'biff8' },
+  ods: { ext: 'ods', bookType: 'ods' },
+  tsv: { ext: 'tsv', bookType: 'csv', separator: '\t' },
+};
+
 export function exportSelectedRows<TData>(
   rows: Row<TData>[],
   config: ImportExportConfig<TData>,
-  format: 'csv' | 'xlsx',
+  format: ExportFormat,
 ): void {
   const data = transformRows(rows, config);
-
-  if (format === 'csv') {
-    const headers = config.columns.map((c) => c.label);
-    const csvRows = data.map((row) =>
-      config.columns.map((c) => `"${String(row[c.label] ?? '').replace(/"/g, '""')}"`)
-    );
-    const csv = [headers.join(','), ...csvRows.map((r) => r.join(','))].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `${config.filename}.csv`);
-  } else {
-    const { utils, write } = xlsxLib;
-    const ws = utils.json_to_sheet(data);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, 'Sheet1');
-    const buf = write(wb, { type: 'array', bookType: 'xlsx' });
-    downloadBlob(new Blob([buf]), `${config.filename}.xlsx`);
-  }
+  const { ext, bookType, separator } = FORMAT_CONFIG[format];
+  const { utils, write } = xlsxLib;
+  const ws = utils.json_to_sheet(data);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, 'Sheet1');
+  const opts = separator
+    ? { type: 'array' as const, bookType: bookType as xlsxLib.BookType, FS: separator }
+    : { type: 'array' as const, bookType: bookType as xlsxLib.BookType };
+  const buf = write(wb, opts);
+  downloadBlob(new Blob([buf]), `${config.filename}.${ext}`);
 }

@@ -85,7 +85,6 @@ function UploadStep({ form, importMutation, sampleData, filename }: UploadStepPr
       form={form}
       mutation={importMutation}
       transformSubmit={(data: UploadFormData) => data.file}
-      showRootError
       resetOnSuccess={false}
     >
       <UploadFile

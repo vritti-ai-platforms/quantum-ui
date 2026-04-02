@@ -41,6 +41,9 @@ export function DataTableSelectionBar<TData>({ table, children, className, impor
             items={[
               { type: 'item' as const, id: 'csv', label: 'CSV (.csv)', onClick: () => exportSelectedRows(selectedRows, importExport, 'csv') },
               { type: 'item' as const, id: 'xlsx', label: 'Excel (.xlsx)', onClick: () => exportSelectedRows(selectedRows, importExport, 'xlsx') },
+              { type: 'item' as const, id: 'xls', label: 'Excel 97-2004 (.xls)', onClick: () => exportSelectedRows(selectedRows, importExport, 'xls') },
+              { type: 'item' as const, id: 'ods', label: 'OpenDocument (.ods)', onClick: () => exportSelectedRows(selectedRows, importExport, 'ods') },
+              { type: 'item' as const, id: 'tsv', label: 'TSV (.tsv)', onClick: () => exportSelectedRows(selectedRows, importExport, 'tsv') },
             ]}
           />
         ) : (

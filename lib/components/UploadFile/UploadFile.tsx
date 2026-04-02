@@ -151,7 +151,8 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           onClick={handleClick}
           disabled={disabled}
           className={cn(
-            'flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-8 transition-colors',
+            'flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors',
+            error ? 'border-destructive' : 'border-border',
             disabled ? 'cursor-default opacity-50' : 'cursor-pointer hover:bg-muted/50',
           )}
         >
