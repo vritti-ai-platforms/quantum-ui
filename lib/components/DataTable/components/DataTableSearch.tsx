@@ -1,4 +1,5 @@
 import { ChevronDown, Search, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
@@ -68,65 +69,78 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
-  if (!isExpanded) {
-    return (
-      <Button variant="outline" size="sm" className={cn('h-8 w-8 p-0', className)} onClick={() => setIsExpanded(true)}>
-        <Search className="h-4 w-4" />
-        <span className="sr-only">Search</span>
-      </Button>
-    );
-  }
-
   return (
-    <div
-      className={cn('flex items-center border border-input rounded-lg bg-background overflow-hidden h-9', className)}
-    >
-      {/* Column selector */}
-      <SingleSelect
-        value={selectedColumnId}
-        onChange={(val) => handleColumnChange(String(val))}
-        options={options}
-        contentClassName="w-[160px]"
-        anchor={() => (
+    <AnimatePresence mode="wait" initial={false}>
+      {!isExpanded ? (
+        <motion.div
+          key="collapsed"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
+        >
+          <Button variant="outline" size="sm" className={cn('h-9 w-9 p-0', className)} onClick={() => setIsExpanded(true)}>
+            <Search className="h-4 w-4" />
+            <span className="sr-only">Search</span>
+          </Button>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="expanded"
+          initial={{ width: 36, opacity: 0.5 }}
+          animate={{ width: 'auto', opacity: 1 }}
+          exit={{ width: 36, opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+          className={cn('flex items-center border border-input rounded-lg bg-background overflow-hidden h-9', className)}
+        >
+          {/* Column selector */}
+          <SingleSelect
+            value={selectedColumnId}
+            onChange={(val) => handleColumnChange(String(val))}
+            options={options}
+            contentClassName="w-[160px]"
+            anchor={() => (
+              <button
+                type="button"
+                className="flex items-center gap-1 h-full px-2.5 border-r border-input text-sm capitalize hover:bg-accent/50 transition-colors shrink-0"
+              >
+                {selectedLabel}
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+              </button>
+            )}
+          />
+
+          {/* Search input */}
+          <div className="flex items-center px-2 flex-1">
+            <Search className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => {
+                const value = e.target.value;
+                onSearchChange(value ? { columnId: selectedColumnId, value } : null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') handleCollapse();
+              }}
+              placeholder={`Search ${selectedLabel.toLowerCase()}...`}
+              className="bg-transparent text-sm outline-none w-full min-w-[140px] placeholder:text-muted-foreground text-foreground"
+            />
+          </div>
+
+          {/* Clear button */}
           <button
             type="button"
-            className="flex items-center gap-1 h-full px-2.5 border-r border-input text-sm capitalize hover:bg-accent/50 transition-colors shrink-0"
+            onClick={handleCollapse}
+            className="px-2 hover:bg-accent transition-colors h-full"
+            aria-label="Close search"
           >
-            {selectedLabel}
-            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            <X className="h-4 w-4 text-muted-foreground" />
           </button>
-        )}
-      />
-
-      {/* Search input */}
-      <div className="flex items-center px-2 flex-1">
-        <Search className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => {
-            const value = e.target.value;
-            onSearchChange(value ? { columnId: selectedColumnId, value } : null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') handleCollapse();
-          }}
-          placeholder={`Search ${selectedLabel.toLowerCase()}...`}
-          className="bg-transparent text-sm outline-none w-full min-w-[140px] placeholder:text-muted-foreground text-foreground"
-        />
-      </div>
-
-      {/* Clear button */}
-      <button
-        type="button"
-        onClick={handleCollapse}
-        className="px-2 hover:bg-accent transition-colors h-full"
-        aria-label="Close search"
-      >
-        <X className="h-4 w-4 text-muted-foreground" />
-      </button>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

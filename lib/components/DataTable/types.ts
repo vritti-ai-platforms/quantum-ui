@@ -77,9 +77,8 @@ export interface DataTableProps<TData> {
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
   isLoading?: boolean;
-  maxHeight?: string;
-  minHeight?: string;
   className?: string;
   enableViews?: boolean;
   importExport?: ImportExportConfig<TData>;
+  mode?: 'page' | 'compact';
 }

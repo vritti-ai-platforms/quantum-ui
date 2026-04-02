@@ -58,6 +58,7 @@ export default defineConfig({
         'selects/feature': resolve(__dirname, 'lib/selects/feature/index.ts'),
         'selects/app': resolve(__dirname, 'lib/selects/app/index.ts'),
         'selects/app-code': resolve(__dirname, 'lib/selects/app-code/index.ts'),
+        'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),
@@ -95,6 +96,7 @@ export default defineConfig({
         'types/api-response': resolve(__dirname, 'lib/types/api-response.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
+        'utils/motion': resolve(__dirname, 'lib/utils/motion.ts'),
         'utils/slug': resolve(__dirname, 'lib/utils/slug.ts'),
       },
       name: 'QuantumUI',

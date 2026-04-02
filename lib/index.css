@@ -52,29 +52,29 @@
   --font-mono: "JetBrains Mono", monospace;
   --radius: 0.75rem;
   --shadow-x: 0rem;
-  --shadow-y: 0.75rem;
-  --shadow-blur: 1.5rem;
-  --shadow-spread: 0.25rem;
-  --shadow-opacity: 0.08;
+  --shadow-y: 0.5rem;
+  --shadow-blur: 1rem;
+  --shadow-spread: 0rem;
+  --shadow-opacity: 0.04;
   --shadow-color: #0a1d36;
-  --shadow-2xs: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.04);
-  --shadow-xs: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.04);
+  --shadow-2xs: 0 1px 2px 0 hsl(214.0909 68.7500% 12.5490% / 0.03);
+  --shadow-xs: 0 1px 3px 0 hsl(214.0909 68.7500% 12.5490% / 0.04);
   --shadow-sm:
-    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08),
-    0rem 1px 2px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
+    0 1px 2px 0 hsl(214.0909 68.7500% 12.5490% / 0.04),
+    0 1px 3px 0 hsl(214.0909 68.7500% 12.5490% / 0.03);
   --shadow:
-    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08),
-    0rem 1px 2px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
+    0 1px 3px 0 hsl(214.0909 68.7500% 12.5490% / 0.05),
+    0 1px 2px -1px hsl(214.0909 68.7500% 12.5490% / 0.04);
   --shadow-md:
-    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08),
-    0rem 2px 4px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
+    0 4px 6px -1px hsl(214.0909 68.7500% 12.5490% / 0.05),
+    0 2px 4px -2px hsl(214.0909 68.7500% 12.5490% / 0.04);
   --shadow-lg:
-    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08),
-    0rem 4px 6px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
+    0 10px 15px -3px hsl(214.0909 68.7500% 12.5490% / 0.05),
+    0 4px 6px -4px hsl(214.0909 68.7500% 12.5490% / 0.04);
   --shadow-xl:
-    0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.08),
-    0rem 8px 10px -0.75px hsl(214.0909 68.7500% 12.5490% / 0.08);
-  --shadow-2xl: 0rem 0.75rem 1.5rem 0.25rem hsl(214.0909 68.7500% 12.5490% / 0.2);
+    0 20px 25px -5px hsl(214.0909 68.7500% 12.5490% / 0.05),
+    0 8px 10px -6px hsl(214.0909 68.7500% 12.5490% / 0.04);
+  --shadow-2xl: 0 25px 50px -12px hsl(214.0909 68.7500% 12.5490% / 0.15);
   --tracking-normal: 0.01em;
   --spacing: 0.25rem;
 }

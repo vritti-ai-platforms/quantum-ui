@@ -40,10 +40,16 @@ export function DataTablePagination<TData>({
     setPageInputValue(null);
   }
 
-  if (totalPages <= 1) return null;
+  const isDisabled = totalPages <= 1;
 
   return (
-    <div className={cn('flex items-center justify-between px-2 py-2', className)}>
+    <div
+      className={cn(
+        'flex items-center justify-between px-2 py-2',
+        isDisabled && 'opacity-70 pointer-events-none',
+        className,
+      )}
+    >
       {/* Left: showing info */}
       <div className="flex items-center gap-4">
         <span className="text-sm text-muted-foreground">

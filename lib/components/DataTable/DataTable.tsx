@@ -1,7 +1,8 @@
-import { flexRender } from '@tanstack/react-table';
 import { useMutation } from '@tanstack/react-query';
+import { flexRender } from '@tanstack/react-table';
 import { ArrowDownToLine, ArrowUpFromLine, Funnel, TableProperties } from 'lucide-react';
-import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useState } from 'react';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { useDialog } from '../../hooks/useDialog';
@@ -30,6 +31,11 @@ const densityClasses: Record<DensityType, string> = {
   comfortable: 'py-4 px-3 text-sm',
 };
 
+const MODE_HEIGHTS = {
+  page: 'calc(100vh - 280px)',
+  compact: 'calc(100vh - 570px)',
+};
+
 // Renders a full-featured data table from a raw TanStack Table instance
 export function DataTable<TData>({
   table,
@@ -39,11 +45,10 @@ export function DataTable<TData>({
   toolbarActions,
   filters,
   isLoading = false,
-  maxHeight = '700px',
-  minHeight = '700px',
   className,
   enableViews = true,
   importExport,
+  mode = 'page',
 }: DataTableProps<TData>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const importDialog = useDialog();
@@ -54,10 +59,18 @@ export function DataTable<TData>({
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
-  const showToolbar = searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || importExport;
+  const showToolbar =
+    searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || importExport;
 
   const search = meta?.search ?? null;
   const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
+
+  const selectedCount = table.getFilteredSelectedRowModel().rows.length;
+
+  // Auto-close filters when rows are selected
+  useEffect(() => {
+    if (selectedCount > 0) setFiltersOpen(false);
+  }, [selectedCount]);
 
   const exportMutation = useMutation({
     mutationFn: async (format: string) => {
@@ -71,7 +84,7 @@ export function DataTable<TData>({
   });
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('flex flex-col gap-2', className)}>
       {/* Toolbar */}
       {showToolbar && (
         <div className="flex items-center gap-4">
@@ -111,17 +124,62 @@ export function DataTable<TData>({
             {enableViews && slug && <DataTableViewsMenu slug={slug} />}
             {importExport && (
               <DropdownMenu
-                trigger={{ children: <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="Import / Export"><TableProperties className="h-4 w-4" /></Button> }}
+                trigger={{
+                  children: (
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="Import / Export">
+                      <TableProperties className="h-4 w-4" />
+                    </Button>
+                  ),
+                }}
                 items={[
-                  { type: 'item' as const, id: 'import', label: 'Import', icon: ArrowUpFromLine, onClick: importDialog.open },
                   {
-                    type: 'sub' as const, id: 'export', label: 'Export All', icon: ArrowDownToLine,
+                    type: 'item' as const,
+                    id: 'import',
+                    label: 'Import',
+                    icon: ArrowUpFromLine,
+                    onClick: importDialog.open,
+                  },
+                  {
+                    type: 'sub' as const,
+                    id: 'export',
+                    label: 'Export All',
+                    icon: ArrowDownToLine,
                     items: [
-                      { type: 'item' as const, id: 'csv', label: 'CSV (.csv)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('csv') },
-                      { type: 'item' as const, id: 'xlsx', label: 'Excel (.xlsx)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('xlsx') },
-                      { type: 'item' as const, id: 'xls', label: 'Excel 97-2004 (.xls)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('xls') },
-                      { type: 'item' as const, id: 'ods', label: 'OpenDocument (.ods)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('ods') },
-                      { type: 'item' as const, id: 'tsv', label: 'TSV (.tsv)', disabled: exportMutation.isPending, onClick: () => exportMutation.mutate('tsv') },
+                      {
+                        type: 'item' as const,
+                        id: 'csv',
+                        label: 'CSV (.csv)',
+                        disabled: exportMutation.isPending,
+                        onClick: () => exportMutation.mutate('csv'),
+                      },
+                      {
+                        type: 'item' as const,
+                        id: 'xlsx',
+                        label: 'Excel (.xlsx)',
+                        disabled: exportMutation.isPending,
+                        onClick: () => exportMutation.mutate('xlsx'),
+                      },
+                      {
+                        type: 'item' as const,
+                        id: 'xls',
+                        label: 'Excel 97-2004 (.xls)',
+                        disabled: exportMutation.isPending,
+                        onClick: () => exportMutation.mutate('xls'),
+                      },
+                      {
+                        type: 'item' as const,
+                        id: 'ods',
+                        label: 'OpenDocument (.ods)',
+                        disabled: exportMutation.isPending,
+                        onClick: () => exportMutation.mutate('ods'),
+                      },
+                      {
+                        type: 'item' as const,
+                        id: 'tsv',
+                        label: 'TSV (.tsv)',
+                        disabled: exportMutation.isPending,
+                        onClick: () => exportMutation.mutate('tsv'),
+                      },
                     ],
                   },
                 ]}
@@ -132,28 +190,40 @@ export function DataTable<TData>({
         </div>
       )}
 
-      {/* Selection bar */}
-      <DataTableSelectionBar table={table} importExport={importExport}>
-        {selectActions?.(table.getFilteredSelectedRowModel().rows)}
-      </DataTableSelectionBar>
-
-      {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        {/* Sliding filter panel */}
-        {filters && (
-          <div
-            className={cn(
-              'grid transition-all duration-200 ease-in-out',
-              filtersOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-            )}
-          >
-            <div className="overflow-hidden">
+      {/* Table container — flex column, fills remaining space */}
+      <div className="border rounded-lg overflow-hidden flex flex-col" style={{ height: MODE_HEIGHTS[mode] }}>
+        {/* Shared slot: SelectionBar OR FilterPanel (mutually exclusive, animated) */}
+        <AnimatePresence mode="wait">
+          {selectedCount > 0 ? (
+            <motion.div
+              key="selection"
+              className="shrink-0 overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <DataTableSelectionBar table={table} importExport={importExport}>
+                {selectActions?.(table.getFilteredSelectedRowModel().rows)}
+              </DataTableSelectionBar>
+            </motion.div>
+          ) : filters && filtersOpen ? (
+            <motion.div
+              key="filters"
+              className="shrink-0 overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            >
               <DataTableFilters filters={filters} table={table} />
-            </div>
-          </div>
-        )}
-        <div className="relative flex w-full flex-col overflow-auto" style={{ maxHeight, minHeight }}>
-          <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        {/* Fixed header */}
+        <div className="shrink-0" style={{ minWidth: table.getCenterTotalSize() }}>
+          <table className="w-full text-sm">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -200,6 +270,12 @@ export function DataTable<TData>({
                 </TableRow>
               ))}
             </TableHeader>
+          </table>
+        </div>
+
+        {/* Scrollable body — only this area has the scrollbar */}
+        <div className="relative flex w-full flex-col overflow-auto overscroll-none flex-1">
+          <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
             {(isLoading || table.getRowModel().rows.length > 0) && (
               <TableBody>
                 {isLoading
@@ -251,8 +327,8 @@ export function DataTable<TData>({
         </div>
       </div>
 
-      {/* Pagination */}
-      <DataTablePagination table={table} />
+      {/* Pagination — hidden in compact mode */}
+      {mode !== 'compact' && <DataTablePagination table={table} />}
 
       {/* Import dialog */}
       {importExport && (

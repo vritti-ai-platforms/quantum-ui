@@ -29,8 +29,8 @@ export function DataTableSelectionBar<TData>({ table, children, className, impor
   };
 
   return (
-    <div className={cn('flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-lg', className)}>
-      <span className="text-sm font-medium text-primary mr-2">
+    <div className={cn('flex items-center gap-2 px-4 py-3 border-b', className)}>
+      <span className="text-sm font-medium mr-2">
         {count} {count === 1 ? singular : plural} selected
       </span>
       {children}
@@ -49,14 +49,6 @@ export function DataTableSelectionBar<TData>({ table, children, className, impor
             Export
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-destructive hover:bg-destructive/15"
-          onClick={() => table.toggleAllRowsSelected(false)}
-        >
-          Clear selection
-        </Button>
       </div>
     </div>
   );
