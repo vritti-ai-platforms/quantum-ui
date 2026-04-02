@@ -21,12 +21,13 @@ export function DataTablePagination<TData>({
 }: DataTablePaginationProps<TData>) {
   const [pageInputValue, setPageInputValue] = useState<string | null>(null);
 
-  const totalRows = table.getFilteredRowModel().rows.length;
+  const totalRows = table.getRowCount();
   const pageSize = table.getState().pagination.pageSize;
   const currentPage = table.getState().pagination.pageIndex + 1;
   const totalPages = table.getPageCount();
+  const rowsOnPage = table.getRowModel().rows.length;
   const start = totalRows === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const end = Math.min(currentPage * pageSize, totalRows);
+  const end = start + rowsOnPage - (rowsOnPage > 0 ? 1 : 0);
   const meta = table.options.meta as DataTableMeta | undefined;
   const singular = meta?.singular ?? 'Row';
   const plural = meta?.plural ?? 'Rows';
