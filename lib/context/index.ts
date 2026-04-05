@@ -12,3 +12,4 @@ export {
   ThemeProvider,
   type ThemeProviderProps,
 } from './ThemeContext';
+export { type LayoutMode, LayoutModeProvider, useLayoutMode } from './LayoutModeContext';
