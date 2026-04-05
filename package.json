@@ -284,9 +284,13 @@
       "types": "./dist/lib/utils/motion.d.ts",
       "import": "./dist/utils/motion.js"
     },
-    "./utils/slug": {
+    "./slug": {
       "types": "./dist/lib/utils/slug.d.ts",
       "import": "./dist/utils/slug.js"
+    },
+    "./lodash": {
+      "types": "./dist/lib/utils/lodash.d.ts",
+      "import": "./dist/utils/lodash.js"
     },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",

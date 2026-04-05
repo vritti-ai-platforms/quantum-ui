@@ -98,6 +98,7 @@ export default defineConfig({
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
         'utils/motion': resolve(__dirname, 'lib/utils/motion.ts'),
         'utils/slug': resolve(__dirname, 'lib/utils/slug.ts'),
+        'utils/lodash': resolve(__dirname, 'lib/utils/lodash.ts'),
       },
       name: 'QuantumUI',
       formats: ['es'],
@@ -105,7 +106,7 @@ export default defineConfig({
     },
     rollupOptions: {
       external: (id, parentId) => {
-        // Don't externalize axios when building utils/axios entry
+        // Don't externalize axios when building the axios entry
         if (parentId?.includes('lib/utils/axios')) {
           return ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom'].includes(id);
         }
