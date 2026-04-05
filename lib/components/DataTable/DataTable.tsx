@@ -327,8 +327,10 @@ export function DataTable<TData>({
         </div>
       </div>
 
-      {/* Pagination — hidden in compact mode */}
-      {mode !== 'compact' && <DataTablePagination table={table} />}
+      {/* Pagination — hidden in compact mode when all rows fit on one page */}
+      {(mode !== 'compact' || table.getRowCount() > (table.getState().pagination?.pageSize ?? 20)) && (
+        <DataTablePagination table={table} />
+      )}
 
       {/* Import dialog */}
       {importExport && (
