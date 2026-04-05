@@ -1,4 +1,5 @@
 export * from './app';
+export * from './category';
 export * from './cloud-provider';
 export * from './currency';
 export * from './deployment';

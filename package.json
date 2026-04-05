@@ -168,6 +168,10 @@
       "types": "./dist/lib/selects/app-code/index.d.ts",
       "import": "./dist/selects/app-code.js"
     },
+    "./selects/category": {
+      "types": "./dist/lib/selects/category/index.d.ts",
+      "import": "./dist/selects/category.js"
+    },
     "./selects/microfrontend": {
       "types": "./dist/lib/selects/microfrontend/index.d.ts",
       "import": "./dist/selects/microfrontend.js"

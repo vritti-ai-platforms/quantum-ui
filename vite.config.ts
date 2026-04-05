@@ -58,6 +58,7 @@ export default defineConfig({
         'selects/feature': resolve(__dirname, 'lib/selects/feature/index.ts'),
         'selects/app': resolve(__dirname, 'lib/selects/app/index.ts'),
         'selects/app-code': resolve(__dirname, 'lib/selects/app-code/index.ts'),
+        'selects/category': resolve(__dirname, 'lib/selects/category/index.ts'),
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
