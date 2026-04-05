@@ -20,6 +20,7 @@ export * from './FilePreview';
 export * from './Form';
 export * from './HierarchyGraph';
 export * from './OTPField';
+export * from './PageContent';
 export * from './PageHeader';
 export * from './PasswordField';
 export * from './PhoneField';

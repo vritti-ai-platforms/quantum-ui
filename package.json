@@ -180,6 +180,10 @@
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
     },
+    "./PageContent": {
+      "types": "./dist/lib/components/PageContent/index.d.ts",
+      "import": "./dist/components/PageContent.js"
+    },
     "./PageHeader": {
       "types": "./dist/lib/components/PageHeader/index.d.ts",
       "import": "./dist/components/PageHeader.js"
