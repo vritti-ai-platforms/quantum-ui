@@ -223,7 +223,7 @@ export function DataTable<TData>({
 
         {/* Fixed header */}
         <div className="shrink-0" style={{ minWidth: table.getCenterTotalSize() }}>
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -234,7 +234,7 @@ export function DataTable<TData>({
                       <TableHead
                         key={header.id}
                         colSpan={header.colSpan}
-                        style={{ width: isActions ? '52px' : header.getSize() }}
+                        style={isActions ? { width: '52px' } : { width: header.getSize(), minWidth: header.getSize(), maxWidth: header.getSize() }}
                         className={cn('relative group/resize', isActions ? 'text-right' : 'text-center')}
                         aria-sort={
                           header.column.getCanSort()
@@ -275,7 +275,7 @@ export function DataTable<TData>({
 
         {/* Scrollable body — only this area has the scrollbar */}
         <div className="relative flex w-full flex-col overflow-auto overscroll-none flex-1">
-          <table className="w-full caption-bottom text-sm" style={{ minWidth: table.getCenterTotalSize() }}>
+          <table className="w-full caption-bottom text-sm table-fixed" style={{ minWidth: table.getCenterTotalSize() }}>
             {(isLoading || table.getRowModel().rows.length > 0) && (
               <TableBody>
                 {isLoading
@@ -297,7 +297,7 @@ export function DataTable<TData>({
                           <TableCell
                             key={cell.id}
                             className={densityClasses[density]}
-                            style={{ width: cell.column.id === 'actions' ? '52px' : cell.column.getSize() }}
+                            style={cell.column.id === 'actions' ? { width: '52px' } : { width: cell.column.getSize(), minWidth: cell.column.getSize(), maxWidth: cell.column.getSize() }}
                           >
                             <div
                               className={cn(

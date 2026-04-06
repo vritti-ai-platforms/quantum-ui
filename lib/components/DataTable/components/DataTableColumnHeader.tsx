@@ -33,20 +33,22 @@ export function DataTableColumnHeader<TData, TValue>({
     <button
       type="button"
       className={cn(
-        'flex items-center cursor-pointer select-none group bg-transparent border-0 p-0 text-inherit',
+        'relative flex items-center cursor-pointer select-none group bg-transparent border-0 p-0 text-inherit',
         className,
       )}
       onClick={(e) => column.getToggleSortingHandler()?.(e)}
     >
       <span className="font-medium">{title}</span>
       {pinnedBadge}
-      {column.getIsSorted() === 'desc' ? (
-        <ArrowDown className="h-4 w-4 ml-2" />
-      ) : column.getIsSorted() === 'asc' ? (
-        <ArrowUp className="h-4 w-4 ml-2" />
-      ) : (
-        <ArrowUp className="h-4 w-0 overflow-hidden opacity-0 group-hover:w-4 group-hover:ml-2 group-hover:opacity-100 transition-all" />
-      )}
+      <span className="absolute -right-5 top-1/2 -translate-y-1/2">
+        {column.getIsSorted() === 'desc' ? (
+          <ArrowDown className="h-3.5 w-3.5" />
+        ) : column.getIsSorted() === 'asc' ? (
+          <ArrowUp className="h-3.5 w-3.5" />
+        ) : (
+          <ArrowUp className="h-3.5 w-3.5 opacity-0 group-hover:opacity-30 transition-opacity" />
+        )}
+      </span>
     </button>
   );
 }
