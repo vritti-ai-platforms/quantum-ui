@@ -71,6 +71,11 @@ export interface AxiosConfig {
    * Default headers to include in all requests
    */
   headers?: Record<string, string>;
+
+  /**
+   * Custom request interceptor — called before every request to add dynamic headers or modify config
+   */
+  onRequest?: (config: import('axios').InternalAxiosRequestConfig) => void | Promise<void>;
 }
 
 /**
