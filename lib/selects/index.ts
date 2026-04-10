@@ -12,4 +12,5 @@ export * from './industry';
 export * from './inventory-item';
 export * from './plan';
 export * from './region';
+export * from './supplier';
 export * from './uom';
