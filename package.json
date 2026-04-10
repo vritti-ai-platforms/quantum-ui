@@ -168,9 +168,21 @@
       "types": "./dist/lib/selects/app-code/index.d.ts",
       "import": "./dist/selects/app-code.js"
     },
+    "./selects/bom": {
+      "types": "./dist/lib/selects/bom/index.d.ts",
+      "import": "./dist/selects/bom.js"
+    },
     "./selects/category": {
       "types": "./dist/lib/selects/category/index.d.ts",
       "import": "./dist/selects/category.js"
+    },
+    "./selects/inventory-item": {
+      "types": "./dist/lib/selects/inventory-item/index.d.ts",
+      "import": "./dist/selects/inventory-item.js"
+    },
+    "./selects/uom": {
+      "types": "./dist/lib/selects/uom/index.d.ts",
+      "import": "./dist/selects/uom.js"
     },
     "./selects/microfrontend": {
       "types": "./dist/lib/selects/microfrontend/index.d.ts",

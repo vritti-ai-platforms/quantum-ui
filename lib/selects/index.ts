@@ -1,4 +1,5 @@
 export * from './app';
+export * from './bom';
 export * from './category';
 export * from './cloud-provider';
 export * from './currency';
@@ -8,5 +9,7 @@ export * from './microfrontend';
 export * from './timezone';
 export * from './feature';
 export * from './industry';
+export * from './inventory-item';
 export * from './plan';
 export * from './region';
+export * from './uom';
