@@ -8,7 +8,7 @@ export interface PageContentProps extends React.HTMLAttributes<HTMLDivElement> {
 export function PageContent({ children, className, ...props }: PageContentProps) {
   return (
     <div
-      className={cn('flex overflow-hidden rounded-xl border bg-card', className)}
+      className={cn('flex overflow-hidden rounded-xl border bg-background', className)}
       style={{ height: 'calc(100vh - 220px)' }}
       {...props}
     >
