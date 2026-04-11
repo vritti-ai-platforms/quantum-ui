@@ -65,6 +65,7 @@ export default defineConfig({
         'selects/storage-location': resolve(__dirname, 'lib/selects/storage-location/index.ts'),
         'selects/supplier': resolve(__dirname, 'lib/selects/supplier/index.ts'),
         'selects/uom': resolve(__dirname, 'lib/selects/uom/index.ts'),
+        'selects/user': resolve(__dirname, 'lib/selects/user/index.ts'),
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),

@@ -192,6 +192,10 @@
       "types": "./dist/lib/selects/uom/index.d.ts",
       "import": "./dist/selects/uom.js"
     },
+    "./selects/user": {
+      "types": "./dist/lib/selects/user/index.d.ts",
+      "import": "./dist/selects/user.js"
+    },
     "./selects/microfrontend": {
       "types": "./dist/lib/selects/microfrontend/index.d.ts",
       "import": "./dist/selects/microfrontend.js"

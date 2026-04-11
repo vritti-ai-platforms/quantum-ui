@@ -15,3 +15,4 @@ export * from './plan';
 export * from './region';
 export * from './supplier';
 export * from './uom';
+export * from './user';
