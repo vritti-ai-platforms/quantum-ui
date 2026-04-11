@@ -180,6 +180,10 @@
       "types": "./dist/lib/selects/inventory-item/index.d.ts",
       "import": "./dist/selects/inventory-item.js"
     },
+    "./selects/storage-location": {
+      "types": "./dist/lib/selects/storage-location/index.d.ts",
+      "import": "./dist/selects/storage-location.js"
+    },
     "./selects/supplier": {
       "types": "./dist/lib/selects/supplier/index.d.ts",
       "import": "./dist/selects/supplier.js"

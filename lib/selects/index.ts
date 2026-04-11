@@ -10,6 +10,7 @@ export * from './timezone';
 export * from './feature';
 export * from './industry';
 export * from './inventory-item';
+export * from './storage-location';
 export * from './plan';
 export * from './region';
 export * from './supplier';
