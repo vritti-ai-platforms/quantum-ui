@@ -84,6 +84,10 @@
       "types": "./dist/lib/components/TextField/index.d.ts",
       "import": "./dist/components/TextField.js"
     },
+    "./SearchBar": {
+      "types": "./dist/lib/components/SearchBar/index.d.ts",
+      "import": "./dist/components/SearchBar.js"
+    },
     "./Typography": {
       "types": "./dist/lib/components/Typography/index.d.ts",
       "import": "./dist/components/Typography.js"

@@ -68,6 +68,7 @@ export default defineConfig({
         'selects/user': resolve(__dirname, 'lib/selects/user/index.ts'),
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
+        'components/SearchBar': resolve(__dirname, 'lib/components/SearchBar/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),
         'components/Typography': resolve(__dirname, 'lib/components/Typography/index.ts'),
         'components/ThemeToggle': resolve(__dirname, 'lib/components/ThemeToggle/index.ts'),

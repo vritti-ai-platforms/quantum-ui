@@ -1,16 +1,15 @@
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { cva } from 'class-variance-authority';
-import { ChevronRight } from 'lucide-react';
+import { ChevronDown, GripVertical } from 'lucide-react';
 import React from 'react';
 import { cn } from '../../../shadcn/utils';
+import { SortableItem, type SortableItemRenderProps, SortableList } from '../Sortable';
 
 const treeVariants = cva(
-  'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10',
+  'group relative rounded-md border border-border/60 bg-background pr-1 transition-colors hover:bg-accent/40',
 );
 
-const selectedTreeVariants = cva('before:opacity-100 before:bg-accent/70 text-accent-foreground');
-
-const dragOverVariants = cva('before:opacity-100 before:bg-primary/20 text-primary-foreground');
+const selectedTreeVariants = cva('border-accent/40 bg-accent/60 text-accent-foreground');
 
 interface TreeDataItem {
   id: string;
@@ -36,14 +35,21 @@ type TreeRenderItemParams = {
   hasChildren: boolean;
 };
 
+export type TreeReorderPayload = {
+  parentId: string | null;
+  orderedIds: string[];
+};
+
 type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   data: TreeDataItem[] | TreeDataItem;
+  isLoading?: boolean;
+  loadingRowCount?: number;
   initialSelectedItemId?: string;
   onSelectChange?: (item: TreeDataItem | undefined) => void;
+  onReorder?: (payload: TreeReorderPayload) => void;
   expandAll?: boolean;
   defaultNodeIcon?: React.ComponentType<{ className?: string }>;
   defaultLeafIcon?: React.ComponentType<{ className?: string }>;
-  onDocumentDrag?: (sourceItem: TreeDataItem, targetItem: TreeDataItem) => void;
   renderItem?: (params: TreeRenderItemParams) => React.ReactNode;
 };
 
@@ -51,21 +57,21 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
   (
     {
       data,
+      isLoading = false,
+      loadingRowCount = 6,
       initialSelectedItemId,
       onSelectChange,
+      onReorder,
       expandAll,
       defaultLeafIcon,
       defaultNodeIcon,
       className,
-      onDocumentDrag,
       renderItem,
       ...props
     },
     ref,
   ) => {
     const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(initialSelectedItemId);
-
-    const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(null);
 
     const handleSelectChange = React.useCallback(
       (item: TreeDataItem | undefined) => {
@@ -77,20 +83,6 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       [onSelectChange],
     );
 
-    const handleDragStart = React.useCallback((item: TreeDataItem) => {
-      setDraggedItem(item);
-    }, []);
-
-    const handleDrop = React.useCallback(
-      (targetItem: TreeDataItem) => {
-        if (draggedItem && onDocumentDrag && draggedItem.id !== targetItem.id) {
-          onDocumentDrag(draggedItem, targetItem);
-        }
-        setDraggedItem(null);
-      },
-      [draggedItem, onDocumentDrag],
-    );
-
     const expandedItemIds = React.useMemo(() => {
       if (!initialSelectedItemId) {
         return [] as string[];
@@ -100,7 +92,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
 
       function walkTreeItems(items: TreeDataItem[] | TreeDataItem, targetId: string) {
         if (Array.isArray(items)) {
-          for (let i = 0; i < items.length; i++) {
+          for (let i = 0; i < items.length; i += 1) {
             ids.push(items[i].id);
             if (walkTreeItems(items[i], targetId) && !expandAll) {
               return true;
@@ -119,46 +111,72 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     }, [data, expandAll, initialSelectedItemId]);
 
     return (
-      <div className={cn('overflow-hidden relative p-2', className)}>
-        <TreeItem
-          data={data}
-          ref={ref}
-          selectedItemId={selectedItemId}
-          handleSelectChange={handleSelectChange}
-          expandedItemIds={expandedItemIds}
-          defaultLeafIcon={defaultLeafIcon}
-          defaultNodeIcon={defaultNodeIcon}
-          handleDragStart={handleDragStart}
-          handleDrop={handleDrop}
-          draggedItem={draggedItem}
-          renderItem={renderItem}
-          level={0}
-          {...props}
-        />
-        {/* biome-ignore lint/a11y/noStaticElementInteractions: drop target for drag-and-drop reordering */}
-        <div
-          role="presentation"
-          className="w-full h-[48px]"
-          onDrop={() => {
-            handleDrop({ id: '', name: 'parent_div' });
-          }}
-          onDragOver={(e) => e.preventDefault()}
-        />
+      <div className={cn('overflow-hidden relative px-1.5 pb-1.5 pt-1.5', className)}>
+        {isLoading ? (
+          <TreeSkeleton rowCount={loadingRowCount} />
+        ) : (
+          <TreeItem
+            data={data}
+            ref={ref}
+            selectedItemId={selectedItemId}
+            handleSelectChange={handleSelectChange}
+            expandedItemIds={expandedItemIds}
+            defaultLeafIcon={defaultLeafIcon}
+            defaultNodeIcon={defaultNodeIcon}
+            renderItem={renderItem}
+            onReorder={onReorder}
+            parentId={null}
+            level={0}
+            {...props}
+          />
+        )}
       </div>
     );
   },
 );
 TreeView.displayName = 'TreeView';
 
-type TreeItemProps = TreeProps & {
+const TreeSkeleton = ({ rowCount }: { rowCount: number }) => {
+  const rows = React.useMemo(
+    () =>
+      Array.from({ length: rowCount }, (_, index) => {
+        const variant = index % 3;
+
+        return {
+          id: crypto.randomUUID(),
+          indentClass: variant === 0 ? '' : variant === 1 ? 'ml-3' : 'ml-6',
+          widthClass: variant === 0 ? 'w-2/3' : variant === 1 ? 'w-1/2' : 'w-2/5',
+        };
+      }),
+    [rowCount],
+  );
+
+  return (
+    <div aria-hidden="true" className="space-y-1.5">
+      {rows.map((row) => {
+        return (
+          <div key={row.id} className={cn('h-10 rounded-md border border-border/60 bg-background', row.indentClass)}>
+            <div className="flex h-full items-center px-3">
+              <div className="h-4 w-4 rounded-full bg-muted animate-pulse" />
+              <div className={cn('ml-2 h-4 rounded bg-muted animate-pulse', row.widthClass)} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+type TreeItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  data: TreeDataItem[] | TreeDataItem;
   selectedItemId?: string;
   handleSelectChange: (item: TreeDataItem | undefined) => void;
   expandedItemIds: string[];
   defaultNodeIcon?: React.ComponentType<{ className?: string }>;
   defaultLeafIcon?: React.ComponentType<{ className?: string }>;
-  handleDragStart?: (item: TreeDataItem) => void;
-  handleDrop?: (item: TreeDataItem) => void;
-  draggedItem: TreeDataItem | null;
+  renderItem?: (params: TreeRenderItemParams) => React.ReactNode;
+  onReorder?: (payload: TreeReorderPayload) => void;
+  parentId: string | null;
   level?: number;
 };
 
@@ -172,57 +190,75 @@ const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
       expandedItemIds,
       defaultNodeIcon,
       defaultLeafIcon,
-      handleDragStart,
-      handleDrop,
-      draggedItem,
       renderItem,
+      onReorder,
+      parentId,
       level,
-      onSelectChange,
-      expandAll,
-      initialSelectedItemId,
-      onDocumentDrag,
       ...props
     },
     ref,
   ) => {
-    if (!Array.isArray(data)) {
-      data = [data];
-    }
+    const items = React.useMemo(() => (Array.isArray(data) ? data : [data]), [data]);
+
+    const handleReorder = React.useCallback(
+      (nextItems: TreeDataItem[]) => {
+        if (!onReorder || nextItems.length < 2) return;
+
+        const hasDisabledInMoveSet = nextItems.some((item) => item.disabled || item.draggable === false);
+        if (hasDisabledInMoveSet) return;
+
+        onReorder({ parentId, orderedIds: nextItems.map((item) => item.id) });
+      },
+      [onReorder, parentId],
+    );
+
     return (
       <div ref={ref} role="tree" className={className} {...props}>
-        <ul>
-          {data.map((item) => (
-            <li key={item.id}>
-              {item.children ? (
-                <TreeNode
-                  item={item}
-                  level={level ?? 0}
-                  selectedItemId={selectedItemId}
-                  expandedItemIds={expandedItemIds}
-                  handleSelectChange={handleSelectChange}
-                  defaultNodeIcon={defaultNodeIcon}
-                  defaultLeafIcon={defaultLeafIcon}
-                  handleDragStart={handleDragStart}
-                  handleDrop={handleDrop}
-                  draggedItem={draggedItem}
-                  renderItem={renderItem}
-                />
-              ) : (
-                <TreeLeaf
-                  item={item}
-                  level={level ?? 0}
-                  selectedItemId={selectedItemId}
-                  handleSelectChange={handleSelectChange}
-                  defaultLeafIcon={defaultLeafIcon}
-                  handleDragStart={handleDragStart}
-                  handleDrop={handleDrop}
-                  draggedItem={draggedItem}
-                  renderItem={renderItem}
-                />
-              )}
-            </li>
-          ))}
-        </ul>
+        <SortableList items={items} onReorder={handleReorder}>
+          <ul className="m-0 list-none p-0">
+            {items.map((item) => (
+              <li key={item.id} className="m-0 mb-1.5 p-0 last:mb-0">
+                <SortableItem id={item.id}>
+                  {({ dragHandleProps, isDragging }) => {
+                    const sortableProps =
+                      items.length < 2 || item.disabled || item.draggable === false ? undefined : dragHandleProps;
+
+                    if (item.children) {
+                      return (
+                        <TreeNode
+                          item={item}
+                          level={level ?? 0}
+                          selectedItemId={selectedItemId}
+                          expandedItemIds={expandedItemIds}
+                          handleSelectChange={handleSelectChange}
+                          defaultNodeIcon={defaultNodeIcon}
+                          defaultLeafIcon={defaultLeafIcon}
+                          renderItem={renderItem}
+                          onReorder={onReorder}
+                          sortableProps={sortableProps}
+                          isDragging={isDragging}
+                        />
+                      );
+                    }
+
+                    return (
+                      <TreeLeaf
+                        item={item}
+                        level={level ?? 0}
+                        selectedItemId={selectedItemId}
+                        handleSelectChange={handleSelectChange}
+                        defaultLeafIcon={defaultLeafIcon}
+                        renderItem={renderItem}
+                        sortableProps={sortableProps}
+                        isDragging={isDragging}
+                      />
+                    );
+                  }}
+                </SortableItem>
+              </li>
+            ))}
+          </ul>
+        </SortableList>
       </div>
     );
   },
@@ -236,10 +272,10 @@ const TreeNode = ({
   selectedItemId,
   defaultNodeIcon,
   defaultLeafIcon,
-  handleDragStart,
-  handleDrop,
-  draggedItem,
   renderItem,
+  onReorder,
+  sortableProps,
+  isDragging,
   level = 0,
 }: {
   item: TreeDataItem;
@@ -248,63 +284,33 @@ const TreeNode = ({
   selectedItemId?: string;
   defaultNodeIcon?: React.ComponentType<{ className?: string }>;
   defaultLeafIcon?: React.ComponentType<{ className?: string }>;
-  handleDragStart?: (item: TreeDataItem) => void;
-  handleDrop?: (item: TreeDataItem) => void;
-  draggedItem: TreeDataItem | null;
   renderItem?: (params: TreeRenderItemParams) => React.ReactNode;
+  onReorder?: (payload: TreeReorderPayload) => void;
+  sortableProps?: SortableItemRenderProps['dragHandleProps'];
+  isDragging: boolean;
   level?: number;
 }) => {
   const [value, setValue] = React.useState(expandedItemIds.includes(item.id) ? [item.id] : []);
-  const [isDragOver, setIsDragOver] = React.useState(false);
   const hasChildren = !!item.children?.length;
   const isSelected = selectedItemId === item.id;
   const isOpen = value.includes(item.id);
-
-  const onDragStart = (e: React.DragEvent) => {
-    if (!item.draggable) {
-      e.preventDefault();
-      return;
-    }
-    e.dataTransfer.setData('text/plain', item.id);
-    handleDragStart?.(item);
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    if (item.droppable !== false && draggedItem && draggedItem.id !== item.id) {
-      e.preventDefault();
-      setIsDragOver(true);
-    }
-  };
-
-  const onDragLeave = () => {
-    setIsDragOver(false);
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    handleDrop?.(item);
-  };
 
   return (
     <AccordionPrimitive.Root type="multiple" value={value} onValueChange={(s) => setValue(s)}>
       <AccordionPrimitive.Item value={item.id}>
         <AccordionTrigger
+          sortableProps={sortableProps}
           className={cn(
             treeVariants(),
+            sortableProps ? 'pl-8' : 'pl-3',
             isSelected && selectedTreeVariants(),
-            isDragOver && dragOverVariants(),
+            isDragging && 'opacity-60',
             item.className,
           )}
           onClick={() => {
             handleSelectChange(item);
             item.onClick?.();
           }}
-          draggable={!!item.draggable}
-          onDragStart={onDragStart}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
         >
           {renderItem ? (
             renderItem({
@@ -318,12 +324,12 @@ const TreeNode = ({
           ) : (
             <>
               <TreeIcon item={item} isSelected={isSelected} isOpen={isOpen} default={defaultNodeIcon} />
-              <span className="text-sm truncate">{item.name}</span>
+              <span className="flex-grow text-sm truncate">{item.name}</span>
               <TreeActions isSelected={isSelected}>{item.actions}</TreeActions>
             </>
           )}
         </AccordionTrigger>
-        <AccordionContent className="ml-4 pl-1 border-l">
+        <AccordionContent className="relative mt-1.5 ml-2.5 pl-2.5 before:absolute before:bottom-1 before:left-0 before:top-1 before:w-px before:bg-border/60">
           <TreeItem
             data={item.children ? item.children : item}
             selectedItemId={selectedItemId}
@@ -331,10 +337,9 @@ const TreeNode = ({
             expandedItemIds={expandedItemIds}
             defaultLeafIcon={defaultLeafIcon}
             defaultNodeIcon={defaultNodeIcon}
-            handleDragStart={handleDragStart}
-            handleDrop={handleDrop}
-            draggedItem={draggedItem}
             renderItem={renderItem}
+            onReorder={onReorder}
+            parentId={item.id}
             level={level + 1}
           />
         </AccordionContent>
@@ -351,10 +356,9 @@ const TreeLeaf = React.forwardRef<
     selectedItemId?: string;
     handleSelectChange: (item: TreeDataItem | undefined) => void;
     defaultLeafIcon?: React.ComponentType<{ className?: string }>;
-    handleDragStart?: (item: TreeDataItem) => void;
-    handleDrop?: (item: TreeDataItem) => void;
-    draggedItem: TreeDataItem | null;
     renderItem?: (params: TreeRenderItemParams) => React.ReactNode;
+    sortableProps?: SortableItemRenderProps['dragHandleProps'];
+    isDragging: boolean;
   }
 >(
   (
@@ -365,117 +369,106 @@ const TreeLeaf = React.forwardRef<
       selectedItemId,
       handleSelectChange,
       defaultLeafIcon,
-      handleDragStart,
-      handleDrop,
-      draggedItem,
       renderItem,
+      sortableProps,
+      isDragging,
       ...props
     },
     ref,
   ) => {
-    const [isDragOver, setIsDragOver] = React.useState(false);
     const isSelected = selectedItemId === item.id;
 
-    const onDragStart = (e: React.DragEvent) => {
-      if (!item.draggable || item.disabled) {
-        e.preventDefault();
-        return;
+    const setLeafRef = (node: HTMLDivElement | null) => {
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
       }
-      e.dataTransfer.setData('text/plain', item.id);
-      handleDragStart?.(item);
-    };
-
-    const onDragOver = (e: React.DragEvent) => {
-      if (item.droppable !== false && !item.disabled && draggedItem && draggedItem.id !== item.id) {
-        e.preventDefault();
-        setIsDragOver(true);
-      }
-    };
-
-    const onDragLeave = () => {
-      setIsDragOver(false);
-    };
-
-    const onDrop = (e: React.DragEvent) => {
-      if (item.disabled) return;
-      e.preventDefault();
-      setIsDragOver(false);
-      handleDrop?.(item);
     };
 
     return (
-      // biome-ignore lint/a11y/useSemanticElements: div ref required by forwardRef; role+tabIndex+onKeyDown added for a11y
-      <div
-        ref={ref}
-        role="button"
-        tabIndex={item.disabled ? -1 : 0}
-        className={cn(
-          'flex w-full text-left items-center py-2 cursor-pointer before:right-1',
-          treeVariants(),
-          className,
-          isSelected && selectedTreeVariants(),
-          isDragOver && dragOverVariants(),
-          item.disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
-          item.className,
-        )}
-        onClick={() => {
-          if (item.disabled) return;
-          handleSelectChange(item);
-          item.onClick?.();
-        }}
-        onKeyDown={(e) => {
-          if (item.disabled) return;
-          if (e.key === 'Enter' || e.key === ' ') {
+      <div ref={setLeafRef} className="group relative" {...props}>
+        <TreeDragHandle sortableProps={sortableProps} />
+        <button
+          type="button"
+          disabled={item.disabled}
+          className={cn(
+            'flex h-10 w-full text-left items-center py-0 before:right-1',
+            treeVariants(),
+            sortableProps ? 'pl-8' : 'pl-3',
+            className,
+            isSelected && selectedTreeVariants(),
+            isDragging && 'opacity-60',
+            item.disabled && 'opacity-50 cursor-not-allowed',
+            item.className,
+          )}
+          onClick={() => {
+            if (item.disabled) return;
             handleSelectChange(item);
             item.onClick?.();
-          }
-        }}
-        draggable={!!item.draggable && !item.disabled}
-        onDragStart={onDragStart}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        {...props}
-      >
-        {renderItem ? (
-          <>
-            <div className="h-4 w-4 shrink-0 mr-1" />
-            {renderItem({
+          }}
+        >
+          {renderItem ? (
+            renderItem({
               item,
               level,
               isLeaf: true,
               isSelected,
               hasChildren: false,
-            })}
-          </>
-        ) : (
-          <>
-            <TreeIcon item={item} isSelected={isSelected} default={defaultLeafIcon} />
-            <span className="flex-grow text-sm truncate">{item.name}</span>
-            <TreeActions isSelected={isSelected && !item.disabled}>{item.actions}</TreeActions>
-          </>
-        )}
+            })
+          ) : (
+            <>
+              <TreeIcon item={item} isSelected={isSelected} default={defaultLeafIcon} />
+              <span className="flex-grow text-sm truncate">{item.name}</span>
+              <TreeActions isSelected={isSelected && !item.disabled}>{item.actions}</TreeActions>
+            </>
+          )}
+        </button>
       </div>
     );
   },
 );
 TreeLeaf.displayName = 'TreeLeaf';
 
+const TreeDragHandle = ({ sortableProps }: { sortableProps?: SortableItemRenderProps['dragHandleProps'] }) => {
+  if (!sortableProps) return null;
+
+  return (
+    <button
+      type="button"
+      ref={sortableProps?.ref}
+      className={cn(
+        'inline-flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground transition-opacity focus-visible:outline-none',
+        'absolute left-2 top-1/2 -translate-y-1/2 z-10 cursor-grab active:cursor-grabbing opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto',
+      )}
+      aria-label="Reorder"
+      title="Reorder"
+      {...sortableProps?.attributes}
+      {...sortableProps?.listeners}
+    >
+      <GripVertical className="h-3.5 w-3.5" />
+    </button>
+  );
+};
+
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header>
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
+    sortableProps?: SortableItemRenderProps['dragHandleProps'];
+  }
+>(({ className, children, sortableProps, ...props }, ref) => (
+  <AccordionPrimitive.Header className="group relative">
+    <TreeDragHandle sortableProps={sortableProps} />
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        'flex flex-1 w-full items-center py-2 transition-all first:[&[data-state=open]>svg]:first-of-type:rotate-90',
+        'flex h-10 flex-1 w-full items-center py-0 transition-all [&[data-state=closed]_.tree-chevron]:-rotate-90',
         className,
       )}
       {...props}
     >
-      <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-200 text-accent-foreground/50 mr-1" />
       {children}
+      <ChevronDown className="tree-chevron ml-2 h-4 w-4 shrink-0 transition-transform duration-200 text-accent-foreground/50" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));
@@ -493,7 +486,7 @@ const AccordionContent = React.forwardRef<
     )}
     {...props}
   >
-    <div className="pb-1 pt-0">{children}</div>
+    <div className="pt-0">{children}</div>
   </AccordionPrimitive.Content>
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;

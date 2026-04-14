@@ -38,6 +38,7 @@ export * from './Switch';
 export * from './Tabs';
 export * from './TextArea';
 export * from './TextField';
+export * from './SearchBar';
 export * from './ThemeToggle';
 export * from './Toggle';
 export * from './Typography';
