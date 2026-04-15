@@ -9,6 +9,7 @@ export * from './Checkbox';
 export * from './CheckboxGroup';
 export * from './Collapsible';
 export * from './DangerZone';
+export * from './DetailField';
 export * from './DataTable';
 export * from './DatePicker';
 export * from './Dialog';

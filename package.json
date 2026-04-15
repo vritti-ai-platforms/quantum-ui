@@ -344,7 +344,11 @@
       "types": "./dist/lib/theme/index.d.ts",
       "import": "./dist/theme/index.js"
     },
-    "./index.css": "./dist/assets/quantum-ui.css"
+    "./index.css": "./dist/assets/quantum-ui.css",
+    "./DetailField": {
+      "types": "./dist/lib/components/DetailField/index.d.ts",
+      "import": "./dist/components/DetailField.js"
+    }
   },
   "files": [
     "dist"
