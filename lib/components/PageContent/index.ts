@@ -1,1 +1,8 @@
-export { PageContent, type PageContentProps } from './PageContent';
+export {
+  PageContent,
+  PageContentDetails,
+  PageContentPanel,
+  type PageContentDetailsProps,
+  type PageContentPanelProps,
+  type PageContentProps,
+} from './PageContent';
