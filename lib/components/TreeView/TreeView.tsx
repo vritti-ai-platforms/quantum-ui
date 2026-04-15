@@ -40,6 +40,11 @@ export type TreeReorderPayload = {
   orderedIds: string[];
 };
 
+type TreeItemDefaults = {
+  draggable?: boolean;
+  droppable?: boolean;
+};
+
 type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   data: TreeDataItem[] | TreeDataItem;
   isLoading?: boolean;
@@ -51,6 +56,9 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   defaultNodeIcon?: React.ComponentType<{ className?: string }>;
   defaultLeafIcon?: React.ComponentType<{ className?: string }>;
   renderItem?: (params: TreeRenderItemParams) => React.ReactNode;
+  itemDefaults?: TreeItemDefaults;
+  defaultDraggable?: boolean;
+  defaultDroppable?: boolean;
 };
 
 const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
@@ -67,6 +75,9 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       defaultNodeIcon,
       className,
       renderItem,
+      itemDefaults,
+      defaultDraggable,
+      defaultDroppable,
       ...props
     },
     ref,
@@ -110,13 +121,22 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       return ids;
     }, [data, expandAll, initialSelectedItemId]);
 
+    const normalizedData = React.useMemo(
+      () =>
+        applyTreeItemDefaults(data, {
+          draggable: itemDefaults?.draggable ?? defaultDraggable,
+          droppable: itemDefaults?.droppable ?? defaultDroppable,
+        }),
+      [data, itemDefaults?.draggable, itemDefaults?.droppable, defaultDraggable, defaultDroppable],
+    );
+
     return (
       <div className={cn('overflow-hidden relative px-1.5 pb-1.5 pt-1.5', className)}>
         {isLoading ? (
           <TreeSkeleton rowCount={loadingRowCount} />
         ) : (
           <TreeItem
-            data={data}
+            data={normalizedData}
             ref={ref}
             selectedItemId={selectedItemId}
             handleSelectChange={handleSelectChange}
@@ -135,6 +155,26 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
   },
 );
 TreeView.displayName = 'TreeView';
+
+function applyTreeItemDefaults(
+  data: TreeDataItem[] | TreeDataItem,
+  defaults: TreeItemDefaults,
+): TreeDataItem[] | TreeDataItem {
+  if (Array.isArray(data)) {
+    return data.map((item) => applyTreeItemDefaultsToItem(item, defaults));
+  }
+
+  return applyTreeItemDefaultsToItem(data, defaults);
+}
+
+function applyTreeItemDefaultsToItem(data: TreeDataItem, defaults: TreeItemDefaults): TreeDataItem {
+  return {
+    ...data,
+    draggable: data.draggable ?? defaults.draggable,
+    droppable: data.droppable ?? defaults.droppable,
+    children: data.children ? data.children.map((child) => applyTreeItemDefaultsToItem(child, defaults)) : undefined,
+  };
+}
 
 const TreeSkeleton = ({ rowCount }: { rowCount: number }) => {
   const rows = React.useMemo(
