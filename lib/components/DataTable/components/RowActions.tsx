@@ -22,10 +22,11 @@ export interface RowAction {
 
 export interface RowActionsProps {
   actions: RowAction[];
+  disabledAll?: boolean;
 }
 
 // Renders a single action as a direct icon button or dialog trigger
-const DirectAction: React.FC<{ action: RowAction }> = ({ action }) => {
+const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ action, disabledAll }) => {
   const Icon = action.icon;
   const destructiveClass = action.variant === 'destructive' ? 'text-destructive hover:text-destructive' : '';
   const dialog = useDialog();
@@ -41,7 +42,7 @@ const DirectAction: React.FC<{ action: RowAction }> = ({ action }) => {
             variant="ghost"
             size="icon"
             className={`size-7 ${destructiveClass}`}
-            disabled={action.disabled}
+            disabled={disabledAll || action.disabled}
             onClick={open}
             aria-label={action.label}
           >
@@ -58,7 +59,7 @@ const DirectAction: React.FC<{ action: RowAction }> = ({ action }) => {
       variant="ghost"
       size="icon"
       className={`size-7 ${destructiveClass}`}
-      disabled={action.disabled}
+      disabled={disabledAll || action.disabled}
       onClick={action.onClick}
       aria-label={action.label}
     >
@@ -68,7 +69,7 @@ const DirectAction: React.FC<{ action: RowAction }> = ({ action }) => {
 };
 
 // Converts actions to DropdownMenu items format
-function toDropdownItems(actions: RowAction[]) {
+function toDropdownItems(actions: RowAction[], disabledAll?: boolean) {
   return actions.map((action) => {
     if (action.dialog) {
       return {
@@ -77,7 +78,7 @@ function toDropdownItems(actions: RowAction[]) {
         label: action.label,
         icon: action.icon,
         variant: action.variant,
-        disabled: action.disabled,
+        disabled: disabledAll || action.disabled,
         dialog: action.dialog,
       };
     }
@@ -87,27 +88,27 @@ function toDropdownItems(actions: RowAction[]) {
       label: action.label,
       icon: action.icon,
       variant: action.variant,
-      disabled: action.disabled,
+      disabled: disabledAll || action.disabled,
       onClick: action.onClick,
     };
   });
 }
 
 // Auto-layout row actions: 0→null, 1→button, 2→side-by-side, 3+→primary + ⋮ dropdown
-export const RowActions: React.FC<RowActionsProps> = ({ actions }) => {
+export const RowActions: React.FC<RowActionsProps> = ({ actions, disabledAll }) => {
   const visible = actions.filter((a) => !a.hidden);
 
   if (visible.length === 0) return null;
 
   if (visible.length === 1) {
-    return <DirectAction action={visible[0]} />;
+    return <DirectAction action={visible[0]} disabledAll={disabledAll} />;
   }
 
   if (visible.length === 2) {
     return (
       <div className="flex items-center gap-1">
-        <DirectAction action={visible[0]} />
-        <DirectAction action={visible[1]} />
+        <DirectAction action={visible[0]} disabledAll={disabledAll} />
+        <DirectAction action={visible[1]} disabledAll={disabledAll} />
       </div>
     );
   }
@@ -115,17 +116,17 @@ export const RowActions: React.FC<RowActionsProps> = ({ actions }) => {
   const [primary, ...overflow] = visible;
   return (
     <div className="flex items-center gap-1">
-      <DirectAction action={primary} />
+      <DirectAction action={primary} disabledAll={disabledAll} />
       <DropdownMenu
         trigger={{
           children: (
-            <Button variant="ghost" size="icon" className="size-7">
+            <Button variant="ghost" size="icon" className="size-7" disabled={disabledAll}>
               <MoreVertical className="size-4" />
             </Button>
           ),
         }}
         align="end"
-        items={toDropdownItems(overflow)}
+        items={toDropdownItems(overflow, disabledAll)}
       />
     </div>
   );

@@ -274,7 +274,7 @@ export function DataTable<TData>({
         </div>
 
         {/* Scrollable body — only this area has the scrollbar */}
-        <div className="relative flex w-full flex-col overflow-auto overscroll-none flex-1">
+        <div className="relative flex w-full flex-col overflow-auto overscroll-auto flex-1">
           <table className="w-full caption-bottom text-sm table-fixed" style={{ minWidth: table.getCenterTotalSize() }}>
             {(isLoading || table.getRowModel().rows.length > 0) && (
               <TableBody>
