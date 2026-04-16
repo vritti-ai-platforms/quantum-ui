@@ -171,12 +171,6 @@ export interface FormProps<
   children: React.ReactNode;
 
   /**
-   * Whether to automatically display root errors
-   * @default true
-   */
-  showRootError?: boolean;
-
-  /**
    * Position of the root error display
    * @default 'bottom'
    */
@@ -271,7 +265,6 @@ export function Form<
   form,
   onSubmit,
   children,
-  showRootError = false,
   rootErrorPosition = 'bottom',
   rootErrorClassName,
   rootErrorAction,
@@ -312,7 +305,6 @@ export function Form<
         // mapApiErrorsToForm handles axios error structure extraction internally
         mapApiErrorsToForm(error, form as any, {
           fieldMapping,
-          setRootError: showRootError,
         });
         // Log error for debugging
         console.error('[Form Submission Error]', error);
@@ -321,7 +313,7 @@ export function Form<
         axios.interceptors.request.eject(interceptorId);
       }
     },
-    [onSubmit, mutation, transformSubmit, fieldMapping, form, showRootError, resetOnSuccess],
+    [onSubmit, mutation, transformSubmit, fieldMapping, form, resetOnSuccess],
   );
 
   const handleSubmit = form.handleSubmit(wrappedOnSubmit as any);
@@ -333,7 +325,7 @@ export function Form<
     <FormProvider {...form}>
       <form onSubmit={handleSubmit} className={cn('space-y-4', className)} {...props}>
         {/* Top position error */}
-        {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
+        {rootErrorPosition === 'top' && form.formState.errors.root && (
           <Alert
             variant="destructive"
             title={form.formState.errors.root.type || 'Error'}
@@ -346,7 +338,7 @@ export function Form<
         {processedChildren}
 
         {/* Bottom position error */}
-        {showRootError && rootErrorPosition === 'bottom' && form.formState.errors.root && (
+        {rootErrorPosition === 'bottom' && form.formState.errors.root && (
           <Alert
             variant="destructive"
             title={form.formState.errors.root.type || 'Error'}

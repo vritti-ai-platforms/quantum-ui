@@ -51,7 +51,6 @@ export interface DialogProps<
   >['transformSubmit'];
   submitLabel?: string;
   cancelLabel?: string;
-  showRootError?: boolean;
   fieldMapping?: FieldMapping;
 }
 
@@ -80,7 +79,6 @@ export function Dialog<
   transformSubmit,
   submitLabel,
   cancelLabel,
-  showRootError,
   fieldMapping,
 }: DialogProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
   // Render the body+footer content — shared between default and form modes
@@ -94,7 +92,6 @@ export function Dialog<
           mutation={mutation}
           onSubmit={onFormSubmit}
           transformSubmit={transformSubmit}
-          showRootError={showRootError}
           fieldMapping={fieldMapping}
           className="space-y-4"
         >

@@ -105,6 +105,7 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
   const generalMessage = apiError.detail;
 
   // Map field-specific errors (field is always present in RFC 9457)
+  let mappedFieldErrorsCount = 0;
   if (apiError.errors && Array.isArray(apiError.errors)) {
     for (const errorItem of apiError.errors) {
       const formField = fieldMapping[errorItem.field] || errorItem.field;
@@ -113,11 +114,12 @@ export function mapApiErrorsToForm<TFieldValues extends FieldValues = FieldValue
         type: 'manual',
         message: errorItem.message,
       });
+      mappedFieldErrorsCount += 1;
     }
   }
 
-  // Root error from detail (independent of field errors)
-  if (generalMessage && setRootError) {
+  // Root error is shown only when no field errors are present
+  if (generalMessage && setRootError && mappedFieldErrorsCount === 0) {
     form.setError('root', {
       type: errorTitle,
       message: generalMessage,
