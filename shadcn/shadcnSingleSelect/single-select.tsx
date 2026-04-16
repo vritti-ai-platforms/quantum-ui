@@ -191,7 +191,8 @@ const SingleSelectRow = memo(function SingleSelectRow({
       aria-disabled={disabled}
       tabIndex={disabled ? undefined : 0}
       className={cn(
-        'relative flex w-full cursor-default flex-col items-start rounded-md h-8 justify-center pr-8 px-2 text-sm outline-hidden select-none',
+        'relative flex w-full cursor-default flex-col items-start rounded-md pr-8 px-2 text-sm outline-hidden select-none',
+        description ? 'min-h-11 justify-center py-1.5' : 'h-8 justify-center',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -231,7 +232,10 @@ function SingleSelectGroupLabel({ className, children, ...props }: SingleSelectG
   return (
     <div
       data-slot="single-select-group-label"
-      className={cn('text-muted-foreground px-2 py-1.5 text-xs', className)}
+      className={cn(
+        'text-foreground px-2 py-1 text-[10px] font-semibold uppercase tracking-wide',
+        className,
+      )}
       {...props}
     >
       {children}

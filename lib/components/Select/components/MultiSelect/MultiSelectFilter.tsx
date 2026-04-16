@@ -47,6 +47,10 @@ export interface MultiSelectFilterProps {
   defaultValue?: SelectValueType[];
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  // Transforms how label is displayed in option rows
+  transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
 }
 
 // Compact multi-select filter trigger with count-based label display
@@ -71,6 +75,8 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       defaultValue,
       searchPlaceholder = 'Search...',
       asyncState,
+      transformLabel,
+      transformDescription,
     },
     ref,
   ) => {
@@ -97,10 +103,16 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
+      const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
+      const optionDescription = option.description
+        ? (transformDescription ? transformDescription(option.description, option) : option.description)
+        : undefined;
+
       return (
         <MultiSelectRow
           key={String(option.value)}
-          name={option.label}
+          name={optionLabel}
+          description={optionDescription}
           checked={state.selectedSet.has(option.value)}
           onToggle={() => {
             state.toggleOption(option.value);

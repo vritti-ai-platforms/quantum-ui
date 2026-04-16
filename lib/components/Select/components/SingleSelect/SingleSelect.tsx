@@ -60,6 +60,8 @@ export interface SingleSelectProps {
   renderOption?: (props: SingleSelectOptionRenderProps) => React.ReactNode;
   // Transforms how labels are displayed in trigger and option rows
   transformLabel?: (label: string, option: SelectOption, context: SingleSelectLabelTransformContext) => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
   // Content rendered below the option list
   footer?: React.ReactNode;
   // Custom className for the popover content panel
@@ -95,6 +97,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       anchor,
       renderOption,
       transformLabel,
+      transformDescription,
       footer,
       contentClassName,
       onOpenChange,
@@ -140,7 +143,9 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
         <SingleSelectRow
           key={String(option.value)}
           name={transformLabel ? transformLabel(option.label, option, 'option') : option.label}
-          description={option.description}
+          description={
+            option.description ? (transformDescription ? transformDescription(option.description, option) : option.description) : undefined
+          }
           selected={state.selectedValue === option.value}
           onSelect={() => {
             state.selectOption(option.value);

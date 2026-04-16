@@ -39,6 +39,10 @@ export interface MultiSelectProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  // Transforms how label is displayed in option rows and selected trigger chips
+  transformLabel?: (label: string, option: SelectOption, context: 'option' | 'trigger') => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
   // Called when the popover open state changes
   onOpenChange?: (open: boolean) => void;
 }
@@ -67,6 +71,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       searchable = false,
       searchPlaceholder = 'Search...',
       asyncState,
+      transformLabel,
+      transformDescription,
       onOpenChange,
     },
     ref,
@@ -95,10 +101,16 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
+      const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
+      const optionDescription = option.description
+        ? (transformDescription ? transformDescription(option.description, option) : option.description)
+        : undefined;
+
       return (
         <MultiSelectRow
           key={String(option.value)}
-          name={option.label}
+          name={optionLabel}
+          description={optionDescription}
           checked={state.selectedSet.has(option.value)}
           onToggle={() => {
             state.toggleOption(option.value);
@@ -154,7 +166,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
         <span className="flex flex-wrap items-center gap-1">
           {state.selectedOptions.map((option) => (
             <Badge key={String(option.value)} variant="secondary" className="gap-1 pr-1">
-              {option.label}
+              {transformLabel ? transformLabel(option.label, option, 'trigger') : option.label}
               <button
                 type="button"
                 aria-label={`Remove ${option.label}`}

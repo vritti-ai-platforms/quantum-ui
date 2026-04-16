@@ -159,6 +159,7 @@ function MultiSelectList({ className, children, ...props }: MultiSelectListProps
 // MultiSelectRow — a single option row with a checkbox
 interface MultiSelectRowProps {
   name: string;
+  description?: string;
   checked: boolean;
   onToggle: () => void;
   disabled?: boolean;
@@ -167,6 +168,7 @@ interface MultiSelectRowProps {
 
 const MultiSelectRow = memo(function MultiSelectRow({
   name,
+  description,
   checked,
   onToggle,
   disabled,
@@ -194,7 +196,8 @@ const MultiSelectRow = memo(function MultiSelectRow({
       aria-disabled={disabled}
       tabIndex={disabled ? undefined : 0}
       className={cn(
-        'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none',
+        'relative flex w-full cursor-default gap-2 rounded-md px-2 text-sm outline-hidden select-none',
+        description ? 'min-h-11 items-start py-1.5' : 'h-8 items-center py-0',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -209,8 +212,12 @@ const MultiSelectRow = memo(function MultiSelectRow({
         disabled={disabled}
         tabIndex={-1}
         aria-hidden="true"
+        className="self-center"
       />
-      <span className="truncate">{name}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{name}</span>
+        {description && <span className="mt-0.5 block truncate text-xs text-muted-foreground">{description}</span>}
+      </span>
     </div>
   );
 });
@@ -237,7 +244,7 @@ function MultiSelectGroupLabel({ className, children, ...props }: MultiSelectGro
   return (
     <div
       data-slot="multi-select-group-label"
-      className={cn('text-muted-foreground px-2 py-1.5 text-xs', className)}
+      className={cn('text-foreground px-2 py-1 text-[10px] font-semibold uppercase tracking-wide', className)}
       {...props}
     >
       {children}
