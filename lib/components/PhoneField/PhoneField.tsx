@@ -81,6 +81,11 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
   ) => {
     const fieldId = React.useId();
     const hasError = !!error;
+    const phoneInputStyle = {
+      '--PhoneInputCountryFlag-backgroundColor--loading': 'transparent',
+      '--PhoneInputCountryFlag-borderColor': 'transparent',
+      '--PhoneInputCountryFlag-borderWidth': 0,
+    } as React.CSSProperties;
 
     return (
       <Field data-disabled={disabled}>
@@ -97,6 +102,7 @@ export const PhoneField = React.forwardRef<HTMLInputElement, PhoneFieldProps>(
             placeholder={placeholder}
             aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
             aria-invalid={hasError}
+            style={phoneInputStyle}
             className={cn(
               'flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-sm shadow-xs transition-[color,box-shadow]',
               'placeholder:text-muted-foreground',
