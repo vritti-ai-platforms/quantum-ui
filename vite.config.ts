@@ -66,6 +66,7 @@ export default defineConfig({
         'selects/inventory-item': resolve(__dirname, 'lib/selects/inventory-item/index.ts'),
         'selects/storage-location': resolve(__dirname, 'lib/selects/storage-location/index.ts'),
         'selects/supplier': resolve(__dirname, 'lib/selects/supplier/index.ts'),
+        'selects/purchase-order': resolve(__dirname, 'lib/selects/purchase-order/index.ts'),
         'selects/uom': resolve(__dirname, 'lib/selects/uom/index.ts'),
         'selects/user': resolve(__dirname, 'lib/selects/user/index.ts'),
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),

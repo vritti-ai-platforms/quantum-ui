@@ -11,6 +11,7 @@ export * from './inventory-item';
 export * from './locale';
 export * from './microfrontend';
 export * from './plan';
+export * from './purchase-order';
 export * from './region';
 export * from './storage-location';
 export * from './supplier';

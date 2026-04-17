@@ -196,6 +196,10 @@
       "types": "./dist/lib/selects/supplier/index.d.ts",
       "import": "./dist/selects/supplier.js"
     },
+    "./selects/purchase-order": {
+      "types": "./dist/lib/selects/purchase-order/index.d.ts",
+      "import": "./dist/selects/purchase-order.js"
+    },
     "./selects/uom": {
       "types": "./dist/lib/selects/uom/index.d.ts",
       "import": "./dist/selects/uom.js"
