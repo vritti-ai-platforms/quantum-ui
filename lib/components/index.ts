@@ -12,6 +12,7 @@ export * from './DangerZone';
 export * from './DetailField';
 export * from './DataTable';
 export * from './DatePicker';
+export * from './DateTimePicker';
 export * from './Dialog';
 export * from './ErrorBoundary';
 export * from './DropdownMenu';

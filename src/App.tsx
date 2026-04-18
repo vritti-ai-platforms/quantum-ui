@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '../lib/components/Button';
 import { DatePicker } from '../lib/components/DatePicker';
+import { DateTimePicker } from '../lib/components/DateTimePicker';
 import { Form } from '../lib/components/Form/Form';
 import { SelectFilter } from '../lib/components/Select/SelectFilter';
 import type { FilterResult } from '../lib/components/Select/types';
@@ -53,14 +54,20 @@ const SelectFilterSection = () => {
       {/* Example A — Standalone single SelectFilter */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">A. Standalone single</p>
-        <SelectFilter field="status" label="Status" options={statusOptions} onChange={setSingleResult} />
+        <SelectFilter name="status" label="Status" options={statusOptions} onChange={(v) => setSingleResult(v ?? undefined)} />
         {singleResult && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(singleResult, null, 2)}</pre>}
       </div>
 
       {/* Example B — Standalone multi SelectFilter */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">B. Standalone multi</p>
-        <SelectFilter field="category" label="Category" multiple options={categoryOptions} onChange={setMultiResult} />
+        <SelectFilter
+          name="category"
+          label="Category"
+          multiple
+          options={categoryOptions}
+          onChange={(v) => setMultiResult(v ?? undefined)}
+        />
         {multiResult && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(multiResult, null, 2)}</pre>}
       </div>
 
@@ -112,8 +119,46 @@ const DatePickerSection = () => {
             label="Appointment Date"
             placeholder="Select date"
             displayFormat="MMMM d, yyyy"
-            inputFormats={['dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd']}
           />
+          <Button type="submit">Submit</Button>
+        </Form>
+        {submitted && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(submitted, null, 2)}</pre>}
+      </div>
+    </div>
+  );
+};
+
+// ─── DATE TIME PICKER EXAMPLES ───
+type DateTimeFormValues = {
+  expectedDelivery?: string;
+};
+
+const DateTimePickerSection = () => {
+  const [standaloneValue, setStandaloneValue] = useState<string | undefined>('2026-05-10T04:30:00.000Z');
+  const [submitted, setSubmitted] = useState<DateTimeFormValues | undefined>();
+  const form = useForm<DateTimeFormValues>({
+    defaultValues: {
+      expectedDelivery: '2026-05-10T04:30:00.000Z',
+    },
+  });
+
+  return (
+    <div className="space-y-10">
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">A. Standalone</p>
+        <DateTimePicker
+          label="Expected Delivery"
+          placeholder="Select date and time"
+          value={standaloneValue}
+          onValueChange={setStandaloneValue}
+        />
+        {standaloneValue && <pre className="rounded-md bg-muted p-3 text-xs">{standaloneValue}</pre>}
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">B. Inside Form (React Hook Form)</p>
+        <Form form={form} onSubmit={(data) => setSubmitted(data)} className="flex items-end gap-3">
+          <DateTimePicker name="expectedDelivery" label="Expected Delivery" />
           <Button type="submit">Submit</Button>
         </Form>
         {submitted && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(submitted, null, 2)}</pre>}
@@ -206,6 +251,12 @@ export const App = () => {
             description="Standalone and Form-integrated DatePicker — value callbacks and submit payload use ISO strings."
           >
             <DatePickerSection />
+          </Section>
+          <Section
+            title="DateTimePicker"
+            description="Standalone and Form-integrated DateTimePicker — value callbacks and submit payload use ISO datetime strings."
+          >
+            <DateTimePickerSection />
           </Section>
         </div>
       </div>
