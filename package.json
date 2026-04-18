@@ -356,6 +356,10 @@
     "./DetailField": {
       "types": "./dist/lib/components/DetailField/index.d.ts",
       "import": "./dist/components/DetailField.js"
+    },
+    "./date-fns": {
+      "types": "./dist/lib/date-fns.d.ts",
+      "import": "./dist/date-fns.js"
     }
   },
   "files": [

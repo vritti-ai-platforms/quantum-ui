@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '../lib/components/Button';
+import { DatePicker } from '../lib/components/DatePicker';
 import { Form } from '../lib/components/Form/Form';
 import { SelectFilter } from '../lib/components/Select/SelectFilter';
 import type { FilterResult } from '../lib/components/Select/types';
@@ -67,8 +68,53 @@ const SelectFilterSection = () => {
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">C. Inside Form (React Hook Form)</p>
         <Form form={form} onSubmit={(data) => setSubmitted(data)} className="flex items-end gap-3">
-          <SelectFilter name="statusFilter" field="status" label="Status" options={statusOptions} />
+          <SelectFilter name="statusFilter" label="Status" options={statusOptions} />
           <Button type="submit">Apply</Button>
+        </Form>
+        {submitted && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(submitted, null, 2)}</pre>}
+      </div>
+    </div>
+  );
+};
+
+// ─── DATE PICKER EXAMPLES ───
+type DateFormValues = {
+  appointmentDate?: string;
+};
+
+const DatePickerSection = () => {
+  const [standaloneValue, setStandaloneValue] = useState<string | undefined>();
+  const [submitted, setSubmitted] = useState<DateFormValues | undefined>();
+  const form = useForm<DateFormValues>({
+    defaultValues: {
+      appointmentDate: undefined,
+    },
+  });
+
+  return (
+    <div className="space-y-10">
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">A. Standalone</p>
+        <DatePicker
+          label="Appointment Date"
+          placeholder="Select date"
+          value={standaloneValue}
+          onValueChange={setStandaloneValue}
+        />
+        {standaloneValue && <pre className="rounded-md bg-muted p-3 text-xs">{standaloneValue}</pre>}
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">B. Inside Form (React Hook Form)</p>
+        <Form form={form} onSubmit={(data) => setSubmitted(data)} className="flex items-end gap-3">
+          <DatePicker
+            name="appointmentDate"
+            label="Appointment Date"
+            placeholder="Select date"
+            displayFormat="MMMM d, yyyy"
+            inputFormats={['dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd']}
+          />
+          <Button type="submit">Submit</Button>
         </Form>
         {submitted && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(submitted, null, 2)}</pre>}
       </div>
@@ -132,9 +178,7 @@ const ConfirmSection = () => {
           D. Custom labels
         </Button>
       </div>
-      {result && (
-        <pre className="rounded-md bg-muted p-3 text-xs">{result}</pre>
-      )}
+      {result && <pre className="rounded-md bg-muted p-3 text-xs">{result}</pre>}
     </div>
   );
 };
@@ -156,6 +200,12 @@ export const App = () => {
             description="Standalone (single/multi) and Form-integrated examples — onChange emits FilterResult."
           >
             <SelectFilterSection />
+          </Section>
+          <Section
+            title="DatePicker"
+            description="Standalone and Form-integrated DatePicker — value callbacks and submit payload use ISO strings."
+          >
+            <DatePickerSection />
           </Section>
         </div>
       </div>

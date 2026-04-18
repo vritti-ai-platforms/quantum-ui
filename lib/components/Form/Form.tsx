@@ -17,6 +17,7 @@ import { Alert } from '../Alert';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 import { CheckboxGroup } from '../CheckboxGroup';
+import { DatePicker } from '../DatePicker';
 import { PhoneField } from '../PhoneField';
 import { RadioGroup } from '../RadioGroup';
 import { Switch } from '../Switch';
@@ -66,6 +67,7 @@ function processChildren<
             const isRadioGroup = child.type === RadioGroup;
             const isCheckboxGroup = child.type === CheckboxGroup;
             const isPhone = child.type === PhoneField;
+            const isDatePicker = child.type === DatePicker;
 
             const fieldProps =
               isCheckbox || isSwitch
@@ -81,6 +83,13 @@ function processChildren<
                       onValueChange: field.onChange,
                       onBlur: field.onBlur,
                     }
+                  : isDatePicker
+                    ? {
+                        value: field.value,
+                        onValueChange: field.onChange,
+                        onBlur: field.onBlur,
+                        ref: field.ref,
+                      }
                   : isPhone
                     ? {
                         ...field,
