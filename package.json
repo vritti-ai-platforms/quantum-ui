@@ -240,6 +240,10 @@
       "types": "./dist/lib/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
     },
+    "./DateTimePicker": {
+      "types": "./dist/lib/components/DateTimePicker/index.d.ts",
+      "import": "./dist/components/DateTimePicker.js"
+    },
     "./Dialog": {
       "types": "./dist/lib/components/Dialog/index.d.ts",
       "import": "./dist/components/Dialog.js"

@@ -78,6 +78,7 @@ export default defineConfig({
         'components/Form': resolve(__dirname, 'lib/components/Form/index.ts'),
         'components/HierarchyGraph': resolve(__dirname, 'lib/components/HierarchyGraph/index.ts'),
         'components/DatePicker': resolve(__dirname, 'lib/components/DatePicker/index.ts'),
+        'components/DateTimePicker': resolve(__dirname, 'lib/components/DateTimePicker/index.ts'),
         'components/Dialog': resolve(__dirname, 'lib/components/Dialog/index.ts'),
         'components/DropdownMenu': resolve(__dirname, 'lib/components/DropdownMenu/index.ts'),
         'components/Empty': resolve(__dirname, 'lib/components/Empty/index.ts'),

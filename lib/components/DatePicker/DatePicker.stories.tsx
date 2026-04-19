@@ -25,6 +25,14 @@ const meta: Meta<typeof DatePicker> = {
       control: 'boolean',
       description: 'Hide/show manual DD/MM/YYYY editor in popover',
     },
+    minDate: {
+      control: 'date',
+      description: 'Lowest selectable date',
+    },
+    maxDate: {
+      control: 'date',
+      description: 'Highest selectable date',
+    },
     onValueChange: {
       action: 'date-changed',
       description: 'Emits ISO date string (YYYY-MM-DD) or undefined',
@@ -65,6 +73,31 @@ export const CustomDisplayFormat: Story = {
     label: 'Custom display',
     value: '2026-04-18',
     displayFormat: 'EEEE, MMM d, yyyy',
+    disableInput: false,
+  },
+};
+
+export const WithMinDate: Story = {
+  args: {
+    label: 'Earliest shipping date',
+    minDate: new Date('2026-04-10T00:00:00'),
+    disableInput: false,
+  },
+};
+
+export const WithMaxDate: Story = {
+  args: {
+    label: 'Latest invoice date',
+    maxDate: new Date('2026-04-25T00:00:00'),
+    disableInput: false,
+  },
+};
+
+export const BoundedRange: Story = {
+  args: {
+    label: 'Delivery window date',
+    minDate: new Date('2026-04-10T00:00:00'),
+    maxDate: new Date('2026-04-25T00:00:00'),
     disableInput: false,
   },
 };
