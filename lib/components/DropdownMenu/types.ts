@@ -271,6 +271,8 @@ export interface DropdownMenuProps {
   trigger: MenuTriggerProps;
   /** Array of menu items to render */
   items: MenuItem[];
+  /** Whether the menu should trap outside interactions while open */
+  modal?: boolean;
   /** Additional CSS classes for the dropdown content */
   contentClassName?: string;
   /** Horizontal alignment of the dropdown relative to the trigger */

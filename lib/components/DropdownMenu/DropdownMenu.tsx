@@ -22,22 +22,21 @@ import { Button } from '../Button';
 import { Dialog } from '../Dialog';
 import type { DialogMenuItem, DropdownMenuProps, MenuItem } from './types';
 
-// Export all primitive parts with proper aliases
-export const DropdownMenuRoot = ShadcnDropdownMenuRoot;
-export const DropdownMenuCheckboxItem = ShadcnDropdownMenuCheckboxItem;
-export const DropdownMenuContent = ShadcnDropdownMenuContent;
-export const DropdownMenuGroup = ShadcnDropdownMenuGroup;
-export const DropdownMenuItem = ShadcnDropdownMenuItem;
-export const DropdownMenuLabel = ShadcnDropdownMenuLabel;
-export const DropdownMenuPortal = ShadcnDropdownMenuPortal;
-export const DropdownMenuRadioGroup = ShadcnDropdownMenuRadioGroup;
-export const DropdownMenuRadioItem = ShadcnDropdownMenuRadioItem;
-export const DropdownMenuSeparator = ShadcnDropdownMenuSeparator;
-export const DropdownMenuShortcut = ShadcnDropdownMenuShortcut;
-export const DropdownMenuSub = ShadcnDropdownMenuSub;
-export const DropdownMenuSubContent = ShadcnDropdownMenuSubContent;
-export const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
-export const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
+const DropdownMenuRoot = ShadcnDropdownMenuRoot;
+const DropdownMenuCheckboxItem = ShadcnDropdownMenuCheckboxItem;
+const DropdownMenuContent = ShadcnDropdownMenuContent;
+const DropdownMenuGroup = ShadcnDropdownMenuGroup;
+const DropdownMenuItem = ShadcnDropdownMenuItem;
+const DropdownMenuLabel = ShadcnDropdownMenuLabel;
+const DropdownMenuPortal = ShadcnDropdownMenuPortal;
+const DropdownMenuRadioGroup = ShadcnDropdownMenuRadioGroup;
+const DropdownMenuRadioItem = ShadcnDropdownMenuRadioItem;
+const DropdownMenuSeparator = ShadcnDropdownMenuSeparator;
+const DropdownMenuShortcut = ShadcnDropdownMenuShortcut;
+const DropdownMenuSub = ShadcnDropdownMenuSub;
+const DropdownMenuSubContent = ShadcnDropdownMenuSubContent;
+const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
+const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
 
 // Renders a single menu item based on its type — supports nested submenus
 const renderMenuItem = (
@@ -205,6 +204,7 @@ const renderMenuItem = (
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   trigger,
   items,
+  modal = false,
   contentClassName,
   align = 'end',
   side,
@@ -226,7 +226,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   return (
     <>
-      <DropdownMenuRoot>
+      <DropdownMenuRoot modal={modal}>
         <DropdownMenuTrigger asChild>
           {trigger.children ?? (
             <Button variant={trigger.variant} className={trigger.className}>
@@ -235,7 +235,16 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
             </Button>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent className={contentClassName} align={align} side={side}>
+        <DropdownMenuContent
+          className={contentClassName}
+          align={align}
+          side={side}
+          onCloseAutoFocus={(event) => {
+            if (!modal) {
+              event.preventDefault();
+            }
+          }}
+        >
           {items.map((item, index) => renderMenuItem(item, index, setActiveDialogId))}
         </DropdownMenuContent>
       </DropdownMenuRoot>

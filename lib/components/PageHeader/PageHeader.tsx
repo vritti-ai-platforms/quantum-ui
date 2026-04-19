@@ -4,16 +4,20 @@ import { Typography } from '../Typography';
 
 export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
+  titleSlot?: React.ReactNode;
   description?: string;
   actions?: React.ReactNode;
 }
 
 export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
-  ({ title, description, actions, className, ...props }, ref) => {
+  ({ title, titleSlot, description, actions, className, ...props }, ref) => {
     return (
       <div ref={ref} className={cn('flex items-start justify-between gap-4', className)} {...props}>
         <div className="space-y-1">
-          <Typography variant="h3">{title}</Typography>
+          <div className="flex items-center gap-2">
+            <Typography variant="h3">{title}</Typography>
+            {titleSlot}
+          </div>
           {description && (
             <Typography variant="body2" intent="muted">
               {description}

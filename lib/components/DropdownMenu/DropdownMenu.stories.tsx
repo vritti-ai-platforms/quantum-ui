@@ -18,10 +18,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '../Avatar';
-import { Button } from '../Button';
 import {
-  DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -30,14 +27,17 @@ import {
   DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuRoot,
+  DropdownMenu as DropdownMenuRoot,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from './DropdownMenu';
+} from '../../../shadcn/shadcnDropdownMenu';
+import { Avatar, AvatarFallback, AvatarImage } from '../Avatar';
+import { Button } from '../Button';
+import { DropdownMenu } from './DropdownMenu';
 import type { MenuItem } from './types';
 
 const meta: Meta<typeof DropdownMenu> = {
