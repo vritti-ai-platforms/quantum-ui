@@ -1,18 +1,18 @@
 import {
+  min as earliestDate,
   format,
   getDaysInMonth,
   isAfter,
   isBefore,
   isValid,
   max as latestDate,
-  min as earliestDate,
   parse,
   startOfDay,
   startOfMonth,
 } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import type React from 'react';
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
@@ -78,6 +78,9 @@ const earliest = (dates: Array<Date | undefined>) => {
 
 const isWithinDayBounds = (date: Date, minDay?: Date, maxDay?: Date) =>
   (!minDay || !isBefore(startOfDay(date), minDay)) && (!maxDay || !isAfter(startOfDay(date), maxDay));
+
+const coerceWithinDayBounds = (date: Date | undefined, minDay?: Date, maxDay?: Date) =>
+  date && isWithinDayBounds(date, minDay, maxDay) ? date : undefined;
 
 const visibleMonthFromParts = (parts: DateParts, fallbackMonth: Date) => {
   const hasYear = parts.year.length === 4;
@@ -186,18 +189,23 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
     ...calendarRestProps
   } = calendarProps ?? {};
 
-  const [localValue, setLocalValue] = useState<Date | undefined>(parsedValue);
+  const [localValue, setLocalValue] = useState<Date | undefined>(() => coerceWithinDayBounds(parsedValue, minDay, maxDay));
   const [openState, setOpenState] = useState(false);
-  const [month, setMonth] = useState<Date>(() => clampMonth(parsedValue ?? minDay ?? maxDay ?? new Date(), minDay, maxDay));
+  const [month, setMonth] = useState<Date>(() =>
+    clampMonth(parsedValue ?? minDay ?? maxDay ?? new Date(), minDay, maxDay),
+  );
   const [draftParts, setDraftParts] = useState<DateParts>(() => toParts(parsedValue));
+  const lastInvalidTimeRef = useRef<number | null>(null);
 
-  const parsedValueTime = parsedValue?.getTime() ?? null;
+  const rawSelected = controlled ? parsedValue : localValue;
+  const selected = coerceWithinDayBounds(rawSelected, minDay, maxDay);
+  const rawSelectedTime = rawSelected?.getTime() ?? null;
   const minDayTime = minDay?.getTime() ?? null;
   const maxDayTime = maxDay?.getTime() ?? null;
-  const selected = controlled ? parsedValue : localValue;
   const selectedTime = selected?.getTime() ?? null;
   const selectedPreview = previewManualDate(draftParts, month);
-  const calendarSelected = selectedPreview && isWithinDayBounds(selectedPreview, minDay, maxDay) ? selectedPreview : selected;
+  const calendarSelected =
+    selectedPreview && isWithinDayBounds(selectedPreview, minDay, maxDay) ? selectedPreview : selected;
   const inputId = id ?? props.name ?? 'date';
   const startMonth = latest([minDay, calendarStartMonth]);
   const endMonth = earliest([maxDay, calendarEndMonth]);
@@ -207,12 +215,32 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
 
   useEffect(() => {
     if (!controlled) return;
-    const next = parsedValueTime === null ? undefined : new Date(parsedValueTime);
+    const next = selectedTime === null ? undefined : new Date(selectedTime);
     const nextMinDay = minDayTime === null ? undefined : new Date(minDayTime);
     const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
     setDraftParts(toParts(next));
     setMonth((currentMonth) => (next ? next : clampMonth(currentMonth, nextMinDay, nextMaxDay)));
-  }, [controlled, parsedValueTime, minDayTime, maxDayTime]);
+  }, [controlled, selectedTime, minDayTime, maxDayTime]);
+
+  useEffect(() => {
+    if (rawSelectedTime === null || selectedTime !== null) {
+      lastInvalidTimeRef.current = null;
+      return;
+    }
+    if (lastInvalidTimeRef.current === rawSelectedTime) return;
+
+    lastInvalidTimeRef.current = rawSelectedTime;
+
+    if (!controlled) setLocalValue(undefined);
+    setDraftParts(emptyParts());
+
+    const nextMinDay = minDayTime === null ? undefined : new Date(minDayTime);
+    const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
+    setMonth((currentMonth) => clampMonth(currentMonth, nextMinDay, nextMaxDay));
+
+    onValueChange?.(undefined);
+    onChange?.(undefined);
+  }, [controlled, rawSelectedTime, selectedTime, minDayTime, maxDayTime, onValueChange, onChange]);
 
   useEffect(() => {
     if (selectedTime !== null) return;
@@ -325,7 +353,10 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
 
                           let day = draftParts.day;
                           if (day.length === 2) {
-                            const cappedDay = Math.min(Number(day), maxDayForParts({ ...draftParts, month: monthValue }, month));
+                            const cappedDay = Math.min(
+                              Number(day),
+                              maxDayForParts({ ...draftParts, month: monthValue }, month),
+                            );
                             day = String(cappedDay).padStart(2, '0');
                           }
 
