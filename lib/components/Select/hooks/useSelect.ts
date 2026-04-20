@@ -116,19 +116,30 @@ export function useSelect({
     getNextPageParam: (lastPage, _allPages, lastPageParam) => (lastPage.hasMore ? lastPageParam + limit : undefined),
     initialPageParam: 0,
     enabled: isAsync && (enabled !== false),
-    placeholderData: keepPreviousData,
   });
 
-  // Merge: resolved selected first, then search results (Set-based dedup)
+  // Merge options with value-based dedup.
+  // During active search, show only live search results (do not prepend previously selected options).
   const fetchedOptions = useMemo(() => {
     const searchResults = data?.pages.flatMap((p) => p.options) ?? [];
     const selected = resolvedSelected?.options ?? [];
-    if (selected.length === 0) return searchResults;
+    const uniqueByValue = new Map<string, SelectOption>();
+    const makeKey = (value: SelectValue) => `${typeof value}:${String(value)}`;
 
-    const selectedIdSet = new Set(selected.map((o) => o.value));
-    const dedupedSearch = searchResults.filter((o) => !selectedIdSet.has(o.value));
-    return [...selected, ...dedupedSearch];
-  }, [resolvedSelected, data]);
+    if (debouncedSearch.trim().length === 0) {
+      for (const option of selected) {
+        uniqueByValue.set(makeKey(option.value), option);
+      }
+    }
+    for (const option of searchResults) {
+      const key = makeKey(option.value);
+      if (!uniqueByValue.has(key)) {
+        uniqueByValue.set(key, option);
+      }
+    }
+
+    return Array.from(uniqueByValue.values());
+  }, [resolvedSelected, data, debouncedSearch]);
 
   const fetchedGroups = data?.pages[0]?.groups ?? staticGroups ?? [];
 

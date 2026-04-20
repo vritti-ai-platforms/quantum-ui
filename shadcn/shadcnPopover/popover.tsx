@@ -17,10 +17,20 @@ function PopoverContent({
   className,
   align = 'center',
   sideOffset = 4,
+  portalContainer,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: React.ComponentProps<typeof PopoverPrimitive.Content> & { portalContainer?: HTMLElement | null }) {
+  const resolvedContainer =
+    portalContainer ??
+    (typeof document !== 'undefined'
+      ? (() => {
+          const dialogContents = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dialog-content"]'));
+          return dialogContents.length > 0 ? dialogContents[dialogContents.length - 1] : undefined;
+        })()
+      : undefined);
+
   return (
-    <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Portal container={resolvedContainer}>
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}
