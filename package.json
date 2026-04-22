@@ -344,6 +344,14 @@
       "types": "./dist/lib/utils/lodash.d.ts",
       "import": "./dist/utils/lodash.js"
     },
+    "./locale": {
+      "types": "./dist/lib/utils/locale.d.ts",
+      "import": "./dist/utils/locale.js"
+    },
+    "./timezone": {
+      "types": "./dist/lib/utils/timezone.d.ts",
+      "import": "./dist/utils/timezone.js"
+    },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",
       "import": "./dist/hooks/index.js"
@@ -424,6 +432,7 @@
   },
   "dependencies": {
     "@dagrejs/dagre": "^3.0.0",
+    "@date-fns/tz": "^1.4.1",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

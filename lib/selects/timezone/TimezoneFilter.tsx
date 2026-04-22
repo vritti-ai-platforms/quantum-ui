@@ -4,7 +4,7 @@ import { TIMEZONES } from './timezones';
 
 export type TimezoneFilterProps = Omit<SelectFilterProps, 'options' | 'name'> & { name?: string };
 
-// Pre-configured SelectFilter for timezone filtering with static local options
+// Pre-configured SelectFilter for timezone filtering with runtime-supported IANA options
 export const TimezoneFilter = Object.assign(
   forwardRef<HTMLButtonElement, TimezoneFilterProps>((props, ref) => (
     <SelectFilter
