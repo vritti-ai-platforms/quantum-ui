@@ -10,6 +10,8 @@ export interface DetailFieldProps {
   value: React.ReactNode;
   className?: string;
   dateFormat?: string;
+  dateOnly?: boolean;
+  timeZone?: string;
   number?: boolean;
 }
 
@@ -18,18 +20,35 @@ type FormattedValue = {
   secondary?: string;
 };
 
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 const formatWithTimeZone = (date: Date, dateFormat: string, timeZone: string, locale?: Locale) =>
   format(date, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
 
-const formatValue = (value: React.ReactNode, dateFormat?: string, locale?: Locale): FormattedValue => {
+const parseDateOnly = (value: string): Date =>
+  parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
+
+const formatValue = (
+  value: React.ReactNode,
+  dateFormat?: string,
+  dateOnly?: boolean,
+  timeZoneOverride?: string,
+  locale?: Locale,
+): FormattedValue => {
   if (value == null) return { primary: '—' };
   if (!dateFormat) return { primary: value };
   if (typeof value !== 'string') return { primary: value };
 
+  if (dateOnly) {
+    const parsed = parseDateOnly(value);
+    if (!isValid(parsed)) return { primary: '—' };
+    return { primary: formatWithTimeZone(parsed, dateFormat, 'UTC', locale) };
+  }
+
   const parsed = parseISO(value);
   if (!isValid(parsed)) return { primary: '—' };
 
-  const primaryTimeZone = resolveTimeZone();
+  const primaryTimeZone = timeZoneOverride ?? resolveTimeZone();
   if (!primaryTimeZone) {
     return { primary: format(parsed, dateFormat, locale ? { locale } : undefined) };
   }
@@ -47,9 +66,17 @@ const formatValue = (value: React.ReactNode, dateFormat?: string, locale?: Local
   };
 };
 
-export const DetailField: React.FC<DetailFieldProps> = ({ label, value, className, dateFormat, number }) => {
+export const DetailField: React.FC<DetailFieldProps> = ({
+  label,
+  value,
+  className,
+  dateFormat,
+  dateOnly,
+  timeZone,
+  number,
+}) => {
   const locale = useLocale();
-  const formattedValue = formatValue(value, dateFormat, locale);
+  const formattedValue = formatValue(value, dateFormat, dateOnly, timeZone, locale);
 
   return (
     <div className={className}>
