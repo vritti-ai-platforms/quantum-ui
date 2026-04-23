@@ -17,6 +17,7 @@ import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { useLocale } from '../../hooks/useLocale';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 
 type DatePickerValue = string | undefined;
@@ -24,7 +25,7 @@ type DateParts = { day: string; month: string; year: string };
 
 const ISO = 'yyyy-MM-dd';
 const MANUAL = 'dd/MM/yyyy';
-const DEFAULT_DISPLAY = 'MMMM d, yyyy';
+const DEFAULT_DISPLAY = 'P';
 const objectWithHasOwn = Object as ObjectConstructor & { hasOwn(target: object, key: PropertyKey): boolean };
 
 const emptyParts = (): DateParts => ({ day: '', month: '', year: '' });
@@ -143,7 +144,6 @@ export interface DatePickerProps {
   disabled?: boolean;
   disableInput?: boolean;
   displayFormat?: string;
-  displatFormat?: string;
   minDate?: Date;
   maxDate?: Date;
 }
@@ -167,14 +167,15 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
     onBlur,
     disabled,
     disableInput = true,
-    displayFormat,
-    displatFormat,
+    displayFormat = DEFAULT_DISPLAY,
     minDate,
     maxDate,
     ...props
   } = rawProps;
 
-  const anchorDisplayFormat = displatFormat ?? displayFormat ?? DEFAULT_DISPLAY;
+  const locale = useLocale();
+  const formatOptions = locale ? { locale } : undefined;
+
   const parsedValue = parseIso(value);
   const minDay = minDate ? startOfDay(minDate) : undefined;
   const maxDay = maxDate ? startOfDay(maxDate) : undefined;
@@ -189,7 +190,9 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
     ...calendarRestProps
   } = calendarProps ?? {};
 
-  const [localValue, setLocalValue] = useState<Date | undefined>(() => coerceWithinDayBounds(parsedValue, minDay, maxDay));
+  const [localValue, setLocalValue] = useState<Date | undefined>(() =>
+    coerceWithinDayBounds(parsedValue, minDay, maxDay),
+  );
   const [openState, setOpenState] = useState(false);
   const [month, setMonth] = useState<Date>(() =>
     clampMonth(parsedValue ?? minDay ?? maxDay ?? new Date(), minDay, maxDay),
@@ -286,7 +289,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
         <Input
           ref={ref}
           id={inputId}
-          value={selected ? format(selected, anchorDisplayFormat) : ''}
+          value={selected ? format(selected, displayFormat, formatOptions) : ''}
           disabled={disabled}
           readOnly
           aria-invalid={!!error}
@@ -383,6 +386,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
               )}
               <Calendar
                 {...calendarRestProps}
+                locale={calendarRestProps.locale ?? locale}
                 mode="single"
                 captionLayout="label"
                 startMonth={startMonth}
@@ -394,8 +398,8 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
                   setMonth(safeMonth);
                   setDraftParts((current) => ({
                     ...current,
-                    month: format(safeMonth, 'MM'),
-                    year: format(safeMonth, 'yyyy'),
+                    month: format(safeMonth, 'MM', formatOptions),
+                    year: format(safeMonth, 'yyyy', formatOptions),
                   }));
                   calendarOnMonthChange?.(safeMonth);
                 }}

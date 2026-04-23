@@ -3,7 +3,7 @@ import type { Locale } from 'date-fns';
 import { format, isValid, parseISO } from 'date-fns';
 import type React from 'react';
 import { useLocale } from '../../hooks/useLocale';
-import { getTimeZone } from '../../utils/timezone';
+import { getUserTimeZone, resolveTimeZone } from '../../utils/timezone';
 
 export interface DetailFieldProps {
   label: React.ReactNode;
@@ -13,26 +13,49 @@ export interface DetailFieldProps {
   number?: boolean;
 }
 
-const formatValue = (value: React.ReactNode, dateFormat?: string, locale?: Locale) => {
-  if (value == null) return '—';
-  if (!dateFormat) return value;
-  if (typeof value !== 'string') return value;
+type FormattedValue = {
+  primary: React.ReactNode;
+  secondary?: string;
+};
+
+const formatWithTimeZone = (date: Date, dateFormat: string, timeZone: string, locale?: Locale) =>
+  format(date, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
+
+const formatValue = (value: React.ReactNode, dateFormat?: string, locale?: Locale): FormattedValue => {
+  if (value == null) return { primary: '—' };
+  if (!dateFormat) return { primary: value };
+  if (typeof value !== 'string') return { primary: value };
+
   const parsed = parseISO(value);
-  if (!isValid(parsed)) return '—';
+  if (!isValid(parsed)) return { primary: '—' };
 
-  const timeZone = getTimeZone() ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-  if (!timeZone) return format(parsed, dateFormat, locale ? { locale } : undefined);
+  const primaryTimeZone = resolveTimeZone();
+  if (!primaryTimeZone) {
+    return { primary: format(parsed, dateFormat, locale ? { locale } : undefined) };
+  }
 
-  return format(parsed, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
+  const primary = `${formatWithTimeZone(parsed, dateFormat, primaryTimeZone, locale)} (${primaryTimeZone})`;
+  const userTimeZone = getUserTimeZone();
+
+  if (!userTimeZone || userTimeZone === primaryTimeZone) {
+    return { primary };
+  }
+
+  return {
+    primary,
+    secondary: `Your time: ${formatWithTimeZone(parsed, dateFormat, userTimeZone, locale)} (${userTimeZone})`,
+  };
 };
 
 export const DetailField: React.FC<DetailFieldProps> = ({ label, value, className, dateFormat, number }) => {
   const locale = useLocale();
+  const formattedValue = formatValue(value, dateFormat, locale);
 
   return (
     <div className={className}>
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className={`font-medium mt-1${number ? ' font-mono' : ''}`}>{formatValue(value, dateFormat, locale)}</p>
+      <p className={`font-medium mt-1${number ? ' font-mono' : ''}`}>{formattedValue.primary}</p>
+      {formattedValue.secondary && <p className="mt-1 text-xs text-muted-foreground">{formattedValue.secondary}</p>}
     </div>
   );
 };

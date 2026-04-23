@@ -129,6 +129,16 @@ export interface ViewsConfig {
 }
 
 /**
+ * Time zone resolution configuration
+ */
+export interface TimeZoneConfig {
+  /**
+   * Custom resolver for the active application time zone
+   */
+  resolveTimeZone?: () => string | null | undefined;
+}
+
+/**
  * Complete quantum-ui configuration interface
  */
 export interface QuantumUIConfig {
@@ -148,6 +158,11 @@ export interface QuantumUIConfig {
   auth?: Partial<AuthConfig>;
 
   /**
+   * Time zone resolution configuration
+   */
+  timeZone?: TimeZoneConfig;
+
+  /**
    * Table views management configuration
    */
   views: ViewsConfig;
@@ -156,12 +171,13 @@ export interface QuantumUIConfig {
 /**
  * Default configuration values
  */
-const defaultConfig: Required<{
+const defaultConfig: {
   csrf: CsrfConfig;
   axios: AxiosConfig;
   auth: AuthConfig;
   views: Required<ViewsConfig>;
-}> = {
+  timeZone: TimeZoneConfig;
+} = {
   csrf: {
     endpoint: 'csrf/token',
     enabled: true,
@@ -182,6 +198,9 @@ const defaultConfig: Required<{
     tokenEndpoint: 'auth/access-token',
     refreshEndpoint: 'auth/refresh-tokens',
     sessionRecoveryEnabled: true,
+  },
+  timeZone: {
+    resolveTimeZone: undefined,
   },
   views: {
     viewsEndpoint: 'table-views',
@@ -270,6 +289,10 @@ export function configureQuantumUI(userConfig: QuantumUIConfig): void {
     auth: {
       ...defaultConfig.auth,
       ...(userConfig.auth || {}),
+    },
+    timeZone: {
+      ...defaultConfig.timeZone,
+      ...(userConfig.timeZone || {}),
     },
     views: {
       ...defaultConfig.views,

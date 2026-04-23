@@ -1,3 +1,4 @@
+import { TZDate, tz } from '@date-fns/tz';
 import {
   min as earliestDate,
   format,
@@ -5,13 +6,10 @@ import {
   isAfter,
   isBefore,
   isValid,
+  type Locale,
   max as latestDate,
   parse,
   parseISO,
-  setHours,
-  setMilliseconds,
-  setMinutes,
-  setSeconds,
   startOfDay,
   startOfMonth,
 } from 'date-fns';
@@ -22,13 +20,15 @@ import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { useLocale } from '../../hooks/useLocale';
+import { resolveTimeZone } from '../../utils/timezone';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 
 type DateTimePickerValue = string | undefined;
 type DateParts = { day: string; month: string; year: string };
 
 const MANUAL_DATE = 'dd/MM/yyyy';
-const DEFAULT_DISPLAY = 'MMMM d, yyyy HH:mm';
+const DEFAULT_DISPLAY = 'P p';
 const DEFAULT_TIME = '00:00';
 const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const objectWithHasOwn = Object as ObjectConstructor & { hasOwn(target: object, key: PropertyKey): boolean };
@@ -36,6 +36,8 @@ const objectWithHasOwn = Object as ObjectConstructor & { hasOwn(target: object, 
 const emptyParts = (): DateParts => ({ day: '', month: '', year: '' });
 const digits = (value: string, max: number) => value.replace(/\D/g, '').slice(0, max);
 const hasValueProp = (props: object, key: string) => objectWithHasOwn.hasOwn(props, key);
+const formatInTimeZone = (date: Date, pattern: string, timeZone: string, locale?: Locale) =>
+  format(date, pattern, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
 const parseDateTime = (value?: string) => {
   if (!value) return undefined;
   const next = parseISO(value);
@@ -49,7 +51,17 @@ const toParts = (date?: Date): DateParts =>
         year: format(date, 'yyyy'),
       }
     : emptyParts();
-const toTime = (date?: Date) => (date ? format(date, 'HH:mm') : '');
+const toCalendarDate = (date: Date | undefined, timeZone: string): Date | undefined => {
+  if (!date) return undefined;
+
+  const year = Number(formatInTimeZone(date, 'yyyy', timeZone));
+  const month = Number(formatInTimeZone(date, 'MM', timeZone));
+  const day = Number(formatInTimeZone(date, 'dd', timeZone));
+
+  return new Date(year, month - 1, day);
+};
+const toDraftParts = (date: Date | undefined, timeZone: string) => toParts(toCalendarDate(date, timeZone));
+const toTime = (date: Date | undefined, timeZone: string) => (date ? formatInTimeZone(date, 'HH:mm', timeZone) : '');
 const toIso = (date?: Date) => (date ? date.toISOString() : undefined);
 
 const parseManualDate = ({ day, month, year }: DateParts) => {
@@ -73,9 +85,10 @@ const previewManualDate = (parts: DateParts, fallbackMonth: Date) => {
   return isValid(next) ? next : undefined;
 };
 
-const withTime = (date: Date, time: string) => {
+const withTime = (date: Date, time: string, timeZone: string) => {
   const [hours, minutes] = TIME_PATTERN.test(time) ? time.split(':').map(Number) : [0, 0];
-  return setMilliseconds(setSeconds(setMinutes(setHours(date, hours), minutes), 0), 0);
+  const zonedDateTime = TZDate.tz(timeZone, date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0, 0);
+  return new Date(zonedDateTime.getTime());
 };
 
 const latest = (dates: Array<Date | undefined>) => {
@@ -96,12 +109,15 @@ const isWithinDateTimeBounds = (date: Date, minDateTime?: Date, maxDateTime?: Da
 
 const coerceWithinDateTimeBounds = (
   date: Date | undefined,
-  minDay?: Date,
-  maxDay?: Date,
-  minDateTime?: Date,
-  maxDateTime?: Date,
+  minDay: Date | undefined,
+  maxDay: Date | undefined,
+  minDateTime: Date | undefined,
+  maxDateTime: Date | undefined,
+  timeZone: string,
 ) =>
-  date && isWithinDayBounds(date, minDay, maxDay) && isWithinDateTimeBounds(date, minDateTime, maxDateTime)
+  date &&
+  isWithinDayBounds(toCalendarDate(date, timeZone) ?? date, minDay, maxDay) &&
+  isWithinDateTimeBounds(date, minDateTime, maxDateTime)
     ? date
     : undefined;
 
@@ -197,17 +213,13 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
     ...props
   } = rawProps;
 
+  const locale = useLocale();
+  const timeZone = resolveTimeZone() ?? 'UTC';
   const parsedValue = parseDateTime(value);
   const minDateTimeValue = parseDateTime(minDateTime);
   const maxDateTimeValue = parseDateTime(maxDateTime);
-  const minDay = latest([
-    minDate ? startOfDay(minDate) : undefined,
-    minDateTimeValue ? startOfDay(minDateTimeValue) : undefined,
-  ]);
-  const maxDay = earliest([
-    maxDate ? startOfDay(maxDate) : undefined,
-    maxDateTimeValue ? startOfDay(maxDateTimeValue) : undefined,
-  ]);
+  const minDay = latest([minDate ? startOfDay(minDate) : undefined, toCalendarDate(minDateTimeValue, timeZone)]);
+  const maxDay = earliest([maxDate ? startOfDay(maxDate) : undefined, toCalendarDate(maxDateTimeValue, timeZone)]);
   const {
     mode: _calendarMode,
     month: _calendarMonth,
@@ -220,25 +232,33 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
   } = calendarProps ?? {};
 
   const [localValue, setLocalValue] = useState<Date | undefined>(() =>
-    coerceWithinDateTimeBounds(parsedValue, minDay, maxDay, minDateTimeValue, maxDateTimeValue),
+    coerceWithinDateTimeBounds(parsedValue, minDay, maxDay, minDateTimeValue, maxDateTimeValue, timeZone),
   );
   const [openState, setOpenState] = useState(false);
   const [month, setMonth] = useState<Date>(() =>
-    clampMonth(parsedValue ?? minDay ?? maxDay ?? new Date(), minDay, maxDay),
+    clampMonth(toCalendarDate(parsedValue, timeZone) ?? minDay ?? maxDay ?? new Date(), minDay, maxDay),
   );
-  const [draftParts, setDraftParts] = useState<DateParts>(() => toParts(parsedValue));
-  const [draftTime, setDraftTime] = useState(() => toTime(parsedValue));
+  const [draftParts, setDraftParts] = useState<DateParts>(() => toDraftParts(parsedValue, timeZone));
+  const [draftTime, setDraftTime] = useState(() => toTime(parsedValue, timeZone));
   const lastInvalidTimeRef = useRef<number | null>(null);
 
   const rawSelected = controlled ? parsedValue : localValue;
-  const selected = coerceWithinDateTimeBounds(rawSelected, minDay, maxDay, minDateTimeValue, maxDateTimeValue);
+  const selected = coerceWithinDateTimeBounds(
+    rawSelected,
+    minDay,
+    maxDay,
+    minDateTimeValue,
+    maxDateTimeValue,
+    timeZone,
+  );
+  const selectedCalendarDate = toCalendarDate(selected, timeZone);
   const rawSelectedTime = rawSelected?.getTime() ?? null;
   const minDayTime = minDay?.getTime() ?? null;
   const maxDayTime = maxDay?.getTime() ?? null;
   const selectedTime = selected?.getTime() ?? null;
   const selectedPreview = previewManualDate(draftParts, month);
   const calendarSelected =
-    selectedPreview && isWithinDayBounds(selectedPreview, minDay, maxDay) ? selectedPreview : selected;
+    selectedPreview && isWithinDayBounds(selectedPreview, minDay, maxDay) ? selectedPreview : selectedCalendarDate;
   const activeDate = calendarSelected;
   const inputId = id ?? props.name ?? 'date-time';
   const startMonth = latest([minDay, calendarStartMonth]);
@@ -248,20 +268,26 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
   const setOpen = openControlled ? (onOpenChange ?? (() => {})) : setOpenState;
 
   const syncDraftFromDate = (next?: Date) => {
-    setDraftParts(toParts(next));
-    setDraftTime(toTime(next));
-    setMonth((currentMonth) => (next ? next : clampMonth(currentMonth, minDay, maxDay)));
+    const nextCalendarDate = toCalendarDate(next, timeZone);
+    setDraftParts(toDraftParts(next, timeZone));
+    setDraftTime(toTime(next, timeZone));
+    setMonth((currentMonth) => (nextCalendarDate ? nextCalendarDate : clampMonth(currentMonth, minDay, maxDay)));
   };
 
   useEffect(() => {
-    if (!controlled) return;
+    if (!controlled && selectedTime === null) return;
+
     const next = selectedTime === null ? undefined : new Date(selectedTime);
     const nextMinDay = minDayTime === null ? undefined : new Date(minDayTime);
     const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
-    setDraftParts(toParts(next));
-    setDraftTime(toTime(next));
-    setMonth((currentMonth) => (next ? next : clampMonth(currentMonth, nextMinDay, nextMaxDay)));
-  }, [controlled, selectedTime, minDayTime, maxDayTime]);
+    const nextCalendarDate = toCalendarDate(next, timeZone);
+
+    setDraftParts(toDraftParts(next, timeZone));
+    setDraftTime(toTime(next, timeZone));
+    setMonth((currentMonth) =>
+      nextCalendarDate ? nextCalendarDate : clampMonth(currentMonth, nextMinDay, nextMaxDay),
+    );
+  }, [controlled, selectedTime, minDayTime, maxDayTime, timeZone]);
 
   useEffect(() => {
     if (rawSelectedTime === null || selectedTime !== null) {
@@ -283,13 +309,6 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
     onValueChange?.(undefined);
     onChange?.(undefined);
   }, [controlled, rawSelectedTime, selectedTime, minDayTime, maxDayTime, onValueChange, onChange]);
-
-  useEffect(() => {
-    if (selectedTime !== null) return;
-    const nextMinDay = minDayTime === null ? undefined : new Date(minDayTime);
-    const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
-    setMonth((currentMonth) => clampMonth(currentMonth, nextMinDay, nextMaxDay));
-  }, [selectedTime, minDayTime, maxDayTime]);
 
   const emit = (next?: Date) => {
     const iso = toIso(next);
@@ -317,7 +336,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
     const parsedDate = parseManualDate(nextParts);
     if (!parsedDate || !isWithinDayBounds(parsedDate, minDay, maxDay)) return;
 
-    const nextDateTime = withTime(parsedDate, draftTime || DEFAULT_TIME);
+    const nextDateTime = withTime(parsedDate, draftTime || DEFAULT_TIME, timeZone);
     if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
 
     commit(nextDateTime);
@@ -330,7 +349,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
         <Input
           ref={ref}
           id={inputId}
-          value={selected ? format(selected, displayFormat) : ''}
+          value={selected ? formatInTimeZone(selected, displayFormat, timeZone, locale) : ''}
           disabled={disabled}
           readOnly
           aria-invalid={!!error}
@@ -424,6 +443,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
               </div>
               <Calendar
                 {...calendarRestProps}
+                locale={locale}
                 mode="single"
                 captionLayout="label"
                 startMonth={startMonth}
@@ -451,7 +471,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
                   setMonth(next);
                   setDraftParts(toParts(next));
 
-                  const nextDateTime = withTime(next, draftTime || DEFAULT_TIME);
+                  const nextDateTime = withTime(next, draftTime || DEFAULT_TIME, timeZone);
                   if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
 
                   commit(nextDateTime);
@@ -473,7 +493,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
 
                       if (!activeDate || !TIME_PATTERN.test(nextTime)) return;
 
-                      const nextDateTime = withTime(activeDate, nextTime);
+                      const nextDateTime = withTime(activeDate, nextTime, timeZone);
                       if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
 
                       commit(nextDateTime);
@@ -483,7 +503,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
                       e.preventDefault();
 
                       if (activeDate && TIME_PATTERN.test(draftTime)) {
-                        const nextDateTime = withTime(activeDate, draftTime);
+                        const nextDateTime = withTime(activeDate, draftTime, timeZone);
                         if (isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) {
                           commit(nextDateTime);
                         }
