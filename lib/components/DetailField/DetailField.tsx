@@ -25,8 +25,7 @@ const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const formatWithTimeZone = (date: Date, dateFormat: string, timeZone: string, locale?: Locale) =>
   format(date, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
 
-const parseDateOnly = (value: string): Date =>
-  parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
+const parseDateOnly = (value: string): Date => parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
 
 const formatValue = (
   value: React.ReactNode,

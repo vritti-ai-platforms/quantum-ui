@@ -11,7 +11,9 @@ function isFilterResult(v: unknown): v is FilterResult {
 }
 
 // Extracts the raw SelectValue(s) from a FilterResult or passes the value through unchanged
-function extractRawValue(v: FilterResult | SelectValue | SelectValue[] | undefined): SelectValue | SelectValue[] | undefined {
+function extractRawValue(
+  v: FilterResult | SelectValue | SelectValue[] | undefined,
+): SelectValue | SelectValue[] | undefined {
   if (isFilterResult(v)) return v.value as SelectValue | SelectValue[];
   return v as SelectValue | SelectValue[] | undefined;
 }

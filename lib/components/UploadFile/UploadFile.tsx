@@ -234,16 +234,12 @@ export const UploadFile: React.FC<UploadFileProps> = ({
               isLoading ? 'border-primary/40 animate-pulse' : 'border-border',
             )}
           >
-            {isLoading && (
-              <div className="absolute inset-0 bg-primary/5" />
-            )}
+            {isLoading && <div className="absolute inset-0 bg-primary/5" />}
             <div className="relative flex items-center gap-3 flex-1 min-w-0">
               <FilePreview file={file} size={40} />
               <div className="flex-1 min-w-0">
                 <span className="block truncate text-sm">{file.name}</span>
-                {isLoading && (
-                  <span className="text-xs text-muted-foreground">Uploading...</span>
-                )}
+                {isLoading && <span className="text-xs text-muted-foreground">Uploading...</span>}
               </div>
               {!isLoading && (
                 <Button

@@ -1,5 +1,5 @@
-import React from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
 import { Input } from '../../../shadcn/shadcnInput';
 import { cn } from '../../../shadcn/utils';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
@@ -65,14 +65,14 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         const parsedMax = Number(props.max);
         const max = Number.isFinite(parsedMax) ? parsedMax : undefined;
         const current = Number(input.value);
-        const baseValue = Number.isFinite(current) ? current : min ?? 0;
+        const baseValue = Number.isFinite(current) ? current : (min ?? 0);
 
         let next = baseValue + delta * step;
         if (typeof min === 'number') next = Math.max(min, next);
         if (typeof max === 'number') next = Math.min(max, next);
 
         const stepString = String(step);
-        const decimals = stepString.includes('.') ? stepString.split('.')[1]?.length ?? 0 : 0;
+        const decimals = stepString.includes('.') ? (stepString.split('.')[1]?.length ?? 0) : 0;
         const nextValue = decimals > 0 ? next.toFixed(decimals) : String(Math.round(next));
 
         const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
@@ -94,15 +94,24 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           setInputNumericValue(-1);
         }
       },
-      [props, isNumberType, disabled, setInputNumericValue],
+      [isNumberType, disabled, setInputNumericValue, props.onKeyDown],
     );
 
     const hasMin = props.min !== undefined && props.min !== null && String(props.min) !== '';
     const hasMax = props.max !== undefined && props.max !== null && String(props.max) !== '';
-    const autoConstraintText = hasMin && hasMax ? `Range: ${props.min} - ${props.max}` : hasMax ? `Max: ${props.max}` : hasMin ? `Min: ${props.min}` : '';
+    const autoConstraintText =
+      hasMin && hasMax
+        ? `Range: ${props.min} - ${props.max}`
+        : hasMax
+          ? `Max: ${props.max}`
+          : hasMin
+            ? `Min: ${props.min}`
+            : '';
     const combinedEndAdornment = (
       <>
-        {autoConstraintText ? <span className="text-xs text-muted-foreground whitespace-nowrap">{autoConstraintText}</span> : null}
+        {autoConstraintText ? (
+          <span className="text-xs text-muted-foreground whitespace-nowrap">{autoConstraintText}</span>
+        ) : null}
         {endAdornment}
       </>
     );

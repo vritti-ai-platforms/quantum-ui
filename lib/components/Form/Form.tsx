@@ -86,27 +86,27 @@ function processChildren<
                       onBlur: field.onBlur,
                     }
                   : isDatePicker
-                  ? {
-                      value: field.value,
-                      onValueChange: field.onChange,
-                      onBlur: field.onBlur,
-                      ref: field.ref,
-                    }
-                  : isDateTimePicker
                     ? {
                         value: field.value,
                         onValueChange: field.onChange,
                         onBlur: field.onBlur,
                         ref: field.ref,
                       }
-                  : isPhone
-                    ? {
-                        ...field,
-                        onCountryChange: (country: Country | undefined) => {
-                          setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
-                        },
-                      }
-                    : field;
+                    : isDateTimePicker
+                      ? {
+                          value: field.value,
+                          onValueChange: field.onChange,
+                          onBlur: field.onBlur,
+                          ref: field.ref,
+                        }
+                      : isPhone
+                        ? {
+                            ...field,
+                            onCountryChange: (country: Country | undefined) => {
+                              setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
+                            },
+                          }
+                        : field;
 
             const isUploadFile = child.type === UploadFile;
 

@@ -232,10 +232,7 @@ function SingleSelectGroupLabel({ className, children, ...props }: SingleSelectG
   return (
     <div
       data-slot="single-select-group-label"
-      className={cn(
-        'text-foreground px-2 py-1 text-[10px] font-semibold uppercase tracking-wide',
-        className,
-      )}
+      className={cn('text-foreground px-2 py-1 text-[10px] font-semibold uppercase tracking-wide', className)}
       {...props}
     >
       {children}

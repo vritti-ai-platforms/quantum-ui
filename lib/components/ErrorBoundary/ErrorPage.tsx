@@ -171,9 +171,21 @@ export const ErrorPage = ({
 
 type ScreenProps = Omit<ErrorPageProps, 'preset'>;
 
-export const UnauthorizedErrorPage = (props: ScreenProps) => <ErrorPage preset={getErrorPagePreset('unauthorized')} {...props} />;
-export const ForbiddenErrorPage = (props: ScreenProps) => <ErrorPage preset={getErrorPagePreset('forbidden')} {...props} />;
-export const NotFoundErrorPage = (props: ScreenProps) => <ErrorPage preset={getErrorPagePreset('notFound')} {...props} />;
-export const ServerErrorPage = (props: ScreenProps) => <ErrorPage preset={getErrorPagePreset('serverError')} {...props} />;
-export const NetworkErrorPage = (props: ScreenProps) => <ErrorPage preset={getErrorPagePreset('networkError')} {...props} />;
-export const UnknownErrorPage = (props: ScreenProps) => <ErrorPage preset={getErrorPagePreset('unknownError')} {...props} />;
+export const UnauthorizedErrorPage = (props: ScreenProps) => (
+  <ErrorPage preset={getErrorPagePreset('unauthorized')} {...props} />
+);
+export const ForbiddenErrorPage = (props: ScreenProps) => (
+  <ErrorPage preset={getErrorPagePreset('forbidden')} {...props} />
+);
+export const NotFoundErrorPage = (props: ScreenProps) => (
+  <ErrorPage preset={getErrorPagePreset('notFound')} {...props} />
+);
+export const ServerErrorPage = (props: ScreenProps) => (
+  <ErrorPage preset={getErrorPagePreset('serverError')} {...props} />
+);
+export const NetworkErrorPage = (props: ScreenProps) => (
+  <ErrorPage preset={getErrorPagePreset('networkError')} {...props} />
+);
+export const UnknownErrorPage = (props: ScreenProps) => (
+  <ErrorPage preset={getErrorPagePreset('unknownError')} {...props} />
+);

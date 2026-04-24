@@ -1,10 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import pluralize from 'pluralize-esm';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import type { DensityType, TableViewState } from '../../../types/table-filter';

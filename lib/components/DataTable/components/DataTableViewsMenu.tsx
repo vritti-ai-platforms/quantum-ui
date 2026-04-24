@@ -4,6 +4,8 @@ import { BookmarkPlus, EyeOff, LayoutList, Pencil, Save, Settings2, Share2, Tras
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useConfirm } from '../../../hooks/useConfirm';
+import type { DialogHandle } from '../../../hooks/useDialog';
 import type { TableViewRecord } from '../../../services/table-views.service';
 import {
   createView,
@@ -14,12 +16,10 @@ import {
   updateView,
 } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
-import type { DialogHandle } from '../../../hooks/useDialog';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
 import { TextField } from '../../TextField';
-import { useConfirm } from '../../../hooks/useConfirm';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
@@ -64,7 +64,9 @@ export function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentPr
     isOpen: open,
     open: () => {},
     close: onClose,
-    onOpenChange: (v) => { if (!v) onClose(); },
+    onOpenChange: (v) => {
+      if (!v) onClose();
+    },
   };
 
   return (
@@ -116,7 +118,9 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
     isOpen: open,
     open: () => {},
     close: onClose,
-    onOpenChange: (v) => { if (!v) onClose(); },
+    onOpenChange: (v) => {
+      if (!v) onClose();
+    },
   };
 
   return (
@@ -172,7 +176,9 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
     isOpen: open,
     open: () => {},
     close: onClose,
-    onOpenChange: (v) => { if (!v) onClose(); },
+    onOpenChange: (v) => {
+      if (!v) onClose();
+    },
   };
 
   return (

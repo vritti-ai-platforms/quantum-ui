@@ -17,15 +17,7 @@ export function DataTableEmpty({
   action,
   className,
 }: DataTableEmptyProps) {
-  return (
-    <Empty
-      icon={<Icon />}
-      title={title}
-      description={description}
-      action={action}
-      className={className}
-    />
-  );
+  return <Empty icon={<Icon />} title={title} description={description} action={action} className={className} />;
 }
 
 DataTableEmpty.displayName = 'DataTableEmpty';

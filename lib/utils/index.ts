@@ -1,4 +1,5 @@
 export { axios } from './axios';
+export { type CurrencyValue, getCurrencyExponent } from './currency';
 export {
   type ApiErrorResponse,
   type FieldMapping,

@@ -1,10 +1,10 @@
 export {
   PageContent,
   PageContentDetails,
-  PageContentPanel,
-  SidePanelListItem,
   type PageContentDetailsProps,
+  PageContentPanel,
   type PageContentPanelProps,
   type PageContentProps,
+  SidePanelListItem,
   type SidePanelListItemProps,
 } from './PageContent';

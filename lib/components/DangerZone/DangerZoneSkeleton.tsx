@@ -6,11 +6,7 @@ export interface DangerZoneSkeletonProps extends React.HTMLAttributes<HTMLDivEle
   showWarning?: boolean;
 }
 
-export const DangerZoneSkeleton = ({
-  showWarning = false,
-  className,
-  ...props
-}: DangerZoneSkeletonProps) => (
+export const DangerZoneSkeleton = ({ showWarning = false, className, ...props }: DangerZoneSkeletonProps) => (
   <div className={cn('bg-card text-card-foreground rounded-xl border py-6', className)} {...props}>
     <div className="flex flex-col gap-6">
       <div className="px-6 flex items-center gap-2">

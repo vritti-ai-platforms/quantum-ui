@@ -39,11 +39,7 @@ const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
 const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
 
 // Renders a single menu item based on its type — supports nested submenus
-const renderMenuItem = (
-  item: MenuItem,
-  index: number,
-  onDialogSelect?: (id: string) => void,
-): React.ReactNode => {
+const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: string) => void): React.ReactNode => {
   switch (item.type) {
     case 'separator':
       return <DropdownMenuSeparator key={item.id ?? `separator-${index}`} />;

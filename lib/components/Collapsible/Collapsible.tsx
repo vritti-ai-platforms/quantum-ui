@@ -41,16 +41,13 @@ export function Collapsible({
   const hasHeader = leading || trailing;
 
   return (
-    <ShadcnCollapsible
-      defaultOpen={defaultOpen}
-      open={open}
-      onOpenChange={onOpenChange}
-      className={className}
-    >
+    <ShadcnCollapsible defaultOpen={defaultOpen} open={open} onOpenChange={onOpenChange} className={className}>
       {hasHeader ? (
         <div className={cn('flex items-center gap-3', headerClassName)}>
           {leading}
-          <ShadcnCollapsibleTrigger className={cn('flex items-center gap-1 flex-1 cursor-pointer group', triggerClassName)}>
+          <ShadcnCollapsibleTrigger
+            className={cn('flex items-center gap-1 flex-1 cursor-pointer group', triggerClassName)}
+          >
             {showChevron && (
               <ChevronRight className="size-4 text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-90" />
             )}

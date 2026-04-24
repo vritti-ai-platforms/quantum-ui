@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useDialog } from '../../../hooks/useDialog';
 import { fetchViews, updateView } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
-import { useDialog } from '../../../hooks/useDialog';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
 import { CreateViewDialog } from './DataTableViewsMenu';
 
@@ -47,8 +47,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
   });
 
   const saveMut = useMutation({
-    mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) =>
-      updateView(id, state),
+    mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) => updateView(id, state),
     onSuccess: () => {
       syncActiveViewState(tableSlug);
       qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
@@ -146,11 +145,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
         }
       />
 
-      <CreateViewDialog
-        tableSlug={tableSlug}
-        open={createDialog.isOpen}
-        onClose={createDialog.close}
-      />
+      <CreateViewDialog tableSlug={tableSlug} open={createDialog.isOpen} onClose={createDialog.close} />
     </>
   );
 }

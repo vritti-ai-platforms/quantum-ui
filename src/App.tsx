@@ -54,7 +54,12 @@ const SelectFilterSection = () => {
       {/* Example A — Standalone single SelectFilter */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">A. Standalone single</p>
-        <SelectFilter name="status" label="Status" options={statusOptions} onChange={(v) => setSingleResult(v ?? undefined)} />
+        <SelectFilter
+          name="status"
+          label="Status"
+          options={statusOptions}
+          onChange={(v) => setSingleResult(v ?? undefined)}
+        />
         {singleResult && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(singleResult, null, 2)}</pre>}
       </div>
 

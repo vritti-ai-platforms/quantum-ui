@@ -115,7 +115,7 @@ export function useSelect({
         .then((r) => r.data),
     getNextPageParam: (lastPage, _allPages, lastPageParam) => (lastPage.hasMore ? lastPageParam + limit : undefined),
     initialPageParam: 0,
-    enabled: isAsync && (enabled !== false),
+    enabled: isAsync && enabled !== false,
   });
 
   // Merge options with value-based dedup.

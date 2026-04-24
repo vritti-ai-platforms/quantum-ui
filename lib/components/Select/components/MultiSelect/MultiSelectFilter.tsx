@@ -105,7 +105,9 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
     function renderRow(option: SelectOption) {
       const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
       const optionDescription = option.description
-        ? (transformDescription ? transformDescription(option.description, option) : option.description)
+        ? transformDescription
+          ? transformDescription(option.description, option)
+          : option.description
         : undefined;
 
       return (

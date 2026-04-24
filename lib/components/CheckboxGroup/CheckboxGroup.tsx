@@ -83,9 +83,7 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
     // Toggle a value in/out of the selection array
     const handleToggle = useCallback(
       (optionValue: string, checked: boolean) => {
-        const next = checked
-          ? [...currentValue, optionValue]
-          : currentValue.filter((v) => v !== optionValue);
+        const next = checked ? [...currentValue, optionValue] : currentValue.filter((v) => v !== optionValue);
 
         if (!isControlled) {
           setInternalValue(next);
@@ -121,11 +119,7 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
 
     // Compute layout classes based on columns or orientation
     const groupClassName = cn(
-      columns
-        ? `grid gap-3`
-        : orientation === 'horizontal'
-          ? 'flex flex-row flex-wrap gap-4'
-          : 'flex flex-col gap-3',
+      columns ? `grid gap-3` : orientation === 'horizontal' ? 'flex flex-row flex-wrap gap-4' : 'flex flex-col gap-3',
     );
 
     // Dynamic grid-cols style when columns prop is provided
@@ -135,7 +129,7 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
       <FieldSet ref={ref} data-invalid={hasError || undefined} className={className} {...props}>
         {label && <FieldLegend>{label}</FieldLegend>}
         {description && !error && <FieldDescription>{description}</FieldDescription>}
-        <div role="group" aria-label={typeof label === 'string' ? label : undefined} className={groupClassName} style={groupStyle}>
+        <div className={groupClassName} style={groupStyle}>
           {options.map(renderItem)}
         </div>
         {error && <FieldError>{error}</FieldError>}

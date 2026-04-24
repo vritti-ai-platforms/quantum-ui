@@ -79,7 +79,12 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.15 }}
         >
-          <Button variant="outline" size="sm" className={cn('h-9 w-9 p-0', className)} onClick={() => setIsExpanded(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('h-9 w-9 p-0', className)}
+            onClick={() => setIsExpanded(true)}
+          >
             <Search className="h-4 w-4" />
             <span className="sr-only">Search</span>
           </Button>
@@ -91,7 +96,10 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
           animate={{ width: 'auto', opacity: 1 }}
           exit={{ width: 36, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-          className={cn('flex items-center border border-input rounded-lg bg-background overflow-hidden h-9', className)}
+          className={cn(
+            'flex items-center border border-input rounded-lg bg-background overflow-hidden h-9',
+            className,
+          )}
         >
           {/* Column selector */}
           <SingleSelect

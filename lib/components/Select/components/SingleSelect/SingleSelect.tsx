@@ -144,7 +144,11 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
           key={String(option.value)}
           name={transformLabel ? transformLabel(option.label, option, 'option') : option.label}
           description={
-            option.description ? (transformDescription ? transformDescription(option.description, option) : option.description) : undefined
+            option.description
+              ? transformDescription
+                ? transformDescription(option.description, option)
+                : option.description
+              : undefined
           }
           selected={state.selectedValue === option.value}
           onSelect={() => {

@@ -17,23 +17,9 @@ const iconColorMap = {
 } as const;
 
 // Renders a centered empty state with optional icon, title, description, and action
-export function Empty({
-  icon,
-  iconColor = 'muted',
-  title,
-  description,
-  action,
-  className,
-  ...props
-}: EmptyProps) {
+export function Empty({ icon, iconColor = 'muted', title, description, action, className, ...props }: EmptyProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-col items-center justify-center gap-4 text-center p-10',
-        className,
-      )}
-      {...props}
-    >
+    <div className={cn('flex flex-col items-center justify-center gap-4 text-center p-10', className)} {...props}>
       {icon && (
         <div
           className={cn(
@@ -45,9 +31,7 @@ export function Empty({
         </div>
       )}
       {title && <p className="text-foreground font-semibold text-base">{title}</p>}
-      {description && (
-        <p className="text-muted-foreground text-sm max-w-sm">{description}</p>
-      )}
+      {description && <p className="text-muted-foreground text-sm max-w-sm">{description}</p>}
       {action && <div className="mt-1">{action}</div>}
     </div>
   );

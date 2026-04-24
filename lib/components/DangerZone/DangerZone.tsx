@@ -15,7 +15,15 @@ export interface DangerZoneProps {
 }
 
 // Renders a destructive-bordered card with a warning heading, description, and action button
-export const DangerZone = ({ title, description, buttonText, onClick, disabled, isLoading, warning }: DangerZoneProps) => {
+export const DangerZone = ({
+  title,
+  description,
+  buttonText,
+  onClick,
+  disabled,
+  isLoading,
+  warning,
+}: DangerZoneProps) => {
   return (
     <Card className="border-destructive/50">
       <CardHeader>

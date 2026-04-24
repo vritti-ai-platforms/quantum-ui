@@ -108,6 +108,10 @@
       "types": "./dist/lib/components/PhoneField/index.d.ts",
       "import": "./dist/components/PhoneField.js"
     },
+    "./CurrencyField": {
+      "types": "./dist/lib/components/CurrencyField/index.d.ts",
+      "import": "./dist/components/CurrencyField.js"
+    },
     "./Progress": {
       "types": "./dist/lib/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"
@@ -485,6 +489,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dinero.js": "^2.0.2",
     "fast-equals": "^6.0.0",
     "input-otp": "^1.4.2",
     "lexical": "^0.41.0",

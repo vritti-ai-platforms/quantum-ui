@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../../../shadcn/utils';
 import { TextField } from '../TextField';
 
-export interface SearchBarProps extends Omit<React.ComponentProps<'input'>, 'type' | 'value' | 'defaultValue' | 'onChange'> {
+export interface SearchBarProps
+  extends Omit<React.ComponentProps<'input'>, 'type' | 'value' | 'defaultValue' | 'onChange'> {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;

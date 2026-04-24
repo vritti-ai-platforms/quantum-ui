@@ -234,7 +234,11 @@ export function DataTable<TData>({
                       <TableHead
                         key={header.id}
                         colSpan={header.colSpan}
-                        style={isActions ? { width: '52px' } : { width: header.getSize(), minWidth: header.getSize(), maxWidth: header.getSize() }}
+                        style={
+                          isActions
+                            ? { width: '52px' }
+                            : { width: header.getSize(), minWidth: header.getSize(), maxWidth: header.getSize() }
+                        }
                         className={cn('relative group/resize', isActions ? 'text-right' : 'text-center')}
                         aria-sort={
                           header.column.getCanSort()
@@ -297,7 +301,15 @@ export function DataTable<TData>({
                           <TableCell
                             key={cell.id}
                             className={densityClasses[density]}
-                            style={cell.column.id === 'actions' ? { width: '52px' } : { width: cell.column.getSize(), minWidth: cell.column.getSize(), maxWidth: cell.column.getSize() }}
+                            style={
+                              cell.column.id === 'actions'
+                                ? { width: '52px' }
+                                : {
+                                    width: cell.column.getSize(),
+                                    minWidth: cell.column.getSize(),
+                                    maxWidth: cell.column.getSize(),
+                                  }
+                            }
                           >
                             <div
                               className={cn(
