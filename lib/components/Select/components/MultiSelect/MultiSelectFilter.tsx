@@ -47,6 +47,7 @@ export interface MultiSelectFilterProps {
   defaultValue?: SelectValueType[];
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  onOpenChange?: (open: boolean) => void;
   // Transforms how label is displayed in option rows
   transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
   // Transforms how description is displayed in option rows
@@ -75,6 +76,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       defaultValue,
       searchPlaceholder = 'Search...',
       asyncState,
+      onOpenChange,
       transformLabel,
       transformDescription,
     },
@@ -100,6 +102,12 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
     // Resolve search binding -- async delegates to parent, filter always shows search
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
     const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
+
+    function handleOpenChange(open: boolean) {
+      state.setOpen(open);
+      onOpenChange?.(open);
+      if (!open) asyncState?.setSearchQuery('');
+    }
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
@@ -179,7 +187,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
 
     return (
       <>
-        <MultiSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+        <MultiSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
           <PopoverTrigger asChild>
             <button
               ref={ref}

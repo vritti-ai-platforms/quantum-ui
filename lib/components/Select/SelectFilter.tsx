@@ -50,12 +50,14 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     onChange,
     operator: controlledOperator,
     onOperatorChange,
+    onOpenChange,
     ...rest
   } = props;
 
   // Track operator locally for uncontrolled usage; Form-controlled value takes precedence
   const defaultOperator = multiple ? 'isAnyOf' : 'equals';
   const [localOperator, setLocalOperator] = useState(controlledOperator ?? defaultOperator);
+  const [open, setOpen] = useState(false);
   const currentOperator = isFilterResult(value) ? value.operator : (controlledOperator ?? localOperator);
 
   function handleOperatorChange(op: string) {
@@ -74,6 +76,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     fieldKeys,
     params,
     selectedValues: rawValue != null ? (Array.isArray(rawValue) ? rawValue : [rawValue]) : undefined,
+    enabled: open,
   });
 
   const isAsync = !!optionsEndpoint;
@@ -96,6 +99,10 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     asyncState,
     operator: currentOperator,
     onOperatorChange: handleOperatorChange,
+    onOpenChange: (nextOpen: boolean) => {
+      setOpen(nextOpen);
+      onOpenChange?.(nextOpen);
+    },
     name,
   };
 

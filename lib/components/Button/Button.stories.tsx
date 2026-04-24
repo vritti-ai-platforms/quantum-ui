@@ -27,6 +27,10 @@ const meta: Meta<typeof Button> = {
       control: 'boolean',
       description: 'Whether the button is disabled',
     },
+    disabledTip: {
+      control: 'text',
+      description: 'Tooltip text shown when the button is explicitly disabled',
+    },
     isLoading: {
       control: 'boolean',
       description: 'Whether the button is in a loading state',
@@ -128,6 +132,33 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     children: 'Disabled Button',
+  },
+};
+
+export const DisabledWithTip: Story = {
+  args: {
+    disabled: true,
+    disabledTip: 'You need admin access to perform this action.',
+    children: 'Delete Workspace',
+  },
+};
+
+export const LoadingWithDisabledTip: Story = {
+  args: {
+    isLoading: true,
+    disabledTip: 'This tooltip only appears when disabled is explicitly true.',
+    loadingText: 'Saving...',
+    children: 'Save Changes',
+  },
+};
+
+export const DisabledWithTipOutlineLarge: Story = {
+  args: {
+    disabled: true,
+    disabledTip: 'Upgrade your plan to export reports.',
+    variant: 'outline',
+    size: 'lg',
+    children: 'Export Report',
   },
 };
 

@@ -121,6 +121,16 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       if (!o) asyncState?.setSearchQuery('');
     }
 
+    function handleSelectOption(value: SelectValue) {
+      state.selectOption(value);
+      handleOpenChange(false);
+    }
+
+    function handleClearSelection() {
+      state.clearSelection();
+      handleOpenChange(false);
+    }
+
     // Resolve search binding -- async delegates to parent, static uses local state
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
     const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
@@ -134,7 +144,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             {renderOption({
               option,
               selected: state.selectedValue === option.value,
-              onSelect: () => state.selectOption(option.value),
+              onSelect: () => handleSelectOption(option.value),
             })}
           </Fragment>
         );
@@ -152,7 +162,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
           }
           selected={state.selectedValue === option.value}
           onSelect={() => {
-            state.selectOption(option.value);
+            handleSelectOption(option.value);
           }}
           disabled={option.disabled}
         />
@@ -210,7 +220,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             )}
           </SingleSelectList>
 
-          {clearable && <SingleSelectClear onClear={state.clearSelection} disabled={!state.selectedValue} />}
+          {clearable && <SingleSelectClear onClear={handleClearSelection} disabled={!state.selectedValue} />}
           {footer}
         </SingleSelectContent>
       );

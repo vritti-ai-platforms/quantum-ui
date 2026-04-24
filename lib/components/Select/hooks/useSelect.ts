@@ -56,6 +56,10 @@ export function useSelect({
   useEffect(() => {
     if (!isAsync) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchQuery === '') {
+      setDebouncedSearch('');
+      return;
+    }
     debounceRef.current = setTimeout(() => {
       setDebouncedSearch(searchQuery);
     }, searchDebounceMs);
@@ -116,6 +120,8 @@ export function useSelect({
     getNextPageParam: (lastPage, _allPages, lastPageParam) => (lastPage.hasMore ? lastPageParam + limit : undefined),
     initialPageParam: 0,
     enabled: isAsync && enabled !== false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   // Merge options with value-based dedup.
@@ -142,6 +148,7 @@ export function useSelect({
   }, [resolvedSelected, data, debouncedSearch]);
 
   const fetchedGroups = data?.pages[0]?.groups ?? staticGroups ?? [];
+  const hasSearchResultsData = (data?.pages.length ?? 0) > 0;
 
   // IntersectionObserver sentinel for infinite scroll
   const { ref: sentinelRef, inView } = useInView();
@@ -168,7 +175,7 @@ export function useSelect({
   return {
     options: fetchedOptions,
     groups: fetchedGroups,
-    loading: isFetching && !isFetchingNextPage,
+    loading: isFetching && !isFetchingNextPage && !hasSearchResultsData,
     loadingMore: isFetchingNextPage,
     hasMore: hasNextPage ?? false,
     searchQuery,

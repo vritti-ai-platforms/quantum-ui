@@ -53,6 +53,7 @@ export interface SingleSelectFilterProps {
   defaultValue?: SelectValue;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  onOpenChange?: (open: boolean) => void;
 }
 
 // Compact single-select filter trigger with inline label display
@@ -77,6 +78,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       defaultValue,
       searchPlaceholder = 'Search...',
       asyncState,
+      onOpenChange,
     },
     ref,
   ) => {
@@ -101,6 +103,22 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
     const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
 
+    function handleOpenChange(open: boolean) {
+      state.setOpen(open);
+      onOpenChange?.(open);
+      if (!open) asyncState?.setSearchQuery('');
+    }
+
+    function handleSelectOption(value: SelectValue) {
+      state.selectOption(value);
+      handleOpenChange(false);
+    }
+
+    function handleClearSelection() {
+      state.clearSelection();
+      handleOpenChange(false);
+    }
+
     // Renders a single option row
     function renderRow(option: SelectOption) {
       return (
@@ -110,7 +128,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
           description={option.description}
           selected={state.selectedValue === option.value}
           onSelect={() => {
-            state.selectOption(option.value);
+            handleSelectOption(option.value);
           }}
           disabled={option.disabled}
         />
@@ -165,12 +183,12 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     // Clears inline from the chip without opening the popover
     function handleInlineClear(e: React.MouseEvent) {
       e.stopPropagation();
-      state.clearSelection();
+      handleClearSelection();
     }
 
     return (
       <>
-        <SingleSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+        <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
           <PopoverTrigger asChild>
             <button
               ref={ref}
@@ -231,7 +249,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               )}
             </SingleSelectList>
 
-            <SingleSelectClear onClear={state.clearSelection} disabled={!state.selectedValue} />
+            <SingleSelectClear onClear={handleClearSelection} disabled={!state.selectedValue} />
           </SingleSelectContent>
         </SingleSelectRoot>
 
