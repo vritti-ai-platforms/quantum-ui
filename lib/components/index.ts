@@ -12,6 +12,8 @@ export * from './CurrencyField';
 export * from './DangerZone';
 export * from './DataTable';
 export * from './DatePicker';
+export * from './DateRangePicker';
+export * from './DateTimeRangePicker';
 export * from './DateTimePicker';
 export * from './DetailField';
 export * from './Dialog';

@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '../lib/components/Button';
 import { DatePicker } from '../lib/components/DatePicker';
+import { DateRangePicker } from '../lib/components/DateRangePicker';
+import type { DateRange } from 'react-day-picker';
+import { DateTimeRangePicker } from '../lib/components/DateTimeRangePicker';
+import type { DateTimeRange } from '../lib/components/DateTimeRangePicker';
 import { DateTimePicker } from '../lib/components/DateTimePicker';
 import { Form } from '../lib/components/Form/Form';
 import { SelectFilter } from '../lib/components/Select/SelectFilter';
@@ -133,6 +137,104 @@ const DatePickerSection = () => {
   );
 };
 
+// ─── DATE RANGE PICKER EXAMPLES ───
+
+const DateRangePickerSection = () => {
+  const [standaloneValue, setStandaloneValue] = useState<DateRange | undefined>();
+
+  return (
+    <div className="space-y-10">
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">A. Standalone (uncontrolled)</p>
+        <DateRangePicker
+          label="Date Range"
+          description="Select a start and end date"
+          placeholder="Select date range"
+        />
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">B. Standalone controlled — shows selected range</p>
+        <DateRangePicker
+          label="Stay Duration"
+          placeholder="Select stay dates"
+          value={standaloneValue}
+          onValueChange={setStandaloneValue}
+        />
+        {standaloneValue && (
+          <pre className="rounded-md bg-muted p-3 text-xs">
+            {JSON.stringify(
+              {
+                from: standaloneValue.from?.toISOString(),
+                to: standaloneValue.to?.toISOString(),
+              },
+              null,
+              2,
+            )}
+          </pre>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">C. Single month view</p>
+        <DateRangePicker
+          label="Sprint Window"
+          placeholder="Select sprint dates"
+          numberOfMonths={1}
+        />
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">D. Error state</p>
+        <DateRangePicker
+          label="Report Period"
+          placeholder="Select report period"
+          error="Date range is required"
+        />
+      </div>
+    </div>
+  );
+};
+
+// ─── DATE TIME RANGE PICKER EXAMPLES ───
+
+const DateTimeRangePickerSection = () => {
+  const [value, setValue] = useState<DateTimeRange | undefined>();
+
+  return (
+    <div className="space-y-10">
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">A. Standalone controlled</p>
+        <DateTimeRangePicker
+          label="Event Window"
+          placeholder="Select event start & end"
+          value={value}
+          onValueChange={setValue}
+        />
+        {value && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(value, null, 2)}</pre>}
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">B. Single month view</p>
+        <DateTimeRangePicker
+          label="Sprint Window"
+          placeholder="Select sprint start & end"
+          numberOfMonths={1}
+        />
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-muted-foreground">C. Error state</p>
+        <DateTimeRangePicker
+          label="Report Period"
+          placeholder="Select report period"
+          error="Date time range is required"
+        />
+      </div>
+    </div>
+  );
+};
+
 // ─── DATE TIME PICKER EXAMPLES ───
 type DateTimeFormValues = {
   expectedDelivery?: string;
@@ -252,10 +354,22 @@ export const App = () => {
             <SelectFilterSection />
           </Section>
           <Section
+            title="DateRangePicker"
+            description="Standalone DateRangePicker — onValueChange emits a DateRange object with from/to Date values."
+          >
+            <DateRangePickerSection />
+          </Section>
+          <Section
             title="DatePicker"
             description="Standalone and Form-integrated DatePicker — value callbacks and submit payload use ISO strings."
           >
             <DatePickerSection />
+          </Section>
+          <Section
+            title="DateTimeRangePicker"
+            description="Standalone DateTimeRangePicker — onValueChange emits { from, to } ISO datetime strings."
+          >
+            <DateTimeRangePickerSection />
           </Section>
           <Section
             title="DateTimePicker"

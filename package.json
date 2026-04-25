@@ -244,6 +244,14 @@
       "types": "./dist/lib/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
     },
+    "./DateRangePicker": {
+      "types": "./dist/lib/components/DateRangePicker/index.d.ts",
+      "import": "./dist/components/DateRangePicker.js"
+    },
+    "./DateTimeRangePicker": {
+      "types": "./dist/lib/components/DateTimeRangePicker/index.d.ts",
+      "import": "./dist/components/DateTimeRangePicker.js"
+    },
     "./DateTimePicker": {
       "types": "./dist/lib/components/DateTimePicker/index.d.ts",
       "import": "./dist/components/DateTimePicker.js"
