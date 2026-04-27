@@ -117,7 +117,7 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
 
     return (
       <FieldSet data-invalid={hasError || undefined} className={className}>
-        {label && <FieldLegend>{label}</FieldLegend>}
+        {label && <FieldLegend variant="label">{label}</FieldLegend>}
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         <ShadcnRadioGroup
           ref={ref}

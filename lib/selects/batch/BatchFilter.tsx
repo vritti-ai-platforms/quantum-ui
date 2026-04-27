@@ -13,7 +13,7 @@ export const BatchFilter = Object.assign(
       name="batchId"
       label="Batch"
       placeholder="Select batch"
-      optionsEndpoint="commerce-api/inventory-item-batches/select"
+      optionsEndpoint="commerce-api/inventory-item-quants/select"
       params={{ inventoryItemId }}
       {...props}
     />

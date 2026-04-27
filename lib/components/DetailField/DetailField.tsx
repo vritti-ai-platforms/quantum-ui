@@ -21,11 +21,22 @@ type FormattedValue = {
 };
 
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_DATETIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 
 const formatWithTimeZone = (date: Date, dateFormat: string, timeZone: string, locale?: Locale) =>
   format(date, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
 
 const parseDateOnly = (value: string): Date => parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
+
+// If the value is a date-like string but no explicit dateFormat is given,
+// fall back to date-fns locale presets so the rendered format respects the user's locale.
+const resolveDateFormat = (value: React.ReactNode, dateFormat?: string, dateOnly?: boolean): string | undefined => {
+  if (dateFormat) return dateFormat;
+  if (typeof value !== 'string') return undefined;
+  if (dateOnly || DATE_ONLY_PATTERN.test(value)) return 'P';
+  if (ISO_DATETIME_PATTERN.test(value)) return 'Pp';
+  return undefined;
+};
 
 const formatValue = (
   value: React.ReactNode,
@@ -35,13 +46,16 @@ const formatValue = (
   locale?: Locale,
 ): FormattedValue => {
   if (value == null) return { primary: '—' };
-  if (!dateFormat) return { primary: value };
+
+  const resolvedFormat = resolveDateFormat(value, dateFormat, dateOnly);
+  if (!resolvedFormat) return { primary: value };
   if (typeof value !== 'string') return { primary: value };
 
-  if (dateOnly) {
+  const isDateOnly = dateOnly || DATE_ONLY_PATTERN.test(value);
+  if (isDateOnly) {
     const parsed = parseDateOnly(value);
     if (!isValid(parsed)) return { primary: '—' };
-    return { primary: formatWithTimeZone(parsed, dateFormat, 'UTC', locale) };
+    return { primary: formatWithTimeZone(parsed, resolvedFormat, 'UTC', locale) };
   }
 
   const parsed = parseISO(value);
@@ -49,10 +63,10 @@ const formatValue = (
 
   const primaryTimeZone = timeZoneOverride ?? resolveTimeZone();
   if (!primaryTimeZone) {
-    return { primary: format(parsed, dateFormat, locale ? { locale } : undefined) };
+    return { primary: format(parsed, resolvedFormat, locale ? { locale } : undefined) };
   }
 
-  const primary = `${formatWithTimeZone(parsed, dateFormat, primaryTimeZone, locale)} (${primaryTimeZone})`;
+  const primary = `${formatWithTimeZone(parsed, resolvedFormat, primaryTimeZone, locale)} (${primaryTimeZone})`;
   const userTimeZone = getUserTimeZone();
 
   if (!userTimeZone || userTimeZone === primaryTimeZone) {
@@ -61,7 +75,7 @@ const formatValue = (
 
   return {
     primary,
-    secondary: `Your time: ${formatWithTimeZone(parsed, dateFormat, userTimeZone, locale)} (${userTimeZone})`,
+    secondary: `Your time: ${formatWithTimeZone(parsed, resolvedFormat, userTimeZone, locale)} (${userTimeZone})`,
   };
 };
 

@@ -5,39 +5,25 @@ import { cn } from '../../../shadcn/utils';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 
 export interface TextFieldProps extends React.ComponentProps<'input'> {
-  /**
-   * Label for the field
-   */
   label?: string;
-
-  /**
-   * Helper text to display below the field
-   */
   description?: React.ReactNode;
-
-  /**
-   * Error message to display
-   */
   error?: string;
-
-  /**
-   * Element to display at the start of the input (e.g., icon)
-   */
   startAdornment?: React.ReactNode;
-
-  /**
-   * Element to display at the end of the input (e.g., icon button)
-   */
   endAdornment?: React.ReactNode;
+  // Blocks negative values and '-'/'e' keys; sets min to 0 if no min provided
+  positive?: boolean;
+  // Blocks zero; sets min to 1 if positive is also true and no min provided
+  nonZero?: boolean;
 }
 
 // TextField molecule - Input + Label composition using Field system
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
-  ({ label, description, error, className, id, disabled, startAdornment, endAdornment, ...props }, ref) => {
+  ({ label, description, error, className, id, disabled, startAdornment, endAdornment, positive, nonZero, ...props }, ref) => {
     const isNumberType = props.type === 'number';
     const normalizedType = isNumberType ? 'text' : props.type;
     const normalizedInputMode = props.inputMode ?? (isNumberType ? 'decimal' : undefined);
     const normalizedPattern = props.pattern ?? (isNumberType ? '^[0-9]*\\.?[0-9]*$' : undefined);
+    const effectiveMin = props.min ?? (positive && nonZero ? 1 : positive ? 0 : undefined);
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     const assignRef = React.useCallback(
@@ -60,7 +46,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
 
         const parsedStep = Number(props.step);
         const step = Number.isFinite(parsedStep) && parsedStep > 0 ? parsedStep : 1;
-        const parsedMin = Number(props.min);
+        const parsedMin = Number(effectiveMin);
         const min = Number.isFinite(parsedMin) ? parsedMin : undefined;
         const parsedMax = Number(props.max);
         const max = Number.isFinite(parsedMax) ? parsedMax : undefined;
@@ -79,13 +65,21 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         valueSetter?.call(input, nextValue);
         input.dispatchEvent(new Event('input', { bubbles: true }));
       },
-      [isNumberType, disabled, props.min, props.max, props.step],
+      [isNumberType, disabled, effectiveMin, props.max, props.step],
     );
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         props.onKeyDown?.(event);
         if (event.defaultPrevented || !isNumberType || disabled) return;
+        if (positive && (event.key === '-' || event.key === 'e')) {
+          event.preventDefault();
+          return;
+        }
+        if (nonZero && event.key === '0' && (event.currentTarget.value === '' || event.currentTarget.value === '0')) {
+          event.preventDefault();
+          return;
+        }
         if (event.key === 'ArrowUp') {
           event.preventDefault();
           setInputNumericValue(1);
@@ -94,18 +88,18 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           setInputNumericValue(-1);
         }
       },
-      [isNumberType, disabled, setInputNumericValue, props.onKeyDown],
+      [isNumberType, disabled, positive, nonZero, setInputNumericValue, props.onKeyDown],
     );
 
-    const hasMin = props.min !== undefined && props.min !== null && String(props.min) !== '';
+    const hasMin = effectiveMin !== undefined && effectiveMin !== null && String(effectiveMin) !== '';
     const hasMax = props.max !== undefined && props.max !== null && String(props.max) !== '';
     const autoConstraintText =
       hasMin && hasMax
-        ? `Range: ${props.min} - ${props.max}`
+        ? `Range: ${effectiveMin} - ${props.max}`
         : hasMax
           ? `Max: ${props.max}`
           : hasMin
-            ? `Min: ${props.min}`
+            ? `Min: ${effectiveMin}`
             : '';
     const combinedEndAdornment = (
       <>
@@ -137,6 +131,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
             )}
             id={id}
             {...props}
+            min={effectiveMin}
             type={normalizedType}
             inputMode={normalizedInputMode}
             pattern={normalizedPattern}

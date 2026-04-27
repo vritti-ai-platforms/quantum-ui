@@ -60,7 +60,7 @@ export function SidePanelListItem({ active = false, className, type = 'button', 
 export function PageContent({ children, className, ...props }: PageContentProps) {
   return (
     <div
-      className={cn('flex overflow-hidden rounded-xl border bg-background', className)}
+      className={cn('flex w-full overflow-hidden rounded-xl border bg-background', className)}
       style={{ height: 'calc(100vh - 220px)' }}
       {...props}
     >

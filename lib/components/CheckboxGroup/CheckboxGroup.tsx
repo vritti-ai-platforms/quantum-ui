@@ -127,7 +127,7 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
 
     return (
       <FieldSet ref={ref} data-invalid={hasError || undefined} className={className} {...props}>
-        {label && <FieldLegend>{label}</FieldLegend>}
+        {label && <FieldLegend variant="label">{label}</FieldLegend>}
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         <div className={groupClassName} style={groupStyle}>
           {options.map(renderItem)}

@@ -11,7 +11,7 @@ export const BatchSelector = forwardRef<HTMLButtonElement, BatchSelectorProps>((
     label="Batch"
     placeholder="Select batch"
     searchable
-    optionsEndpoint="commerce-api/inventory-item-batches/select"
+    optionsEndpoint="commerce-api/inventory-item-quants/select"
     params={{ inventoryItemId }}
     {...props}
   />

@@ -49,6 +49,8 @@ export function DataTable<TData>({
   enableViews = true,
   importExport,
   mode = 'page',
+  onRowClick,
+  selectedRowId,
 }: DataTableProps<TData>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const importDialog = useDialog();
@@ -295,34 +297,45 @@ export function DataTable<TData>({
                         ))}
                       </TableRow>
                     ))
-                  : table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className={densityClasses[density]}
-                            style={
-                              cell.column.id === 'actions'
-                                ? { width: '52px' }
-                                : {
-                                    width: cell.column.getSize(),
-                                    minWidth: cell.column.getSize(),
-                                    maxWidth: cell.column.getSize(),
-                                  }
-                            }
-                          >
-                            <div
-                              className={cn(
-                                'flex items-center',
-                                cell.column.id === 'actions' ? 'justify-end' : 'justify-center',
-                              )}
-                            >
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </div>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
+                  : table.getRowModel().rows.map((row) => {
+                      const externallySelected = selectedRowId != null && row.id === selectedRowId;
+                      const isSelected = row.getIsSelected() || externallySelected;
+                      return (
+                        <TableRow key={row.id} data-state={isSelected ? 'selected' : undefined}>
+                          {row.getVisibleCells().map((cell) => {
+                            const isActionsCell = cell.column.id === 'actions';
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={cn(
+                                  densityClasses[density],
+                                  onRowClick && !isActionsCell ? 'cursor-pointer' : undefined,
+                                )}
+                                onClick={onRowClick && !isActionsCell ? () => onRowClick(row.original) : undefined}
+                                style={
+                                  isActionsCell
+                                    ? { width: '52px' }
+                                    : {
+                                        width: cell.column.getSize(),
+                                        minWidth: cell.column.getSize(),
+                                        maxWidth: cell.column.getSize(),
+                                      }
+                                }
+                              >
+                                <div
+                                  className={cn(
+                                    'flex items-center',
+                                    isActionsCell ? 'justify-end' : 'justify-center',
+                                  )}
+                                >
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </div>
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
               </TableBody>
             )}
           </table>

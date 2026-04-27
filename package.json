@@ -192,6 +192,14 @@
       "types": "./dist/lib/selects/inventory-item/index.d.ts",
       "import": "./dist/selects/inventory-item.js"
     },
+    "./selects/lot": {
+      "types": "./dist/lib/selects/lot/index.d.ts",
+      "import": "./dist/selects/lot.js"
+    },
+    "./selects/quant-item": {
+      "types": "./dist/lib/selects/quant-item/index.d.ts",
+      "import": "./dist/selects/quant-item.js"
+    },
     "./selects/storage-location": {
       "types": "./dist/lib/selects/storage-location/index.d.ts",
       "import": "./dist/selects/storage-location.js"
