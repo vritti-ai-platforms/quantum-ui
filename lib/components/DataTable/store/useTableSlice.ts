@@ -1,4 +1,5 @@
 import type { SortingState } from '@tanstack/react-table';
+import { deepEqual } from 'fast-equals';
 import { useCallback, useMemo } from 'react';
 import type { FilterCondition, SearchState, TableViewState } from '../../../types/table-filter';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
@@ -9,10 +10,21 @@ import { useDataTableStore, viewStatesEqual } from './store';
 export function useTableSlice(slug: string) {
   const activeState = useDataTableStore((s) => s.tables[slug]?.activeState ?? EMPTY_TABLE_STATE);
   const activeViewId = useDataTableStore((s) => s.tables[slug]?.activeViewId ?? null);
+  const activeViewState = useDataTableStore((s) => s.tables[slug]?.activeViewState ?? null);
   const isViewDirty = useDataTableStore((s) => {
     const t = s.tables[slug];
     if (!t?.activeViewState) return false;
     return !viewStatesEqual(t.activeState, t.activeViewState);
+  });
+  const isFiltersDirty = useDataTableStore((s) => {
+    const t = s.tables[slug];
+    if (!t?.activeViewState) return false;
+    return !deepEqual(t.activeState.filters, t.activeViewState.filters);
+  });
+  const isSearchDirty = useDataTableStore((s) => {
+    const t = s.tables[slug];
+    if (!t?.activeViewState) return false;
+    return !deepEqual(t.activeState.search, t.activeViewState.search);
   });
 
   const _updateActiveState = useDataTableStore((s) => s.updateActiveState);
@@ -50,8 +62,11 @@ export function useTableSlice(slug: string) {
   return {
     activeState,
     activeViewId,
+    activeViewState,
     sorting,
     isViewDirty,
+    isFiltersDirty,
+    isSearchDirty,
     updateActiveState,
     setFilters,
     setSearch,

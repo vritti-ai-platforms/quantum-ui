@@ -1,5 +1,5 @@
 import type { Row, Table } from '@tanstack/react-table';
-import type { DensityType, FilterCondition, SearchState } from '../../types/table-filter';
+import type { DensityType, FilterCondition, SearchState, TableViewState } from '../../types/table-filter';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
@@ -45,6 +45,9 @@ export interface DataTableMeta {
   density: DensityType;
   setDensity: (d: DensityType) => void;
   isViewDirty: boolean;
+  isFiltersDirty: boolean;
+  isSearchDirty: boolean;
+  activeViewState: TableViewState | null;
   setFilters: (filters: FilterCondition[]) => void;
   search: SearchState;
   setSearch: (search: SearchState) => void;

@@ -44,9 +44,12 @@ export function useDataTable<TData>({
     // State
     activeState,
     activeViewId,
+    activeViewState,
     sorting,
     // Dirty flags
     isViewDirty,
+    isFiltersDirty,
+    isSearchDirty,
     // Actions
     updateActiveState,
     setFilters,
@@ -109,6 +112,9 @@ export function useDataTable<TData>({
 
       // View dirty state
       isViewDirty,
+      isFiltersDirty,
+      isSearchDirty,
+      activeViewState,
 
       // Filters
       setFilters: (filters: Parameters<typeof setFilters>[0]) => setFilters(filters),
@@ -125,6 +131,9 @@ export function useDataTable<TData>({
       filterVisibility,
       density,
       isViewDirty,
+      isFiltersDirty,
+      isSearchDirty,
+      activeViewState,
       updateActiveState,
       setFilters,
       activeState.search,

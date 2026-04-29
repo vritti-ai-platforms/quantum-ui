@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { useDialog } from '../../hooks/useDialog';
+import { EMPTY_TABLE_STATE } from '../../types/table-filter';
 import { axios } from '../../utils/axios';
 import { Button } from '../Button';
 import { DropdownMenu } from '../DropdownMenu';
@@ -36,6 +37,21 @@ const MODE_HEIGHTS = {
   compact: 'calc(100vh - 570px)',
 };
 
+// Builds "No results match your search, your filters and this view." from the active flags
+function buildNoResultsDescription(flags: {
+  hasActiveSearch: boolean;
+  hasActiveFilters: boolean;
+  hasActiveView: boolean;
+}): string {
+  const parts: string[] = [];
+  if (flags.hasActiveSearch) parts.push('your search');
+  if (flags.hasActiveFilters) parts.push('your filters');
+  if (flags.hasActiveView) parts.push('this view');
+  const joined =
+    parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+  return `No results match ${joined}.`;
+}
+
 // Renders a full-featured data table from a raw TanStack Table instance
 export function DataTable<TData>({
   table,
@@ -58,6 +74,8 @@ export function DataTable<TData>({
   const meta = table.options.meta as DataTableMeta | undefined;
   const slug = meta?.slug;
   const appliedFilterCount = useDataTableStore((s) => (slug ? (s.tables[slug]?.activeState?.filters?.length ?? 0) : 0));
+  const activeViewId = useDataTableStore((s) => (slug ? (s.tables[slug]?.activeViewId ?? null) : null));
+  const loadViewState = useDataTableStore((s) => s.loadViewState);
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
@@ -65,6 +83,16 @@ export function DataTable<TData>({
     searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || importExport;
 
   const search = meta?.search ?? null;
+  const hasActiveView = !!activeViewId;
+  // Without a view, "active" = anything present. With a view, "active" = diverged from the view's saved state.
+  const hasActiveFilters = hasActiveView ? !!meta?.isFiltersDirty : appliedFilterCount > 0;
+  const hasActiveSearch = hasActiveView
+    ? !!meta?.isSearchDirty
+    : !!(search?.value && search.value.trim() !== '');
+  const isFiltered = hasActiveSearch || hasActiveFilters || hasActiveView;
+  // Reset baselines: clear actions revert to the view's saved values, or to empty when no view is active.
+  const filtersBaseline = meta?.activeViewState?.filters ?? [];
+  const searchBaseline = meta?.activeViewState?.search ?? null;
   const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
 
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
@@ -341,12 +369,43 @@ export function DataTable<TData>({
           </table>
           {!isLoading && table.getRowModel().rows.length === 0 && (
             <div className="flex flex-1 items-center justify-center">
-              <DataTableEmpty
-                icon={emptyStateConfig?.icon}
-                title={emptyStateConfig?.title}
-                description={emptyStateConfig?.description}
-                action={emptyStateConfig?.action}
-              />
+              {isFiltered ? (
+                <DataTableEmpty
+                  icon={emptyStateConfig?.icon}
+                  title="No results found"
+                  description={buildNoResultsDescription({ hasActiveSearch, hasActiveFilters, hasActiveView })}
+                  action={
+                    <div className="flex gap-2">
+                      {hasActiveSearch && (
+                        <Button variant="outline" size="sm" onClick={() => meta?.setSearch?.(searchBaseline)}>
+                          Clear Search
+                        </Button>
+                      )}
+                      {hasActiveFilters && (
+                        <Button variant="outline" size="sm" onClick={() => meta?.setFilters?.(filtersBaseline)}>
+                          Clear Filters
+                        </Button>
+                      )}
+                      {hasActiveView && slug && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => loadViewState(slug, EMPTY_TABLE_STATE, null, false)}
+                        >
+                          Clear View
+                        </Button>
+                      )}
+                    </div>
+                  }
+                />
+              ) : (
+                <DataTableEmpty
+                  icon={emptyStateConfig?.icon}
+                  title={emptyStateConfig?.title}
+                  description={emptyStateConfig?.description}
+                  action={emptyStateConfig?.action}
+                />
+              )}
             </div>
           )}
         </div>
