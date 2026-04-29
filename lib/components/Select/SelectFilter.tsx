@@ -12,10 +12,11 @@ function isFilterResult(v: unknown): v is FilterResult {
 
 // Extracts the raw SelectValue(s) from a FilterResult or passes the value through unchanged
 function extractRawValue(
-  v: FilterResult | SelectValue | SelectValue[] | undefined,
+  v: FilterResult | SelectValue | SelectValue[] | undefined | null,
 ): SelectValue | SelectValue[] | undefined {
+  if (v == null) return undefined;
   if (isFilterResult(v)) return v.value as SelectValue | SelectValue[];
-  return v as SelectValue | SelectValue[] | undefined;
+  return v as SelectValue | SelectValue[];
 }
 
 interface SelectFilterBaseProps {
@@ -60,12 +61,23 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
   const [open, setOpen] = useState(false);
   const currentOperator = isFilterResult(value) ? value.operator : (controlledOperator ?? localOperator);
 
+  const rawValue = extractRawValue(value);
+
   function handleOperatorChange(op: string) {
     setLocalOperator(op);
     onOperatorChange?.(op);
+    // Propagate operator change immediately when a value is already selected
+    if (multiple) {
+      const currentValues = Array.isArray(rawValue) ? rawValue : [];
+      if (currentValues.length > 0) {
+        onChange?.({ field: name, operator: op, value: currentValues.map(String) });
+      }
+    } else {
+      if (rawValue != null && rawValue !== '') {
+        onChange?.({ field: name, operator: op, value: rawValue as string | number });
+      }
+    }
   }
-
-  const rawValue = extractRawValue(value);
 
   const selectData = useSelect({
     options: rest.options,

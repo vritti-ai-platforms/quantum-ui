@@ -89,16 +89,18 @@ interface MultiSelectSearchProps {
 
 function MultiSelectSearch({ value, onValueChange, placeholder = 'Search...', className }: MultiSelectSearchProps) {
   return (
-    <div data-slot="multi-select-search" className={cn('flex items-center gap-2 border-b px-3', className)}>
-      <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
-      <input
-        type="text"
-        aria-label="Search options"
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        placeholder={placeholder}
-        className="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-      />
+    <div data-slot="multi-select-search" className={cn('px-3 py-2', className)}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 h-9">
+        <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          type="text"
+          aria-label="Search options"
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
     </div>
   );
 }

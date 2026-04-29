@@ -223,7 +223,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
                 <span className="text-sm text-muted-foreground">{label}</span>
                 <RadixSelect value={operator} onValueChange={handleOperatorChange}>
-                  <RadixSelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 shadow-none text-sm font-medium text-foreground focus-visible:ring-0">
+                  <RadixSelectTrigger className="h-auto w-auto gap-1 rounded-none border-0 !bg-transparent p-0 shadow-none text-sm font-medium text-foreground hover:!bg-transparent focus-visible:ring-0 data-[state=open]:!bg-transparent">
                     <RadixSelectValue />
                   </RadixSelectTrigger>
                   <RadixSelectContent>
