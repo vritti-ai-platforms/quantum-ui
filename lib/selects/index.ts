@@ -4,6 +4,7 @@ export * from './bom';
 export * from './category';
 export * from './cloud-provider';
 export * from './currency';
+export * from './customer';
 export * from './deployment';
 export * from './feature';
 export * from './industry';

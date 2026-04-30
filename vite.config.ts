@@ -64,6 +64,7 @@ export default defineConfig({
         'selects/app-code': resolve(__dirname, 'lib/selects/app-code/index.ts'),
         'selects/bom': resolve(__dirname, 'lib/selects/bom/index.ts'),
         'selects/category': resolve(__dirname, 'lib/selects/category/index.ts'),
+        'selects/customer': resolve(__dirname, 'lib/selects/customer/index.ts'),
         'selects/inventory-item': resolve(__dirname, 'lib/selects/inventory-item/index.ts'),
         'selects/lot': resolve(__dirname, 'lib/selects/lot/index.ts'),
         'selects/quant-item': resolve(__dirname, 'lib/selects/quant-item/index.ts'),

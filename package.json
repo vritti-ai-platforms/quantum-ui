@@ -188,6 +188,10 @@
       "types": "./dist/lib/selects/category/index.d.ts",
       "import": "./dist/selects/category.js"
     },
+    "./selects/customer": {
+      "types": "./dist/lib/selects/customer/index.d.ts",
+      "import": "./dist/selects/customer.js"
+    },
     "./selects/inventory-item": {
       "types": "./dist/lib/selects/inventory-item/index.d.ts",
       "import": "./dist/selects/inventory-item.js"
