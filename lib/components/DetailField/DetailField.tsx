@@ -4,6 +4,7 @@ import { format, isValid, parseISO } from 'date-fns';
 import type React from 'react';
 import { useLocale } from '../../hooks/useLocale';
 import { getUserTimeZone, resolveTimeZone } from '../../utils/timezone';
+import { Skeleton } from '../Skeleton';
 
 export interface DetailFieldProps {
   label: React.ReactNode;
@@ -13,6 +14,7 @@ export interface DetailFieldProps {
   dateOnly?: boolean;
   timeZone?: string;
   number?: boolean;
+  loading?: boolean;
 }
 
 type FormattedValue = {
@@ -87,8 +89,19 @@ export const DetailField: React.FC<DetailFieldProps> = ({
   dateOnly,
   timeZone,
   number,
+  loading,
 }) => {
   const locale = useLocale();
+
+  if (loading) {
+    return (
+      <div className={className}>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <Skeleton className="mt-1 h-5 w-32" />
+      </div>
+    );
+  }
+
   const formattedValue = formatValue(value, dateFormat, dateOnly, timeZone, locale);
 
   return (
