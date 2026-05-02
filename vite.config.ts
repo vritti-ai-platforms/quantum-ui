@@ -74,6 +74,7 @@ export default defineConfig({
         'selects/uom': resolve(__dirname, 'lib/selects/uom/index.ts'),
         'selects/user': resolve(__dirname, 'lib/selects/user/index.ts'),
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
+        'selects/version': resolve(__dirname, 'lib/selects/version/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/SearchBar': resolve(__dirname, 'lib/components/SearchBar/index.ts'),
         'components/TextArea': resolve(__dirname, 'lib/components/TextArea/index.ts'),

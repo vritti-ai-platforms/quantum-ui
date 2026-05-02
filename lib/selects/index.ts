@@ -21,3 +21,4 @@ export * from './supplier';
 export * from './timezone';
 export * from './uom';
 export * from './user';
+export * from './version';
