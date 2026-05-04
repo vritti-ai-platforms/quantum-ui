@@ -18,13 +18,15 @@ export interface PageContentPanelProps extends Omit<React.HTMLAttributes<HTMLDiv
   contentClassName?: string;
   isLoading?: boolean;
   loadingContent?: React.ReactNode;
+  isEmpty?: boolean;
+  emptyState?: React.ReactNode;
 }
 
 export interface PageContentDetailsProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-function DefaultPanelSkeleton() {
+export function PanelSkeleton() {
   return (
     <div className="p-3 space-y-2">
       {Array.from({ length: 6 }).map((_, i) => (
@@ -80,10 +82,24 @@ export function PageContentPanel({
   contentClassName,
   isLoading,
   loadingContent,
+  isEmpty,
+  emptyState,
   ...props
 }: PageContentPanelProps) {
   const panelBody = content ?? children;
   const hasActions = Boolean(actions);
+
+  const showEmpty = !isLoading && isEmpty;
+
+  const resolvedBody = isLoading
+    ? (loadingContent ?? <PanelSkeleton />)
+    : showEmpty
+      ? emptyState
+      : panelBody;
+
+  const resolvedContentClassName = showEmpty
+    ? cn('flex-1 overflow-auto flex items-center justify-center', contentClassName)
+    : cn('flex-1 overflow-auto', contentClassName);
 
   return (
     <div className={cn('w-72 border-r flex flex-col shrink-0 overflow-hidden', className)} {...props}>
@@ -97,8 +113,8 @@ export function PageContentPanel({
           {actions ? <div className="shrink-0">{actions}</div> : null}
         </div>
       )}
-      <div className={cn('flex-1 overflow-auto', contentClassName)}>
-        {isLoading ? (loadingContent ?? <DefaultPanelSkeleton />) : panelBody}
+      <div className={resolvedContentClassName}>
+        {resolvedBody}
       </div>
     </div>
   );

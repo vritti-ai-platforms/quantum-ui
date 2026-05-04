@@ -5,6 +5,7 @@ export {
   PageContentPanel,
   type PageContentPanelProps,
   type PageContentProps,
+  PanelSkeleton,
   SidePanelListItem,
   type SidePanelListItemProps,
 } from './PageContent';
