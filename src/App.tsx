@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { AreaChart } from '../lib/components/AreaChart';
+import { BarChart } from '../lib/components/BarChart';
+import { LineChart } from '../lib/components/LineChart';
+import { PieChart } from '../lib/components/PieChart';
+import { RadarChart } from '../lib/components/RadarChart';
+import { RadialChart } from '../lib/components/RadialChart';
+import type { ChartConfig } from '../lib/components/BarChart';
 import { Button } from '../lib/components/Button';
+import { ThemeToggle } from '../lib/components/ThemeToggle';
 import { DatePicker } from '../lib/components/DatePicker';
 import { DateRangePicker } from '../lib/components/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
@@ -335,12 +343,107 @@ const ConfirmSection = () => {
   );
 };
 
+// ─── CHARTS ───
+
+const monthlyData = [
+  { month: 'Jan', desktop: 186, mobile: 80 },
+  { month: 'Feb', desktop: 305, mobile: 200 },
+  { month: 'Mar', desktop: 237, mobile: 120 },
+  { month: 'Apr', desktop: 73, mobile: 190 },
+  { month: 'May', desktop: 209, mobile: 130 },
+  { month: 'Jun', desktop: 214, mobile: 140 },
+];
+
+const multiSeriesConfig: ChartConfig = {
+  desktop: { label: 'Desktop', color: 'var(--chart-1)' },
+  mobile: { label: 'Mobile', color: 'var(--chart-2)' },
+};
+
+const browserData = [
+  { browser: 'Chrome', visitors: 275 },
+  { browser: 'Safari', visitors: 200 },
+  { browser: 'Firefox', visitors: 187 },
+  { browser: 'Edge', visitors: 173 },
+  { browser: 'Other', visitors: 90 },
+];
+
+const browserConfig: ChartConfig = {
+  Chrome: { label: 'Chrome', color: 'var(--chart-1)' },
+  Safari: { label: 'Safari', color: 'var(--chart-2)' },
+  Firefox: { label: 'Firefox', color: 'var(--chart-3)' },
+  Edge: { label: 'Edge', color: 'var(--chart-4)' },
+  Other: { label: 'Other', color: 'var(--chart-5)' },
+};
+
+const radarData = [
+  { subject: 'Speed', A: 120, B: 110 },
+  { subject: 'Reliability', A: 98, B: 130 },
+  { subject: 'Comfort', A: 86, B: 130 },
+  { subject: 'Safety', A: 99, B: 100 },
+  { subject: 'Efficiency', A: 85, B: 90 },
+];
+
+const radarConfig: ChartConfig = {
+  A: { label: 'Model A', color: 'var(--chart-1)' },
+  B: { label: 'Model B', color: 'var(--chart-2)' },
+};
+
+const radialData = [
+  { name: 'Chrome', visitors: 275 },
+  { name: 'Safari', visitors: 200 },
+  { name: 'Firefox', visitors: 187 },
+];
+
+const radialConfig: ChartConfig = {
+  Chrome: { label: 'Chrome', color: 'var(--chart-1)' },
+  Safari: { label: 'Safari', color: 'var(--chart-2)' },
+  Firefox: { label: 'Firefox', color: 'var(--chart-3)' },
+};
+
+const ChartsSection = () => (
+  <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">BarChart</p>
+      <BarChart data={monthlyData} config={multiSeriesConfig} xAxisKey="month" bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]} />
+    </div>
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">LineChart</p>
+      <LineChart data={monthlyData} config={multiSeriesConfig} xAxisKey="month" lines={[{ dataKey: 'desktop', type: 'monotone' }, { dataKey: 'mobile', type: 'monotone' }]} />
+    </div>
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">AreaChart</p>
+      <AreaChart data={monthlyData} config={multiSeriesConfig} xAxisKey="month" areas={[{ dataKey: 'desktop', type: 'monotone' }, { dataKey: 'mobile', type: 'monotone' }]} />
+    </div>
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">PieChart</p>
+      <PieChart data={browserData} config={browserConfig} dataKey="visitors" nameKey="browser" />
+    </div>
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">RadarChart</p>
+      <RadarChart data={radarData} config={radarConfig} angleKey="subject" radars={[{ dataKey: 'A' }, { dataKey: 'B' }]} />
+    </div>
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">RadialChart</p>
+      <RadialChart data={radialData} config={radialConfig} dataKey="visitors" />
+    </div>
+  </div>
+);
+
 // ─── APP ───
 export const App = () => {
   return (
     <ConfirmProvider>
       <div className="min-h-screen bg-background text-foreground">
+        <div className="sticky top-0 z-10 flex justify-end border-b border-border bg-background px-6 py-2">
+          <ThemeToggle />
+        </div>
         <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
+          <Section
+            title="Charts"
+            description="All 6 chart types — BarChart, LineChart, AreaChart, PieChart, RadarChart, RadialChart."
+          >
+            <ChartsSection />
+          </Section>
           <Section
             title="useConfirm"
             description="Imperative Promise-based confirm dialog — await confirm(options) returns true/false."

@@ -68,9 +68,29 @@
       "types": "./dist/lib/components/DangerZone/index.d.ts",
       "import": "./dist/components/DangerZone.js"
     },
-    "./Chart": {
-      "types": "./dist/lib/components/Chart/index.d.ts",
-      "import": "./dist/components/Chart.js"
+    "./BarChart": {
+      "types": "./dist/lib/components/BarChart/index.d.ts",
+      "import": "./dist/components/BarChart.js"
+    },
+    "./LineChart": {
+      "types": "./dist/lib/components/LineChart/index.d.ts",
+      "import": "./dist/components/LineChart.js"
+    },
+    "./AreaChart": {
+      "types": "./dist/lib/components/AreaChart/index.d.ts",
+      "import": "./dist/components/AreaChart.js"
+    },
+    "./PieChart": {
+      "types": "./dist/lib/components/PieChart/index.d.ts",
+      "import": "./dist/components/PieChart.js"
+    },
+    "./RadarChart": {
+      "types": "./dist/lib/components/RadarChart/index.d.ts",
+      "import": "./dist/components/RadarChart.js"
+    },
+    "./RadialChart": {
+      "types": "./dist/lib/components/RadialChart/index.d.ts",
+      "import": "./dist/components/RadialChart.js"
     },
     "./Collapsible": {
       "types": "./dist/lib/components/Collapsible/index.d.ts",
