@@ -1,2 +1,2 @@
 export { CategoryFilter, type CategoryFilterProps } from './CategoryFilter';
-export { CategorySelector, type CategorySelectorProps } from './CategorySelector';
+export { CategorySelector, type CategorySelectorProps, formatCategoryPath } from './CategorySelector';
