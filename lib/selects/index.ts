@@ -16,7 +16,7 @@ export * from './plan';
 export * from './quant-item';
 export * from './purchase-order';
 export * from './region';
-export * from './storage-location';
+export * from './location';
 export * from './supplier';
 export * from './timezone';
 export * from './uom';

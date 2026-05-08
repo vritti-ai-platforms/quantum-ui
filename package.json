@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -224,9 +224,9 @@
       "types": "./dist/lib/selects/quant-item/index.d.ts",
       "import": "./dist/selects/quant-item.js"
     },
-    "./selects/storage-location": {
-      "types": "./dist/lib/selects/storage-location/index.d.ts",
-      "import": "./dist/selects/storage-location.js"
+    "./selects/location": {
+      "types": "./dist/lib/selects/location/index.d.ts",
+      "import": "./dist/selects/location.js"
     },
     "./selects/supplier": {
       "types": "./dist/lib/selects/supplier/index.d.ts",
