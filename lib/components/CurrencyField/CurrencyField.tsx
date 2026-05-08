@@ -223,6 +223,8 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
                   onChange={handleCurrencyChange}
                   disabled={disabled}
                   clearable={false}
+                  label=""
+                  contentClassName="min-w-[280px] w-auto"
                   anchor={({ selectedOption, open, disabled: anchorDisabled }) => (
                     <button
                       type="button"
