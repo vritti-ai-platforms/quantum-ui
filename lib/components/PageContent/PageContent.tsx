@@ -22,8 +22,13 @@ export interface PageContentPanelProps extends Omit<React.HTMLAttributes<HTMLDiv
   emptyState?: React.ReactNode;
 }
 
-export interface PageContentDetailsProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+export interface PageContentDetailsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {
+  children?: React.ReactNode;
+  content?: React.ReactNode;
+  isLoading?: boolean;
+  loadingContent?: React.ReactNode;
+  isEmpty?: boolean;
+  emptyState?: React.ReactNode;
 }
 
 export function PanelSkeleton() {
@@ -120,11 +125,42 @@ export function PageContentPanel({
   );
 }
 
-/** Right details region inside PageContent. */
-export function PageContentDetails({ children, className, ...props }: PageContentDetailsProps) {
+/**
+ * Right details region inside PageContent.
+ *
+ * State precedence: isLoading → loadingContent (or PanelSkeleton fallback)
+ *                   isEmpty   → emptyState (centered)
+ *                   else      → content || children
+ *
+ * Mirrors PageContentPanel's loading/empty API so callers can declaratively express
+ * all three states without inline ternaries.
+ */
+export function PageContentDetails({
+  children,
+  className,
+  content,
+  isLoading,
+  loadingContent,
+  isEmpty,
+  emptyState,
+  ...props
+}: PageContentDetailsProps) {
+  const body = content ?? children;
+  const showEmpty = !isLoading && isEmpty;
+
+  const resolved = isLoading
+    ? (loadingContent ?? <PanelSkeleton />)
+    : showEmpty
+      ? emptyState
+      : body;
+
+  const layoutClass = showEmpty
+    ? 'flex-1 overflow-auto p-6 min-w-0 flex items-center justify-center'
+    : 'flex-1 overflow-auto p-6 min-w-0';
+
   return (
-    <div className={cn('flex-1 overflow-auto p-6 min-w-0', className)} {...props}>
-      {children}
+    <div className={cn(layoutClass, className)} {...props}>
+      {resolved}
     </div>
   );
 }

@@ -417,6 +417,10 @@
       "types": "./dist/lib/components/DetailField/index.d.ts",
       "import": "./dist/components/DetailField.js"
     },
+    "./FormattedDate": {
+      "types": "./dist/lib/components/FormattedDate/index.d.ts",
+      "import": "./dist/components/FormattedDate.js"
+    },
     "./date-fns": {
       "types": "./dist/lib/date-fns.d.ts",
       "import": "./dist/date-fns.js"
