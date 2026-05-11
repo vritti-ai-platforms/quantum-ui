@@ -1,5 +1,8 @@
 // Main component
 
+export type { CompactTableSkeletonColumn, CompactTableSkeletonProps } from './CompactTableSkeleton';
+export { CompactTableSkeleton } from './CompactTableSkeleton';
+
 // Sub-components
 export { DataTableColumnHeader } from './components/DataTableColumnHeader';
 export { DataTableEmpty } from './components/DataTableEmpty';
