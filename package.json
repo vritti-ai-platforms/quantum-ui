@@ -400,6 +400,10 @@
       "types": "./dist/lib/utils/timezone.d.ts",
       "import": "./dist/utils/timezone.js"
     },
+    "./pluralize": {
+      "types": "./dist/lib/utils/pluralize.d.ts",
+      "import": "./dist/utils/pluralize.js"
+    },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",
       "import": "./dist/hooks/index.js"

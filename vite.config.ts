@@ -128,6 +128,7 @@ export default defineConfig({
         'utils/lodash': resolve(__dirname, 'lib/utils/lodash.ts'),
         'utils/locale': resolve(__dirname, 'lib/utils/locale.ts'),
         'utils/timezone': resolve(__dirname, 'lib/utils/timezone.ts'),
+        'utils/pluralize': resolve(__dirname, 'lib/utils/pluralize.ts'),
         'date-fns': resolve(__dirname, 'lib/date-fns.ts'),
       },
       name: 'QuantumUI',
