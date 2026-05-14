@@ -192,7 +192,7 @@ export function useDataTable<TData>({
         updateActiveState((prev) => ({ ...prev, columnSizing: newVal }));
       }
     },
-    columnResizeMode: 'onEnd',
+    columnResizeMode: 'onChange',
     enableColumnResizing: enableColumnResizing && !lockedColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),

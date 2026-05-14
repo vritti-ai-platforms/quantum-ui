@@ -352,8 +352,8 @@ export function DataTable<TData>({
                               >
                                 <div
                                   className={cn(
-                                    'flex items-center',
-                                    isActionsCell ? 'justify-end' : 'justify-center',
+                                    'overflow-hidden',
+                                    isActionsCell ? 'flex items-center justify-end' : 'text-center',
                                   )}
                                 >
                                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
