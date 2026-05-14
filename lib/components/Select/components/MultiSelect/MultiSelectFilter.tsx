@@ -217,7 +217,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
             </button>
           </PopoverTrigger>
 
-          <MultiSelectContent className="w-[250px]">
+          <MultiSelectContent className="min-w-[250px]">
             {label && (
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
                 <span className="text-sm text-muted-foreground">{label}</span>

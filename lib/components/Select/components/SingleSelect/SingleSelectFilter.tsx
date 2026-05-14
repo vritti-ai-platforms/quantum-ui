@@ -54,6 +54,10 @@ export interface SingleSelectFilterProps {
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
   onOpenChange?: (open: boolean) => void;
+  // Transforms how label is displayed in option rows
+  transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
 }
 
 // Compact single-select filter trigger with inline label display
@@ -79,6 +83,8 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       searchPlaceholder = 'Search...',
       asyncState,
       onOpenChange,
+      transformLabel,
+      transformDescription,
     },
     ref,
   ) => {
@@ -121,11 +127,18 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
 
     // Renders a single option row
     function renderRow(option: SelectOption) {
+      const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
+      const optionDescription = option.description
+        ? transformDescription
+          ? transformDescription(option.description, option)
+          : option.description
+        : undefined;
+
       return (
         <SingleSelectRow
           key={String(option.value)}
-          name={option.label}
-          description={option.description}
+          name={optionLabel}
+          description={optionDescription}
           selected={state.selectedValue === option.value}
           onSelect={() => {
             handleSelectOption(option.value);
@@ -218,7 +231,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
             </button>
           </PopoverTrigger>
 
-          <SingleSelectContent className="w-[250px]">
+          <SingleSelectContent className="min-w-[250px]">
             {label && (
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
                 <span className="text-sm text-muted-foreground">{label}</span>

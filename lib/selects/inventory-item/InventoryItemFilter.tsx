@@ -16,5 +16,5 @@ export const InventoryItemFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'InventoryItemFilter', defaultLabel: 'Inventory Item' },
+  { displayName: 'InventoryItemFilter', defaultLabel: 'Inventory Item', defaultName: 'inventoryItemId' },
 );

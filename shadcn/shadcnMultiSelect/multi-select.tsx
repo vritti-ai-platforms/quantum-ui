@@ -71,7 +71,7 @@ function MultiSelectContent({ className, children, align = 'start', ...props }: 
     <PopoverContent
       data-slot="multi-select-content"
       align={align}
-      className={cn('w-[var(--radix-popover-trigger-width)] p-0', className)}
+      className={cn('w-auto min-w-[var(--radix-popover-trigger-width)] p-0', className)}
       {...props}
     >
       {children}

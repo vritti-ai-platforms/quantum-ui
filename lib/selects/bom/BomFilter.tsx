@@ -16,5 +16,5 @@ export const BomFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'BomFilter', defaultLabel: 'Bill of Materials' },
+  { displayName: 'BomFilter', defaultLabel: 'Bill of Materials', defaultName: 'bomId' },
 );

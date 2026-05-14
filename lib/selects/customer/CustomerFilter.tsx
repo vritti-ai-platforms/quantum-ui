@@ -16,5 +16,5 @@ export const CustomerFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'CustomerFilter', defaultLabel: 'Customer' },
+  { displayName: 'CustomerFilter', defaultLabel: 'Customer', defaultName: 'customerId' },
 );

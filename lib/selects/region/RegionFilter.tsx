@@ -16,5 +16,5 @@ export const RegionFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'RegionFilter', defaultLabel: 'Region' },
+  { displayName: 'RegionFilter', defaultLabel: 'Region', defaultName: 'regionId' },
 );

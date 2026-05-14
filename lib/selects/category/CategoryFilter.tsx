@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { SelectFilter, type SelectFilterProps } from '../../components/Select/SelectFilter';
+import { formatCategoryPath } from './CategorySelector';
 
 export type CategoryFilterProps = Omit<SelectFilterProps, 'optionsEndpoint' | 'name'> & { name?: string };
 
@@ -12,9 +13,10 @@ export const CategoryFilter = Object.assign(
       label="Category"
       placeholder="Select category"
       optionsEndpoint="commerce-api/categories/select"
-      fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+      fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'path' }}
+      transformDescription={formatCategoryPath}
       {...props}
     />
   )),
-  { displayName: 'CategoryFilter', defaultLabel: 'Category' },
+  { displayName: 'CategoryFilter', defaultLabel: 'Category', defaultName: 'categoryId' },
 );

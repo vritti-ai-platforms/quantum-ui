@@ -20,5 +20,5 @@ export const QuantItemFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'QuantItemFilter', defaultLabel: 'Serial' },
+  { displayName: 'QuantItemFilter', defaultLabel: 'Serial', defaultName: 'quantItemId' },
 );

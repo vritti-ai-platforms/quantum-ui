@@ -15,5 +15,5 @@ export const LocationFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'LocationFilter', defaultLabel: 'Location' },
+  { displayName: 'LocationFilter', defaultLabel: 'Location', defaultName: 'locationId' },
 );

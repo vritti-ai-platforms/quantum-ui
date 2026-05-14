@@ -16,5 +16,5 @@ export const BusinessFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'BusinessFilter', defaultLabel: 'Business' },
+  { displayName: 'BusinessFilter', defaultLabel: 'Business', defaultName: 'businessId' },
 );

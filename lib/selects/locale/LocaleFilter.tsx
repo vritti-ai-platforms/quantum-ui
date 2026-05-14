@@ -9,5 +9,5 @@ export const LocaleFilter = Object.assign(
   forwardRef<HTMLButtonElement, LocaleFilterProps>((props, ref) => (
     <SelectFilter ref={ref} name="locale" label="Language" placeholder="Select language" options={LOCALES} {...props} />
   )),
-  { displayName: 'LocaleFilter', defaultLabel: 'Language' },
+  { displayName: 'LocaleFilter', defaultLabel: 'Language', defaultName: 'locale' },
 );

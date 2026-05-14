@@ -17,9 +17,9 @@ type FilterFormValues = Record<string, FilterCondition | null | undefined>;
 function getFilterProps(node: React.ReactNode): { id: string; label: string } | null {
   if (!isValidElement(node)) return null;
   const props = node.props as Record<string, unknown>;
-  const id = typeof props.name === 'string' ? props.name : null;
-  const componentDefault = (node.type as { defaultLabel?: string }).defaultLabel;
-  const label = typeof props.label === 'string' ? props.label : (componentDefault ?? '');
+  const meta = node.type as { defaultLabel?: string; defaultName?: string };
+  const id = typeof props.name === 'string' ? props.name : (meta.defaultName ?? null);
+  const label = typeof props.label === 'string' ? props.label : (meta.defaultLabel ?? '');
   if (!id) return null;
   return { id, label };
 }

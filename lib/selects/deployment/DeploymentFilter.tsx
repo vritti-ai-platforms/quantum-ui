@@ -16,5 +16,5 @@ export const DeploymentFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'DeploymentFilter', defaultLabel: 'Deployment' },
+  { displayName: 'DeploymentFilter', defaultLabel: 'Deployment', defaultName: 'deploymentId' },
 );

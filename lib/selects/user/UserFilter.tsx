@@ -16,5 +16,5 @@ export const UserFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'UserFilter', defaultLabel: 'Manager' },
+  { displayName: 'UserFilter', defaultLabel: 'Manager', defaultName: 'managerId' },
 );

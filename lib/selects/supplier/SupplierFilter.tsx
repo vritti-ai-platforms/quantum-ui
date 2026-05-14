@@ -16,5 +16,5 @@ export const SupplierFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'SupplierFilter', defaultLabel: 'Supplier' },
+  { displayName: 'SupplierFilter', defaultLabel: 'Supplier', defaultName: 'supplierId' },
 );

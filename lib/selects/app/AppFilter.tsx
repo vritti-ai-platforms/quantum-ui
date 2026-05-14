@@ -16,5 +16,5 @@ export const AppFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'AppFilter', defaultLabel: 'App' },
+  { displayName: 'AppFilter', defaultLabel: 'App', defaultName: 'appId' },
 );

@@ -20,5 +20,5 @@ export const LotFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'LotFilter', defaultLabel: 'Lot' },
+  { displayName: 'LotFilter', defaultLabel: 'Lot', defaultName: 'lotId' },
 );

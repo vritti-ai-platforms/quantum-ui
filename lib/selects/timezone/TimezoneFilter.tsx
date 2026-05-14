@@ -16,5 +16,5 @@ export const TimezoneFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'TimezoneFilter', defaultLabel: 'Timezone' },
+  { displayName: 'TimezoneFilter', defaultLabel: 'Timezone', defaultName: 'timezone' },
 );

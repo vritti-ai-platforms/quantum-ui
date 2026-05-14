@@ -16,5 +16,5 @@ export const CurrencyFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'CurrencyFilter', defaultLabel: 'Currency' },
+  { displayName: 'CurrencyFilter', defaultLabel: 'Currency', defaultName: 'currency' },
 );

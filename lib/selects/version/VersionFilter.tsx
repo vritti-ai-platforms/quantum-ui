@@ -16,5 +16,5 @@ export const VersionFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'VersionFilter', defaultLabel: 'Version' },
+  { displayName: 'VersionFilter', defaultLabel: 'Version', defaultName: 'version' },
 );

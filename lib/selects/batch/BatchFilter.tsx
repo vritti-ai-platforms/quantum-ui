@@ -18,5 +18,5 @@ export const BatchFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'BatchFilter', defaultLabel: 'Batch' },
+  { displayName: 'BatchFilter', defaultLabel: 'Batch', defaultName: 'batchId' },
 );

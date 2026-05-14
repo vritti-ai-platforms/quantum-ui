@@ -16,5 +16,5 @@ export const PlanFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'PlanFilter', defaultLabel: 'Plan' },
+  { displayName: 'PlanFilter', defaultLabel: 'Plan', defaultName: 'planId' },
 );

@@ -16,5 +16,5 @@ export const UomFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'UomFilter', defaultLabel: 'Unit of Measure' },
+  { displayName: 'UomFilter', defaultLabel: 'Unit of Measure', defaultName: 'uomId' },
 );

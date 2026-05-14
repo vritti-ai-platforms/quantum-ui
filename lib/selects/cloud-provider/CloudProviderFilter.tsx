@@ -16,5 +16,5 @@ export const CloudProviderFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'CloudProviderFilter', defaultLabel: 'Cloud Provider' },
+  { displayName: 'CloudProviderFilter', defaultLabel: 'Cloud Provider', defaultName: 'cloudProviderId' },
 );

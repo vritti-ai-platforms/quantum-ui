@@ -16,5 +16,5 @@ export const FeatureFilter = Object.assign(
       {...props}
     />
   )),
-  { displayName: 'FeatureFilter', defaultLabel: 'Feature' },
+  { displayName: 'FeatureFilter', defaultLabel: 'Feature', defaultName: 'featureId' },
 );
