@@ -1,5 +1,4 @@
 export * from './app';
-export * from './batch';
 export * from './bom';
 export * from './business';
 export * from './category';
@@ -15,6 +14,7 @@ export * from './microfrontend';
 export * from './plan';
 export * from './quant-item';
 export * from './purchase-order';
+export * from './quant';
 export * from './region';
 export * from './location';
 export * from './supplier';

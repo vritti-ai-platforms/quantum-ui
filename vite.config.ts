@@ -66,7 +66,7 @@ export default defineConfig({
         'selects/deployment': resolve(__dirname, 'lib/selects/deployment/index.ts'),
         'selects/feature': resolve(__dirname, 'lib/selects/feature/index.ts'),
         'selects/app': resolve(__dirname, 'lib/selects/app/index.ts'),
-        'selects/batch': resolve(__dirname, 'lib/selects/batch/index.ts'),
+        'selects/quant': resolve(__dirname, 'lib/selects/quant/index.ts'),
         'selects/app-code': resolve(__dirname, 'lib/selects/app-code/index.ts'),
         'selects/bom': resolve(__dirname, 'lib/selects/bom/index.ts'),
         'selects/category': resolve(__dirname, 'lib/selects/category/index.ts'),

@@ -192,9 +192,9 @@
       "types": "./dist/lib/selects/app/index.d.ts",
       "import": "./dist/selects/app.js"
     },
-    "./selects/batch": {
-      "types": "./dist/lib/selects/batch/index.d.ts",
-      "import": "./dist/selects/batch.js"
+    "./selects/quant": {
+      "types": "./dist/lib/selects/quant/index.d.ts",
+      "import": "./dist/selects/quant.js"
     },
     "./selects/app-code": {
       "types": "./dist/lib/selects/app-code/index.d.ts",
