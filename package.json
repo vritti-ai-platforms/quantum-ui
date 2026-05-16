@@ -404,6 +404,10 @@
       "types": "./dist/lib/utils/pluralize.d.ts",
       "import": "./dist/utils/pluralize.js"
     },
+    "./zod": {
+      "types": "./dist/lib/utils/zod.d.ts",
+      "import": "./dist/utils/zod.js"
+    },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",
       "import": "./dist/hooks/index.js"

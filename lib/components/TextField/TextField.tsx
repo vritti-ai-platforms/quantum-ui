@@ -18,13 +18,27 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
 
 // TextField molecule - Input + Label composition using Field system
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
-  ({ label, description, error, className, id, disabled, startAdornment, endAdornment, positive, nonZero, ...props }, ref) => {
+  (
+    { label, description, error, className, id, disabled, startAdornment, endAdornment, positive, nonZero, onChange, ...props },
+    ref,
+  ) => {
     const isNumberType = props.type === 'number';
     const normalizedType = isNumberType ? 'text' : props.type;
     const normalizedInputMode = props.inputMode ?? (isNumberType ? 'decimal' : undefined);
-    const normalizedPattern = props.pattern ?? (isNumberType ? '^[0-9]*\\.?[0-9]*$' : undefined);
-    const effectiveMin = props.min ?? (positive && nonZero ? 1 : positive ? 0 : undefined);
+    // Resolve the actual minimum: positive floor takes precedence when both are set, so
+    // `positive` always blocks negatives even if a contradictory `min` is passed.
+    const positiveFloor = positive ? (nonZero ? 1 : 0) : undefined;
+    const propsMinNum = props.min != null && props.min !== '' ? Number(props.min) : undefined;
+    const propsMinValid = propsMinNum !== undefined && Number.isFinite(propsMinNum) ? propsMinNum : undefined;
+    const effectiveMin =
+      positiveFloor !== undefined && propsMinValid !== undefined
+        ? Math.max(positiveFloor, propsMinValid)
+        : (propsMinValid ?? positiveFloor);
     const inputRef = React.useRef<HTMLInputElement>(null);
+    // Tracks the last raw string typed so intermediate states like "-" or "0." survive the
+    // round-trip through RHF. Must be state (not a ref) so updates trigger a re-render and
+    // React's controlled input doesn't revert the DOM to the canonical number.
+    const [rawInput, setRawInput] = React.useState<string>('');
 
     const assignRef = React.useCallback(
       (node: HTMLInputElement | null) => {
@@ -46,16 +60,14 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
 
         const parsedStep = Number(props.step);
         const step = Number.isFinite(parsedStep) && parsedStep > 0 ? parsedStep : 1;
-        const parsedMin = Number(effectiveMin);
-        const min = Number.isFinite(parsedMin) ? parsedMin : undefined;
         const parsedMax = Number(props.max);
         const max = Number.isFinite(parsedMax) ? parsedMax : undefined;
         const current = Number(input.value);
-        const baseValue = Number.isFinite(current) ? current : (min ?? 0);
+        const baseValue = Number.isFinite(current) ? current : (effectiveMin ?? 0);
 
         let next = baseValue + delta * step;
-        if (typeof min === 'number') next = Math.max(min, next);
-        if (typeof max === 'number') next = Math.min(max, next);
+        if (effectiveMin !== undefined) next = Math.max(effectiveMin, next);
+        if (max !== undefined) next = Math.min(max, next);
 
         const stepString = String(step);
         const decimals = stepString.includes('.') ? (stepString.split('.')[1]?.length ?? 0) : 0;
@@ -66,6 +78,20 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         input.dispatchEvent(new Event('input', { bubbles: true }));
       },
       [isNumberType, disabled, effectiveMin, props.max, props.step],
+    );
+
+    const handleChange = React.useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (isNumberType) {
+          const raw = event.target.value;
+          setRawInput(raw);
+          const num = raw === '' ? NaN : Number(raw);
+          (onChange as unknown as (v: number) => void)?.(num);
+        } else {
+          onChange?.(event);
+        }
+      },
+      [isNumberType, onChange],
     );
 
     const handleKeyDown = React.useCallback(
@@ -91,16 +117,28 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       [isNumberType, disabled, positive, nonZero, setInputNumericValue, props.onKeyDown],
     );
 
-    const hasMin = effectiveMin !== undefined && effectiveMin !== null && String(effectiveMin) !== '';
-    const hasMax = props.max !== undefined && props.max !== null && String(props.max) !== '';
-    const autoConstraintText =
-      hasMin && hasMax
-        ? `Range: ${effectiveMin} - ${props.max}`
-        : hasMax
-          ? `Max: ${props.max}`
-          : hasMin
-            ? `Min: ${effectiveMin}`
-            : '';
+    // For number fields, prefer the raw typed string when it represents the same value as
+    // the stored number — preserves intermediate states like "0.", "1.50", "-" that would
+    // otherwise be lost as React reconciles the controlled input back to the canonical form.
+    let displayValue: TextFieldProps['value'] = props.value;
+    if (isNumberType && typeof props.value === 'number') {
+      if (Number.isNaN(props.value)) {
+        displayValue = rawInput;
+      } else if (rawInput !== '' && Number(rawInput) === props.value) {
+        displayValue = rawInput;
+      }
+    }
+
+    const hasMin = propsMinValid !== undefined;
+    const hasMax = props.max != null && props.max !== '';
+    const hints: string[] = [];
+    if (positive && nonZero) hints.push('Positive non-zero');
+    else if (positive) hints.push('Positive');
+    else if (nonZero) hints.push('Non-zero');
+    if (hasMin && hasMax) hints.push(`Range: ${propsMinValid} - ${props.max}`);
+    else if (hasMax) hints.push(`Max: ${props.max}`);
+    else if (hasMin) hints.push(`Min: ${propsMinValid}`);
+    const autoConstraintText = hints.join(', ');
     const combinedEndAdornment = (
       <>
         {autoConstraintText ? (
@@ -131,11 +169,12 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
             )}
             id={id}
             {...props}
+            value={displayValue}
             min={effectiveMin}
             type={normalizedType}
             inputMode={normalizedInputMode}
-            pattern={normalizedPattern}
             onKeyDown={handleKeyDown}
+            onChange={handleChange}
           />
           {isNumberType && (
             <div className="absolute inset-y-0 right-2 z-20 flex items-center">

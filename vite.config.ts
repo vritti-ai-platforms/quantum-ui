@@ -129,6 +129,7 @@ export default defineConfig({
         'utils/locale': resolve(__dirname, 'lib/utils/locale.ts'),
         'utils/timezone': resolve(__dirname, 'lib/utils/timezone.ts'),
         'utils/pluralize': resolve(__dirname, 'lib/utils/pluralize.ts'),
+        'utils/zod': resolve(__dirname, 'lib/utils/zod.ts'),
         'date-fns': resolve(__dirname, 'lib/date-fns.ts'),
       },
       name: 'QuantumUI',
@@ -141,7 +142,9 @@ export default defineConfig({
         if (parentId?.includes('lib/utils/axios')) {
           return ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom'].includes(id);
         }
-        // Externalize all peer dependencies for other entries
+        // zod and @hookform/resolvers are intentionally NOT in externals — they're only
+        // imported from lib/utils/zod, so Rollup bundles them into the zod chunk only.
+        // Apps must consume them via @vritti/quantum-ui/zod.
         return [
           'react',
           'react-dom',
