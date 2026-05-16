@@ -8,7 +8,7 @@
  *
  */
 import * as React from "react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import {
   LexicalTypeaheadMenuPlugin,
@@ -29,6 +29,7 @@ import {
   CommandItem,
   CommandList,
 } from "../editor-ui/command"
+import emojiList from "../utils/emoji-list"
 
 class EmojiOption extends MenuOption {
   title: string
@@ -49,39 +50,22 @@ class EmojiOption extends MenuOption {
   }
 }
 
-type Emoji = {
-  emoji: string
-  description: string
-  category: string
-  aliases: Array<string>
-  tags: Array<string>
-  unicode_version: string
-  ios_version: string
-  skin_tones?: boolean
-}
-
 const MAX_EMOJI_SUGGESTION_COUNT = 10
 
 export function EmojiPickerPlugin() {
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<string | null>(null)
-  const [emojis, setEmojis] = useState<Array<Emoji>>([])
-  const [isOpen, setIsOpen] = useState(false)
-  useEffect(() => {
-    import("../utils/emoji-list").then((file) => setEmojis(file.default))
-  }, [])
+  const [, setIsOpen] = useState(false)
 
   const emojiOptions = useMemo(
     () =>
-      emojis != null
-        ? emojis.map(
-            ({ emoji, aliases, tags }) =>
-              new EmojiOption(aliases[0], emoji, {
-                keywords: [...aliases, ...tags],
-              })
-          )
-        : [],
-    [emojis]
+      emojiList.map(
+        ({ emoji, aliases, tags }) =>
+          new EmojiOption(aliases[0], emoji, {
+            keywords: [...aliases, ...tags],
+          })
+      ),
+    []
   )
 
   const checkForTriggerMatch = useBasicTypeaheadTriggerMatch(":", {

@@ -118,9 +118,6 @@ export default defineConfig({
         'context/index': resolve(__dirname, 'lib/context/index.ts'),
         // Theme entries (consolidated theme exports for Module Federation)
         'theme/index': resolve(__dirname, 'lib/theme/index.ts'),
-        // Types entries
-        'types/table-filter': resolve(__dirname, 'lib/types/table-filter.ts'),
-        'types/api-response': resolve(__dirname, 'lib/types/api-response.ts'),
         // Utils entries
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
         'utils/motion': resolve(__dirname, 'lib/utils/motion.ts'),
