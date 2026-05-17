@@ -8,6 +8,8 @@ export { zodResolver };
 
 export interface NumericFieldOptions {
   required?: string;
+  integer?: boolean;
+  integerMessage?: string;
   nonZero?: boolean;
   nonZeroMessage?: string;
   positive?: boolean;
@@ -19,10 +21,12 @@ export interface NumericFieldOptions {
 }
 
 // NaN-aware numeric field builder. NaN (empty input) shows required message;
-// positive/min/max constraints show their own messages.
+// integer/positive/min/max constraints show their own messages.
 export function zodNumericField(options: NumericFieldOptions = {}) {
   const {
     required = 'Required',
+    integer = false,
+    integerMessage = 'Must be a whole number',
     nonZero = false,
     nonZeroMessage = 'Must not be zero',
     positive = false,
@@ -36,6 +40,8 @@ export function zodNumericField(options: NumericFieldOptions = {}) {
   return z.union([z.number(), z.nan()]).superRefine((v, ctx) => {
     if (Number.isNaN(v)) {
       ctx.addIssue({ code: 'custom', message: required });
+    } else if (integer && !Number.isInteger(v)) {
+      ctx.addIssue({ code: 'custom', message: integerMessage });
     } else if (nonZero && v === 0) {
       ctx.addIssue({ code: 'custom', message: nonZeroMessage });
     } else if (positive && v <= 0) {
