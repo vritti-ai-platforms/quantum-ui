@@ -14,17 +14,19 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
   positive?: boolean;
   // Blocks zero; sets min to 1 if positive is also true and no min provided
   nonZero?: boolean;
+  // Blocks decimal input ('.' and ','); switches inputMode to numeric
+  integer?: boolean;
 }
 
 // TextField molecule - Input + Label composition using Field system
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
   (
-    { label, description, error, className, id, disabled, startAdornment, endAdornment, positive, nonZero, onChange, ...props },
+    { label, description, error, className, id, disabled, startAdornment, endAdornment, positive, nonZero, integer, onChange, ...props },
     ref,
   ) => {
     const isNumberType = props.type === 'number';
     const normalizedType = isNumberType ? 'text' : props.type;
-    const normalizedInputMode = props.inputMode ?? (isNumberType ? 'decimal' : undefined);
+    const normalizedInputMode = props.inputMode ?? (isNumberType ? (integer ? 'numeric' : 'decimal') : undefined);
     // Resolve the actual minimum: positive floor takes precedence when both are set, so
     // `positive` always blocks negatives even if a contradictory `min` is passed.
     const positiveFloor = positive ? (nonZero ? 1 : 0) : undefined;
@@ -70,14 +72,14 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         if (max !== undefined) next = Math.min(max, next);
 
         const stepString = String(step);
-        const decimals = stepString.includes('.') ? (stepString.split('.')[1]?.length ?? 0) : 0;
+        const decimals = integer || stepString.includes('.') === false ? 0 : (stepString.split('.')[1]?.length ?? 0);
         const nextValue = decimals > 0 ? next.toFixed(decimals) : String(Math.round(next));
 
         const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
         valueSetter?.call(input, nextValue);
         input.dispatchEvent(new Event('input', { bubbles: true }));
       },
-      [isNumberType, disabled, effectiveMin, props.max, props.step],
+      [isNumberType, disabled, effectiveMin, integer, props.max, props.step],
     );
 
     const handleChange = React.useCallback(
@@ -102,6 +104,10 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           event.preventDefault();
           return;
         }
+        if (integer && (event.key === '.' || event.key === ',' || event.key === 'e')) {
+          event.preventDefault();
+          return;
+        }
         if (nonZero && event.key === '0' && (event.currentTarget.value === '' || event.currentTarget.value === '0')) {
           event.preventDefault();
           return;
@@ -114,7 +120,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           setInputNumericValue(-1);
         }
       },
-      [isNumberType, disabled, positive, nonZero, setInputNumericValue, props.onKeyDown],
+      [isNumberType, disabled, positive, nonZero, integer, setInputNumericValue, props.onKeyDown],
     );
 
     // For number fields, prefer the raw typed string when it represents the same value as
@@ -132,9 +138,14 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     const hasMin = propsMinValid !== undefined;
     const hasMax = props.max != null && props.max !== '';
     const hints: string[] = [];
-    if (positive && nonZero) hints.push('Positive non-zero');
-    else if (positive) hints.push('Positive');
-    else if (nonZero) hints.push('Non-zero');
+    const integerLabel = positive ? '+Int' : 'Int';
+    const positiveLabel = '+';
+    const nonZeroLabel = '≠0';
+    if (integer && nonZero) hints.push(`${integerLabel} ${nonZeroLabel}`);
+    else if (integer) hints.push(integerLabel);
+    else if (positive && nonZero) hints.push(`${positiveLabel} ${nonZeroLabel}`);
+    else if (positive) hints.push(positiveLabel);
+    else if (nonZero) hints.push(nonZeroLabel);
     if (hasMin && hasMax) hints.push(`Range: ${propsMinValid} - ${props.max}`);
     else if (hasMax) hints.push(`Max: ${props.max}`);
     else if (hasMin) hints.push(`Min: ${propsMinValid}`);

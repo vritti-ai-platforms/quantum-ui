@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { SelectGroup, SelectOption, SelectValue } from '../types';
 
 interface UseSingleSelectStateProps {
@@ -81,6 +81,16 @@ export function useSingleSelect({
   }, [open]);
 
   const selectedOption = selectedValue ? optionMap.get(selectedValue) : undefined;
+
+  // Fire onOptionSelect once when the initial value resolves from the async option map.
+  // Tracks whether we've already notified so re-renders don't re-fire it.
+  const notifiedInitialRef = useRef<SelectValue | null>(null);
+  useEffect(() => {
+    if (selectedOption && notifiedInitialRef.current !== selectedValue) {
+      notifiedInitialRef.current = selectedValue ?? null;
+      onOptionSelect?.(selectedOption);
+    }
+  }, [selectedOption, selectedValue, onOptionSelect]);
 
   // O(n + g) grouping — one pass over groups, one pass over options
   const grouped = useMemo(() => {

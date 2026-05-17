@@ -8,6 +8,8 @@ export { zodResolver };
 
 export interface NumericFieldOptions {
   required?: string;
+  nonZero?: boolean;
+  nonZeroMessage?: string;
   positive?: boolean;
   positiveMessage?: string;
   min?: number;
@@ -21,6 +23,8 @@ export interface NumericFieldOptions {
 export function zodNumericField(options: NumericFieldOptions = {}) {
   const {
     required = 'Required',
+    nonZero = false,
+    nonZeroMessage = 'Must not be zero',
     positive = false,
     positiveMessage = 'Must be greater than 0',
     min,
@@ -29,15 +33,17 @@ export function zodNumericField(options: NumericFieldOptions = {}) {
     maxMessage,
   } = options;
 
-  return z.number().superRefine((v, ctx) => {
+  return z.union([z.number(), z.nan()]).superRefine((v, ctx) => {
     if (Number.isNaN(v)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: required });
+      ctx.addIssue({ code: 'custom', message: required });
+    } else if (nonZero && v === 0) {
+      ctx.addIssue({ code: 'custom', message: nonZeroMessage });
     } else if (positive && v <= 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: positiveMessage });
+      ctx.addIssue({ code: 'custom', message: positiveMessage });
     } else if (min != null && v < min) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: minMessage ?? `Must be at least ${min}` });
+      ctx.addIssue({ code: 'custom', message: minMessage ?? `Must be at least ${min}` });
     } else if (max != null && v > max) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: maxMessage ?? `Must be at most ${max}` });
+      ctx.addIssue({ code: 'custom', message: maxMessage ?? `Must be at most ${max}` });
     }
   });
 }

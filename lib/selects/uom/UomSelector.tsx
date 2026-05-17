@@ -11,7 +11,7 @@ export const UomSelector = forwardRef<HTMLButtonElement, UomSelectorProps>((prop
     placeholder="Select unit"
     searchable
     optionsEndpoint="commerce-api/uom/select"
-    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    fieldKeys={{ valueKey: 'id', labelKey: 'name', additionalKeys: 'allowDecimal' }}
     {...props}
   />
 ));
