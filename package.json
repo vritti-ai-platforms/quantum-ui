@@ -56,6 +56,10 @@
       "types": "./dist/lib/components/Badge/index.d.ts",
       "import": "./dist/components/Badge.js"
     },
+    "./Kbd": {
+      "types": "./dist/lib/components/Kbd/index.d.ts",
+      "import": "./dist/components/Kbd.js"
+    },
     "./Button": {
       "types": "./dist/lib/components/Button/index.d.ts",
       "import": "./dist/components/Button.js"
@@ -408,6 +412,10 @@
       "types": "./dist/lib/utils/zod.d.ts",
       "import": "./dist/utils/zod.js"
     },
+    "./hotkeys": {
+      "types": "./dist/lib/utils/hotkeys.d.ts",
+      "import": "./dist/utils/hotkeys.js"
+    },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",
       "import": "./dist/hooks/index.js"
@@ -555,6 +563,7 @@
     "pluralize-esm": "^9.0.5",
     "react-day-picker": "^9.13.0",
     "react-error-boundary": "^6.1.1",
+    "react-hotkeys-hook": "^5.3.2",
     "react-intersection-observer": "^10.0.2",
     "react-phone-number-input": "^3.4.14",
     "recharts": "^3.7.0",

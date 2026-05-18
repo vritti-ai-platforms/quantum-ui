@@ -6,3 +6,5 @@ export { type SlugParam, useSlugParams } from './useSlugParams';
 export { type UseSSEOptions, type UseSSEReturn, useSSE } from './useSSE';
 export { type ThemeMode, type UseThemeReturn, useTheme } from './useTheme';
 export { type TimerHandle, useTimer } from './useTimer';
+export { useBarcodeScanner } from './useBarcodeScanner';
+export type { UseBarcodeScannerOptions, UseBarcodeScannerResult } from './useBarcodeScanner';
