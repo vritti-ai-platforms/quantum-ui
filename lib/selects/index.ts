@@ -12,7 +12,7 @@ export * from './locale';
 export * from './lot';
 export * from './microfrontend';
 export * from './plan';
-export * from './quant-item';
+export * from './serial';
 export * from './purchase-order';
 export * from './quant';
 export * from './region';
