@@ -53,3 +53,22 @@ export function zodNumericField(options: NumericFieldOptions = {}) {
     }
   });
 }
+
+export interface CurrencyFieldOptions {
+  required?: string;
+}
+
+// CurrencyField returns undefined when empty and { currency, value } when filled.
+// Accept undefined explicitly so the required message fires instead of a generic
+// Zod type error from z.object({...}).
+export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
+  const { required = 'Required' } = options;
+
+  return z
+    .union([z.object({ currency: z.string(), value: z.string() }), z.undefined()])
+    .superRefine((v, ctx) => {
+      if (!v?.value) {
+        ctx.addIssue({ code: 'custom', message: required });
+      }
+    });
+}
