@@ -412,6 +412,14 @@
       "types": "./dist/lib/utils/zod.d.ts",
       "import": "./dist/utils/zod.js"
     },
+    "./money": {
+      "types": "./dist/lib/utils/money.d.ts",
+      "import": "./dist/utils/money.js"
+    },
+    "./decimal": {
+      "types": "./dist/lib/utils/decimal.d.ts",
+      "import": "./dist/utils/decimal.js"
+    },
     "./hotkeys": {
       "types": "./dist/lib/utils/hotkeys.d.ts",
       "import": "./dist/utils/hotkeys.js"
@@ -553,6 +561,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "decimal.js": "^10.6.0",
     "dinero.js": "^2.0.2",
     "fast-equals": "^6.0.0",
     "input-otp": "^1.4.2",
