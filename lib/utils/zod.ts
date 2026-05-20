@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { z } from 'zod';
 
 // Re-export the full zod API + the @hookform/resolvers/zod adapter so apps consume
@@ -71,4 +72,23 @@ export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
         ctx.addIssue({ code: 'custom', message: required });
       }
     });
+}
+
+export interface PhoneFieldOptions {
+  required?: string;
+  optional?: boolean;
+}
+
+// PhoneField returns a string (E.164) when filled or undefined/empty when empty.
+// Validates with react-phone-number-input's isValidPhoneNumber. Pass optional:true
+// to allow empty values without triggering the required message.
+export function zodPhoneField(options: PhoneFieldOptions = {}) {
+  const { required = 'Required', optional = false } = options;
+  return z.union([z.string(), z.undefined()]).superRefine((v, ctx) => {
+    if (!v) {
+      if (!optional) ctx.addIssue({ code: 'custom', message: required });
+    } else if (!isValidPhoneNumber(v)) {
+      ctx.addIssue({ code: 'custom', message: 'Invalid phone number' });
+    }
+  });
 }
