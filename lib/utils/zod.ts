@@ -55,6 +55,7 @@ export function zodNumericField(options: NumericFieldOptions = {}) {
   });
 }
 
+
 export interface CurrencyFieldOptions {
   required?: string;
 }
@@ -82,13 +83,20 @@ export interface PhoneFieldOptions {
 // PhoneField returns a string (E.164) when filled or undefined/empty when empty.
 // Validates with react-phone-number-input's isValidPhoneNumber. Pass optional:true
 // to allow empty values without triggering the required message.
-export function zodPhoneField(options: PhoneFieldOptions = {}) {
+export function zodPhoneField(options?: { required?: string; optional?: false }): z.ZodType<string, string>;
+export function zodPhoneField(options: { required?: string; optional: true }): z.ZodType<string | undefined, string | undefined>;
+export function zodPhoneField(options: PhoneFieldOptions = {}): z.ZodType<string, string> | z.ZodType<string | undefined, string | undefined> {
   const { required = 'Required', optional = false } = options;
-  return z.union([z.string(), z.undefined()]).superRefine((v, ctx) => {
-    if (!v) {
-      if (!optional) ctx.addIssue({ code: 'custom', message: required });
-    } else if (!isValidPhoneNumber(v)) {
-      ctx.addIssue({ code: 'custom', message: 'Invalid phone number' });
-    }
-  });
+
+  if (optional) {
+    return z.union([z.string(), z.undefined()]).superRefine((v, ctx) => {
+      if (v && !isValidPhoneNumber(v)) {
+        ctx.addIssue({ code: 'custom', message: 'Invalid phone number' });
+      }
+    });
+  }
+
+  return z
+    .string({ error: required })
+    .refine((v) => isValidPhoneNumber(v), 'Invalid phone number');
 }
