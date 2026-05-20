@@ -47,8 +47,7 @@ function buildNoResultsDescription(flags: {
   if (flags.hasActiveSearch) parts.push('your search');
   if (flags.hasActiveFilters) parts.push('your filters');
   if (flags.hasActiveView) parts.push('this view');
-  const joined =
-    parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+  const joined = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
   return `No results match ${joined}.`;
 }
 
@@ -86,9 +85,7 @@ export function DataTable<TData>({
   const hasActiveView = !!activeViewId;
   // Without a view, "active" = anything present. With a view, "active" = diverged from the view's saved state.
   const hasActiveFilters = hasActiveView ? !!meta?.isFiltersDirty : appliedFilterCount > 0;
-  const hasActiveSearch = hasActiveView
-    ? !!meta?.isSearchDirty
-    : !!(search?.value && search.value.trim() !== '');
+  const hasActiveSearch = hasActiveView ? !!meta?.isSearchDirty : !!(search?.value && search.value.trim() !== '');
   const isFiltered = hasActiveSearch || hasActiveFilters || hasActiveView;
   // Reset baselines: clear actions revert to the view's saved values, or to empty when no view is active.
   const filtersBaseline = meta?.activeViewState?.filters ?? [];
@@ -251,9 +248,9 @@ export function DataTable<TData>({
           ) : null}
         </AnimatePresence>
 
-        {/* Fixed header */}
-        <div className="shrink-0" style={{ minWidth: table.getCenterTotalSize() }}>
-          <table className="w-full text-sm table-fixed">
+        {/* Scrollable container — header and body share one scroll context */}
+        <div className="relative flex w-full flex-col overflow-auto overscroll-auto flex-1">
+          <table className="w-full caption-bottom text-sm table-fixed" style={{ minWidth: table.getCenterTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -266,10 +263,15 @@ export function DataTable<TData>({
                         colSpan={header.colSpan}
                         style={
                           isActions
-                            ? { width: '52px' }
+                            ? { width: '70px' }
                             : { width: header.getSize(), minWidth: header.getSize(), maxWidth: header.getSize() }
                         }
-                        className={cn('relative group/resize', isActions ? 'text-right' : 'text-center')}
+                        className={cn(
+                          'relative group/resize',
+                          isActions
+                            ? 'text-right sticky right-0 z-20 bg-muted/40 backdrop-blur-sm [box-shadow:-4px_0_6px_-2px_var(--color-border)]'
+                            : 'text-center',
+                        )}
                         aria-sort={
                           header.column.getCanSort()
                             ? header.column.getIsSorted() === 'asc'
@@ -304,12 +306,6 @@ export function DataTable<TData>({
                 </TableRow>
               ))}
             </TableHeader>
-          </table>
-        </div>
-
-        {/* Scrollable body — only this area has the scrollbar */}
-        <div className="relative flex w-full flex-col overflow-auto overscroll-auto flex-1">
-          <table className="w-full caption-bottom text-sm table-fixed" style={{ minWidth: table.getCenterTotalSize() }}>
             {(isLoading || table.getRowModel().rows.length > 0) && (
               <TableBody>
                 {isLoading
@@ -329,7 +325,7 @@ export function DataTable<TData>({
                       const externallySelected = selectedRowId != null && row.id === selectedRowId;
                       const isSelected = row.getIsSelected() || externallySelected;
                       return (
-                        <TableRow key={row.id} data-state={isSelected ? 'selected' : undefined}>
+                        <TableRow key={row.id} data-state={isSelected ? 'selected' : undefined} className="group">
                           {row.getVisibleCells().map((cell) => {
                             const isActionsCell = cell.column.id === 'actions';
                             return (
@@ -337,12 +333,15 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={cn(
                                   densityClasses[density],
+                                  isActionsCell
+                                    ? 'px-2 sticky right-0 z-10 bg-background/40 backdrop-blur-sm group-hover:bg-muted/30 group-data-[state=selected]:bg-muted/40 [box-shadow:-4px_0_6px_-2px_var(--color-border)]'
+                                    : undefined,
                                   onRowClick && !isActionsCell ? 'cursor-pointer' : undefined,
                                 )}
                                 onClick={onRowClick && !isActionsCell ? () => onRowClick(row.original) : undefined}
                                 style={
                                   isActionsCell
-                                    ? { width: '52px' }
+                                    ? { width: '70px' }
                                     : {
                                         width: cell.column.getSize(),
                                         minWidth: cell.column.getSize(),
@@ -352,8 +351,7 @@ export function DataTable<TData>({
                               >
                                 <div
                                   className={cn(
-                                    'overflow-hidden',
-                                    isActionsCell ? 'flex items-center justify-end' : 'text-center',
+                                    isActionsCell ? 'flex items-center justify-end' : 'overflow-hidden text-center',
                                   )}
                                 >
                                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
