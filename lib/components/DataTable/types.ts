@@ -83,7 +83,7 @@ export interface DataTableProps<TData> {
   className?: string;
   enableViews?: boolean;
   importExport?: ImportExportConfig<TData>;
-  mode?: 'page' | 'compact';
+  mode?: 'page' | 'tab' | 'compact';
   // Fires when a non-actions cell in a row is clicked. Highlights the matching row.
   onRowClick?: (row: TData) => void;
   // Returns the id of the externally-selected row (rendered with the `selected` data-state).
