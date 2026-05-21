@@ -1,5 +1,5 @@
 import React from 'react';
-import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
+import { Field, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 import { Switch as ShadcnSwitch } from '../../../shadcn/shadcnSwitch';
 
 export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof ShadcnSwitch> {
@@ -9,9 +9,9 @@ export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof Shadc
   label?: React.ReactNode;
 
   /**
-   * Helper text or description to display below the switch
+   * Helper text or description displayed beside the toggle — required for field layout
    */
-  description?: React.ReactNode;
+  description: React.ReactNode;
 
   /**
    * Error message to display below the switch
@@ -22,21 +22,15 @@ export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof Shadc
 /**
  * Switch component for toggling between two states (on/off).
  *
- * Can be used as a bare component or with label, description, and error support
- * for form integration.
+ * Description is required and sits beside the toggle, keeping the label pinned
+ * to the top so it aligns with adjacent TextField labels in a form row.
  *
  * @example
  * ```tsx
- * // Bare usage
- * <Switch />
- * <Switch size="sm" />
- * <Switch defaultChecked />
- * <Switch disabled />
- *
  * // With Field system (form usage)
  * <Switch
  *   label="Enable notifications"
- *   description="Receive email updates"
+ *   description="Receive email updates about your account"
  * />
  *
  * // In a Form component
@@ -55,32 +49,26 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
     const fieldId = id || generatedId;
     const hasError = !!error;
 
-    // If no label or description, just return the base switch
-    if (!label && !description && !error) {
-      return <ShadcnSwitch {...props} ref={ref} id={fieldId} />;
-    }
-
     return (
-      <Field orientation="horizontal" data-disabled={props.disabled} data-invalid={hasError}>
-        <FieldContent>
-          {label && (
-            <FieldLabel htmlFor={fieldId} className="font-normal cursor-pointer">
-              {label}
-            </FieldLabel>
-          )}
+      <Field data-disabled={props.disabled} data-invalid={hasError}>
+        {label && (
+          <FieldLabel htmlFor={fieldId} className="font-normal cursor-pointer">
+            {label}
+          </FieldLabel>
+        )}
 
-          {description && <FieldDescription id={`${fieldId}-description`}>{description}</FieldDescription>}
+        <div className="flex min-h-9 items-center justify-between gap-3">
+          <p id={`${fieldId}-description`} className="text-sm text-muted-foreground leading-normal">{description}</p>
+          <ShadcnSwitch
+            {...props}
+            ref={ref}
+            id={fieldId}
+            aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
+            aria-invalid={hasError}
+          />
+        </div>
 
-          {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
-        </FieldContent>
-        <ShadcnSwitch
-          {...props}
-          ref={ref}
-          id={fieldId}
-          className={`self-center ${props.className ?? ''}`}
-          aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
-          aria-invalid={hasError}
-        />
+        {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
       </Field>
     );
   },

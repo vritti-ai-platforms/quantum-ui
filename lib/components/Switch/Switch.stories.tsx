@@ -105,11 +105,11 @@ export const AllSizes: Story = {
   render: () => (
     <div className="flex items-center gap-6">
       <div className="flex flex-col items-center gap-2">
-        <Switch size="sm" />
+        <Switch size="sm" description="Small toggle" />
         <span className="text-xs text-muted-foreground">Small</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Switch size="default" />
+        <Switch size="default" description="Default toggle" />
         <span className="text-xs text-muted-foreground">Default</span>
       </div>
     </div>
