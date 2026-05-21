@@ -9,6 +9,7 @@ export { zodResolver };
 
 export interface NumericFieldOptions {
   required?: string;
+  nullable?: boolean;
   integer?: boolean;
   integerMessage?: string;
   nonZero?: boolean;
@@ -21,11 +22,13 @@ export interface NumericFieldOptions {
   maxMessage?: string;
 }
 
-// NaN-aware numeric field builder. NaN (empty input) shows required message;
-// integer/positive/min/max constraints show their own messages.
+// NaN-aware numeric field builder. NaN (empty input) shows required message,
+// or becomes null when nullable:true. integer/positive/min/max constraints
+// show their own messages and are never silently swallowed.
 export function zodNumericField(options: NumericFieldOptions = {}) {
   const {
     required = 'Required',
+    nullable = false,
     integer = false,
     integerMessage = 'Must be a whole number',
     nonZero = false,
@@ -37,6 +40,28 @@ export function zodNumericField(options: NumericFieldOptions = {}) {
     max,
     maxMessage,
   } = options;
+
+  if (nullable) {
+    return z
+      .union([z.number(), z.nan(), z.null()])
+      .transform((v) => (v === null || Number.isNaN(v as number) ? null : v))
+      .pipe(
+        z.number().nullable().superRefine((v, ctx) => {
+          if (v === null) return;
+          if (integer && !Number.isInteger(v)) {
+            ctx.addIssue({ code: 'custom', message: integerMessage });
+          } else if (nonZero && v === 0) {
+            ctx.addIssue({ code: 'custom', message: nonZeroMessage });
+          } else if (positive && v <= 0) {
+            ctx.addIssue({ code: 'custom', message: positiveMessage });
+          } else if (min != null && v < min) {
+            ctx.addIssue({ code: 'custom', message: minMessage ?? `Must be at least ${min}` });
+          } else if (max != null && v > max) {
+            ctx.addIssue({ code: 'custom', message: maxMessage ?? `Must be at most ${max}` });
+          }
+        }),
+      );
+  }
 
   return z.union([z.number(), z.nan()]).superRefine((v, ctx) => {
     if (Number.isNaN(v)) {
@@ -58,19 +83,23 @@ export function zodNumericField(options: NumericFieldOptions = {}) {
 
 export interface CurrencyFieldOptions {
   required?: string;
+  positive?: boolean;
+  positiveMessage?: string;
 }
 
 // CurrencyField returns undefined when empty and { currency, value } when filled.
 // Accept undefined explicitly so the required message fires instead of a generic
 // Zod type error from z.object({...}).
 export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
-  const { required = 'Required' } = options;
+  const { required = 'Required', positive = true, positiveMessage = 'Must be greater than 0' } = options;
 
   return z
     .union([z.object({ currency: z.string(), value: z.string() }), z.undefined()])
     .superRefine((v, ctx) => {
       if (!v?.value) {
         ctx.addIssue({ code: 'custom', message: required });
+      } else if (positive && Number(v.value) <= 0) {
+        ctx.addIssue({ code: 'custom', message: positiveMessage });
       }
     });
 }

@@ -18,6 +18,7 @@ export * from './quant';
 export * from './region';
 export * from './location';
 export * from './supplier';
+export * from './supplier-item';
 export * from './timezone';
 export * from './uom';
 export * from './user';

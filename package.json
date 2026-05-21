@@ -236,6 +236,10 @@
       "types": "./dist/lib/selects/supplier/index.d.ts",
       "import": "./dist/selects/supplier.js"
     },
+    "./selects/supplier-item": {
+      "types": "./dist/lib/selects/supplier-item/index.d.ts",
+      "import": "./dist/selects/supplier-item.js"
+    },
     "./selects/purchase-order": {
       "types": "./dist/lib/selects/purchase-order/index.d.ts",
       "import": "./dist/selects/purchase-order.js"

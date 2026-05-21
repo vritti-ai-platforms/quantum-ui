@@ -3,16 +3,18 @@ import { Select, type SelectProps } from '../../components/Select/Select';
 
 export type UomSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
-// Pre-configured Select for unit of measure selection with async search
-export const UomSelector = forwardRef<HTMLButtonElement, UomSelectorProps>((props, ref) => (
+const DEFAULT_FIELD_KEYS = { valueKey: 'id', labelKey: 'name', additionalKeys: 'allowDecimal', groupIdKey: 'dimensionId' } as const;
+
+// Pre-configured Select for unit of measure selection, grouped by dimension
+export const UomSelector = forwardRef<HTMLButtonElement, UomSelectorProps>(({ fieldKeys, ...props }, ref) => (
   <Select
     ref={ref}
     label="Unit of Measure"
     placeholder="Select unit"
     searchable
     optionsEndpoint="commerce-api/uom/select"
-    fieldKeys={{ valueKey: 'id', labelKey: 'name', additionalKeys: 'allowDecimal' }}
     {...props}
+    fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
   />
 ));
 UomSelector.displayName = 'UomSelector';

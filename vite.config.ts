@@ -77,6 +77,7 @@ export default defineConfig({
         'selects/serial': resolve(__dirname, 'lib/selects/serial/index.ts'),
         'selects/location': resolve(__dirname, 'lib/selects/location/index.ts'),
         'selects/supplier': resolve(__dirname, 'lib/selects/supplier/index.ts'),
+        'selects/supplier-item': resolve(__dirname, 'lib/selects/supplier-item/index.ts'),
         'selects/purchase-order': resolve(__dirname, 'lib/selects/purchase-order/index.ts'),
         'selects/uom': resolve(__dirname, 'lib/selects/uom/index.ts'),
         'selects/user': resolve(__dirname, 'lib/selects/user/index.ts'),

@@ -134,7 +134,9 @@ export function useSelect({
 
     if (debouncedSearch.trim().length === 0) {
       for (const option of selected) {
-        uniqueByValue.set(makeKey(option.value), option);
+        if (selectedValues?.includes(option.value)) {
+          uniqueByValue.set(makeKey(option.value), option);
+        }
       }
     }
     for (const option of searchResults) {
