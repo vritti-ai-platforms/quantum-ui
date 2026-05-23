@@ -1,19 +1,21 @@
 import { forwardRef } from 'react';
 import { Select, type SelectProps } from '../../components/Select/Select';
 
+export type LotSelectorParams = { inventoryItemId?: string };
+
 export type LotSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'params'> & {
-  inventoryItemId: string;
+  params?: LotSelectorParams;
 };
 
 // Pre-configured Select for inventory item lot selection (scoped to a single item)
-export const LotSelector = forwardRef<HTMLButtonElement, LotSelectorProps>(({ inventoryItemId, ...props }, ref) => (
+export const LotSelector = forwardRef<HTMLButtonElement, LotSelectorProps>(({ params, ...props }, ref) => (
   <Select
     ref={ref}
     label="Lot"
     placeholder="Select or type a lot number"
     searchable
     optionsEndpoint="commerce-api/inventory-item-lots/select"
-    params={{ inventoryItemId }}
+    params={params}
     fieldKeys={{ valueKey: 'id', labelKey: 'lotNumber' }}
     {...props}
   />

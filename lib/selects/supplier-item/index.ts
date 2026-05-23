@@ -1,1 +1,5 @@
-export { SupplierItemSelector, type SupplierItemSelectorProps } from './SupplierItemSelector';
+export {
+  SupplierItemSelector,
+  type SupplierItemSelectorParams,
+  type SupplierItemSelectorProps,
+} from './SupplierItemSelector';
