@@ -259,6 +259,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
             handle={handle}
             title={item.dialog.title}
             description={item.dialog.description}
+            badgeSlot={item.dialog.badgeSlot}
             content={item.dialog.content}
             footer={item.dialog.footer}
           />

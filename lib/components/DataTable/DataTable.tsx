@@ -269,9 +269,7 @@ export function DataTable<TData>({
                         }
                         className={cn(
                           'relative group/resize',
-                          isActions
-                            ? 'text-right sticky right-0 z-20 bg-muted/40 backdrop-blur-sm [box-shadow:-4px_0_6px_-2px_var(--color-border)]'
-                            : 'text-center',
+                          isActions ? 'text-right sticky right-0 z-20' : 'text-center',
                         )}
                         aria-sort={
                           header.column.getCanSort()
@@ -283,19 +281,32 @@ export function DataTable<TData>({
                             : undefined
                         }
                       >
-                        {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
-                          <div className={cn('flex', headerAlignClass)}>
-                            <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
-                          </div>
-                        ) : (
-                          flexRender(header.column.columnDef.header, header.getContext())
+                        {/*
+                          Sticky actions header: the blurred/frosted bg lives in an absolute overlay that
+                          leaves the bottom 1px transparent, so the parent <tr>'s natural border-b shows
+                          through unmodified — no alignment math needed.
+                        */}
+                        {isActions && (
+                          <div
+                            aria-hidden
+                            className="pointer-events-none absolute inset-x-0 top-0 bottom-px bg-muted/40 backdrop-blur-sm"
+                          />
                         )}
+                        <div className={cn(isActions ? 'relative' : undefined)}>
+                          {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
+                            <div className={cn('flex', headerAlignClass)}>
+                              <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
+                            </div>
+                          ) : (
+                            flexRender(header.column.columnDef.header, header.getContext())
+                          )}
+                        </div>
                         {!meta?.lockedColumnSizing && header.column.getCanResize() && (
                           <div
                             onPointerDown={header.getResizeHandler()}
                             onTouchStart={header.getResizeHandler()}
                             className={cn(
-                              'absolute top-0 right-0 w-1 h-full cursor-col-resize select-none touch-none',
+                              'absolute top-0 right-0 w-1 h-full cursor-col-resize select-none touch-none z-10',
                               'opacity-0 group-hover/resize:opacity-100 hover:bg-primary/50',
                               header.column.getIsResizing() && 'opacity-100 bg-primary',
                             )}
@@ -334,9 +345,7 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={cn(
                                   densityClasses[density],
-                                  isActionsCell
-                                    ? 'px-2 sticky right-0 z-10 bg-background/40 backdrop-blur-sm group-hover:bg-muted/30 group-data-[state=selected]:bg-muted/40 [box-shadow:-4px_0_6px_-2px_var(--color-border)]'
-                                    : undefined,
+                                  isActionsCell ? 'relative px-2 sticky right-0 z-10' : undefined,
                                   onRowClick && !isActionsCell ? 'cursor-pointer' : undefined,
                                 )}
                                 onClick={onRowClick && !isActionsCell ? () => onRowClick(row.original) : undefined}
@@ -350,9 +359,23 @@ export function DataTable<TData>({
                                       }
                                 }
                               >
+                                {/*
+                                  Sticky actions cell: the frosted bg + scroll shadow live in an absolute
+                                  overlay that leaves the bottom 1px transparent. The parent <tr>'s natural
+                                  border-b shows through unmodified — guarantees pixel-perfect alignment with
+                                  the other cells' row dividers.
+                                */}
+                                {isActionsCell && (
+                                  <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute inset-x-0 top-0 bottom-px bg-background/40 backdrop-blur-sm group-hover:bg-muted/30 group-data-[state=selected]:bg-muted/40"
+                                  />
+                                )}
                                 <div
                                   className={cn(
-                                    isActionsCell ? 'flex items-center justify-end' : 'overflow-hidden text-center',
+                                    isActionsCell
+                                      ? 'relative flex items-center justify-end'
+                                      : 'overflow-hidden text-center',
                                   )}
                                 >
                                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

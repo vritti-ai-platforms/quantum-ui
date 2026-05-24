@@ -62,7 +62,14 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
       const isItemDisabled = disabled || option.disabled;
 
       return (
-        <Field key={option.value} orientation="horizontal" data-disabled={isItemDisabled || undefined}>
+        <Field
+          key={option.value}
+          orientation="horizontal"
+          // Field defaults to `w-full`; override when the outer group is horizontal
+          // so each option hugs its content instead of spanning the full row.
+          className={orientation === 'horizontal' ? 'w-auto' : undefined}
+          data-disabled={isItemDisabled || undefined}
+        >
           <ShadcnRadioGroupItem value={option.value} id={itemId} disabled={isItemDisabled} />
           <FieldContent>
             <FieldLabel htmlFor={itemId} className="font-normal cursor-pointer">

@@ -213,6 +213,8 @@ export interface DialogMenuItem extends MenuItemBase {
     title: string;
     /** Optional dialog description */
     description?: string;
+    /** Optional badge slot rendered inline with the title */
+    badgeSlot?: ReactNode;
     /** Render prop for dialog body — receives a close function */
     content?: (close: () => void) => ReactNode;
     /** Static footer content */

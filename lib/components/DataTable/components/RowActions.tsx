@@ -17,6 +17,7 @@ export interface RowAction {
     title: string;
     description: string;
     className?: string;
+    badgeSlot?: React.ReactNode;
     content: (close: () => void) => React.ReactNode;
   };
 }
@@ -38,6 +39,7 @@ const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ 
         handle={dialog}
         title={action.dialog.title}
         description={action.dialog.description}
+        badgeSlot={action.dialog.badgeSlot}
         className={action.dialog.className}
         anchor={(open) => (
           <Button

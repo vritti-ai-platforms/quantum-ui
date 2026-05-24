@@ -17,11 +17,11 @@ import { Form, type FormProps } from '../Form';
 
 export interface DialogProps<
   TFieldValues extends FieldValues = FieldValues,
-  TContext = any,
+  TContext = unknown,
   TTransformedValues extends FieldValues | undefined = TFieldValues,
   TMutationData = unknown,
   TMutationError = Error,
-  TMutationVariables = any,
+  TMutationVariables = unknown,
 > {
   // Handle from useDialog() — controls open state and cleanup
   handle: DialogHandle;
@@ -33,6 +33,9 @@ export interface DialogProps<
   trigger?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
+  // Optional badge-style slot rendered inline with the title in the header.
+  // Use for short status indicators tied to the dialog's subject (e.g. "Draft", "Derived unit").
+  badgeSlot?: React.ReactNode;
   children?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
@@ -57,11 +60,11 @@ export interface DialogProps<
 // Composite dialog — controlled by a useDialog() handle
 export function Dialog<
   TFieldValues extends FieldValues = FieldValues,
-  TContext = any,
+  TContext = unknown,
   TTransformedValues extends FieldValues | undefined = TFieldValues,
   TMutationData = unknown,
   TMutationError = Error,
-  TMutationVariables = any,
+  TMutationVariables = unknown,
 >({
   handle,
   anchor,
@@ -69,6 +72,7 @@ export function Dialog<
   trigger,
   title,
   description,
+  badgeSlot,
   children,
   footer,
   className,
@@ -124,7 +128,18 @@ export function Dialog<
       <ShadcnDialogContent className={className}>
         {(title || description) && (
           <ShadcnDialogHeader>
-            {title && <ShadcnDialogTitle>{title}</ShadcnDialogTitle>}
+            {title && (
+              <ShadcnDialogTitle>
+                {badgeSlot ? (
+                  <span className="flex items-center gap-2">
+                    <span>{title}</span>
+                    {badgeSlot}
+                  </span>
+                ) : (
+                  title
+                )}
+              </ShadcnDialogTitle>
+            )}
             {description && <ShadcnDialogDescription>{description}</ShadcnDialogDescription>}
           </ShadcnDialogHeader>
         )}
