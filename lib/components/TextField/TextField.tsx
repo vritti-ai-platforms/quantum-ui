@@ -29,7 +29,9 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     const normalizedInputMode = props.inputMode ?? (isNumberType ? (integer ? 'numeric' : 'decimal') : undefined);
     // Resolve the actual minimum: positive floor takes precedence when both are set, so
     // `positive` always blocks negatives even if a contradictory `min` is passed.
-    const positiveFloor = positive ? (nonZero ? 1 : 0) : undefined;
+    // For decimal mode, `nonZero` is enforced by the form/zod layer — HTML min stays at 0 so
+    // values like 0.3 / 0.5 remain valid. The 1-floor only makes sense when integer is true.
+    const positiveFloor = positive ? (nonZero && integer ? 1 : 0) : undefined;
     const propsMinNum = props.min != null && props.min !== '' ? Number(props.min) : undefined;
     const propsMinValid = propsMinNum !== undefined && Number.isFinite(propsMinNum) ? propsMinNum : undefined;
     const effectiveMin =
@@ -108,7 +110,13 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           event.preventDefault();
           return;
         }
-        if (nonZero && event.key === '0' && (event.currentTarget.value === '' || event.currentTarget.value === '0')) {
+        // Only block '0' as the first keystroke in integer mode; decimal mode needs '0' to start "0.3" etc.
+        if (
+          nonZero &&
+          integer &&
+          event.key === '0' &&
+          (event.currentTarget.value === '' || event.currentTarget.value === '0')
+        ) {
           event.preventDefault();
           return;
         }
