@@ -127,6 +127,7 @@ export default defineConfig({
         'utils/lodash': resolve(__dirname, 'lib/utils/lodash.ts'),
         'utils/locale': resolve(__dirname, 'lib/utils/locale.ts'),
         'utils/timezone': resolve(__dirname, 'lib/utils/timezone.ts'),
+        'utils/currency': resolve(__dirname, 'lib/utils/currency.ts'),
         'utils/pluralize': resolve(__dirname, 'lib/utils/pluralize.ts'),
         'utils/zod': resolve(__dirname, 'lib/utils/zod.ts'),
         'utils/hotkeys': resolve(__dirname, 'lib/utils/hotkeys.ts'),

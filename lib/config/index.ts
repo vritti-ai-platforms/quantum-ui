@@ -139,6 +139,16 @@ export interface TimeZoneConfig {
 }
 
 /**
+ * Currency resolution configuration
+ */
+export interface CurrencyConfig {
+  /**
+   * Custom resolver for the active application currency (ISO 4217)
+   */
+  resolveCurrency?: () => string | null | undefined;
+}
+
+/**
  * Complete quantum-ui configuration interface
  */
 export interface QuantumUIConfig {
@@ -163,6 +173,11 @@ export interface QuantumUIConfig {
   timeZone?: TimeZoneConfig;
 
   /**
+   * Currency resolution configuration
+   */
+  currency?: CurrencyConfig;
+
+  /**
    * Table views management configuration
    */
   views: ViewsConfig;
@@ -177,6 +192,7 @@ const defaultConfig: {
   auth: AuthConfig;
   views: Required<ViewsConfig>;
   timeZone: TimeZoneConfig;
+  currency: CurrencyConfig;
 } = {
   csrf: {
     endpoint: 'csrf/token',
@@ -201,6 +217,9 @@ const defaultConfig: {
   },
   timeZone: {
     resolveTimeZone: undefined,
+  },
+  currency: {
+    resolveCurrency: undefined,
   },
   views: {
     viewsEndpoint: 'table-views',
@@ -293,6 +312,10 @@ export function configureQuantumUI(userConfig: QuantumUIConfig): void {
     timeZone: {
       ...defaultConfig.timeZone,
       ...(userConfig.timeZone || {}),
+    },
+    currency: {
+      ...defaultConfig.currency,
+      ...(userConfig.currency || {}),
     },
     views: {
       ...defaultConfig.views,

@@ -2,8 +2,9 @@ import { tz } from '@date-fns/tz';
 import type { Locale } from 'date-fns';
 import { format, isValid, parseISO } from 'date-fns';
 import type React from 'react';
+import { useBUTimezone } from '../../hooks/useBUTimezone';
 import { useLocale } from '../../hooks/useLocale';
-import { getUserTimeZone, resolveTimeZone } from '../../utils/timezone';
+import { getUserTimeZone } from '../../utils/timezone';
 import { Skeleton } from '../Skeleton';
 
 export interface DetailFieldProps {
@@ -46,6 +47,7 @@ const formatValue = (
   dateOnly?: boolean,
   timeZoneOverride?: string,
   locale?: Locale,
+  buTimeZone?: string | null,
 ): FormattedValue => {
   if (value == null) return { primary: '—' };
 
@@ -63,7 +65,7 @@ const formatValue = (
   const parsed = parseISO(value);
   if (!isValid(parsed)) return { primary: '—' };
 
-  const primaryTimeZone = timeZoneOverride ?? resolveTimeZone();
+  const primaryTimeZone = timeZoneOverride ?? buTimeZone ?? null;
   if (!primaryTimeZone) {
     return { primary: format(parsed, resolvedFormat, locale ? { locale } : undefined) };
   }
@@ -92,6 +94,7 @@ export const DetailField: React.FC<DetailFieldProps> = ({
   loading,
 }) => {
   const locale = useLocale();
+  const buTimeZone = useBUTimezone();
 
   if (loading) {
     return (
@@ -102,7 +105,7 @@ export const DetailField: React.FC<DetailFieldProps> = ({
     );
   }
 
-  const formattedValue = formatValue(value, dateFormat, dateOnly, timeZone, locale);
+  const formattedValue = formatValue(value, dateFormat, dateOnly, timeZone, locale, buTimeZone);
 
   return (
     <div className={className}>

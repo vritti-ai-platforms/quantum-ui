@@ -408,6 +408,10 @@
       "types": "./dist/lib/utils/timezone.d.ts",
       "import": "./dist/utils/timezone.js"
     },
+    "./currency": {
+      "types": "./dist/lib/utils/currency.d.ts",
+      "import": "./dist/utils/currency.js"
+    },
     "./pluralize": {
       "types": "./dist/lib/utils/pluralize.d.ts",
       "import": "./dist/utils/pluralize.js"

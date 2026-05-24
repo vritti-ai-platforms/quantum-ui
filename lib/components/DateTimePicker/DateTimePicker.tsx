@@ -20,8 +20,8 @@ import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { useBUTimezone } from '../../hooks/useBUTimezone';
 import { useLocale } from '../../hooks/useLocale';
-import { resolveTimeZone } from '../../utils/timezone';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 
 type DateTimePickerValue = string | undefined;
@@ -214,7 +214,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
   } = rawProps;
 
   const locale = useLocale();
-  const timeZone = resolveTimeZone() ?? 'UTC';
+  const timeZone = useBUTimezone() ?? 'UTC';
   const parsedValue = parseDateTime(value);
   const minDateTimeValue = parseDateTime(minDateTime);
   const maxDateTimeValue = parseDateTime(maxDateTime);

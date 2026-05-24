@@ -2,8 +2,8 @@ import { tz } from '@date-fns/tz';
 import type { Locale } from 'date-fns';
 import { format, isValid, parseISO } from 'date-fns';
 import type React from 'react';
+import { useBUTimezone } from '../../hooks/useBUTimezone';
 import { useLocale } from '../../hooks/useLocale';
-import { resolveTimeZone } from '../../utils/timezone';
 
 export interface FormattedDateProps {
   value: string | null | undefined;
@@ -39,6 +39,7 @@ export const FormattedDate: React.FC<FormattedDateProps> = ({
   className,
 }) => {
   const locale = useLocale();
+  const buTimeZone = useBUTimezone();
 
   if (value == null || typeof value !== 'string') {
     return <span className={className}>{fallback}</span>;
@@ -57,7 +58,7 @@ export const FormattedDate: React.FC<FormattedDateProps> = ({
   const parsed = parseISO(value);
   if (!isValid(parsed)) return <span className={className}>{fallback}</span>;
 
-  const resolvedTimeZone = timeZone ?? resolveTimeZone();
+  const resolvedTimeZone = timeZone ?? buTimeZone;
   if (!resolvedTimeZone) {
     return (
       <span className={className}>{format(parsed, resolvedFormat, locale ? { locale } : undefined)}</span>
