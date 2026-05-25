@@ -25,7 +25,14 @@ export interface NumericFieldOptions {
 // NaN-aware numeric field builder. NaN (empty input) shows required message,
 // or becomes null when nullable:true. integer/positive/min/max constraints
 // show their own messages and are never silently swallowed.
-export function zodNumericField(options: NumericFieldOptions = {}) {
+//
+// Overloads narrow the inferred output type: `nullable: true` → `number | null`,
+// anything else → `number`. Without these overloads, TS widens the return type
+// across both internal branches, so every caller would see `number | null`
+// regardless of how they configured `nullable`.
+export function zodNumericField(options?: Omit<NumericFieldOptions, 'nullable'> & { nullable?: false }): z.ZodType<number, number>;
+export function zodNumericField(options: Omit<NumericFieldOptions, 'nullable'> & { nullable: true }): z.ZodType<number | null, number | null>;
+export function zodNumericField(options: NumericFieldOptions = {}): z.ZodType<number, number> | z.ZodType<number | null, number | null> {
   const {
     required = 'Required',
     nullable = false,
