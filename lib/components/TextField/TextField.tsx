@@ -10,9 +10,12 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
   error?: string;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
-  // Blocks negative values and '-'/'e' keys; sets min to 0 if no min provided
+  // Blocks negative values and '-'/'e' keys. Combined with `integer`, also blocks `0` and
+  // sets min to 1 (so positive+integer means ≥1). For decimal mode, zero is still typeable so
+  // the user can start "0.5"; zod is the final gate.
   positive?: boolean;
-  // Blocks zero; sets min to 1 if positive is also true and no min provided
+  // Blocks zero. Combined with `integer`, blocks `0` as the first keystroke. Use independently
+  // from `positive` when the field accepts signed-but-not-zero values.
   nonZero?: boolean;
   // Blocks decimal input ('.' and ','); switches inputMode to numeric
   integer?: boolean;
@@ -29,9 +32,9 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     const normalizedInputMode = props.inputMode ?? (isNumberType ? (integer ? 'numeric' : 'decimal') : undefined);
     // Resolve the actual minimum: positive floor takes precedence when both are set, so
     // `positive` always blocks negatives even if a contradictory `min` is passed.
-    // For decimal mode, `nonZero` is enforced by the form/zod layer — HTML min stays at 0 so
-    // values like 0.3 / 0.5 remain valid. The 1-floor only makes sense when integer is true.
-    const positiveFloor = positive ? (nonZero && integer ? 1 : 0) : undefined;
+    // For integer mode, `positive` means ≥1 (floor 1). For decimal mode, HTML min stays at 0 so
+    // values like 0.3 / 0.5 remain typeable; the form/zod layer rejects plain 0.
+    const positiveFloor = positive ? (integer ? 1 : 0) : undefined;
     const propsMinNum = props.min != null && props.min !== '' ? Number(props.min) : undefined;
     const propsMinValid = propsMinNum !== undefined && Number.isFinite(propsMinNum) ? propsMinNum : undefined;
     const effectiveMin =
@@ -110,9 +113,10 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           event.preventDefault();
           return;
         }
-        // Only block '0' as the first keystroke in integer mode; decimal mode needs '0' to start "0.3" etc.
+        // Block '0' as the first keystroke in integer mode when either `positive` (≥1) or
+        // `nonZero` is set. Decimal mode needs '0' to remain typeable so the user can start "0.3".
         if (
-          nonZero &&
+          (positive || nonZero) &&
           integer &&
           event.key === '0' &&
           (event.currentTarget.value === '' || event.currentTarget.value === '0')

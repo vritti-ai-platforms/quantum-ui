@@ -26,6 +26,13 @@ export interface NumericFieldOptions {
 // or becomes null when nullable:true. integer/positive/min/max constraints
 // show their own messages and are never silently swallowed.
 //
+// Semantics (mirrors TextField):
+//   - `positive: true`              → value must be > 0 (zero is rejected)
+//   - `positive: true` + `integer`  → value must be ≥ 1
+//   - `nonZero: true`               → value must be ≠ 0 (use for signed-but-not-zero cases;
+//                                     redundant when `positive: true` is also set)
+//   - `integer: true`               → value must be a whole number
+//
 // Overloads narrow the inferred output type: `nullable: true` → `number | null`,
 // anything else → `number`. Without these overloads, TS widens the return type
 // across both internal branches, so every caller would see `number | null`
