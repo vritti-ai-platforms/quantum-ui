@@ -38,3 +38,13 @@ export type {
 
 // Utility
 export { exportToCSV, getSelectionColumn } from './utils';
+
+// Cell components — wrap useFormatters() for consistent rendering with DetailField.
+export type {
+  CurrencyCellProps,
+  DateCellProps,
+  DateTimeCellProps,
+  NumberCellProps,
+  StringCellProps,
+} from './cells/cells';
+export { CurrencyCell, DateCell, DateTimeCell, NumberCell, StringCell } from './cells/cells';

@@ -424,6 +424,10 @@
       "types": "./dist/lib/utils/money.d.ts",
       "import": "./dist/utils/money.js"
     },
+    "./format": {
+      "types": "./dist/lib/utils/format.d.ts",
+      "import": "./dist/utils/format.js"
+    },
     "./decimal": {
       "types": "./dist/lib/utils/decimal.d.ts",
       "import": "./dist/utils/decimal.js"

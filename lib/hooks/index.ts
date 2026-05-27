@@ -4,6 +4,7 @@ export { useBUCurrency } from './useBUCurrency';
 export { useBUTimezone } from './useBUTimezone';
 export { type ConfirmOptions, useConfirm } from './useConfirm';
 export { type DialogHandle, useDialog } from './useDialog';
+export { type Formatters, useFormatters } from './useFormatters';
 export { useIsMobile } from './useIsMobile';
 export { useLocale } from './useLocale';
 export { type SlugParam, useSlugParams } from './useSlugParams';

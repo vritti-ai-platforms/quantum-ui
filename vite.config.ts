@@ -132,6 +132,7 @@ export default defineConfig({
         'utils/zod': resolve(__dirname, 'lib/utils/zod.ts'),
         'utils/hotkeys': resolve(__dirname, 'lib/utils/hotkeys.ts'),
         'utils/money': resolve(__dirname, 'lib/utils/money.ts'),
+        'utils/format': resolve(__dirname, 'lib/utils/format.ts'),
         'utils/decimal': resolve(__dirname, 'lib/utils/decimal.ts'),
         'date-fns': resolve(__dirname, 'lib/date-fns.ts'),
       },
