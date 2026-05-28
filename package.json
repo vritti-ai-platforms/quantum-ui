@@ -232,6 +232,10 @@
       "types": "./dist/lib/selects/location/index.d.ts",
       "import": "./dist/selects/location.js"
     },
+    "./selects/cost-category": {
+      "types": "./dist/lib/selects/cost-category/index.d.ts",
+      "import": "./dist/selects/cost-category.js"
+    },
     "./selects/supplier": {
       "types": "./dist/lib/selects/supplier/index.d.ts",
       "import": "./dist/selects/supplier.js"

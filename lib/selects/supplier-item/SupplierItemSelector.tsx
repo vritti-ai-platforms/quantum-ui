@@ -28,7 +28,7 @@ const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
   groupIdKey: 'categoryId',
-  additionalKeys: 'symbol,unitPrice,currencyCode,allowDecimal',
+  additionalKeys: 'symbol,unitPrice,currencyCode,allowDecimal,inventoryItemId,uomId',
 } as const;
 
 function defaultTransformLabel(label: string, option: SelectOption): string {
