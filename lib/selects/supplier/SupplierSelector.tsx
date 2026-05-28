@@ -7,6 +7,7 @@ export type SupplierSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
+  descriptionKey: 'currencyCode', // default to name, but transformDescription will show currency + payment terms if available
   additionalKeys: 'currencyCode,paymentTerms',
 } as const;
 
