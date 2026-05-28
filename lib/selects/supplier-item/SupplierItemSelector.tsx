@@ -5,7 +5,13 @@ import { formatCurrency } from '../../utils/money';
 
 export type SupplierItemSelectorParams = {
   supplierId?: string;
+  // Restricts to supplier items whose (inventoryItemId, uomId) matches a line on this PO. Used by GR
+  // and shared with any SupplierItem filter component for symmetry.
   purchaseOrderId?: string;
+  // Excludes supplier items whose (inventoryItemId, uomId) is already on this PO. Used by the PO add-line dialog.
+  excludeOnPurchaseOrderId?: string;
+  // Excludes supplier items whose (inventoryItemId, uomId) is already on this goods receipt.
+  excludeOnGoodsReceiptId?: string;
 };
 
 export type SupplierItemSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'params'> & {
