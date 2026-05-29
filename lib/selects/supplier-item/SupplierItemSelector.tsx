@@ -19,7 +19,7 @@ export type SupplierItemSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'p
 };
 
 // Pre-configured Select for inventory items offered by suppliers.
-// Hits GET /commerce-api/inventory-items/supplier-items/select.
+// Hits GET /commerce-api/supplier-items/select.
 // Pass supplierId via `params` to scope results to a single supplier; otherwise
 // results span all suppliers and each option includes a `description` with the
 // supplier name. Pass purchaseOrderId via `params` to exclude items whose
@@ -28,7 +28,8 @@ const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
   groupIdKey: 'categoryId',
-  additionalKeys: 'symbol,unitPrice,currencyCode,allowDecimal,inventoryItemId,uomId',
+  additionalKeys:
+    'symbol,unitPrice,currencyCode,allowDecimal,inventoryItemId,uomId,poUnitPrice,poPrimaryUomUnitPrice,poCurrencyCode',
 } as const;
 
 function defaultTransformLabel(label: string, option: SelectOption): string {
@@ -52,7 +53,7 @@ export const SupplierItemSelector = forwardRef<HTMLButtonElement, SupplierItemSe
       label="Supplier Item"
       placeholder="Select supplier item"
       searchable
-      optionsEndpoint="commerce-api/inventory-items/supplier-items/select"
+      optionsEndpoint="commerce-api/supplier-items/select"
       params={params}
       transformLabel={defaultTransformLabel}
       {...props}
