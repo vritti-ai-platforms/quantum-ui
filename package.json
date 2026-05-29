@@ -248,6 +248,10 @@
       "types": "./dist/lib/selects/purchase-order/index.d.ts",
       "import": "./dist/selects/purchase-order.js"
     },
+    "./selects/purchase-order-item": {
+      "types": "./dist/lib/selects/purchase-order-item/index.d.ts",
+      "import": "./dist/selects/purchase-order-item.js"
+    },
     "./selects/uom": {
       "types": "./dist/lib/selects/uom/index.d.ts",
       "import": "./dist/selects/uom.js"

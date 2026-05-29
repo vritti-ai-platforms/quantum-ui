@@ -3,29 +3,27 @@ import { Select, type SelectProps } from '../../components/Select/Select';
 import type { SelectOption } from '../../components/Select/types';
 import { formatCurrency } from '../../utils/money';
 
-export type SupplierItemSelectorParams = {
-  supplierId?: string;
-  // Excludes supplier items whose (inventoryItemId, uomId) is already on this PO. Used by the PO add-line dialog.
-  excludeOnPurchaseOrderId?: string;
-  // Excludes supplier items whose (inventoryItemId, uomId) is already on this goods receipt.
-  // Used by the GR add-item dialog when the receipt has no linked PO.
+export type PurchaseOrderItemSelectorParams = {
+  // The PO whose lines drive the select. Required.
+  purchaseOrderId: string;
+  // Excludes PO lines whose (inventoryItemId, uomId) is already on this goods receipt.
   excludeOnGoodsReceiptId?: string;
 };
 
-export type SupplierItemSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'params'> & {
-  params?: SupplierItemSelectorParams;
+export type PurchaseOrderItemSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'params'> & {
+  params: PurchaseOrderItemSelectorParams;
 };
 
-// Pre-configured Select for inventory items offered by suppliers.
-// Hits GET /commerce-api/supplier-items/select.
-// Pass supplierId via `params` to scope results to a single supplier; otherwise
-// results span all suppliers and each option includes a `description` with the
-// supplier name.
+// Pre-configured Select for purchase-order line items. Hits GET /commerce-api/purchase-order-items/select.
+// The option `additionals` carries (inventoryItemId, uomId, unitPrice, currencyCode, allowDecimal,
+// symbol, orderedQuantity, receivedQuantity) so the consumer can submit a payload keyed on
+// (inventoryItemId, uomId) directly without a lookup hop.
 const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
   groupIdKey: 'categoryId',
-  additionalKeys: 'symbol,unitPrice,currencyCode,allowDecimal,inventoryItemId,uomId',
+  additionalKeys:
+    'symbol,inventoryItemId,uomId,unitPrice,currencyCode,allowDecimal,orderedQuantity,receivedQuantity',
 } as const;
 
 function defaultTransformLabel(label: string, option: SelectOption): string {
@@ -42,14 +40,14 @@ function defaultTransformLabel(label: string, option: SelectOption): string {
   return baseLabel;
 }
 
-export const SupplierItemSelector = forwardRef<HTMLButtonElement, SupplierItemSelectorProps>(
+export const PurchaseOrderItemSelector = forwardRef<HTMLButtonElement, PurchaseOrderItemSelectorProps>(
   ({ fieldKeys, params, ...props }, ref) => (
     <Select
       ref={ref}
-      label="Supplier Item"
-      placeholder="Select supplier item"
+      label="Purchase Order Item"
+      placeholder="Select item from purchase order"
       searchable
-      optionsEndpoint="commerce-api/supplier-items/select"
+      optionsEndpoint="commerce-api/purchase-order-items/select"
       params={params}
       transformLabel={defaultTransformLabel}
       {...props}
@@ -57,4 +55,4 @@ export const SupplierItemSelector = forwardRef<HTMLButtonElement, SupplierItemSe
     />
   ),
 );
-SupplierItemSelector.displayName = 'SupplierItemSelector';
+PurchaseOrderItemSelector.displayName = 'PurchaseOrderItemSelector';

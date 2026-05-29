@@ -80,6 +80,7 @@ export default defineConfig({
         'selects/supplier': resolve(__dirname, 'lib/selects/supplier/index.ts'),
         'selects/supplier-item': resolve(__dirname, 'lib/selects/supplier-item/index.ts'),
         'selects/purchase-order': resolve(__dirname, 'lib/selects/purchase-order/index.ts'),
+        'selects/purchase-order-item': resolve(__dirname, 'lib/selects/purchase-order-item/index.ts'),
         'selects/uom': resolve(__dirname, 'lib/selects/uom/index.ts'),
         'selects/user': resolve(__dirname, 'lib/selects/user/index.ts'),
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
