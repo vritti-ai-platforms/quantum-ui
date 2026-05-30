@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import React from 'react';
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../shadcn/shadcnTooltip';
 import { cn } from '../../../shadcn/utils';
 import { CurrencySelector } from '../../selects/currency/CurrencySelector';
 import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
@@ -53,6 +54,11 @@ export interface CurrencyFieldProps {
    * Whether the field is disabled.
    */
   disabled?: boolean;
+
+  /**
+   * Tooltip text shown on hover when the field is disabled.
+   */
+  disabledTip?: string;
 
   /**
    * Placeholder text for the amount input.
@@ -110,6 +116,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       description,
       error,
       disabled,
+      disabledTip,
       placeholder,
       className,
       required,
@@ -194,7 +201,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       }
     }, [amount, currency, decimals, emit]);
 
-    return (
+    const field = (
       <Field data-disabled={disabled}>
         {label && <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>}
 
@@ -274,6 +281,22 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
           {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
         </FieldContent>
       </Field>
+    );
+
+    if (!disabledTip || !disabled) {
+      return field;
+    }
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          {/* Disabled inputs don't emit hover/focus events, so the trigger lives on a wrapper. */}
+          <TooltipTrigger asChild>
+            <span className="inline-flex w-full cursor-not-allowed">{field}</span>
+          </TooltipTrigger>
+          <TooltipContent>{disabledTip}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   },
 );

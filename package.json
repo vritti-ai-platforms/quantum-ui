@@ -64,6 +64,10 @@
       "types": "./dist/lib/components/Button/index.d.ts",
       "import": "./dist/components/Button.js"
     },
+    "./ScanBarcodeButton": {
+      "types": "./dist/lib/components/ScanBarcodeButton/index.d.ts",
+      "import": "./dist/components/ScanBarcodeButton.js"
+    },
     "./Card": {
       "types": "./dist/lib/components/Card/index.d.ts",
       "import": "./dist/components/Card.js"

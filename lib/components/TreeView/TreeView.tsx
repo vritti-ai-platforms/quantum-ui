@@ -50,6 +50,9 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   isLoading?: boolean;
   loadingRowCount?: number;
   initialSelectedItemId?: string;
+  // Controlled selection: when provided (string or null), the highlight follows this value rather
+  // than internal click state. `null` clears the selection; omit entirely for uncontrolled behavior.
+  selectedItemId?: string | null;
   onSelectChange?: (item: TreeDataItem | undefined) => void;
   onReorder?: (payload: TreeReorderPayload) => void;
   expandAll?: boolean;
@@ -68,6 +71,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       isLoading = false,
       loadingRowCount = 6,
       initialSelectedItemId,
+      selectedItemId: controlledSelectedItemId,
       onSelectChange,
       onReorder,
       expandAll,
@@ -82,20 +86,28 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     },
     ref,
   ) => {
-    const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(initialSelectedItemId);
+    const isSelectionControlled = controlledSelectedItemId !== undefined;
+    const [internalSelectedItemId, setInternalSelectedItemId] = React.useState<string | undefined>(
+      initialSelectedItemId,
+    );
+    const selectedItemId = isSelectionControlled ? (controlledSelectedItemId ?? undefined) : internalSelectedItemId;
 
     const handleSelectChange = React.useCallback(
       (item: TreeDataItem | undefined) => {
-        setSelectedItemId(item?.id);
+        if (!isSelectionControlled) setInternalSelectedItemId(item?.id);
         if (onSelectChange) {
           onSelectChange(item);
         }
       },
-      [onSelectChange],
+      [isSelectionControlled, onSelectChange],
     );
 
+    // When controlled, expansion follows the controlled selection so external selection changes
+    // reveal (expand toward) the target; otherwise it tracks the initial selection as before.
+    const revealTargetId = isSelectionControlled ? selectedItemId : initialSelectedItemId;
+
     const expandedItemIds = React.useMemo(() => {
-      if (!initialSelectedItemId) {
+      if (!revealTargetId) {
         return [] as string[];
       }
 
@@ -117,9 +129,12 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
         }
       }
 
-      walkTreeItems(data, initialSelectedItemId);
-      return ids;
-    }, [data, expandAll, initialSelectedItemId]);
+      walkTreeItems(data, revealTargetId);
+      // In controlled mode the reveal target follows selection, so expand only its ancestors — not
+      // the target itself — otherwise selecting a parent would force it open and clicking couldn't
+      // collapse it. Uncontrolled mode keeps the original behavior (reveal path is static).
+      return expandAll || !isSelectionControlled ? ids : ids.filter((id) => id !== revealTargetId);
+    }, [data, expandAll, isSelectionControlled, revealTargetId]);
 
     const normalizedData = React.useMemo(
       () =>
@@ -334,6 +349,14 @@ const TreeNode = ({
   const hasChildren = !!item.children?.length;
   const isSelected = selectedItemId === item.id;
   const isOpen = value.includes(item.id);
+
+  // Reveal-to-selection: when this node enters the reveal path (e.g. selection changed externally),
+  // open it. Additive only — never force-collapses a node the user opened.
+  React.useEffect(() => {
+    if (expandedItemIds.includes(item.id)) {
+      setValue((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
+    }
+  }, [expandedItemIds, item.id]);
 
   return (
     <AccordionPrimitive.Root type="multiple" value={value} onValueChange={(s) => setValue(s)}>

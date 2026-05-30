@@ -33,6 +33,7 @@ export default defineConfig({
         'components/Badge': resolve(__dirname, 'lib/components/Badge/index.ts'),
         'components/Kbd': resolve(__dirname, 'lib/components/Kbd/index.ts'),
         'components/Button': resolve(__dirname, 'lib/components/Button/index.ts'),
+        'components/ScanBarcodeButton': resolve(__dirname, 'lib/components/ScanBarcodeButton/index.ts'),
         'components/Card': resolve(__dirname, 'lib/components/Card/index.ts'),
         'components/BarChart': resolve(__dirname, 'lib/components/BarChart/index.ts'),
         'components/LineChart': resolve(__dirname, 'lib/components/LineChart/index.ts'),

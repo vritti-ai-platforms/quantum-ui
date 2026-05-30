@@ -18,6 +18,8 @@ export interface UseBarcodeScannerOptions<TData, TError, TVariables> {
 
 export interface UseBarcodeScannerResult {
   isActive: boolean;
+  // True while a scanned code is being submitted (mirrors the supplied mutation's pending state).
+  isPending: boolean;
   enable: () => void;
   disable: () => void;
   toggle: () => void;
@@ -111,6 +113,7 @@ export function useBarcodeScanner<TData, TError, TVariables>({
 
   return {
     isActive,
+    isPending: mutation.isPending,
     enable,
     disable,
     toggle,
