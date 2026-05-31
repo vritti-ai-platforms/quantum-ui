@@ -21,6 +21,7 @@ export type PurchaseOrderItemSelectorProps = Omit<SelectProps, 'optionsEndpoint'
 const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
+  descriptionKey: 'tracking',
   groupIdKey: 'categoryId',
   additionalKeys:
     'symbol,inventoryItemId,uomId,unitPrice,currencyCode,allowDecimal,orderedQuantity,receivedQuantity',
@@ -40,6 +41,23 @@ function defaultTransformLabel(label: string, option: SelectOption): string {
   return baseLabel;
 }
 
+// Humanises the `inventory_items.tracking` enum (`quantity` / `lot` / `serial` / `lot_serial`)
+// that the backend serves as the option description.
+function defaultTransformDescription(value: string): string {
+  switch (value) {
+    case 'quantity':
+      return 'Quantity';
+    case 'lot':
+      return 'Lot';
+    case 'serial':
+      return 'Serial';
+    case 'lot_serial':
+      return 'Lot + Serial';
+    default:
+      return value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+}
+
 export const PurchaseOrderItemSelector = forwardRef<HTMLButtonElement, PurchaseOrderItemSelectorProps>(
   ({ fieldKeys, params, ...props }, ref) => (
     <Select
@@ -50,6 +68,7 @@ export const PurchaseOrderItemSelector = forwardRef<HTMLButtonElement, PurchaseO
       optionsEndpoint="commerce-api/purchase-order-items/select"
       params={params}
       transformLabel={defaultTransformLabel}
+      transformDescription={defaultTransformDescription}
       {...props}
       fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
     />
