@@ -58,7 +58,13 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
         )}
 
         <div className="flex min-h-9 items-center justify-between gap-3">
-          <p id={`${fieldId}-description`} className="text-sm text-muted-foreground leading-normal">{description}</p>
+          <label
+            htmlFor={fieldId}
+            id={`${fieldId}-description`}
+            className="text-sm text-muted-foreground leading-normal cursor-pointer"
+          >
+            {description}
+          </label>
           <ShadcnSwitch
             {...props}
             ref={ref}
