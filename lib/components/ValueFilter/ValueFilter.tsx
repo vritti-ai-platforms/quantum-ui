@@ -1,4 +1,4 @@
-import { ChevronDownIcon, X } from 'lucide-react';
+import { ChevronDown, ChevronDownIcon, ChevronUp, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
@@ -146,18 +146,72 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
           </Select>
         </div>
         <div className="space-y-3 px-4 py-4">
-          <Input
-            type={fieldType === 'number' ? 'number' : 'text'}
-            placeholder={`Enter ${label.toLowerCase()}...`}
-            value={draftValue}
-            onChange={(e) => setDraftValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleApply();
-              }
-            }}
-          />
+          <div className="relative">
+            <Input
+              type="text"
+              inputMode={fieldType === 'number' ? 'decimal' : undefined}
+              pattern={fieldType === 'number' ? '^[0-9]*\\.?[0-9]*$' : undefined}
+              placeholder={`Enter ${label.toLowerCase()}...`}
+              value={draftValue}
+              className={fieldType === 'number' ? 'pr-8' : undefined}
+              onChange={(e) => {
+                if (fieldType === 'number') {
+                  const filtered = e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+                  setDraftValue(filtered);
+                } else {
+                  setDraftValue(e.target.value);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleApply();
+                  return;
+                }
+                if (fieldType === 'number') {
+                  if (e.key === '-' || e.key === 'e') {
+                    e.preventDefault();
+                    return;
+                  }
+                  if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) + 1)));
+                    return;
+                  }
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) - 1)));
+                  }
+                }
+              }}
+            />
+            {fieldType === 'number' && (
+              <div className="absolute inset-y-0 right-1.5 flex items-center">
+                <div className="flex h-7 w-4 flex-col overflow-hidden rounded-sm border border-border bg-background">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="flex h-1/2 items-center justify-center border-b border-border text-muted-foreground hover:bg-accent"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) + 1)))}
+                    aria-label="Increase value"
+                  >
+                    <ChevronUp className="size-2.5" />
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="flex h-1/2 items-center justify-center text-muted-foreground hover:bg-accent"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) - 1)))}
+                    aria-label="Decrease value"
+                  >
+                    <ChevronDown className="size-2.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={handleClear}>

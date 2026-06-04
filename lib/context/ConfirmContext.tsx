@@ -1,6 +1,13 @@
-import { createContext, type ReactNode, useCallback, useRef, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
+import type { DialogHandle } from '../hooks/useDialog';
+
+export interface ConfirmAlert {
+  type: 'default' | 'destructive' | 'warning' | 'success' | 'info';
+  text: string;
+}
 
 // All fields optional — every one has a built-in default
 export interface ConfirmOptions {
@@ -9,10 +16,20 @@ export interface ConfirmOptions {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'default' | 'destructive';
+  alert?: ConfirmAlert;
+}
+
+interface ResolvedConfirmOptions {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  variant: 'default' | 'destructive';
+  alert?: ConfirmAlert;
 }
 
 // Built-in defaults — used when neither the provider nor the caller provides a value
-const DEFAULT_CONFIRM_OPTIONS: Required<ConfirmOptions> = {
+const DEFAULT_CONFIRM_OPTIONS: ResolvedConfirmOptions = {
   title: 'Are you sure?',
   description: '',
   confirmLabel: 'Confirm',
@@ -35,7 +52,7 @@ export interface ConfirmProviderProps {
 
 // Renders a shared confirm dialog and exposes the imperative confirm() function
 export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderProps) => {
-  const [state, setState] = useState<{ open: boolean; options: Required<ConfirmOptions> }>({
+  const [state, setState] = useState<{ open: boolean; options: ResolvedConfirmOptions }>({
     open: false,
     options: DEFAULT_CONFIRM_OPTIONS,
   });
@@ -57,17 +74,30 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
     [defaultOptions],
   );
 
+  const handleCancel = useCallback(() => {
+    resolverRef.current?.(false);
+    resolverRef.current = null;
+    setState((prev) => ({ ...prev, open: false }));
+  }, []);
+
   const handleConfirm = useCallback(() => {
     resolverRef.current?.(true);
     resolverRef.current = null;
     setState((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const handleCancel = useCallback(() => {
-    resolverRef.current?.(false);
-    resolverRef.current = null;
-    setState((prev) => ({ ...prev, open: false }));
-  }, []);
+  // Build a DialogHandle-compatible object for the Dialog component
+  const handle: DialogHandle = useMemo(
+    () => ({
+      isOpen: state.open,
+      open: () => setState((prev) => ({ ...prev, open: true })),
+      close: handleCancel,
+      onOpenChange: (val: boolean) => {
+        if (!val) handleCancel();
+      },
+    }),
+    [state.open, handleCancel],
+  );
 
   const { options } = state;
 
@@ -75,10 +105,7 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
       <Dialog
-        open={state.open}
-        onOpenChange={(open) => {
-          if (!open) handleCancel();
-        }}
+        handle={handle}
         title={options.title}
         description={options.description || undefined}
         footer={
@@ -91,7 +118,9 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
             </Button>
           </>
         }
-      />
+      >
+        {options.alert ? <Alert variant={options.alert.type} description={options.alert.text} /> : null}
+      </Dialog>
     </ConfirmContext.Provider>
   );
 };

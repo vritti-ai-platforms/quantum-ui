@@ -1,0 +1,528 @@
+import { TZDate, tz } from '@date-fns/tz';
+import {
+  min as earliestDate,
+  format,
+  getDaysInMonth,
+  isAfter,
+  isBefore,
+  isValid,
+  type Locale,
+  max as latestDate,
+  parse,
+  parseISO,
+  startOfDay,
+  startOfMonth,
+} from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import type React from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { Button } from '../../../shadcn/shadcnButton';
+import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
+import { Input } from '../../../shadcn/shadcnInput';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { useBUTimezone } from '../../hooks/useBUTimezone';
+import { useLocale } from '../../hooks/useLocale';
+import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
+
+type DateTimePickerValue = string | undefined;
+type DateParts = { day: string; month: string; year: string };
+
+const MANUAL_DATE = 'dd/MM/yyyy';
+const DEFAULT_DISPLAY = 'P p';
+const DEFAULT_TIME = '00:00';
+const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const objectWithHasOwn = Object as ObjectConstructor & { hasOwn(target: object, key: PropertyKey): boolean };
+
+const emptyParts = (): DateParts => ({ day: '', month: '', year: '' });
+const digits = (value: string, max: number) => value.replace(/\D/g, '').slice(0, max);
+const hasValueProp = (props: object, key: string) => objectWithHasOwn.hasOwn(props, key);
+const formatInTimeZone = (date: Date, pattern: string, timeZone: string, locale?: Locale) =>
+  format(date, pattern, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
+const parseDateTime = (value?: string) => {
+  if (!value) return undefined;
+  const next = parseISO(value);
+  return isValid(next) ? next : undefined;
+};
+const toParts = (date?: Date): DateParts =>
+  date
+    ? {
+        day: format(date, 'dd'),
+        month: format(date, 'MM'),
+        year: format(date, 'yyyy'),
+      }
+    : emptyParts();
+const toCalendarDate = (date: Date | undefined, timeZone: string): Date | undefined => {
+  if (!date) return undefined;
+
+  const year = Number(formatInTimeZone(date, 'yyyy', timeZone));
+  const month = Number(formatInTimeZone(date, 'MM', timeZone));
+  const day = Number(formatInTimeZone(date, 'dd', timeZone));
+
+  return new Date(year, month - 1, day);
+};
+const toDraftParts = (date: Date | undefined, timeZone: string) => toParts(toCalendarDate(date, timeZone));
+const toTime = (date: Date | undefined, timeZone: string) => (date ? formatInTimeZone(date, 'HH:mm', timeZone) : '');
+const toIso = (date?: Date) => (date ? date.toISOString() : undefined);
+
+const parseManualDate = ({ day, month, year }: DateParts) => {
+  if (day.length !== 2 || month.length !== 2 || year.length !== 4) return undefined;
+  const next = parse(`${day}/${month}/${year}`, MANUAL_DATE, new Date());
+  return isValid(next) && format(next, MANUAL_DATE) === `${day}/${month}/${year}` ? next : undefined;
+};
+
+const previewManualDate = (parts: DateParts, fallbackMonth: Date) => {
+  const year = parts.year ? Number(parts.year) : fallbackMonth.getFullYear();
+  const month = parts.month ? Number(parts.month) : fallbackMonth.getMonth() + 1;
+  const day = parts.day ? Number(parts.day) : Number.NaN;
+
+  if (!Number.isInteger(year) || year < 1 || !Number.isInteger(month) || month < 1 || month > 12) return undefined;
+  if (!Number.isInteger(day) || day < 1) return undefined;
+
+  const maxDay = getDaysInMonth(new Date(year, month - 1, 1));
+  if (day > maxDay) return undefined;
+
+  const next = new Date(year, month - 1, day);
+  return isValid(next) ? next : undefined;
+};
+
+const withTime = (date: Date, time: string, timeZone: string) => {
+  const [hours, minutes] = TIME_PATTERN.test(time) ? time.split(':').map(Number) : [0, 0];
+  const zonedDateTime = TZDate.tz(timeZone, date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0, 0);
+  return new Date(zonedDateTime.getTime());
+};
+
+const latest = (dates: Array<Date | undefined>) => {
+  const values = dates.filter((value): value is Date => !!value);
+  return values.length > 0 ? latestDate(values) : undefined;
+};
+
+const earliest = (dates: Array<Date | undefined>) => {
+  const values = dates.filter((value): value is Date => !!value);
+  return values.length > 0 ? earliestDate(values) : undefined;
+};
+
+const isWithinDayBounds = (date: Date, minDay?: Date, maxDay?: Date) =>
+  (!minDay || !isBefore(startOfDay(date), minDay)) && (!maxDay || !isAfter(startOfDay(date), maxDay));
+
+const isWithinDateTimeBounds = (date: Date, minDateTime?: Date, maxDateTime?: Date) =>
+  (!minDateTime || !isBefore(date, minDateTime)) && (!maxDateTime || !isAfter(date, maxDateTime));
+
+const coerceWithinDateTimeBounds = (
+  date: Date | undefined,
+  minDay: Date | undefined,
+  maxDay: Date | undefined,
+  minDateTime: Date | undefined,
+  maxDateTime: Date | undefined,
+  timeZone: string,
+) =>
+  date &&
+  isWithinDayBounds(toCalendarDate(date, timeZone) ?? date, minDay, maxDay) &&
+  isWithinDateTimeBounds(date, minDateTime, maxDateTime)
+    ? date
+    : undefined;
+
+const visibleMonthFromParts = (parts: DateParts, fallbackMonth: Date) => {
+  const hasYear = parts.year.length === 4;
+  const hasMonth = parts.month.length > 0;
+
+  if (!hasYear && !hasMonth) return fallbackMonth;
+
+  const year = hasYear ? Number(parts.year) : fallbackMonth.getFullYear();
+  const month = hasMonth ? Number(parts.month) : fallbackMonth.getMonth() + 1;
+
+  if (!Number.isInteger(year) || year < 1 || year > 9999) return fallbackMonth;
+  if (!Number.isInteger(month) || month < 1 || month > 12) return new Date(year, fallbackMonth.getMonth(), 1);
+
+  return new Date(year, month - 1, 1);
+};
+
+const clampMonth = (month: Date, minDay?: Date, maxDay?: Date) => {
+  const monthStart = startOfMonth(month);
+  const minMonth = minDay ? startOfMonth(minDay) : undefined;
+  const maxMonth = maxDay ? startOfMonth(maxDay) : undefined;
+
+  if (minMonth && minDay && isBefore(monthStart, minMonth)) return minDay;
+  if (maxMonth && maxDay && isAfter(monthStart, maxMonth)) return maxDay;
+  return month;
+};
+
+const maxDayForParts = (parts: DateParts, fallbackMonth: Date) => {
+  const year = parts.year.length === 4 ? Number(parts.year) : fallbackMonth.getFullYear();
+  const month = parts.month.length > 0 ? Number(parts.month) - 1 : fallbackMonth.getMonth();
+  const safeMonth = month >= 0 && month < 12 ? month : fallbackMonth.getMonth();
+  return getDaysInMonth(new Date(year, safeMonth, 1));
+};
+
+const mergeDisabledMatchers = (
+  disabled: CalendarProps['disabled'],
+  minDay?: Date,
+  maxDay?: Date,
+): CalendarProps['disabled'] => {
+  const matchers = disabled ? (Array.isArray(disabled) ? [...disabled] : [disabled]) : [];
+  if (minDay) matchers.push({ before: minDay });
+  if (maxDay) matchers.push({ after: maxDay });
+  return matchers.length > 0 ? matchers : undefined;
+};
+
+export interface DateTimePickerProps {
+  name?: string;
+  label?: string;
+  description?: React.ReactNode;
+  error?: string;
+  placeholder?: string;
+  value?: DateTimePickerValue;
+  onValueChange?: (value: string | undefined) => void;
+  onChange?: (value: string | undefined) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  calendarProps?: CalendarProps;
+  className?: string;
+  id?: string;
+  onBlur?: () => void;
+  disabled?: boolean;
+  displayFormat?: string;
+  minDate?: Date;
+  maxDate?: Date;
+  minDateTime?: string;
+  maxDateTime?: string;
+}
+
+export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>((rawProps, ref) => {
+  const controlled = hasValueProp(rawProps, 'value');
+  const openControlled = hasValueProp(rawProps, 'open');
+  const {
+    label,
+    description,
+    error,
+    placeholder = 'Select date and time',
+    value,
+    onValueChange,
+    onChange,
+    open: openProp,
+    onOpenChange,
+    calendarProps,
+    className,
+    id,
+    onBlur,
+    disabled,
+    displayFormat = DEFAULT_DISPLAY,
+    minDate,
+    maxDate,
+    minDateTime,
+    maxDateTime,
+    ...props
+  } = rawProps;
+
+  const locale = useLocale();
+  const timeZone = useBUTimezone() ?? 'UTC';
+  const parsedValue = parseDateTime(value);
+  const minDateTimeValue = parseDateTime(minDateTime);
+  const maxDateTimeValue = parseDateTime(maxDateTime);
+  const minDay = latest([minDate ? startOfDay(minDate) : undefined, toCalendarDate(minDateTimeValue, timeZone)]);
+  const maxDay = earliest([maxDate ? startOfDay(maxDate) : undefined, toCalendarDate(maxDateTimeValue, timeZone)]);
+  const {
+    mode: _calendarMode,
+    month: _calendarMonth,
+    onMonthChange: calendarOnMonthChange,
+    startMonth: calendarStartMonth,
+    endMonth: calendarEndMonth,
+    disabled: calendarDisabledProp,
+    captionLayout: _calendarCaptionLayout,
+    ...calendarRestProps
+  } = calendarProps ?? {};
+
+  const [localValue, setLocalValue] = useState<Date | undefined>(() =>
+    coerceWithinDateTimeBounds(parsedValue, minDay, maxDay, minDateTimeValue, maxDateTimeValue, timeZone),
+  );
+  const [openState, setOpenState] = useState(false);
+  const [month, setMonth] = useState<Date>(() =>
+    clampMonth(toCalendarDate(parsedValue, timeZone) ?? minDay ?? maxDay ?? new Date(), minDay, maxDay),
+  );
+  const [draftParts, setDraftParts] = useState<DateParts>(() => toDraftParts(parsedValue, timeZone));
+  const [draftTime, setDraftTime] = useState(() => toTime(parsedValue, timeZone));
+  const lastInvalidTimeRef = useRef<number | null>(null);
+
+  const rawSelected = controlled ? parsedValue : localValue;
+  const selected = coerceWithinDateTimeBounds(
+    rawSelected,
+    minDay,
+    maxDay,
+    minDateTimeValue,
+    maxDateTimeValue,
+    timeZone,
+  );
+  const selectedCalendarDate = toCalendarDate(selected, timeZone);
+  const rawSelectedTime = rawSelected?.getTime() ?? null;
+  const minDayTime = minDay?.getTime() ?? null;
+  const maxDayTime = maxDay?.getTime() ?? null;
+  const selectedTime = selected?.getTime() ?? null;
+  const selectedPreview = previewManualDate(draftParts, month);
+  const calendarSelected =
+    selectedPreview && isWithinDayBounds(selectedPreview, minDay, maxDay) ? selectedPreview : selectedCalendarDate;
+  const activeDate = calendarSelected;
+  const inputId = id ?? props.name ?? 'date-time';
+  const startMonth = latest([minDay, calendarStartMonth]);
+  const endMonth = earliest([maxDay, calendarEndMonth]);
+  const calendarDisabled = mergeDisabledMatchers(calendarDisabledProp, minDay, maxDay);
+  const isOpen = openControlled ? openProp : openState;
+  const setOpen = openControlled ? (onOpenChange ?? (() => {})) : setOpenState;
+
+  const syncDraftFromDate = (next?: Date) => {
+    const nextCalendarDate = toCalendarDate(next, timeZone);
+    setDraftParts(toDraftParts(next, timeZone));
+    setDraftTime(toTime(next, timeZone));
+    setMonth((currentMonth) => (nextCalendarDate ? nextCalendarDate : clampMonth(currentMonth, minDay, maxDay)));
+  };
+
+  useEffect(() => {
+    if (!controlled && selectedTime === null) return;
+
+    const next = selectedTime === null ? undefined : new Date(selectedTime);
+    const nextMinDay = minDayTime === null ? undefined : new Date(minDayTime);
+    const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
+    const nextCalendarDate = toCalendarDate(next, timeZone);
+
+    setDraftParts(toDraftParts(next, timeZone));
+    setDraftTime(toTime(next, timeZone));
+    setMonth((currentMonth) =>
+      nextCalendarDate ? nextCalendarDate : clampMonth(currentMonth, nextMinDay, nextMaxDay),
+    );
+  }, [controlled, selectedTime, minDayTime, maxDayTime, timeZone]);
+
+  useEffect(() => {
+    if (rawSelectedTime === null || selectedTime !== null) {
+      lastInvalidTimeRef.current = null;
+      return;
+    }
+    if (lastInvalidTimeRef.current === rawSelectedTime) return;
+
+    lastInvalidTimeRef.current = rawSelectedTime;
+
+    if (!controlled) setLocalValue(undefined);
+    setDraftParts(emptyParts());
+    setDraftTime('');
+
+    const nextMinDay = minDayTime === null ? undefined : new Date(minDayTime);
+    const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
+    setMonth((currentMonth) => clampMonth(currentMonth, nextMinDay, nextMaxDay));
+
+    onValueChange?.(undefined);
+    onChange?.(undefined);
+  }, [controlled, rawSelectedTime, selectedTime, minDayTime, maxDayTime, onValueChange, onChange]);
+
+  const emit = (next?: Date) => {
+    const iso = toIso(next);
+    onValueChange?.(iso);
+    onChange?.(iso);
+  };
+
+  const commit = (next?: Date) => {
+    if (!controlled) setLocalValue(next);
+    syncDraftFromDate(next);
+    emit(next);
+  };
+
+  const updateDraftDate = (nextParts: DateParts) => {
+    setDraftParts(nextParts);
+
+    const nextMonth = clampMonth(visibleMonthFromParts(nextParts, month), minDay, maxDay);
+    if (nextMonth.getTime() !== month.getTime()) setMonth(nextMonth);
+
+    if (!nextParts.day && !nextParts.month && !nextParts.year) {
+      commit(undefined);
+      return;
+    }
+
+    const parsedDate = parseManualDate(nextParts);
+    if (!parsedDate || !isWithinDayBounds(parsedDate, minDay, maxDay)) return;
+
+    const nextDateTime = withTime(parsedDate, draftTime || DEFAULT_TIME, timeZone);
+    if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
+
+    commit(nextDateTime);
+  };
+
+  return (
+    <Field data-disabled={disabled}>
+      {label && <FieldLabel htmlFor={inputId}>{label}</FieldLabel>}
+      <div className="relative">
+        <Input
+          ref={ref}
+          id={inputId}
+          value={selected ? formatInTimeZone(selected, displayFormat, timeZone, locale) : ''}
+          disabled={disabled}
+          readOnly
+          aria-invalid={!!error}
+          placeholder={placeholder}
+          className={`pr-10 ${className ?? ''}`.trim()}
+          onClick={() => !disabled && setOpen(true)}
+          onBlur={() => onBlur?.()}
+          onKeyDown={(e) => {
+            if (e.key !== 'ArrowDown') return;
+            e.preventDefault();
+            setOpen(true);
+          }}
+          {...props}
+        />
+        <div className="absolute inset-y-0 right-1 flex items-center">
+          <Popover open={isOpen} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Select date and time"
+                disabled={disabled}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <CalendarIcon />
+                <span className="sr-only">Select date and time</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="end" sideOffset={10}>
+              <div className="border-b p-2">
+                <div className="flex items-center justify-center">
+                  <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
+                    <Input
+                      value={draftParts.day}
+                      placeholder="DD"
+                      inputMode="numeric"
+                      maxLength={2}
+                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => {
+                        const day = digits(e.target.value, 2);
+                        if (day === '00') return;
+                        if (day.length === 2) {
+                          const nextDay = Number(day);
+                          if (nextDay < 1 || nextDay > maxDayForParts(draftParts, month)) return;
+                        }
+                        updateDraftDate({ ...draftParts, day });
+                      }}
+                    />
+                    <Input
+                      value={draftParts.month}
+                      placeholder="MM"
+                      inputMode="numeric"
+                      maxLength={2}
+                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => {
+                        const monthValue = digits(e.target.value, 2);
+                        if (monthValue === '00') return;
+                        if (monthValue.length === 2) {
+                          const nextMonth = Number(monthValue);
+                          if (nextMonth < 1 || nextMonth > 12) return;
+                        }
+
+                        let day = draftParts.day;
+                        if (day.length === 2) {
+                          const cappedDay = Math.min(
+                            Number(day),
+                            maxDayForParts({ ...draftParts, month: monthValue }, month),
+                          );
+                          day = String(cappedDay).padStart(2, '0');
+                        }
+
+                        updateDraftDate({ ...draftParts, day, month: monthValue });
+                      }}
+                    />
+                    <Input
+                      value={draftParts.year}
+                      placeholder="YYYY"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => updateDraftDate({ ...draftParts, year: digits(e.target.value, 4) })}
+                      onKeyDown={(e) => {
+                        if (e.key !== 'Enter') return;
+                        e.preventDefault();
+                        updateDraftDate(draftParts);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <Calendar
+                {...calendarRestProps}
+                locale={locale}
+                mode="single"
+                captionLayout="label"
+                startMonth={startMonth}
+                endMonth={endMonth}
+                disabled={calendarDisabled}
+                month={month}
+                onMonthChange={(nextMonth) => {
+                  const safeMonth = clampMonth(nextMonth, minDay, maxDay);
+                  setMonth(safeMonth);
+                  setDraftParts((current) => ({
+                    ...current,
+                    month: format(safeMonth, 'MM'),
+                    year: format(safeMonth, 'yyyy'),
+                  }));
+                  calendarOnMonthChange?.(safeMonth);
+                }}
+                selected={calendarSelected}
+                onSelect={(next) => {
+                  if (!next) {
+                    commit(undefined);
+                    return;
+                  }
+                  if (!isWithinDayBounds(next, minDay, maxDay)) return;
+
+                  setMonth(next);
+                  setDraftParts(toParts(next));
+
+                  const nextDateTime = withTime(next, draftTime || DEFAULT_TIME, timeZone);
+                  if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
+
+                  commit(nextDateTime);
+                  onBlur?.();
+                }}
+              />
+              <div className="border-t p-2">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">Time</span>
+                  <Input
+                    type="time"
+                    step={60}
+                    value={draftTime}
+                    disabled={disabled || !activeDate}
+                    className="h-7 w-[112px] appearance-none pr-2 [color-scheme:light] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-clear-button]:hidden [&::-webkit-inner-spin-button]:hidden"
+                    onChange={(e) => {
+                      const nextTime = e.target.value;
+                      setDraftTime(nextTime);
+
+                      if (!activeDate || !TIME_PATTERN.test(nextTime)) return;
+
+                      const nextDateTime = withTime(activeDate, nextTime, timeZone);
+                      if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
+
+                      commit(nextDateTime);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter') return;
+                      e.preventDefault();
+
+                      if (activeDate && TIME_PATTERN.test(draftTime)) {
+                        const nextDateTime = withTime(activeDate, draftTime, timeZone);
+                        if (isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) {
+                          commit(nextDateTime);
+                        }
+                      }
+
+                      onBlur?.();
+                      setOpen(false);
+                    }}
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+      {description && !error && <FieldDescription>{description}</FieldDescription>}
+      {error && <FieldError>{error}</FieldError>}
+    </Field>
+  );
+});
+
+DateTimePicker.displayName = 'DateTimePicker';

@@ -5,6 +5,7 @@ export {
   ConfirmProvider,
   type ConfirmProviderProps,
 } from './ConfirmContext';
+export { type LayoutMode, LayoutModeProvider, useLayoutMode } from './LayoutModeContext';
 export {
   ThemeContext,
   type ThemeContextValue,

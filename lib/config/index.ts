@@ -71,6 +71,11 @@ export interface AxiosConfig {
    * Default headers to include in all requests
    */
   headers?: Record<string, string>;
+
+  /**
+   * Custom request interceptor — called before every request to add dynamic headers or modify config
+   */
+  onRequest?: (config: import('axios').InternalAxiosRequestConfig) => void | Promise<void>;
 }
 
 /**
@@ -91,13 +96,13 @@ export interface AuthConfig {
 
   /**
    * Endpoint for session recovery from httpOnly cookie
-   * @default 'cloud-api/auth/token'
+   * @default 'auth/access-token'
    */
   tokenEndpoint: string;
 
   /**
    * Endpoint for token refresh
-   * @default 'cloud-api/auth/refresh'
+   * @default 'auth/refresh-tokens'
    */
   refreshEndpoint: string;
 
@@ -124,6 +129,26 @@ export interface ViewsConfig {
 }
 
 /**
+ * Time zone resolution configuration
+ */
+export interface TimeZoneConfig {
+  /**
+   * Custom resolver for the active application time zone
+   */
+  resolveTimeZone?: () => string | null | undefined;
+}
+
+/**
+ * Currency resolution configuration
+ */
+export interface CurrencyConfig {
+  /**
+   * Custom resolver for the active application currency (ISO 4217)
+   */
+  resolveCurrency?: () => string | null | undefined;
+}
+
+/**
  * Complete quantum-ui configuration interface
  */
 export interface QuantumUIConfig {
@@ -143,6 +168,16 @@ export interface QuantumUIConfig {
   auth?: Partial<AuthConfig>;
 
   /**
+   * Time zone resolution configuration
+   */
+  timeZone?: TimeZoneConfig;
+
+  /**
+   * Currency resolution configuration
+   */
+  currency?: CurrencyConfig;
+
+  /**
    * Table views management configuration
    */
   views: ViewsConfig;
@@ -151,12 +186,14 @@ export interface QuantumUIConfig {
 /**
  * Default configuration values
  */
-const defaultConfig: Required<{
+const defaultConfig: {
   csrf: CsrfConfig;
   axios: AxiosConfig;
   auth: AuthConfig;
   views: Required<ViewsConfig>;
-}> = {
+  timeZone: TimeZoneConfig;
+  currency: CurrencyConfig;
+} = {
   csrf: {
     endpoint: 'csrf/token',
     enabled: true,
@@ -174,9 +211,15 @@ const defaultConfig: Required<{
   auth: {
     tokenHeaderName: 'Authorization',
     tokenPrefix: 'Bearer',
-    tokenEndpoint: 'cloud-api/auth/token',
-    refreshEndpoint: 'cloud-api/auth/refresh',
+    tokenEndpoint: 'auth/access-token',
+    refreshEndpoint: 'auth/refresh-tokens',
     sessionRecoveryEnabled: true,
+  },
+  timeZone: {
+    resolveTimeZone: undefined,
+  },
+  currency: {
+    resolveCurrency: undefined,
   },
   views: {
     viewsEndpoint: 'table-views',
@@ -265,6 +308,14 @@ export function configureQuantumUI(userConfig: QuantumUIConfig): void {
     auth: {
       ...defaultConfig.auth,
       ...(userConfig.auth || {}),
+    },
+    timeZone: {
+      ...defaultConfig.timeZone,
+      ...(userConfig.timeZone || {}),
+    },
+    currency: {
+      ...defaultConfig.currency,
+      ...(userConfig.currency || {}),
     },
     views: {
       ...defaultConfig.views,

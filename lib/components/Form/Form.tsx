@@ -16,9 +16,13 @@ import { type FieldMapping, mapApiErrorsToForm } from '../../utils/formHelpers';
 import { Alert } from '../Alert';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
+import { CheckboxGroup } from '../CheckboxGroup';
+import { DatePicker } from '../DatePicker';
+import { DateTimePicker } from '../DateTimePicker';
 import { PhoneField } from '../PhoneField';
 import { RadioGroup } from '../RadioGroup';
 import { Switch } from '../Switch';
+import { UploadFile } from '../UploadFile';
 
 // Re-export Controller for explicit usage
 export { Controller } from 'react-hook-form';
@@ -36,6 +40,8 @@ function processChildren<
   control: ControllerProps<TFieldValues, FieldPath<TFieldValues>, TTransformedValues>['control'],
   isSubmitting: boolean,
   setValue: UseFormReturn<TFieldValues, _TContext, TTransformedValues>['setValue'],
+  onCancel?: () => void,
+  reset?: UseFormReturn<TFieldValues, _TContext, TTransformedValues>['reset'],
 ): React.ReactNode {
   return Children.map(children, (child) => {
     // Handle non-element children (strings, numbers, null, etc.)
@@ -56,11 +62,14 @@ function processChildren<
           control={control}
           name={name}
           render={({ field, fieldState }) => {
-            // Check if this is a Checkbox, Switch, or RadioGroup component
+            // Check if this is a Checkbox, Switch, RadioGroup, or CheckboxGroup component
             const isCheckbox = child.type === Checkbox;
             const isSwitch = child.type === Switch;
             const isRadioGroup = child.type === RadioGroup;
+            const isCheckboxGroup = child.type === CheckboxGroup;
             const isPhone = child.type === PhoneField;
+            const isDatePicker = child.type === DatePicker;
+            const isDateTimePicker = child.type === DateTimePicker;
 
             const fieldProps =
               isCheckbox || isSwitch
@@ -70,30 +79,58 @@ function processChildren<
                     onBlur: field.onBlur,
                     ref: field.ref,
                   }
-                : isRadioGroup
+                : isRadioGroup || isCheckboxGroup
                   ? {
                       value: field.value,
                       onValueChange: field.onChange,
                       onBlur: field.onBlur,
                     }
-                  : isPhone
+                  : isDatePicker
                     ? {
-                        ...field,
-                        onCountryChange: (country: Country | undefined) => {
-                          setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
-                        },
+                        value: field.value,
+                        onValueChange: field.onChange,
+                        onBlur: field.onBlur,
+                        ref: field.ref,
                       }
-                    : field;
+                    : isDateTimePicker
+                      ? {
+                          value: field.value,
+                          onValueChange: field.onChange,
+                          onBlur: field.onBlur,
+                          ref: field.ref,
+                        }
+                      : isPhone
+                        ? {
+                            ...field,
+                            onCountryChange: (country: Country | undefined) => {
+                              setValue(`${name}Country` as FieldPath<TFieldValues>, country as any);
+                            },
+                          }
+                        : field;
+
+            const isUploadFile = child.type === UploadFile;
 
             return cloneElement(child, {
               ...childProps,
               ...fieldProps,
               error: fieldState.error?.message || (fieldState.error ? 'Invalid' : undefined),
               name: undefined, // Remove name to avoid passing it to the underlying input
+              ...(isUploadFile ? { isLoading: isSubmitting } : {}),
             });
           }}
         />
       );
+    }
+
+    // Handle cancel buttons - wire up form.reset() + onCancel callback
+    if (childProps['data-cancel'] && onCancel && reset) {
+      return cloneElement(child, {
+        ...childProps,
+        onClick: () => {
+          reset();
+          onCancel();
+        },
+      });
     }
 
     // Handle submit buttons - inject loading state via isLoading prop
@@ -111,14 +148,14 @@ function processChildren<
 
     // Handle React Fragments - process their children directly
     if (isFragment) {
-      return processChildren(childProps.children, control, isSubmitting, setValue);
+      return processChildren(childProps.children, control, isSubmitting, setValue, onCancel, reset);
     }
 
     // Recurse into children for container elements (divs, FieldGroups, etc.)
     if (childProps.children != null) {
       return cloneElement(child, {
         ...childProps,
-        children: processChildren(childProps.children, control, isSubmitting, setValue),
+        children: processChildren(childProps.children, control, isSubmitting, setValue, onCancel, reset),
       });
     }
 
@@ -150,12 +187,6 @@ export interface FormProps<
    * Children elements - automatically wrapped with Controller if they have a name prop
    */
   children: React.ReactNode;
-
-  /**
-   * Whether to automatically display root errors
-   * @default true
-   */
-  showRootError?: boolean;
 
   /**
    * Position of the root error display
@@ -196,6 +227,19 @@ export interface FormProps<
   transformSubmit?: (
     data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues,
   ) => TMutationVariables;
+
+  /**
+   * Automatically calls form.reset() after a successful mutation.
+   * Set to false for "edit" forms where resetting clears pre-populated values.
+   * @default true
+   */
+  resetOnSuccess?: boolean;
+
+  /**
+   * Called when a cancel button (marked with data-cancel) is clicked.
+   * Form.reset() is called automatically before invoking this callback.
+   */
+  onCancel?: () => void;
 }
 
 /**
@@ -239,13 +283,14 @@ export function Form<
   form,
   onSubmit,
   children,
-  showRootError = false,
   rootErrorPosition = 'bottom',
   rootErrorClassName,
   rootErrorAction,
   fieldMapping,
   mutation,
   transformSubmit,
+  resetOnSuccess,
+  onCancel,
   className,
   ...props
 }: FormProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
@@ -270,12 +315,14 @@ export function Form<
         } else if (onSubmit) {
           await onSubmit(data as any);
         }
+
+        // Reset form after successful submission (default: true)
+        if (resetOnSuccess !== false) form.reset();
       } catch (error) {
         // Form's only job: map API errors to form fields
         // mapApiErrorsToForm handles axios error structure extraction internally
         mapApiErrorsToForm(error, form as any, {
           fieldMapping,
-          setRootError: showRootError,
         });
         // Log error for debugging
         console.error('[Form Submission Error]', error);
@@ -284,19 +331,19 @@ export function Form<
         axios.interceptors.request.eject(interceptorId);
       }
     },
-    [onSubmit, mutation, transformSubmit, fieldMapping, form, showRootError],
+    [onSubmit, mutation, transformSubmit, fieldMapping, form, resetOnSuccess],
   );
 
   const handleSubmit = form.handleSubmit(wrappedOnSubmit as any);
 
   // Process children recursively to automatically wrap with Controller
-  const processedChildren = processChildren(children, form.control, isSubmitting, form.setValue);
+  const processedChildren = processChildren(children, form.control, isSubmitting, form.setValue, onCancel, form.reset);
 
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit} className={cn('space-y-4', className)} {...props}>
         {/* Top position error */}
-        {showRootError && rootErrorPosition === 'top' && form.formState.errors.root && (
+        {rootErrorPosition === 'top' && form.formState.errors.root && (
           <Alert
             variant="destructive"
             title={form.formState.errors.root.type || 'Error'}
@@ -309,7 +356,7 @@ export function Form<
         {processedChildren}
 
         {/* Bottom position error */}
-        {showRootError && rootErrorPosition === 'bottom' && form.formState.errors.root && (
+        {rootErrorPosition === 'bottom' && form.formState.errors.root && (
           <Alert
             variant="destructive"
             title={form.formState.errors.root.type || 'Error'}

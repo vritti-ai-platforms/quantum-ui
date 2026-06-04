@@ -1,39 +1,26 @@
 import { forwardRef } from 'react';
-import { SelectFilter } from '../../components/Select/SelectFilter';
-import type { FilterResult, SelectValue } from '../../components/Select/types';
+import { SelectFilter, type SelectFilterProps } from '../../components/Select/SelectFilter';
 import { CURRENCIES } from './currencies';
 
-export interface CurrencyFilterProps {
-  field?: string;
+export type CurrencyFilterProps = Omit<SelectFilterProps, 'options' | 'name'> & {
   name?: string;
-  label?: string;
-  placeholder?: string;
-  value?: FilterResult | SelectValue;
-  onChange?: (result: FilterResult | null | undefined) => void;
-  operator?: string;
-  onOperatorChange?: (operator: string) => void;
-  onBlur?: () => void;
-  disabled?: boolean;
-  required?: boolean;
-  className?: string;
-  id?: string;
-}
+  excludeCodes?: string[];
+};
 
 // Pre-configured SelectFilter for currency filtering with static local options
 export const CurrencyFilter = Object.assign(
-  forwardRef<HTMLButtonElement, CurrencyFilterProps>(
-    ({ field = 'currency', label = 'Currency', placeholder = 'Select currency', name, ...props }, ref) => (
+  forwardRef<HTMLButtonElement, CurrencyFilterProps>(({ excludeCodes, ...props }, ref) => {
+    const options = excludeCodes?.length ? CURRENCIES.filter((c) => !excludeCodes.includes(String(c.value))) : CURRENCIES;
+    return (
       <SelectFilter
         ref={ref}
-        field={field}
-        name={name ?? field}
-        label={label}
-        placeholder={placeholder}
-        options={CURRENCIES}
-        multiple={false}
+        name="currency"
+        label="Currency"
+        placeholder="Select currency"
+        options={options}
         {...props}
       />
-    ),
-  ),
-  { displayName: 'CurrencyFilter', defaultLabel: 'Currency' },
+    );
+  }),
+  { displayName: 'CurrencyFilter', defaultLabel: 'Currency', defaultName: 'currency' },
 );

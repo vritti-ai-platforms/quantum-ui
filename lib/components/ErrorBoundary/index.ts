@@ -1,6 +1,8 @@
 export { QueryErrorBoundary, QueryErrorFallback } from './ErrorBoundary';
 export {
   ErrorPage,
+  type ErrorPagePreset,
+  type ErrorScreenKey,
   ForbiddenErrorPage,
   getErrorPagePreset,
   NetworkErrorPage,
@@ -9,6 +11,4 @@ export {
   ServerErrorPage,
   UnauthorizedErrorPage,
   UnknownErrorPage,
-  type ErrorPagePreset,
-  type ErrorScreenKey,
 } from './ErrorPage';

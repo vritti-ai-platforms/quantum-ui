@@ -74,7 +74,7 @@ function SingleSelectContent({ className, children, align = 'start', ...props }:
     <PopoverContent
       data-slot="single-select-content"
       align={align}
-      className={cn('w-[var(--radix-popover-trigger-width)] p-0', className)}
+      className={cn('w-auto min-w-[var(--radix-popover-trigger-width)] p-0', className)}
       {...props}
     >
       {children}
@@ -191,7 +191,8 @@ const SingleSelectRow = memo(function SingleSelectRow({
       aria-disabled={disabled}
       tabIndex={disabled ? undefined : 0}
       className={cn(
-        'relative flex w-full cursor-default flex-col items-start rounded-md h-8 justify-center pr-8 px-2 text-sm outline-hidden select-none',
+        'relative flex w-full cursor-default flex-col items-start rounded-md pr-8 px-2 text-sm outline-hidden select-none',
+        description ? 'min-h-11 justify-center py-1.5' : 'h-8 justify-center',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -216,7 +217,12 @@ interface SingleSelectGroupProps extends React.ComponentProps<'div'> {
 
 function SingleSelectGroup({ className, children, ...props }: SingleSelectGroupProps) {
   return (
-    <div data-slot="single-select-group" role="group" className={cn(className)} {...props}>
+    <div
+      data-slot="single-select-group"
+      role="group"
+      className={cn('border-t border-border first:border-t-0 pt-1 mt-1 first:pt-0 first:mt-0', className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -231,7 +237,7 @@ function SingleSelectGroupLabel({ className, children, ...props }: SingleSelectG
   return (
     <div
       data-slot="single-select-group-label"
-      className={cn('text-muted-foreground px-2 py-1.5 text-xs', className)}
+      className={cn('text-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide', className)}
       {...props}
     >
       {children}

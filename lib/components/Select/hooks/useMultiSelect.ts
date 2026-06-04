@@ -105,6 +105,18 @@ export function useMultiSelect({
     [selectedValues, optionMap],
   );
 
+  // Fire onOptionsSelect once when all initial values resolve from the async option map.
+  const notifiedInitialRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (selectedValues.length === 0) return;
+    const allResolved = selectedValues.every((v) => optionMap.has(v));
+    if (!allResolved) return;
+    const key = [...selectedValues].sort().join(',');
+    if (notifiedInitialRef.current === key) return;
+    notifiedInitialRef.current = key;
+    onOptionsSelect?.(selectedOptions);
+  }, [selectedOptions, selectedValues, optionMap, onOptionsSelect]);
+
   // O(n + g) grouping — one pass over groups, one pass over options
   const grouped = useMemo(() => {
     if (!groups || groups.length === 0) return null;

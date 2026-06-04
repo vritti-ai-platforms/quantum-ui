@@ -9,12 +9,21 @@ export interface DangerZoneProps {
   buttonText: string;
   onClick: () => void;
   disabled?: boolean;
+  isLoading?: boolean;
   // When set, renders a warning alert below the action row
   warning?: string;
 }
 
 // Renders a destructive-bordered card with a warning heading, description, and action button
-export const DangerZone = ({ title, description, buttonText, onClick, disabled, warning }: DangerZoneProps) => {
+export const DangerZone = ({
+  title,
+  description,
+  buttonText,
+  onClick,
+  disabled,
+  isLoading,
+  warning,
+}: DangerZoneProps) => {
   return (
     <Card className="border-destructive/50">
       <CardHeader>
@@ -29,7 +38,7 @@ export const DangerZone = ({ title, description, buttonText, onClick, disabled, 
             <p className="text-sm font-medium">{title}</p>
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
-          <Button variant="destructive" size="sm" onClick={onClick} disabled={disabled}>
+          <Button variant="destructive" size="sm" onClick={onClick} disabled={disabled} isLoading={isLoading}>
             {buttonText}
           </Button>
         </div>

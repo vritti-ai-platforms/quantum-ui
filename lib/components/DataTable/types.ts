@@ -1,5 +1,5 @@
 import type { Row, Table } from '@tanstack/react-table';
-import type { DensityType, FilterCondition, SearchState } from '../../types/table-filter';
+import type { DensityType, FilterCondition, SearchState, TableViewState } from '../../types/table-filter';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
@@ -45,9 +45,29 @@ export interface DataTableMeta {
   density: DensityType;
   setDensity: (d: DensityType) => void;
   isViewDirty: boolean;
+  isFiltersDirty: boolean;
+  isSearchDirty: boolean;
+  activeViewState: TableViewState | null;
   setFilters: (filters: FilterCondition[]) => void;
   search: SearchState;
   setSearch: (search: SearchState) => void;
+}
+
+// --- Import/Export config ---
+
+export interface ImportExportColumn {
+  key: string;
+  label: string;
+}
+
+export interface ImportExportConfig<TData = unknown> {
+  columns: ImportExportColumn[];
+  sampleData?: Record<string, string>[];
+  importEndpoint: string;
+  exportEndpoint: string;
+  transformExportRow?: (row: TData) => Record<string, unknown>;
+  filename: string;
+  onSuccess?: () => void;
 }
 
 // --- DataTable component props ---
@@ -59,10 +79,13 @@ export interface DataTableProps<TData> {
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
-  onStatePush?: () => void;
   isLoading?: boolean;
-  maxHeight?: string;
-  minHeight?: string;
   className?: string;
   enableViews?: boolean;
+  importExport?: ImportExportConfig<TData>;
+  mode?: 'page' | 'tab' | 'compact';
+  // Fires when a non-actions cell in a row is clicked. Highlights the matching row.
+  onRowClick?: (row: TData) => void;
+  // Returns the id of the externally-selected row (rendered with the `selected` data-state).
+  selectedRowId?: string | null;
 }

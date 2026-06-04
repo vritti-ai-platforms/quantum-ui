@@ -17,33 +17,29 @@ import {
   DropdownMenuSubTrigger as ShadcnDropdownMenuSubTrigger,
   DropdownMenuTrigger as ShadcnDropdownMenuTrigger,
 } from '../../../shadcn/shadcnDropdownMenu';
+import type { DialogHandle } from '../../hooks/useDialog';
 import { Button } from '../Button';
 import { Dialog } from '../Dialog';
 import type { DialogMenuItem, DropdownMenuProps, MenuItem } from './types';
 
-// Export all primitive parts with proper aliases
-export const DropdownMenuRoot = ShadcnDropdownMenuRoot;
-export const DropdownMenuCheckboxItem = ShadcnDropdownMenuCheckboxItem;
-export const DropdownMenuContent = ShadcnDropdownMenuContent;
-export const DropdownMenuGroup = ShadcnDropdownMenuGroup;
-export const DropdownMenuItem = ShadcnDropdownMenuItem;
-export const DropdownMenuLabel = ShadcnDropdownMenuLabel;
-export const DropdownMenuPortal = ShadcnDropdownMenuPortal;
-export const DropdownMenuRadioGroup = ShadcnDropdownMenuRadioGroup;
-export const DropdownMenuRadioItem = ShadcnDropdownMenuRadioItem;
-export const DropdownMenuSeparator = ShadcnDropdownMenuSeparator;
-export const DropdownMenuShortcut = ShadcnDropdownMenuShortcut;
-export const DropdownMenuSub = ShadcnDropdownMenuSub;
-export const DropdownMenuSubContent = ShadcnDropdownMenuSubContent;
-export const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
-export const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
+const DropdownMenuRoot = ShadcnDropdownMenuRoot;
+const DropdownMenuCheckboxItem = ShadcnDropdownMenuCheckboxItem;
+const DropdownMenuContent = ShadcnDropdownMenuContent;
+const DropdownMenuGroup = ShadcnDropdownMenuGroup;
+const DropdownMenuItem = ShadcnDropdownMenuItem;
+const DropdownMenuLabel = ShadcnDropdownMenuLabel;
+const DropdownMenuPortal = ShadcnDropdownMenuPortal;
+const DropdownMenuRadioGroup = ShadcnDropdownMenuRadioGroup;
+const DropdownMenuRadioItem = ShadcnDropdownMenuRadioItem;
+const DropdownMenuSeparator = ShadcnDropdownMenuSeparator;
+const DropdownMenuShortcut = ShadcnDropdownMenuShortcut;
+const DropdownMenuSub = ShadcnDropdownMenuSub;
+const DropdownMenuSubContent = ShadcnDropdownMenuSubContent;
+const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
+const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
 
 // Renders a single menu item based on its type — supports nested submenus
-const renderMenuItem = (
-  item: MenuItem,
-  index: number,
-  onDialogSelect?: (id: string) => void,
-): React.ReactNode => {
+const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: string) => void): React.ReactNode => {
   switch (item.type) {
     case 'separator':
       return <DropdownMenuSeparator key={item.id ?? `separator-${index}`} />;
@@ -204,6 +200,7 @@ const renderMenuItem = (
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   trigger,
   items,
+  modal = false,
   contentClassName,
   align = 'end',
   side,
@@ -225,7 +222,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   return (
     <>
-      <DropdownMenuRoot>
+      <DropdownMenuRoot modal={modal}>
         <DropdownMenuTrigger asChild>
           {trigger.children ?? (
             <Button variant={trigger.variant} className={trigger.className}>
@@ -234,23 +231,40 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
             </Button>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent className={contentClassName} align={align} side={side}>
+        <DropdownMenuContent
+          className={contentClassName}
+          align={align}
+          side={side}
+          onCloseAutoFocus={(event) => {
+            if (!modal) {
+              event.preventDefault();
+            }
+          }}
+        >
           {items.map((item, index) => renderMenuItem(item, index, setActiveDialogId))}
         </DropdownMenuContent>
       </DropdownMenuRoot>
-      {dialogItems.map((item) => (
-        <Dialog
-          key={item.id}
-          open={activeDialogId === item.id}
-          onOpenChange={(open) => {
-            if (!open) setActiveDialogId(null);
-          }}
-          title={item.dialog.title}
-          description={item.dialog.description}
-          content={item.dialog.content}
-          footer={item.dialog.footer}
-        />
-      ))}
+      {dialogItems.map((item) => {
+        const handle: DialogHandle = {
+          isOpen: activeDialogId === item.id,
+          open: () => setActiveDialogId(item.id),
+          close: () => setActiveDialogId(null),
+          onOpenChange: (val) => {
+            if (!val) setActiveDialogId(null);
+          },
+        };
+        return (
+          <Dialog
+            key={item.id}
+            handle={handle}
+            title={item.dialog.title}
+            description={item.dialog.description}
+            badgeSlot={item.dialog.badgeSlot}
+            content={item.dialog.content}
+            footer={item.dialog.footer}
+          />
+        );
+      })}
     </>
   );
 };

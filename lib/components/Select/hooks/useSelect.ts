@@ -56,6 +56,10 @@ export function useSelect({
   useEffect(() => {
     if (!isAsync) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchQuery === '') {
+      setDebouncedSearch('');
+      return;
+    }
     debounceRef.current = setTimeout(() => {
       setDebouncedSearch(searchQuery);
     }, searchDebounceMs);
@@ -115,22 +119,38 @@ export function useSelect({
         .then((r) => r.data),
     getNextPageParam: (lastPage, _allPages, lastPageParam) => (lastPage.hasMore ? lastPageParam + limit : undefined),
     initialPageParam: 0,
-    enabled: isAsync && (enabled !== false),
-    placeholderData: keepPreviousData,
+    enabled: isAsync && enabled !== false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
-  // Merge: resolved selected first, then search results (Set-based dedup)
+  // Merge options with value-based dedup.
+  // During active search, show only live search results (do not prepend previously selected options).
   const fetchedOptions = useMemo(() => {
     const searchResults = data?.pages.flatMap((p) => p.options) ?? [];
     const selected = resolvedSelected?.options ?? [];
-    if (selected.length === 0) return searchResults;
+    const uniqueByValue = new Map<string, SelectOption>();
+    const makeKey = (value: SelectValue) => `${typeof value}:${String(value)}`;
 
-    const selectedIdSet = new Set(selected.map((o) => o.value));
-    const dedupedSearch = searchResults.filter((o) => !selectedIdSet.has(o.value));
-    return [...selected, ...dedupedSearch];
-  }, [resolvedSelected, data]);
+    if (debouncedSearch.trim().length === 0) {
+      for (const option of selected) {
+        if (selectedValues?.includes(option.value)) {
+          uniqueByValue.set(makeKey(option.value), option);
+        }
+      }
+    }
+    for (const option of searchResults) {
+      const key = makeKey(option.value);
+      if (!uniqueByValue.has(key)) {
+        uniqueByValue.set(key, option);
+      }
+    }
+
+    return Array.from(uniqueByValue.values());
+  }, [resolvedSelected, data, debouncedSearch]);
 
   const fetchedGroups = data?.pages[0]?.groups ?? staticGroups ?? [];
+  const hasSearchResultsData = (data?.pages.length ?? 0) > 0;
 
   // IntersectionObserver sentinel for infinite scroll
   const { ref: sentinelRef, inView } = useInView();
@@ -157,7 +177,7 @@ export function useSelect({
   return {
     options: fetchedOptions,
     groups: fetchedGroups,
-    loading: isFetching && !isFetchingNextPage,
+    loading: isFetching && !isFetchingNextPage && !hasSearchResultsData,
     loadingMore: isFetchingNextPage,
     hasMore: hasNextPage ?? false,
     searchQuery,

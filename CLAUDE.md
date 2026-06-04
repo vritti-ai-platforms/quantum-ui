@@ -310,7 +310,7 @@ import { useSlugParams } from '@vritti/quantum-ui/hooks';
 const { name, id } = useSlugParams(); // id = UUID for API calls
 ```
 
-Route param must be named `:slug`. Build slugs with `buildSlug` from `@vritti/quantum-ui/utils/slug`.
+Route param must be named `:slug`. Build slugs with `buildSlug` from `@vritti/quantum-ui/slug`.
 
 ---
 

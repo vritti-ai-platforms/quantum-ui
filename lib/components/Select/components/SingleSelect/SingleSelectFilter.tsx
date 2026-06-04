@@ -53,6 +53,11 @@ export interface SingleSelectFilterProps {
   defaultValue?: SelectValue;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  onOpenChange?: (open: boolean) => void;
+  // Transforms how label is displayed in option rows
+  transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
 }
 
 // Compact single-select filter trigger with inline label display
@@ -77,6 +82,9 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       defaultValue,
       searchPlaceholder = 'Search...',
       asyncState,
+      onOpenChange,
+      transformLabel,
+      transformDescription,
     },
     ref,
   ) => {
@@ -101,16 +109,39 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
     const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
 
+    function handleOpenChange(open: boolean) {
+      state.setOpen(open);
+      onOpenChange?.(open);
+      if (!open) asyncState?.setSearchQuery('');
+    }
+
+    function handleSelectOption(value: SelectValue) {
+      state.selectOption(value);
+      handleOpenChange(false);
+    }
+
+    function handleClearSelection() {
+      state.clearSelection();
+      handleOpenChange(false);
+    }
+
     // Renders a single option row
     function renderRow(option: SelectOption) {
+      const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
+      const optionDescription = option.description
+        ? transformDescription
+          ? transformDescription(option.description, option)
+          : option.description
+        : undefined;
+
       return (
         <SingleSelectRow
           key={String(option.value)}
-          name={option.label}
-          description={option.description}
+          name={optionLabel}
+          description={optionDescription}
           selected={state.selectedValue === option.value}
           onSelect={() => {
-            state.selectOption(option.value);
+            handleSelectOption(option.value);
           }}
           disabled={option.disabled}
         />
@@ -165,12 +196,12 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     // Clears inline from the chip without opening the popover
     function handleInlineClear(e: React.MouseEvent) {
       e.stopPropagation();
-      state.clearSelection();
+      handleClearSelection();
     }
 
     return (
       <>
-        <SingleSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+        <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
           <PopoverTrigger asChild>
             <button
               ref={ref}
@@ -200,12 +231,12 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
             </button>
           </PopoverTrigger>
 
-          <SingleSelectContent className="w-[250px]">
+          <SingleSelectContent className="min-w-[250px]">
             {label && (
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
                 <span className="text-sm text-muted-foreground">{label}</span>
                 <RadixSelect value={operator} onValueChange={handleOperatorChange}>
-                  <RadixSelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 shadow-none text-sm font-medium text-foreground focus-visible:ring-0">
+                  <RadixSelectTrigger className="h-auto w-auto gap-1 rounded-none border-0 !bg-transparent p-0 shadow-none text-sm font-medium text-foreground hover:!bg-transparent focus-visible:ring-0 data-[state=open]:!bg-transparent">
                     <RadixSelectValue />
                   </RadixSelectTrigger>
                   <RadixSelectContent>
@@ -231,7 +262,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               )}
             </SingleSelectList>
 
-            <SingleSelectClear onClear={state.clearSelection} disabled={!state.selectedValue} />
+            <SingleSelectClear onClear={handleClearSelection} disabled={!state.selectedValue} />
           </SingleSelectContent>
         </SingleSelectRoot>
 

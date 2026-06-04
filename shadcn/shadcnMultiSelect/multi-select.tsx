@@ -71,7 +71,7 @@ function MultiSelectContent({ className, children, align = 'start', ...props }: 
     <PopoverContent
       data-slot="multi-select-content"
       align={align}
-      className={cn('w-[var(--radix-popover-trigger-width)] p-0', className)}
+      className={cn('w-auto min-w-[var(--radix-popover-trigger-width)] p-0', className)}
       {...props}
     >
       {children}
@@ -89,16 +89,18 @@ interface MultiSelectSearchProps {
 
 function MultiSelectSearch({ value, onValueChange, placeholder = 'Search...', className }: MultiSelectSearchProps) {
   return (
-    <div data-slot="multi-select-search" className={cn('flex items-center gap-2 border-b px-3', className)}>
-      <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
-      <input
-        type="text"
-        aria-label="Search options"
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        placeholder={placeholder}
-        className="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-      />
+    <div data-slot="multi-select-search" className={cn('px-3 py-2', className)}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 h-9">
+        <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          type="text"
+          aria-label="Search options"
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
     </div>
   );
 }
@@ -159,6 +161,7 @@ function MultiSelectList({ className, children, ...props }: MultiSelectListProps
 // MultiSelectRow — a single option row with a checkbox
 interface MultiSelectRowProps {
   name: string;
+  description?: string;
   checked: boolean;
   onToggle: () => void;
   disabled?: boolean;
@@ -167,6 +170,7 @@ interface MultiSelectRowProps {
 
 const MultiSelectRow = memo(function MultiSelectRow({
   name,
+  description,
   checked,
   onToggle,
   disabled,
@@ -194,7 +198,8 @@ const MultiSelectRow = memo(function MultiSelectRow({
       aria-disabled={disabled}
       tabIndex={disabled ? undefined : 0}
       className={cn(
-        'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none',
+        'relative flex w-full cursor-default gap-2 rounded-md px-2 text-sm outline-hidden select-none',
+        description ? 'min-h-11 items-start py-1.5' : 'h-8 items-center py-0',
         'hover:bg-accent hover:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -209,8 +214,12 @@ const MultiSelectRow = memo(function MultiSelectRow({
         disabled={disabled}
         tabIndex={-1}
         aria-hidden="true"
+        className="self-center"
       />
-      <span className="truncate">{name}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{name}</span>
+        {description && <span className="mt-0.5 block truncate text-xs text-muted-foreground">{description}</span>}
+      </span>
     </div>
   );
 });
@@ -222,7 +231,12 @@ interface MultiSelectGroupProps extends React.ComponentProps<'div'> {
 
 function MultiSelectGroup({ className, children, ...props }: MultiSelectGroupProps) {
   return (
-    <div data-slot="multi-select-group" role="group" className={cn(className)} {...props}>
+    <div
+      data-slot="multi-select-group"
+      role="group"
+      className={cn('border-t border-border first:border-t-0 pt-1 mt-1 first:pt-0 first:mt-0', className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -237,7 +251,7 @@ function MultiSelectGroupLabel({ className, children, ...props }: MultiSelectGro
   return (
     <div
       data-slot="multi-select-group-label"
-      className={cn('text-muted-foreground px-2 py-1.5 text-xs', className)}
+      className={cn('text-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide', className)}
       {...props}
     >
       {children}

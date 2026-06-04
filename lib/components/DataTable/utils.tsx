@@ -1,6 +1,8 @@
 import type { CellContext, Column, ColumnDef, HeaderContext, Row, SortingState } from '@tanstack/react-table';
+import * as xlsxLib from 'xlsx';
 import type { SortCondition } from '../../types/table-filter';
 import { Checkbox } from '../Checkbox';
+import type { ImportExportConfig } from './types';
 
 // Converts SortCondition[] to TanStack SortingState
 export function sortConditionsToTanstack(sort: SortCondition[]): SortingState {
@@ -61,4 +63,59 @@ export function exportToCSV<TData>(rows: Row<TData>[], columns: Column<TData, un
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// Downloads a blob as a file
+export function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Transforms selected rows into flat export objects using importExport columns
+function transformRows<TData>(rows: Row<TData>[], config: ImportExportConfig<TData>): Record<string, string>[] {
+  return rows.map((row) => {
+    const transformed = config.transformExportRow
+      ? config.transformExportRow(row.original)
+      : (row.original as Record<string, unknown>);
+    const picked: Record<string, string> = {};
+    for (const col of config.columns) {
+      picked[col.label] = String(transformed[col.key] ?? '');
+    }
+    return picked;
+  });
+}
+
+// Exports selected rows using importExport columns (round-trip compatible with import)
+type ExportFormat = 'csv' | 'xlsx' | 'xls' | 'ods' | 'tsv';
+
+const FORMAT_CONFIG: Record<ExportFormat, { ext: string; bookType: string; separator?: string }> = {
+  csv: { ext: 'csv', bookType: 'csv' },
+  xlsx: { ext: 'xlsx', bookType: 'xlsx' },
+  xls: { ext: 'xls', bookType: 'biff8' },
+  ods: { ext: 'ods', bookType: 'ods' },
+  tsv: { ext: 'tsv', bookType: 'csv', separator: '\t' },
+};
+
+export function exportSelectedRows<TData>(
+  rows: Row<TData>[],
+  config: ImportExportConfig<TData>,
+  format: ExportFormat,
+): void {
+  const data = transformRows(rows, config);
+  const { ext, bookType, separator } = FORMAT_CONFIG[format];
+  const { utils, write } = xlsxLib;
+  const ws = utils.json_to_sheet(data);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, 'Sheet1');
+  const opts = separator
+    ? { type: 'array' as const, bookType: bookType as xlsxLib.BookType, FS: separator }
+    : { type: 'array' as const, bookType: bookType as xlsxLib.BookType };
+  const buf = write(wb, opts);
+  downloadBlob(new Blob([buf]), `${config.filename}.${ext}`);
 }

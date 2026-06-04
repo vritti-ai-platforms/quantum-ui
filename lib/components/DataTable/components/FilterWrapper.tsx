@@ -26,28 +26,25 @@ function processChildren(
 
     const el = child as React.ReactElement<Record<string, unknown>>;
     const props = el.props;
+    const defaultName =
+      typeof el.type === 'function' || typeof el.type === 'object'
+        ? (el.type as { defaultName?: string }).defaultName
+        : undefined;
+    const name = typeof props.name === 'string' ? props.name : defaultName;
 
-    // Named filter fields — wrap with Controller to inject value/onChange/fieldKey
-    if (typeof props.name === 'string') {
-      const name = props.name;
+    if (typeof name === 'string') {
       return (
         <Controller
           key={name}
           control={control}
           name={name}
           render={({ field }) =>
-            cloneElement(el, {
-              ...props,
-              fieldKey: name,
-              value: field.value,
-              onChange: field.onChange,
-            })
+            cloneElement(el, { ...props, fieldKey: name, value: field.value, onChange: field.onChange })
           }
         />
       );
     }
 
-    // Recurse into container children
     if (props.children != null) {
       return cloneElement(el, {
         ...props,

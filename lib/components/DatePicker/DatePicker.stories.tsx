@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Button } from '../Button';
+import { Form } from '../Form/Form';
 import { DatePicker } from './DatePicker';
 
 const meta: Meta<typeof DatePicker> = {
@@ -10,29 +13,32 @@ const meta: Meta<typeof DatePicker> = {
   },
   tags: ['autodocs'],
   argTypes: {
-    label: {
-      control: 'text',
-      description: 'Label for the date picker',
-    },
-    description: {
-      control: 'text',
-      description: 'Helper text to display below the field',
-    },
-    error: {
-      control: 'text',
-      description: 'Error message to display',
-    },
-    placeholder: {
-      control: 'text',
-      description: 'Placeholder text',
-    },
     value: {
+      control: 'text',
+      description: 'ISO date string value (YYYY-MM-DD)',
+    },
+    displayFormat: {
+      control: 'text',
+      description: 'date-fns format used for anchor display',
+    },
+    disableInput: {
+      control: 'boolean',
+      description: 'Hide/show manual DD/MM/YYYY editor in popover',
+    },
+    minDate: {
       control: 'date',
-      description: 'Selected date',
+      description: 'Lowest selectable date',
+    },
+    maxDate: {
+      control: 'date',
+      description: 'Highest selectable date',
     },
     onValueChange: {
       action: 'date-changed',
-      description: 'Callback when date changes',
+      description: 'Emits ISO date string (YYYY-MM-DD) or undefined',
+    },
+    calendarProps: {
+      control: false,
     },
   },
 };
@@ -40,78 +46,95 @@ const meta: Meta<typeof DatePicker> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Basic stories
 export const Default: Story = {
   args: {
+    label: 'Due date',
     placeholder: 'Select date',
   },
 };
 
-export const WithLabel: Story = {
+export const WithInitialValue: Story = {
   args: {
-    label: 'Date of birth',
-    placeholder: 'Select date',
+    label: 'Invoice date',
+    value: '2026-04-18',
   },
 };
 
-export const WithDescription: Story = {
+export const ManualEntryEnabled: Story = {
   args: {
-    label: 'Date of birth',
-    description: 'Please select your date of birth',
-    placeholder: 'Select date',
+    label: 'Expected delivery',
+    disableInput: false,
+    value: '2026-04-18',
   },
 };
 
-export const WithError: Story = {
+export const CustomDisplayFormat: Story = {
   args: {
-    label: 'Date of birth',
-    error: 'This field is required',
-    placeholder: 'Select date',
+    label: 'Custom display',
+    value: '2026-04-18',
+    displayFormat: 'EEEE, MMM d, yyyy',
+    disableInput: false,
   },
 };
 
-export const WithSelectedDate: Story = {
+export const WithMinDate: Story = {
   args: {
-    label: 'Date of birth',
-    value: new Date('1990-01-15'),
-    placeholder: 'Select date',
+    label: 'Earliest shipping date',
+    minDate: new Date('2026-04-10T00:00:00'),
+    disableInput: false,
   },
 };
 
-export const CustomPlaceholder: Story = {
+export const WithMaxDate: Story = {
   args: {
-    label: 'Appointment date',
-    placeholder: 'Choose a date',
+    label: 'Latest invoice date',
+    maxDate: new Date('2026-04-25T00:00:00'),
+    disableInput: false,
   },
 };
 
-// Controlled example
+export const BoundedRange: Story = {
+  args: {
+    label: 'Delivery window date',
+    minDate: new Date('2026-04-10T00:00:00'),
+    maxDate: new Date('2026-04-25T00:00:00'),
+    disableInput: false,
+  },
+};
+
 export const Controlled: Story = {
   render: () => {
-    const [date, setDate] = React.useState<Date | undefined>(undefined);
+    const [value, setValue] = React.useState<string | undefined>('2026-04-18');
     return (
-      <div className="flex flex-col gap-4">
-        <DatePicker label="Controlled Date Picker" value={date} onValueChange={setDate} placeholder="Select date" />
-        {date && <p className="text-sm text-muted-foreground">Selected: {date.toLocaleDateString()}</p>}
+      <div className="w-[340px] space-y-3">
+        <DatePicker label="Controlled DatePicker" value={value} onValueChange={setValue} disableInput={false} />
+        <pre className="rounded-md bg-muted p-2 text-xs">{JSON.stringify({ value }, null, 2)}</pre>
       </div>
     );
   },
-  parameters: {
-    layout: 'centered',
-  },
 };
 
-// Multiple examples
-export const AllStates: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6 w-80">
-      <DatePicker label="Default" placeholder="Select date" />
-      <DatePicker label="With Description" description="This is a helper text" placeholder="Select date" />
-      <DatePicker label="With Error" error="This field is required" placeholder="Select date" />
-      <DatePicker label="With Selected Date" value={new Date('2024-01-15')} placeholder="Select date" />
-    </div>
-  ),
-  parameters: {
-    layout: 'padded',
+type DateFormValues = {
+  invoiceDate?: string;
+};
+
+export const InForm: Story = {
+  render: () => {
+    const form = useForm<DateFormValues>({
+      defaultValues: {
+        invoiceDate: '2026-04-18',
+      },
+    });
+    const [submitted, setSubmitted] = React.useState<DateFormValues | null>(null);
+
+    return (
+      <div className="w-[360px] space-y-4">
+        <Form form={form} onSubmit={(data) => setSubmitted(data)}>
+          <DatePicker name="invoiceDate" label="Invoice Date" disableInput={false} />
+          <Button type="submit">Submit</Button>
+        </Form>
+        {submitted && <pre className="rounded-md bg-muted p-2 text-xs">{JSON.stringify(submitted, null, 2)}</pre>}
+      </div>
+    );
   },
 };

@@ -6,11 +6,7 @@ import { cn } from '../utils';
 // Base RadioGroup root wrapper
 function ShadcnRadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
   return (
-    <RadioGroupPrimitive.Root
-      data-slot="radio-group"
-      className={cn('flex flex-col gap-3', className)}
-      {...props}
-    />
+    <RadioGroupPrimitive.Root data-slot="radio-group" className={cn('flex flex-col gap-3', className)} {...props} />
   );
 }
 

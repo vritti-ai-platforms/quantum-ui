@@ -1,6 +1,5 @@
 import type { UseMutationResult } from '@tanstack/react-query';
 import type React from 'react';
-import { useState } from 'react';
 import type { FieldValues, UseFormReturn } from 'react-hook-form';
 import {
   Dialog as ShadcnDialog,
@@ -11,21 +10,21 @@ import {
   DialogTitle as ShadcnDialogTitle,
   DialogTrigger as ShadcnDialogTrigger,
 } from '../../../shadcn/shadcnDialog';
+import type { DialogHandle } from '../../hooks/useDialog';
 import type { FieldMapping } from '../../utils/formHelpers';
 import { Button } from '../Button';
 import { Form, type FormProps } from '../Form';
 
 export interface DialogProps<
   TFieldValues extends FieldValues = FieldValues,
-  TContext = any,
+  TContext = unknown,
   TTransformedValues extends FieldValues | undefined = TFieldValues,
   TMutationData = unknown,
   TMutationError = Error,
-  TMutationVariables = any,
+  TMutationVariables = unknown,
 > {
-  // Controlled mode — omit both to let Dialog manage its own state
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  // Handle from useDialog() — controls open state and cleanup
+  handle: DialogHandle;
   // anchor — render prop that receives open(); button renders outside DialogTrigger
   anchor?: (open: () => void) => React.ReactNode;
   // content — render prop that receives close()
@@ -34,6 +33,9 @@ export interface DialogProps<
   trigger?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
+  // Optional badge-style slot rendered inline with the title in the header.
+  // Use for short status indicators tied to the dialog's subject (e.g. "Draft", "Derived unit").
+  badgeSlot?: React.ReactNode;
   children?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
@@ -52,26 +54,25 @@ export interface DialogProps<
   >['transformSubmit'];
   submitLabel?: string;
   cancelLabel?: string;
-  showRootError?: boolean;
   fieldMapping?: FieldMapping;
 }
 
-// Composite dialog — manages its own open state unless open/onOpenChange are provided
+// Composite dialog — controlled by a useDialog() handle
 export function Dialog<
   TFieldValues extends FieldValues = FieldValues,
-  TContext = any,
+  TContext = unknown,
   TTransformedValues extends FieldValues | undefined = TFieldValues,
   TMutationData = unknown,
   TMutationError = Error,
-  TMutationVariables = any,
+  TMutationVariables = unknown,
 >({
-  open: controlledOpen,
-  onOpenChange,
+  handle,
   anchor,
   content,
   trigger,
   title,
   description,
+  badgeSlot,
   children,
   footer,
   className,
@@ -82,32 +83,11 @@ export function Dialog<
   transformSubmit,
   submitLabel,
   cancelLabel,
-  showRootError,
   fieldMapping,
 }: DialogProps<TFieldValues, TContext, TTransformedValues, TMutationData, TMutationError, TMutationVariables>) {
-  const [internalOpen, setInternalOpen] = useState(false);
-
-  const isControlled = controlledOpen !== undefined;
-  const isOpen = isControlled ? controlledOpen : internalOpen;
-
-  const openDialog = () => {
-    if (!isControlled) setInternalOpen(true);
-    onOpenChange?.(true);
-  };
-
-  const closeDialog = () => {
-    if (!isControlled) setInternalOpen(false);
-    onOpenChange?.(false);
-  };
-
-  const handleOpenChange = (val: boolean) => {
-    if (!isControlled) setInternalOpen(val);
-    onOpenChange?.(val);
-  };
-
   // Render the body+footer content — shared between default and form modes
   const renderBody = () => {
-    if (content) return content(closeDialog);
+    if (content) return content(handle.close);
 
     if (mode === 'form' && form) {
       return (
@@ -116,7 +96,6 @@ export function Dialog<
           mutation={mutation}
           onSubmit={onFormSubmit}
           transformSubmit={transformSubmit}
-          showRootError={showRootError}
           fieldMapping={fieldMapping}
           className="space-y-4"
         >
@@ -124,7 +103,7 @@ export function Dialog<
           <ShadcnDialogFooter>
             {footer ?? (
               <>
-                <Button variant="outline" type="button" onClick={closeDialog}>
+                <Button variant="outline" type="button" onClick={handle.close}>
                   {cancelLabel ?? 'Cancel'}
                 </Button>
                 <Button type="submit">{submitLabel ?? 'Save'}</Button>
@@ -144,12 +123,23 @@ export function Dialog<
   };
 
   return (
-    <ShadcnDialog open={isOpen} onOpenChange={handleOpenChange}>
-      {anchor ? anchor(openDialog) : trigger && <ShadcnDialogTrigger asChild>{trigger}</ShadcnDialogTrigger>}
+    <ShadcnDialog open={handle.isOpen} onOpenChange={handle.onOpenChange}>
+      {anchor ? anchor(handle.open) : trigger && <ShadcnDialogTrigger asChild>{trigger}</ShadcnDialogTrigger>}
       <ShadcnDialogContent className={className}>
         {(title || description) && (
           <ShadcnDialogHeader>
-            {title && <ShadcnDialogTitle>{title}</ShadcnDialogTitle>}
+            {title && (
+              <ShadcnDialogTitle>
+                {badgeSlot ? (
+                  <span className="flex items-center gap-2">
+                    <span>{title}</span>
+                    {badgeSlot}
+                  </span>
+                ) : (
+                  title
+                )}
+              </ShadcnDialogTitle>
+            )}
             {description && <ShadcnDialogDescription>{description}</ShadcnDialogDescription>}
           </ShadcnDialogHeader>
         )}

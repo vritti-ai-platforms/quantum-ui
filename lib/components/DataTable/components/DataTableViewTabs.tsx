@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useDialog } from '../../../hooks/useDialog';
 import { fetchViews, updateView } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
-import { useDialog } from '../../../hooks/useDialog';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
 import { CreateViewDialog } from './DataTableViewsMenu';
 
@@ -25,8 +25,8 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
   const syncActiveViewState = useDataTableStore((s) => s.syncActiveViewState);
 
   const [pendingViewId, setPendingViewId] = useState<string | null>(null);
-  const dirtyGuard = useDialog();
-  const createDialog = useDialog();
+  const dirtyGuard = useDialog({ onClose: () => setPendingViewId(null) });
+  const createDialog = useDialog({ onClose: () => setPendingViewId(null) });
 
   const qc = useQueryClient();
 
@@ -47,8 +47,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
   });
 
   const saveMut = useMutation({
-    mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) =>
-      updateView(id, state),
+    mutationFn: ({ id, state }: { id: string; state: typeof EMPTY_TABLE_STATE }) => updateView(id, state),
     onSuccess: () => {
       syncActiveViewState(tableSlug);
       qc.invalidateQueries({ queryKey: VIEWS_QK(tableSlug) });
@@ -108,13 +107,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
       </div>
 
       <Dialog
-        open={dirtyGuard.isOpen}
-        onOpenChange={(v) => {
-          if (!v) {
-            dirtyGuard.close();
-            setPendingViewId(null);
-          }
-        }}
+        handle={dirtyGuard}
         title="Unsaved Changes"
         description="This view has unsaved changes. What would you like to do?"
         footer={
@@ -152,14 +145,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
         }
       />
 
-      <CreateViewDialog
-        tableSlug={tableSlug}
-        open={createDialog.isOpen}
-        onClose={() => {
-          createDialog.close();
-          setPendingViewId(null);
-        }}
-      />
+      <CreateViewDialog tableSlug={tableSlug} open={createDialog.isOpen} onClose={createDialog.close} />
     </>
   );
 }

@@ -28,6 +28,8 @@ interface UploadFileBaseProps {
   hint?: string;
   // Current file value — injected by Form Controller or passed directly
   value?: File | File[] | null;
+  // Shows a pulsing loading animation on the file row during upload/processing.
+  isLoading?: boolean;
 }
 
 // Standalone usage — onChange is required
@@ -78,6 +80,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   hint,
   value,
   onChange,
+  isLoading,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -148,7 +151,8 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           onClick={handleClick}
           disabled={disabled}
           className={cn(
-            'flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-8 transition-colors',
+            'flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors',
+            error ? 'border-destructive' : 'border-border',
             disabled ? 'cursor-default opacity-50' : 'cursor-pointer hover:bg-muted/50',
           )}
         >
@@ -225,20 +229,31 @@ export const UploadFile: React.FC<UploadFileProps> = ({
         {files.map((file) => (
           <div
             key={`${file.name}-${file.size}`}
-            className="flex items-center gap-3 rounded-lg border border-dashed border-border p-3"
+            className={cn(
+              'relative overflow-hidden flex items-center gap-3 rounded-lg border border-dashed p-3',
+              isLoading ? 'border-primary/40 animate-pulse' : 'border-border',
+            )}
           >
-            <FilePreview file={file} size={40} />
-            <span className="flex-1 truncate text-sm">{file.name}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              onClick={() => handleRemove(file)}
-              disabled={disabled}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {isLoading && <div className="absolute inset-0 bg-primary/5" />}
+            <div className="relative flex items-center gap-3 flex-1 min-w-0">
+              <FilePreview file={file} size={40} />
+              <div className="flex-1 min-w-0">
+                <span className="block truncate text-sm">{file.name}</span>
+                {isLoading && <span className="text-xs text-muted-foreground">Uploading...</span>}
+              </div>
+              {!isLoading && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => handleRemove(file)}
+                  disabled={disabled}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         ))}
       </div>

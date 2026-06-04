@@ -31,6 +31,8 @@ export interface SingleSelectOptionRenderProps {
   onSelect: () => void;
 }
 
+export type SingleSelectLabelTransformContext = 'trigger' | 'option';
+
 export interface SingleSelectProps {
   label?: string;
   description?: React.ReactNode;
@@ -56,6 +58,10 @@ export interface SingleSelectProps {
   anchor?: (props: SingleSelectAnchorProps) => React.ReactElement;
   // Custom option row renderer -- replaces the default SingleSelectRow
   renderOption?: (props: SingleSelectOptionRenderProps) => React.ReactNode;
+  // Transforms how labels are displayed in trigger and option rows
+  transformLabel?: (label: string, option: SelectOption, context: SingleSelectLabelTransformContext) => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
   // Content rendered below the option list
   footer?: React.ReactNode;
   // Custom className for the popover content panel
@@ -90,6 +96,8 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       asyncState,
       anchor,
       renderOption,
+      transformLabel,
+      transformDescription,
       footer,
       contentClassName,
       onOpenChange,
@@ -113,6 +121,16 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       if (!o) asyncState?.setSearchQuery('');
     }
 
+    function handleSelectOption(value: SelectValue) {
+      state.selectOption(value);
+      handleOpenChange(false);
+    }
+
+    function handleClearSelection() {
+      state.clearSelection();
+      handleOpenChange(false);
+    }
+
     // Resolve search binding -- async delegates to parent, static uses local state
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
     const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
@@ -126,7 +144,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             {renderOption({
               option,
               selected: state.selectedValue === option.value,
-              onSelect: () => state.selectOption(option.value),
+              onSelect: () => handleSelectOption(option.value),
             })}
           </Fragment>
         );
@@ -134,11 +152,17 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       return (
         <SingleSelectRow
           key={String(option.value)}
-          name={option.label}
-          description={option.description}
+          name={transformLabel ? transformLabel(option.label, option, 'option') : option.label}
+          description={
+            option.description
+              ? transformDescription
+                ? transformDescription(option.description, option)
+                : option.description
+              : undefined
+          }
           selected={state.selectedValue === option.value}
           onSelect={() => {
-            state.selectOption(option.value);
+            handleSelectOption(option.value);
           }}
           disabled={option.disabled}
         />
@@ -196,7 +220,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             )}
           </SingleSelectList>
 
-          {clearable && <SingleSelectClear onClear={state.clearSelection} disabled={!state.selectedValue} />}
+          {clearable && <SingleSelectClear onClear={handleClearSelection} disabled={!state.selectedValue} />}
           {footer}
         </SingleSelectContent>
       );
@@ -205,7 +229,8 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
     // Custom anchor path -- skip Field wrapper and use PopoverTrigger asChild
     if (anchor) {
       return (
-        <>
+        <Field>
+          {label && <FieldLabel>{label}</FieldLabel>}
           <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
             <PopoverTrigger asChild>
               {anchor({ selectedOption: state.selectedOption, open: state.open, disabled })}
@@ -213,7 +238,9 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             {renderContent()}
           </SingleSelectRoot>
           {name && state.selectedValue && <input type="hidden" name={name} value={String(state.selectedValue)} />}
-        </>
+          {description && !error && <FieldDescription>{description}</FieldDescription>}
+          {error && <FieldError>{error}</FieldError>}
+        </Field>
       );
     }
 
@@ -236,7 +263,11 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
           >
             <span className="flex flex-1 items-center overflow-hidden">
               {state.selectedOption ? (
-                <span className="truncate">{state.selectedOption.label}</span>
+                <span className="truncate">
+                  {transformLabel
+                    ? transformLabel(state.selectedOption.label, state.selectedOption, 'trigger')
+                    : state.selectedOption.label}
+                </span>
               ) : (
                 <span className="text-muted-foreground">{placeholder}</span>
               )}

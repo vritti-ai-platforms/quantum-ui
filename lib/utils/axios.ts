@@ -217,24 +217,6 @@ async function fetchCsrfToken(): Promise<string | null> {
 // Helpers
 // =============================================================================
 
-function getSubdomain(): string | null {
-  if (typeof window === 'undefined') return null;
-
-  const parts = window.location.hostname.split('.');
-
-  // localhost (e.g., acme.localhost)
-  if (parts.length >= 2 && parts[parts.length - 1] === 'localhost') {
-    return parts[0];
-  }
-
-  // production (e.g., acme.vritti.cloud)
-  if (parts.length >= 3) {
-    return parts[0];
-  }
-
-  return null;
-}
-
 // =============================================================================
 // Axios Instance & Interceptors
 // =============================================================================
@@ -270,10 +252,9 @@ axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     config.headers[quantumConfig.auth.tokenHeaderName] = `${quantumConfig.auth.tokenPrefix} ${token}`;
   }
 
-  // Add tenant subdomain header
-  const subdomain = getSubdomain();
-  if (subdomain) {
-    config.headers['x-subdomain'] = subdomain;
+  // Call custom request interceptor if configured
+  if (quantumConfig.axios.onRequest) {
+    await quantumConfig.axios.onRequest(config);
   }
 
   // Add CSRF token for state-changing requests

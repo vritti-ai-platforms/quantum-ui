@@ -1,5 +1,5 @@
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 import { TextArea } from './TextArea';
 
 const meta: Meta<typeof TextArea> = {
@@ -333,4 +333,3 @@ export const MarkdownEditor: Story = {
     layout: 'centered',
   },
 };
-

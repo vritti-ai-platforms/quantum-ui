@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.2.10",
+  "version": "0.3.1",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -56,9 +56,17 @@
       "types": "./dist/lib/components/Badge/index.d.ts",
       "import": "./dist/components/Badge.js"
     },
+    "./Kbd": {
+      "types": "./dist/lib/components/Kbd/index.d.ts",
+      "import": "./dist/components/Kbd.js"
+    },
     "./Button": {
       "types": "./dist/lib/components/Button/index.d.ts",
       "import": "./dist/components/Button.js"
+    },
+    "./ScanBarcodeButton": {
+      "types": "./dist/lib/components/ScanBarcodeButton/index.d.ts",
+      "import": "./dist/components/ScanBarcodeButton.js"
     },
     "./Card": {
       "types": "./dist/lib/components/Card/index.d.ts",
@@ -68,9 +76,29 @@
       "types": "./dist/lib/components/DangerZone/index.d.ts",
       "import": "./dist/components/DangerZone.js"
     },
-    "./Chart": {
-      "types": "./dist/lib/components/Chart/index.d.ts",
-      "import": "./dist/components/Chart.js"
+    "./BarChart": {
+      "types": "./dist/lib/components/BarChart/index.d.ts",
+      "import": "./dist/components/BarChart.js"
+    },
+    "./LineChart": {
+      "types": "./dist/lib/components/LineChart/index.d.ts",
+      "import": "./dist/components/LineChart.js"
+    },
+    "./AreaChart": {
+      "types": "./dist/lib/components/AreaChart/index.d.ts",
+      "import": "./dist/components/AreaChart.js"
+    },
+    "./PieChart": {
+      "types": "./dist/lib/components/PieChart/index.d.ts",
+      "import": "./dist/components/PieChart.js"
+    },
+    "./RadarChart": {
+      "types": "./dist/lib/components/RadarChart/index.d.ts",
+      "import": "./dist/components/RadarChart.js"
+    },
+    "./RadialChart": {
+      "types": "./dist/lib/components/RadialChart/index.d.ts",
+      "import": "./dist/components/RadialChart.js"
     },
     "./Collapsible": {
       "types": "./dist/lib/components/Collapsible/index.d.ts",
@@ -83,6 +111,14 @@
     "./TextField": {
       "types": "./dist/lib/components/TextField/index.d.ts",
       "import": "./dist/components/TextField.js"
+    },
+    "./TokenInput": {
+      "types": "./dist/lib/components/TokenInput/index.d.ts",
+      "import": "./dist/components/TokenInput.js"
+    },
+    "./SearchBar": {
+      "types": "./dist/lib/components/SearchBar/index.d.ts",
+      "import": "./dist/components/SearchBar.js"
     },
     "./Typography": {
       "types": "./dist/lib/components/Typography/index.d.ts",
@@ -104,9 +140,17 @@
       "types": "./dist/lib/components/PhoneField/index.d.ts",
       "import": "./dist/components/PhoneField.js"
     },
+    "./CurrencyField": {
+      "types": "./dist/lib/components/CurrencyField/index.d.ts",
+      "import": "./dist/components/CurrencyField.js"
+    },
     "./Progress": {
       "types": "./dist/lib/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"
+    },
+    "./CheckboxGroup": {
+      "types": "./dist/lib/components/CheckboxGroup/index.d.ts",
+      "import": "./dist/components/CheckboxGroup.js"
     },
     "./RadioGroup": {
       "types": "./dist/lib/components/RadioGroup/index.d.ts",
@@ -124,9 +168,9 @@
       "types": "./dist/lib/selects/cloud-provider/index.d.ts",
       "import": "./dist/selects/cloud-provider.js"
     },
-    "./selects/industry": {
-      "types": "./dist/lib/selects/industry/index.d.ts",
-      "import": "./dist/selects/industry.js"
+    "./selects/business": {
+      "types": "./dist/lib/selects/business/index.d.ts",
+      "import": "./dist/selects/business.js"
     },
     "./selects/region": {
       "types": "./dist/lib/selects/region/index.d.ts",
@@ -140,13 +184,113 @@
       "types": "./dist/lib/selects/currency/index.d.ts",
       "import": "./dist/selects/currency.js"
     },
+    "./selects/locale": {
+      "types": "./dist/lib/selects/locale/index.d.ts",
+      "import": "./dist/selects/locale.js"
+    },
+    "./selects/timezone": {
+      "types": "./dist/lib/selects/timezone/index.d.ts",
+      "import": "./dist/selects/timezone.js"
+    },
     "./selects/deployment": {
       "types": "./dist/lib/selects/deployment/index.d.ts",
       "import": "./dist/selects/deployment.js"
     },
+    "./selects/feature": {
+      "types": "./dist/lib/selects/feature/index.d.ts",
+      "import": "./dist/selects/feature.js"
+    },
+    "./selects/app": {
+      "types": "./dist/lib/selects/app/index.d.ts",
+      "import": "./dist/selects/app.js"
+    },
+    "./selects/quant": {
+      "types": "./dist/lib/selects/quant/index.d.ts",
+      "import": "./dist/selects/quant.js"
+    },
+    "./selects/app-code": {
+      "types": "./dist/lib/selects/app-code/index.d.ts",
+      "import": "./dist/selects/app-code.js"
+    },
+    "./selects/bom": {
+      "types": "./dist/lib/selects/bom/index.d.ts",
+      "import": "./dist/selects/bom.js"
+    },
+    "./selects/category": {
+      "types": "./dist/lib/selects/category/index.d.ts",
+      "import": "./dist/selects/category.js"
+    },
+    "./selects/customer": {
+      "types": "./dist/lib/selects/customer/index.d.ts",
+      "import": "./dist/selects/customer.js"
+    },
+    "./selects/inventory-item": {
+      "types": "./dist/lib/selects/inventory-item/index.d.ts",
+      "import": "./dist/selects/inventory-item.js"
+    },
+    "./selects/variant-option": {
+      "types": "./dist/lib/selects/variant-option/index.d.ts",
+      "import": "./dist/selects/variant-option.js"
+    },
+    "./selects/modifier-group": {
+      "types": "./dist/lib/selects/modifier-group/index.d.ts",
+      "import": "./dist/selects/modifier-group.js"
+    },
+    "./selects/lot": {
+      "types": "./dist/lib/selects/lot/index.d.ts",
+      "import": "./dist/selects/lot.js"
+    },
+    "./selects/serial": {
+      "types": "./dist/lib/selects/serial/index.d.ts",
+      "import": "./dist/selects/serial.js"
+    },
+    "./selects/location": {
+      "types": "./dist/lib/selects/location/index.d.ts",
+      "import": "./dist/selects/location.js"
+    },
+    "./selects/cost-category": {
+      "types": "./dist/lib/selects/cost-category/index.d.ts",
+      "import": "./dist/selects/cost-category.js"
+    },
+    "./selects/supplier": {
+      "types": "./dist/lib/selects/supplier/index.d.ts",
+      "import": "./dist/selects/supplier.js"
+    },
+    "./selects/supplier-item": {
+      "types": "./dist/lib/selects/supplier-item/index.d.ts",
+      "import": "./dist/selects/supplier-item.js"
+    },
+    "./selects/purchase-order": {
+      "types": "./dist/lib/selects/purchase-order/index.d.ts",
+      "import": "./dist/selects/purchase-order.js"
+    },
+    "./selects/purchase-order-item": {
+      "types": "./dist/lib/selects/purchase-order-item/index.d.ts",
+      "import": "./dist/selects/purchase-order-item.js"
+    },
+    "./selects/uom": {
+      "types": "./dist/lib/selects/uom/index.d.ts",
+      "import": "./dist/selects/uom.js"
+    },
+    "./selects/user": {
+      "types": "./dist/lib/selects/user/index.d.ts",
+      "import": "./dist/selects/user.js"
+    },
+    "./selects/microfrontend": {
+      "types": "./dist/lib/selects/microfrontend/index.d.ts",
+      "import": "./dist/selects/microfrontend.js"
+    },
+    "./selects/version": {
+      "types": "./dist/lib/selects/version/index.d.ts",
+      "import": "./dist/selects/version.js"
+    },
     "./OTPField": {
       "types": "./dist/lib/components/OTPField/index.d.ts",
       "import": "./dist/components/OTPField.js"
+    },
+    "./PageContent": {
+      "types": "./dist/lib/components/PageContent/index.d.ts",
+      "import": "./dist/components/PageContent.js"
     },
     "./PageHeader": {
       "types": "./dist/lib/components/PageHeader/index.d.ts",
@@ -160,9 +304,25 @@
       "types": "./dist/lib/components/Form/index.d.ts",
       "import": "./dist/components/Form.js"
     },
+    "./HierarchyGraph": {
+      "types": "./dist/lib/components/HierarchyGraph/index.d.ts",
+      "import": "./dist/components/HierarchyGraph.js"
+    },
     "./DatePicker": {
       "types": "./dist/lib/components/DatePicker/index.d.ts",
       "import": "./dist/components/DatePicker.js"
+    },
+    "./DateRangePicker": {
+      "types": "./dist/lib/components/DateRangePicker/index.d.ts",
+      "import": "./dist/components/DateRangePicker.js"
+    },
+    "./DateTimeRangePicker": {
+      "types": "./dist/lib/components/DateTimeRangePicker/index.d.ts",
+      "import": "./dist/components/DateTimeRangePicker.js"
+    },
+    "./DateTimePicker": {
+      "types": "./dist/lib/components/DateTimePicker/index.d.ts",
+      "import": "./dist/components/DateTimePicker.js"
     },
     "./Dialog": {
       "types": "./dist/lib/components/Dialog/index.d.ts",
@@ -212,6 +372,10 @@
       "types": "./dist/lib/components/Toggle/index.d.ts",
       "import": "./dist/components/Toggle.js"
     },
+    "./TreeView": {
+      "types": "./dist/lib/components/TreeView/index.d.ts",
+      "import": "./dist/components/TreeView.js"
+    },
     "./FilePreview": {
       "types": "./dist/lib/components/FilePreview/index.d.ts",
       "import": "./dist/components/FilePreview.js"
@@ -248,9 +412,53 @@
       "types": "./dist/lib/utils/axios.d.ts",
       "import": "./dist/utils/axios.js"
     },
-    "./utils/slug": {
+    "./motion": {
+      "types": "./dist/lib/utils/motion.d.ts",
+      "import": "./dist/utils/motion.js"
+    },
+    "./slug": {
       "types": "./dist/lib/utils/slug.d.ts",
       "import": "./dist/utils/slug.js"
+    },
+    "./lodash": {
+      "types": "./dist/lib/utils/lodash.d.ts",
+      "import": "./dist/utils/lodash.js"
+    },
+    "./locale": {
+      "types": "./dist/lib/utils/locale.d.ts",
+      "import": "./dist/utils/locale.js"
+    },
+    "./timezone": {
+      "types": "./dist/lib/utils/timezone.d.ts",
+      "import": "./dist/utils/timezone.js"
+    },
+    "./currency": {
+      "types": "./dist/lib/utils/currency.d.ts",
+      "import": "./dist/utils/currency.js"
+    },
+    "./pluralize": {
+      "types": "./dist/lib/utils/pluralize.d.ts",
+      "import": "./dist/utils/pluralize.js"
+    },
+    "./zod": {
+      "types": "./dist/lib/utils/zod.d.ts",
+      "import": "./dist/utils/zod.js"
+    },
+    "./money": {
+      "types": "./dist/lib/utils/money.d.ts",
+      "import": "./dist/utils/money.js"
+    },
+    "./format": {
+      "types": "./dist/lib/utils/format.d.ts",
+      "import": "./dist/utils/format.js"
+    },
+    "./decimal": {
+      "types": "./dist/lib/utils/decimal.d.ts",
+      "import": "./dist/utils/decimal.js"
+    },
+    "./hotkeys": {
+      "types": "./dist/lib/utils/hotkeys.d.ts",
+      "import": "./dist/utils/hotkeys.js"
     },
     "./hooks": {
       "types": "./dist/lib/hooks/index.d.ts",
@@ -264,7 +472,19 @@
       "types": "./dist/lib/theme/index.d.ts",
       "import": "./dist/theme/index.js"
     },
-    "./index.css": "./dist/assets/quantum-ui.css"
+    "./index.css": "./dist/assets/quantum-ui.css",
+    "./DetailField": {
+      "types": "./dist/lib/components/DetailField/index.d.ts",
+      "import": "./dist/components/DetailField.js"
+    },
+    "./FormattedDate": {
+      "types": "./dist/lib/components/FormattedDate/index.d.ts",
+      "import": "./dist/components/FormattedDate.js"
+    },
+    "./date-fns": {
+      "types": "./dist/lib/date-fns.d.ts",
+      "import": "./dist/date-fns.js"
+    }
   },
   "files": [
     "dist"
@@ -303,7 +523,8 @@
     "@storybook/react": "10.2.0",
     "@storybook/react-vite": "10.2.0",
     "@tailwindcss/postcss": "^4.1.18",
-    "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-query": "^5.100.10",
+    "@types/dagre": "^0.7.54",
     "@types/node": "^25.0.9",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
@@ -322,6 +543,8 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^3.0.0",
+    "@date-fns/tz": "^1.4.1",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -344,6 +567,7 @@
     "@lexical/table": "^0.41.0",
     "@lexical/text": "^0.41.0",
     "@lexical/utils": "^0.41.0",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -367,24 +591,30 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-table": "^8.21.3",
     "@types/lodash": "^4.17.24",
+    "@xyflow/react": "^12.10.1",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "decimal.js": "^10.6.0",
+    "dinero.js": "^2.0.2",
     "fast-equals": "^6.0.0",
     "input-otp": "^1.4.2",
     "lexical": "^0.41.0",
     "lodash": "^4.17.23",
     "lucide-react": "^0.562.0",
+    "motion": "^12.38.0",
     "pluralize-esm": "^9.0.5",
     "react-day-picker": "^9.13.0",
     "react-error-boundary": "^6.1.1",
+    "react-hotkeys-hook": "^5.3.2",
     "react-intersection-observer": "^10.0.2",
     "react-phone-number-input": "^3.4.14",
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.5",
     "zustand": "^5.0.11"
   }

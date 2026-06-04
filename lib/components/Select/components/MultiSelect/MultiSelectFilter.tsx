@@ -47,6 +47,11 @@ export interface MultiSelectFilterProps {
   defaultValue?: SelectValueType[];
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
+  onOpenChange?: (open: boolean) => void;
+  // Transforms how label is displayed in option rows
+  transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
+  // Transforms how description is displayed in option rows
+  transformDescription?: (description: string, option: SelectOption) => string;
 }
 
 // Compact multi-select filter trigger with count-based label display
@@ -71,6 +76,9 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       defaultValue,
       searchPlaceholder = 'Search...',
       asyncState,
+      onOpenChange,
+      transformLabel,
+      transformDescription,
     },
     ref,
   ) => {
@@ -95,12 +103,26 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
     const searchValue = asyncState ? asyncState.searchQuery : state.searchQuery;
     const setSearchValue = asyncState ? asyncState.setSearchQuery : state.setSearchQuery;
 
+    function handleOpenChange(open: boolean) {
+      state.setOpen(open);
+      onOpenChange?.(open);
+      if (!open) asyncState?.setSearchQuery('');
+    }
+
     // Renders a single option row
     function renderRow(option: SelectOption) {
+      const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
+      const optionDescription = option.description
+        ? transformDescription
+          ? transformDescription(option.description, option)
+          : option.description
+        : undefined;
+
       return (
         <MultiSelectRow
           key={String(option.value)}
-          name={option.label}
+          name={optionLabel}
+          description={optionDescription}
           checked={state.selectedSet.has(option.value)}
           onToggle={() => {
             state.toggleOption(option.value);
@@ -165,7 +187,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
 
     return (
       <>
-        <MultiSelectRoot open={state.open} onOpenChange={state.setOpen} disabled={disabled}>
+        <MultiSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
           <PopoverTrigger asChild>
             <button
               ref={ref}
@@ -195,14 +217,13 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
             </button>
           </PopoverTrigger>
 
-          <MultiSelectContent className="w-[250px]">
+          <MultiSelectContent className="min-w-[250px]">
             {label && (
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
                 <span className="text-sm text-muted-foreground">{label}</span>
                 <Select value={activeOperator} onValueChange={handleOperatorChange}>
-                  <SelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 shadow-none text-sm font-medium text-foreground focus-visible:ring-0">
+                  <SelectTrigger className="h-auto w-auto gap-1 rounded-none border-0 !bg-transparent p-0 shadow-none text-sm font-medium text-foreground hover:!bg-transparent focus-visible:ring-0 data-[state=open]:!bg-transparent">
                     <SelectValue />
-                    <ChevronDownIcon className="size-3.5 text-muted-foreground" />
                   </SelectTrigger>
                   <SelectContent>
                     {operators.map((op) => (

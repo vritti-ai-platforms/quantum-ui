@@ -1,5 +1,8 @@
 // Main component
 
+export type { CompactTableSkeletonColumn, CompactTableSkeletonProps } from './CompactTableSkeleton';
+export { CompactTableSkeleton } from './CompactTableSkeleton';
+
 // Sub-components
 export { DataTableColumnHeader } from './components/DataTableColumnHeader';
 export { DataTableEmpty } from './components/DataTableEmpty';
@@ -9,9 +12,11 @@ export { DataTableRowDensity } from './components/DataTableRowDensity';
 export { DataTableSearch } from './components/DataTableSearch';
 export { DataTableSelectionBar } from './components/DataTableSelectionBar';
 export { DataTableViewOptions } from './components/DataTableViewOptions';
+export type { RowAction, RowActionsProps } from './components/RowActions';
+export { RowActions } from './components/RowActions';
 export { DataTable } from './DataTable';
-export { useDataTable } from './hooks/useDataTable';
 export type { DataTableServerState } from './hooks/useDataTable';
+export { useDataTable } from './hooks/useDataTable';
 export type { TableSlice, TableState } from './store/store';
 export { useDataTableStore } from './store/store';
 
@@ -24,6 +29,8 @@ export type {
   DataTableSearchConfig,
   DataTableToolbarConfig,
   DensityType,
+  ImportExportColumn,
+  ImportExportConfig,
   SearchColumn,
   SearchState,
   SelectActions,
@@ -31,3 +38,13 @@ export type {
 
 // Utility
 export { exportToCSV, getSelectionColumn } from './utils';
+
+// Cell components — wrap useFormatters() for consistent rendering with DetailField.
+export type {
+  CurrencyCellProps,
+  DateCellProps,
+  DateTimeCellProps,
+  NumberCellProps,
+  StringCellProps,
+} from './cells/cells';
+export { CurrencyCell, DateCell, DateTimeCell, NumberCell, StringCell } from './cells/cells';

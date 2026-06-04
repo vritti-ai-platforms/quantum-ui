@@ -1,5 +1,5 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from '../utils';
 
 // Tabs root component wrapping Radix Tabs primitive
@@ -44,7 +44,7 @@ function TabsTrigger({ className, ...props }: React.ComponentPropsWithoutRef<typ
         // disabled
         'disabled:pointer-events-none disabled:opacity-50',
         // svg children
-        '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4',
+        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -54,13 +54,7 @@ function TabsTrigger({ className, ...props }: React.ComponentPropsWithoutRef<typ
 
 // Tab panel content shown when its trigger is active
 function TabsContent({ className, ...props }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>) {
-  return (
-    <TabsPrimitive.Content
-      data-slot="tabs-content"
-      className={cn('flex-1 outline-none', className)}
-      {...props}
-    />
-  );
+  return <TabsPrimitive.Content data-slot="tabs-content" className={cn('flex-1 outline-none', className)} {...props} />;
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

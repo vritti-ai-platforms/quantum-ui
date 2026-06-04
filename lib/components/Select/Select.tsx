@@ -2,7 +2,7 @@ import type React from 'react';
 import { forwardRef, useState } from 'react';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
-import { useSelect, stableStringify } from './hooks/useSelect';
+import { useSelect } from './hooks/useSelect';
 import type { AsyncSelectState, SelectFieldKeys } from './types';
 
 interface SelectBaseProps {
@@ -13,24 +13,19 @@ interface SelectBaseProps {
   params?: Record<string, string | number | boolean>;
 }
 
-interface SelectSingleProps extends SingleSelectProps, SelectBaseProps {
-  multiple?: false;
+export interface SelectProps extends Omit<SingleSelectProps & MultiSelectProps, 'value' | 'onChange'>, SelectBaseProps {
+  multiple?: boolean;
+  value?: SingleSelectProps['value'] | MultiSelectProps['value'];
+  onChange?: SingleSelectProps['onChange'] | MultiSelectProps['onChange'];
 }
 
-interface SelectMultiProps extends MultiSelectProps, SelectBaseProps {
-  multiple: true;
-}
-
-export type SelectProps = SelectSingleProps | SelectMultiProps;
+export type SelectSingleProps = SelectProps;
+export type SelectMultiProps = SelectProps;
 
 // Unified select field supporting single/multi selection and default/filter variants
 export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
-  const { multiple, optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, ...rest } = props;
-
-  // Params-keyed latch: enabled once opened for the current params, stays enabled until params change
-  const [openedForParams, setOpenedForParams] = useState<string | null>(null);
-  const currentParamsKey = stableStringify(params);
-  const enabled = openedForParams === currentParamsKey;
+  const { multiple, optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, onOpenChange, ...rest } = props;
+  const [open, setOpen] = useState(false);
 
   const selectData = useSelect({
     options: rest.options,
@@ -41,7 +36,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     fieldKeys,
     params,
     selectedValues: rest.value != null ? (Array.isArray(rest.value) ? rest.value : [rest.value]) : undefined,
-    enabled,
+    enabled: open,
   });
 
   const isAsync = !!optionsEndpoint;
@@ -64,9 +59,10 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     asyncState,
   };
 
-  // Latch open for current params on first open; params change resets enabled via derived state
+  // Scope async queries to the open popover lifecycle so reopening reuses cached data and refetches in the background.
   const handleOpenChange = (o: boolean) => {
-    if (o && openedForParams !== currentParamsKey) setOpenedForParams(currentParamsKey);
+    setOpen(o);
+    onOpenChange?.(o);
   };
 
   if (multiple) {

@@ -4,6 +4,7 @@ export interface SelectOption {
   value: SelectValue;
   label: string;
   description?: string;
+  additionals?: Record<string, string | number | boolean | null>;
   disabled?: boolean;
   groupId?: string | number;
 }
@@ -40,5 +41,6 @@ export interface SelectFieldKeys {
   valueKey?: string;
   labelKey?: string;
   descriptionKey?: string;
+  additionalKeys?: string;
   groupIdKey?: string;
 }

@@ -16,3 +16,4 @@ export {
   Form,
   type FormProps,
 } from './Form';
+export { FormSection, type FormSectionProps } from './FormSection';

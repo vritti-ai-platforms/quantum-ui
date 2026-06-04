@@ -3,13 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { cn } from '../../../shadcn/utils';
 import type { TableViewState } from '../../types/table-filter';
 import { Button } from '../Button';
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRoot,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../DropdownMenu';
+import { DropdownMenu, type MenuItem } from '../DropdownMenu';
 import { Spinner } from '../Spinner';
 
 export interface TableView {
@@ -169,56 +163,70 @@ export const ViewTabs: React.FC<ViewTabsProps> = ({
                   {!view.isOwn && <Lock className="size-3 text-muted-foreground" />}
                 </span>
               </button>
+              {(() => {
+                const items: MenuItem[] = view.isOwn
+                  ? [
+                      {
+                        type: 'item',
+                        id: `${view.id}-rename`,
+                        label: 'Edit name',
+                        icon: Pencil,
+                        onClick: () => handleStartRename(view),
+                      },
+                      {
+                        type: 'item',
+                        id: `${view.id}-save`,
+                        label: 'Save changes',
+                        icon: Save,
+                        onClick: () => onUpdate(view.id),
+                      },
+                      {
+                        type: 'item',
+                        id: `${view.id}-share`,
+                        label: view.isShared ? 'Unshare' : 'Share',
+                        icon: Share2,
+                        onClick: () => onToggleShare(view.id, !view.isShared),
+                      },
+                      { type: 'separator' },
+                      {
+                        type: 'item',
+                        id: `${view.id}-delete`,
+                        label: 'Delete',
+                        icon: Trash2,
+                        variant: 'destructive',
+                        onClick: () => onDelete(view.id),
+                      },
+                    ]
+                  : [
+                      {
+                        type: 'item',
+                        id: `${view.id}-shared-by-others`,
+                        label: 'Shared by others',
+                        icon: Lock,
+                        disabled: true,
+                      },
+                    ];
 
-              {/* Overflow menu */}
-              <DropdownMenuRoot>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
-                  >
-                    <Ellipsis className="size-3.5" />
-                    <span className="sr-only">View options for {view.name}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-[180px]">
-                  {view.isOwn && (
-                    <DropdownMenuItem onClick={() => handleStartRename(view)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Edit name
-                    </DropdownMenuItem>
-                  )}
-                  {view.isOwn && (
-                    <DropdownMenuItem onClick={() => onUpdate(view.id)}>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save changes
-                    </DropdownMenuItem>
-                  )}
-                  {view.isOwn && (
-                    <DropdownMenuItem onClick={() => onToggleShare(view.id, !view.isShared)}>
-                      <Share2 className="mr-2 h-4 w-4" />
-                      {view.isShared ? 'Unshare' : 'Share'}
-                    </DropdownMenuItem>
-                  )}
-                  {view.isOwn && <DropdownMenuSeparator />}
-                  {view.isOwn && (
-                    <DropdownMenuItem
-                      onClick={() => onDelete(view.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  )}
-                  {!view.isOwn && (
-                    <DropdownMenuItem disabled>
-                      <Lock className="mr-2 h-4 w-4" />
-                      Shared by others
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenuRoot>
+                return (
+                  <DropdownMenu
+                    trigger={{
+                      children: (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
+                        >
+                          <Ellipsis className="size-3.5" />
+                          <span className="sr-only">View options for {view.name}</span>
+                        </Button>
+                      ),
+                    }}
+                    items={items}
+                    align="start"
+                    contentClassName="w-[180px]"
+                  />
+                );
+              })()}
             </>
           )}
         </div>

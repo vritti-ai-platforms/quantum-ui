@@ -1,10 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import pluralize from 'pluralize-esm';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import type { DensityType, TableViewState } from '../../../types/table-filter';
@@ -49,9 +44,12 @@ export function useDataTable<TData>({
     // State
     activeState,
     activeViewId,
+    activeViewState,
     sorting,
     // Dirty flags
     isViewDirty,
+    isFiltersDirty,
+    isSearchDirty,
     // Actions
     updateActiveState,
     setFilters,
@@ -114,6 +112,9 @@ export function useDataTable<TData>({
 
       // View dirty state
       isViewDirty,
+      isFiltersDirty,
+      isSearchDirty,
+      activeViewState,
 
       // Filters
       setFilters: (filters: Parameters<typeof setFilters>[0]) => setFilters(filters),
@@ -130,6 +131,9 @@ export function useDataTable<TData>({
       filterVisibility,
       density,
       isViewDirty,
+      isFiltersDirty,
+      isSearchDirty,
+      activeViewState,
       updateActiveState,
       setFilters,
       activeState.search,
@@ -188,7 +192,7 @@ export function useDataTable<TData>({
         updateActiveState((prev) => ({ ...prev, columnSizing: newVal }));
       }
     },
-    columnResizeMode: 'onEnd',
+    columnResizeMode: 'onChange',
     enableColumnResizing: enableColumnResizing && !lockedColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),

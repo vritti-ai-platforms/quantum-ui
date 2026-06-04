@@ -4,6 +4,8 @@ import { BookmarkPlus, EyeOff, LayoutList, Pencil, Save, Settings2, Share2, Tras
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useConfirm } from '../../../hooks/useConfirm';
+import type { DialogHandle } from '../../../hooks/useDialog';
 import type { TableViewRecord } from '../../../services/table-views.service';
 import {
   createView,
@@ -18,7 +20,6 @@ import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
 import { TextField } from '../../TextField';
-import { useConfirm } from '../../../hooks/useConfirm';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
 
 const VIEWS_QK = (slug: string) => ['quantum-ui', 'table-views', slug] as const;
@@ -59,13 +60,19 @@ export function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentPr
     },
   });
 
+  const handle: DialogHandle = {
+    isOpen: open,
+    open: () => {},
+    close: onClose,
+    onOpenChange: (v) => {
+      if (!v) onClose();
+    },
+  };
+
   return (
     <Dialog
       mode="form"
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
+      handle={handle}
       title="Create New View"
       description="Save the current filters and sort as a named view."
       form={form}
@@ -107,13 +114,19 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
     },
   });
 
+  const handle: DialogHandle = {
+    isOpen: open,
+    open: () => {},
+    close: onClose,
+    onOpenChange: (v) => {
+      if (!v) onClose();
+    },
+  };
+
   return (
     <Dialog
       mode="form"
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
+      handle={handle}
       title="Rename View"
       description={`Change the name of "${initialName}".`}
       form={form}
@@ -159,12 +172,18 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
 
   const confirm = useConfirm();
 
+  const handle: DialogHandle = {
+    isOpen: open,
+    open: () => {},
+    close: onClose,
+    onOpenChange: (v) => {
+      if (!v) onClose();
+    },
+  };
+
   return (
     <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose();
-      }}
+      handle={handle}
       title="Manage Views"
       description="Share or delete saved views for this table."
       footer={

@@ -15,6 +15,7 @@ export {
   getConfig,
   type QuantumUIConfig,
   resetConfig,
+  type TimeZoneConfig,
 } from './config';
 // Context
 export * from './context';
