@@ -112,6 +112,10 @@
       "types": "./dist/lib/components/TextField/index.d.ts",
       "import": "./dist/components/TextField.js"
     },
+    "./TokenInput": {
+      "types": "./dist/lib/components/TokenInput/index.d.ts",
+      "import": "./dist/components/TokenInput.js"
+    },
     "./SearchBar": {
       "types": "./dist/lib/components/SearchBar/index.d.ts",
       "import": "./dist/components/SearchBar.js"
@@ -223,6 +227,14 @@
     "./selects/inventory-item": {
       "types": "./dist/lib/selects/inventory-item/index.d.ts",
       "import": "./dist/selects/inventory-item.js"
+    },
+    "./selects/variant-option": {
+      "types": "./dist/lib/selects/variant-option/index.d.ts",
+      "import": "./dist/selects/variant-option.js"
+    },
+    "./selects/modifier-group": {
+      "types": "./dist/lib/selects/modifier-group/index.d.ts",
+      "import": "./dist/selects/modifier-group.js"
     },
     "./selects/lot": {
       "types": "./dist/lib/selects/lot/index.d.ts",
