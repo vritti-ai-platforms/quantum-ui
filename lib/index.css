@@ -1,13 +1,25 @@
 /**
- * quantum-ui CSS - Theme Variables and Component Styles
+ * quantum-ui CSS - Theme Variables + Component Utilities
  *
- * This file contains only CSS custom properties and component-specific styles.
- * The consuming application should import Tailwind CSS separately.
+ * Ships quantum-ui's theme tokens AND the Tailwind utility classes its own
+ * components use (scanned from lib/ + shadcn/), so a consumer gets fully styled
+ * components by importing this file alone — no need to @source-scan quantum-ui's
+ * dist (which silently fails under pnpm/CI node_modules layouts).
+ *
+ * Preflight is intentionally excluded: the consuming app imports `tailwindcss`
+ * itself and owns the base reset, so we only contribute the theme + utilities
+ * layers to avoid a duplicate reset.
  *
  * Usage in consuming app:
  * @import 'tailwindcss';
  * @import '@vritti/quantum-ui/index.css';
  */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+@source "./**/*.{ts,tsx}";
+@source "../shadcn/**/*.{ts,tsx}";
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.2302 0.0547 256.1829);
