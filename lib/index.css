@@ -12,6 +12,17 @@
  *   @import 'tailwindcss';
  *   @import '@vritti/quantum-ui/index.css';
  */
+
+/**
+ * Canonical cascade-layer order, declared at the very top of the shipped CSS.
+ * This file ships a compiled `@layer utilities` block (from ./utilities.css) but
+ * never declares `base`/`components` itself. Without this statement, a consuming
+ * app's Tailwind can register `utilities` BEFORE `base`, so preflight's reset
+ * (e.g. `border-width: 0`) overrides our component utilities — borders/shadows
+ * vanish. Declaring the order here locks `base` before `utilities` for consumers.
+ */
+@layer theme, base, components, utilities;
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.2302 0.0547 256.1829);
