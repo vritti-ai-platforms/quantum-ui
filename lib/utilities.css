@@ -1,0 +1,19 @@
+/**
+ * Compiled component utilities for quantum-ui.
+ *
+ * Generates the Tailwind utility classes quantum-ui's own components use
+ * (scanned from lib/ + shadcn/), so consumers get fully-styled components
+ * without @source-scanning quantum-ui's dist (which fails under pnpm/CI).
+ *
+ * @reference pulls the theme tokens from ./index.css for context WITHOUT
+ * re-emitting the @theme directive (that survives in ./index.css for consumers).
+ * Only the theme + utilities layers are emitted — NO preflight — since the
+ * consuming app imports `tailwindcss` itself and owns the base reset.
+ *
+ * The build bundles this into the same emitted quantum-ui.css as ./index.css.
+ */
+@reference "./index.css";
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+@source "./**/*.{ts,tsx}";
+@source "../shadcn/**/*.{ts,tsx}";

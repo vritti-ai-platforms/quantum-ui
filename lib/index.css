@@ -1,25 +1,17 @@
 /**
- * quantum-ui CSS - Theme Variables + Component Utilities
+ * quantum-ui CSS — theme tokens + component styles (the @theme DIRECTIVE).
  *
- * Ships quantum-ui's theme tokens AND the Tailwind utility classes its own
- * components use (scanned from lib/ + shadcn/), so a consumer gets fully styled
- * components by importing this file alone — no need to @source-scan quantum-ui's
- * dist (which silently fails under pnpm/CI node_modules layouts).
+ * This file deliberately does NOT import tailwindcss, so the `@theme inline`
+ * block below survives into the shipped CSS as a real directive — the consuming
+ * app's Tailwind reads it to register tokens (so e.g. `@apply border-border`
+ * and `bg-primary` work in consumer code).
  *
- * Preflight is intentionally excluded: the consuming app imports `tailwindcss`
- * itself and owns the base reset, so we only contribute the theme + utilities
- * layers to avoid a duplicate reset.
- *
- * Usage in consuming app:
- * @import 'tailwindcss';
- * @import '@vritti/quantum-ui/index.css';
+ * The compiled component utilities live in ./utilities.css; the build bundles
+ * both into the same emitted quantum-ui.css (cssCodeSplit: false), so consumers
+ * still import just this one file:
+ *   @import 'tailwindcss';
+ *   @import '@vritti/quantum-ui/index.css';
  */
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme" layer(theme);
-@import "tailwindcss/utilities" layer(utilities);
-@source "./**/*.{ts,tsx}";
-@source "../shadcn/**/*.{ts,tsx}";
-
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.2302 0.0547 256.1829);
