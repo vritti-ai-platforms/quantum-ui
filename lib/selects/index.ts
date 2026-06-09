@@ -1,5 +1,4 @@
 export * from './app';
-export * from './bom';
 export * from './business';
 export * from './category';
 export * from './cloud-provider';

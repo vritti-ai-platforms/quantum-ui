@@ -212,10 +212,6 @@
       "types": "./dist/lib/selects/app-code/index.d.ts",
       "import": "./dist/selects/app-code.js"
     },
-    "./selects/bom": {
-      "types": "./dist/lib/selects/bom/index.d.ts",
-      "import": "./dist/selects/bom.js"
-    },
     "./selects/category": {
       "types": "./dist/lib/selects/category/index.d.ts",
       "import": "./dist/selects/category.js"
