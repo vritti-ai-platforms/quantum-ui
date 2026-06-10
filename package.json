@@ -264,6 +264,10 @@
       "types": "./dist/lib/selects/purchase-order-item/index.d.ts",
       "import": "./dist/selects/purchase-order-item.js"
     },
+    "./selects/tax-group": {
+      "types": "./dist/lib/selects/tax-group/index.d.ts",
+      "import": "./dist/selects/tax-group.js"
+    },
     "./selects/uom": {
       "types": "./dist/lib/selects/uom/index.d.ts",
       "import": "./dist/selects/uom.js"

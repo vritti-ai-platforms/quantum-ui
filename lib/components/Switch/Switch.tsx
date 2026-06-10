@@ -22,8 +22,8 @@ export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof Shadc
 /**
  * Switch component for toggling between two states (on/off).
  *
- * Description is required and sits beside the toggle, keeping the label pinned
- * to the top so it aligns with adjacent TextField labels in a form row.
+ * Description is required. The label and description stack vertically on the
+ * left, with the toggle pinned to the right of the row.
  *
  * @example
  * ```tsx
@@ -44,31 +44,33 @@ export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof Shadc
  * ```
  */
 export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, SwitchProps>(
-  ({ label, description, error, id, ...props }, ref) => {
+  ({ label, description, error, id, size = 'lg', ...props }, ref) => {
     const generatedId = React.useId();
     const fieldId = id || generatedId;
     const hasError = !!error;
 
     return (
       <Field data-disabled={props.disabled} data-invalid={hasError}>
-        {label && (
-          <FieldLabel htmlFor={fieldId} className="font-normal cursor-pointer">
-            {label}
-          </FieldLabel>
-        )}
-
-        <div className="flex min-h-9 items-center justify-between gap-3">
-          <label
-            htmlFor={fieldId}
-            id={`${fieldId}-description`}
-            className="text-sm text-muted-foreground leading-normal cursor-pointer"
-          >
-            {description}
-          </label>
+        <div className="flex min-h-9 items-center justify-between gap-4">
+          <div className="flex flex-col gap-0.5">
+            {label && (
+              <FieldLabel htmlFor={fieldId} className="font-normal cursor-pointer">
+                {label}
+              </FieldLabel>
+            )}
+            <label
+              htmlFor={fieldId}
+              id={`${fieldId}-description`}
+              className="text-sm text-muted-foreground leading-normal cursor-pointer"
+            >
+              {description}
+            </label>
+          </div>
           <ShadcnSwitch
             {...props}
             ref={ref}
             id={fieldId}
+            size={size}
             aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
             aria-invalid={hasError}
           />

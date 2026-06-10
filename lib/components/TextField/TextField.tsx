@@ -24,7 +24,22 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
 // TextField molecule - Input + Label composition using Field system
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
   (
-    { label, description, error, className, id, disabled, startAdornment, endAdornment, positive, nonZero, integer, onChange, ...props },
+    {
+      label,
+      description,
+      error,
+      className,
+      id,
+      disabled,
+      startAdornment,
+      endAdornment,
+      positive,
+      nonZero,
+      integer,
+      onChange,
+      style,
+      ...props
+    },
     ref,
   ) => {
     const isNumberType = props.type === 'number';
@@ -46,6 +61,11 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     // round-trip through RHF. Must be state (not a ref) so updates trigger a re-render and
     // React's controlled input doesn't revert the DOM to the canonical number.
     const [rawInput, setRawInput] = React.useState<string>('');
+    // Trailing overlay (constraint hint + stepper / end adornment) is measured at runtime so the
+    // input reserves exactly its width as right padding — a one-char hint like "+" no longer costs
+    // the same as "Range: 0 - 100". Re-measures on content/size changes via ResizeObserver.
+    const endOverlayRef = React.useRef<HTMLDivElement>(null);
+    const [endPadding, setEndPadding] = React.useState<number | undefined>(undefined);
 
     const assignRef = React.useCallback(
       (node: HTMLInputElement | null) => {
@@ -171,6 +191,23 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       </>
     );
 
+    const hasEndContent = isNumberType || !!endAdornment || !!autoConstraintText;
+
+    React.useLayoutEffect(() => {
+      const node = endOverlayRef.current;
+      if (!hasEndContent || !node) {
+        setEndPadding(undefined);
+        return;
+      }
+      // Reserve the overlay's width plus a small gap so input text never sits under it.
+      const measure = () => setEndPadding(node.offsetWidth + 4);
+      measure();
+      if (typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(measure);
+      observer.observe(node);
+      return () => observer.disconnect();
+    }, [hasEndContent]);
+
     return (
       <Field data-disabled={disabled}>
         {label && <FieldLabel>{label}</FieldLabel>}
@@ -183,15 +220,10 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
             aria-invalid={!!error}
             ref={assignRef}
             disabled={disabled}
-            className={cn(
-              className,
-              startAdornment && 'pl-10',
-              isNumberType && (endAdornment || autoConstraintText) && 'pr-36',
-              isNumberType && !endAdornment && !autoConstraintText && 'pr-12',
-              !isNumberType && (endAdornment || autoConstraintText) && 'pr-10',
-            )}
+            className={cn(className, startAdornment && 'pl-10')}
             id={id}
             {...props}
+            style={{ ...style, paddingRight: endPadding }}
             value={displayValue}
             min={effectiveMin}
             type={normalizedType}
@@ -199,42 +231,37 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
             onKeyDown={handleKeyDown}
             onChange={handleChange}
           />
-          {isNumberType && (
-            <div className="absolute inset-y-0 right-2 z-20 flex items-center">
-              <div className="flex h-7 w-4 flex-col overflow-hidden rounded-sm border border-border bg-background">
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className="flex h-1/2 items-center justify-center border-b border-border text-muted-foreground hover:bg-accent disabled:opacity-50"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => setInputNumericValue(1)}
-                  disabled={disabled}
-                  aria-label="Increase value"
-                >
-                  <ChevronUp className="size-2.5" />
-                </button>
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className="flex h-1/2 items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-50"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => setInputNumericValue(-1)}
-                  disabled={disabled}
-                  aria-label="Decrease value"
-                >
-                  <ChevronDown className="size-2.5" />
-                </button>
-              </div>
-            </div>
-          )}
-          {(endAdornment || autoConstraintText) && (
-            <div
-              className={cn(
-                'absolute inset-y-0 flex items-center gap-2',
-                isNumberType ? 'right-8 pr-2 z-10' : 'right-0 pr-3',
+          {hasEndContent && (
+            <div ref={endOverlayRef} className="absolute inset-y-0 right-0 z-10 flex items-center gap-2 pr-2">
+              {(endAdornment || autoConstraintText) && (
+                <div className="flex items-center gap-2">{combinedEndAdornment}</div>
               )}
-            >
-              {combinedEndAdornment}
+              {isNumberType && (
+                <div className="flex h-7 w-4 flex-col overflow-hidden rounded-sm border border-border bg-background">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="flex h-1/2 items-center justify-center border-b border-border text-muted-foreground hover:bg-accent disabled:opacity-50"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => setInputNumericValue(1)}
+                    disabled={disabled}
+                    aria-label="Increase value"
+                  >
+                    <ChevronUp className="size-2.5" />
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="flex h-1/2 items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-50"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => setInputNumericValue(-1)}
+                    disabled={disabled}
+                    aria-label="Decrease value"
+                  >
+                    <ChevronDown className="size-2.5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

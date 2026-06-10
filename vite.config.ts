@@ -79,6 +79,7 @@ export default defineConfig({
         'selects/location': resolve(__dirname, 'lib/selects/location/index.ts'),
         'selects/supplier': resolve(__dirname, 'lib/selects/supplier/index.ts'),
         'selects/supplier-item': resolve(__dirname, 'lib/selects/supplier-item/index.ts'),
+        'selects/tax-group': resolve(__dirname, 'lib/selects/tax-group/index.ts'),
         'selects/purchase-order': resolve(__dirname, 'lib/selects/purchase-order/index.ts'),
         'selects/purchase-order-item': resolve(__dirname, 'lib/selects/purchase-order-item/index.ts'),
         'selects/uom': resolve(__dirname, 'lib/selects/uom/index.ts'),
