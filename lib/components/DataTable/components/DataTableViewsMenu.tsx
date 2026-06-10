@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookmarkPlus, EyeOff, LayoutList, Pencil, Save, Settings2, Share2, Trash2 } from 'lucide-react';
+import { BookmarkPlus, EyeOff, LayoutList, Pencil, Plus, Save, Settings2, Share2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -73,6 +73,7 @@ export function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentPr
     <Dialog
       mode="form"
       handle={handle}
+      icon={Plus}
       title="Create New View"
       description="Save the current filters and sort as a named view."
       form={form}
@@ -127,6 +128,7 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
     <Dialog
       mode="form"
       handle={handle}
+      icon={Pencil}
       title="Rename View"
       description={`Change the name of "${initialName}".`}
       form={form}
@@ -184,6 +186,7 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
   return (
     <Dialog
       handle={handle}
+      icon={Settings2}
       title="Manage Views"
       description="Share or delete saved views for this table."
       footer={

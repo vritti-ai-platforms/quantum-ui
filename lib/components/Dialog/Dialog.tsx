@@ -1,4 +1,5 @@
 import type { UseMutationResult } from '@tanstack/react-query';
+import type { LucideIcon } from 'lucide-react';
 import type React from 'react';
 import type { FieldValues, UseFormReturn } from 'react-hook-form';
 import {
@@ -10,10 +11,28 @@ import {
   DialogTitle as ShadcnDialogTitle,
   DialogTrigger as ShadcnDialogTrigger,
 } from '../../../shadcn/shadcnDialog';
+import { cn } from '../../../shadcn/utils';
 import type { DialogHandle } from '../../hooks/useDialog';
 import type { FieldMapping } from '../../utils/formHelpers';
 import { Button } from '../Button';
 import { Form, type FormProps } from '../Form';
+
+export interface DialogActionsProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+// Standard dialog/form action bar — a top divider with right-aligned buttons that stack on mobile.
+// Use to wrap a form's submit/cancel buttons so every dialog shares the same footer layout.
+export function DialogActions({ children, className }: DialogActionsProps) {
+  return (
+    <div className={cn('flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end', className)}>
+      {children}
+    </div>
+  );
+}
+
+DialogActions.displayName = 'DialogActions';
 
 export interface DialogProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -31,8 +50,10 @@ export interface DialogProps<
   content?: (close: () => void) => React.ReactNode;
   // trigger — legacy ReactNode trigger (wrapped in DialogTrigger automatically)
   trigger?: React.ReactNode;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
+  // Required header icon — rendered as a badge before the title to standardize dialog headers.
+  icon: LucideIcon;
+  title: React.ReactNode;
+  description: React.ReactNode;
   // Optional badge-style slot rendered inline with the title in the header.
   // Use for short status indicators tied to the dialog's subject (e.g. "Draft", "Derived unit").
   badgeSlot?: React.ReactNode;
@@ -70,6 +91,7 @@ export function Dialog<
   anchor,
   content,
   trigger,
+  icon: Icon,
   title,
   description,
   badgeSlot,
@@ -126,23 +148,18 @@ export function Dialog<
     <ShadcnDialog open={handle.isOpen} onOpenChange={handle.onOpenChange}>
       {anchor ? anchor(handle.open) : trigger && <ShadcnDialogTrigger asChild>{trigger}</ShadcnDialogTrigger>}
       <ShadcnDialogContent className={className}>
-        {(title || description) && (
-          <ShadcnDialogHeader>
-            {title && (
-              <ShadcnDialogTitle>
-                {badgeSlot ? (
-                  <span className="flex items-center gap-2">
-                    <span>{title}</span>
-                    {badgeSlot}
-                  </span>
-                ) : (
-                  title
-                )}
-              </ShadcnDialogTitle>
-            )}
-            {description && <ShadcnDialogDescription>{description}</ShadcnDialogDescription>}
-          </ShadcnDialogHeader>
-        )}
+        <ShadcnDialogHeader>
+          <ShadcnDialogTitle>
+            <span className="flex items-center gap-2">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="size-4" />
+              </span>
+              <span>{title}</span>
+              {badgeSlot}
+            </span>
+          </ShadcnDialogTitle>
+          <ShadcnDialogDescription>{description}</ShadcnDialogDescription>
+        </ShadcnDialogHeader>
         {renderBody()}
       </ShadcnDialogContent>
     </ShadcnDialog>

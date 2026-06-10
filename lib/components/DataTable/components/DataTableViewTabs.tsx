@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDialog } from '../../../hooks/useDialog';
 import { fetchViews, updateView } from '../../../services/table-views.service';
@@ -108,6 +109,7 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
 
       <Dialog
         handle={dirtyGuard}
+        icon={TriangleAlert}
         title="Unsaved Changes"
         description="This view has unsaved changes. What would you like to do?"
         footer={

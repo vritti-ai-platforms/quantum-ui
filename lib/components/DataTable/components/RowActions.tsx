@@ -37,6 +37,7 @@ const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ 
     return (
       <Dialog
         handle={dialog}
+        icon={action.icon}
         title={action.dialog.title}
         description={action.dialog.description}
         badgeSlot={action.dialog.badgeSlot}

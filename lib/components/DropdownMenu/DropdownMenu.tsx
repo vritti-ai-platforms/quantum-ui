@@ -257,6 +257,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
           <Dialog
             key={item.id}
             handle={handle}
+            icon={item.icon}
             title={item.dialog.title}
             description={item.dialog.description}
             badgeSlot={item.dialog.badgeSlot}

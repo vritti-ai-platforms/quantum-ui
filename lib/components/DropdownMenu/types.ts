@@ -207,12 +207,14 @@ export interface CustomMenuItem {
  */
 export interface DialogMenuItem extends MenuItemBase {
   type: 'dialog';
+  /** Required header icon — reused as the dialog's header icon */
+  icon: LucideIcon;
   /** Dialog configuration */
   dialog: {
     /** Dialog title */
     title: string;
-    /** Optional dialog description */
-    description?: string;
+    /** Dialog description (required) */
+    description: string;
     /** Optional badge slot rendered inline with the title */
     badgeSlot?: ReactNode;
     /** Render prop for dialog body — receives a close function */

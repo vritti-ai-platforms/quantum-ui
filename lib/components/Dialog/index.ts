@@ -1,2 +1,2 @@
-export type { DialogProps } from './Dialog';
-export { Dialog } from './Dialog';
+export type { DialogActionsProps, DialogProps } from './Dialog';
+export { Dialog, DialogActions } from './Dialog';

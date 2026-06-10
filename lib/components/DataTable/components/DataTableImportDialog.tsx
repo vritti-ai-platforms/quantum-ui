@@ -1,7 +1,7 @@
 import type { UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { ArrowLeft, CheckCircle2, Download, Equal, FilePlus2, FileUp, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Download, Equal, FilePlus2, FileUp, RefreshCw, Upload } from 'lucide-react';
 import { useCallback } from 'react';
 import { type UseFormReturn, useForm } from 'react-hook-form';
 import { utils, writeFile } from 'xlsx';
@@ -318,6 +318,7 @@ export function DataTableImportDialog({
   return (
     <Dialog
       handle={dialogHandle}
+      icon={Upload}
       title={title}
       description={description}
       className={!isUploadStep && result && !result.success ? 'max-w-3xl' : undefined}

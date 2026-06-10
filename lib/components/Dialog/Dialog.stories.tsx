@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Settings } from 'lucide-react';
 import { useDialog } from '../../hooks/useDialog';
 import { Button } from '../Button/Button';
 import { Dialog } from './Dialog';
@@ -34,7 +35,13 @@ export const Default: Story = {
   render: () => {
     const dialog = useDialog();
     return (
-      <Dialog handle={dialog} trigger={<Button>Open Dialog</Button>} title="Dialog Title">
+      <Dialog
+        handle={dialog}
+        icon={Settings}
+        trigger={<Button>Open Dialog</Button>}
+        title="Dialog Title"
+        description="A basic dialog with a trigger button."
+      >
         <p className="text-sm text-muted-foreground">This is the dialog body. You can put any content here.</p>
       </Dialog>
     );
@@ -48,6 +55,7 @@ export const WithDescription: Story = {
     return (
       <Dialog
         handle={dialog}
+        icon={Settings}
         trigger={<Button>Open Dialog</Button>}
         title="Edit Profile"
         description="Make changes to your profile here. Click save when you're done."
@@ -65,6 +73,7 @@ export const WithFooter: Story = {
     return (
       <Dialog
         handle={dialog}
+        icon={Settings}
         trigger={<Button>Open Dialog</Button>}
         title="Save Changes"
         description="Your changes will be saved to your account."
@@ -91,6 +100,7 @@ export const ConfirmationDialog: Story = {
     return (
       <Dialog
         handle={dialog}
+        icon={Settings}
         trigger={<Button variant="destructive">Delete Account</Button>}
         title="Are you absolutely sure?"
         description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
@@ -116,6 +126,7 @@ export const FormDialog: Story = {
     return (
       <Dialog
         handle={dialog}
+        icon={Settings}
         trigger={<Button>Edit Profile</Button>}
         title="Edit Profile"
         description="Update your personal information."
@@ -165,6 +176,7 @@ export const AnchorPattern: Story = {
     return (
       <Dialog
         handle={dialog}
+        icon={Settings}
         anchor={(open) => (
           <Button variant="outline" onClick={open}>
             Open with Anchor Pattern
@@ -197,6 +209,7 @@ export const AllProps: Story = {
     return (
       <Dialog
         handle={dialog}
+        icon={Settings}
         title="Dialog Title"
         description="This is the dialog description providing more context."
         trigger={<Button>Open Dialog</Button>}

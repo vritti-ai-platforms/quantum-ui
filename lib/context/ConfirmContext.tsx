@@ -1,3 +1,4 @@
+import { CircleHelp, TriangleAlert } from 'lucide-react';
 import { createContext, type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';
@@ -106,8 +107,9 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
       {children}
       <Dialog
         handle={handle}
+        icon={options.variant === 'destructive' ? TriangleAlert : CircleHelp}
         title={options.title}
-        description={options.description || undefined}
+        description={options.description}
         footer={
           <>
             <Button variant="outline" type="button" onClick={handleCancel}>
