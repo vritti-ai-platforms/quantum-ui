@@ -34,7 +34,7 @@ const densityClasses: Record<DensityType, string> = {
 
 const MODE_HEIGHTS = {
   page: 'calc(100vh - 280px)',
-  tab: 'calc(100vh - 328px)',
+  tab: 'calc(100vh - 320px)',
   compact: 'calc(100vh - 570px)',
 };
 
