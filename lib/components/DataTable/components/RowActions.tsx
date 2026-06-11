@@ -38,6 +38,7 @@ const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ 
       <Dialog
         handle={dialog}
         icon={action.icon}
+        iconVariant={action.variant === 'destructive' ? 'destructive' : 'default'}
         title={action.dialog.title}
         description={action.dialog.description}
         badgeSlot={action.dialog.badgeSlot}

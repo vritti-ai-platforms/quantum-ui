@@ -108,6 +108,7 @@ export const ConfirmProvider = ({ children, defaultOptions }: ConfirmProviderPro
       <Dialog
         handle={handle}
         icon={options.variant === 'destructive' ? TriangleAlert : CircleHelp}
+        iconVariant={options.variant}
         title={options.title}
         description={options.description}
         footer={

@@ -17,8 +17,9 @@ import {
 } from '../../../services/table-views.service';
 import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
 import { Button } from '../../Button';
-import { Dialog } from '../../Dialog';
+import { Dialog, DialogActions } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
+import { Form } from '../../Form';
 import { TextField } from '../../TextField';
 import { useDataTableStore, viewStatesEqual } from '../store/store';
 
@@ -71,22 +72,33 @@ export function CreateViewDialog({ tableSlug, open, onClose }: DialogComponentPr
 
   return (
     <Dialog
-      mode="form"
       handle={handle}
       icon={Plus}
       title="Create New View"
       description="Save the current filters and sort as a named view."
-      form={form}
-      mutation={mut}
-      transformSubmit={(data) => ({
-        name: data.name.trim(),
-        tableSlug,
-        state: useDataTableStore.getState().tables[tableSlug]?.activeState ?? EMPTY_TABLE_STATE,
-      })}
-      submitLabel="Save"
-    >
-      <TextField name="name" label="View name" placeholder="e.g. High Region Providers" />
-    </Dialog>
+      content={(close) => (
+        <Form
+          form={form}
+          mutation={mut}
+          className="space-y-4"
+          transformSubmit={(data) => ({
+            name: data.name.trim(),
+            tableSlug,
+            state: useDataTableStore.getState().tables[tableSlug]?.activeState ?? EMPTY_TABLE_STATE,
+          })}
+        >
+          <TextField name="name" label="View name" placeholder="e.g. High Region Providers" />
+          <DialogActions>
+            <Button type="button" variant="outline" onClick={close}>
+              Cancel
+            </Button>
+            <Button type="submit" loadingText="Saving...">
+              Save
+            </Button>
+          </DialogActions>
+        </Form>
+      )}
+    />
   );
 }
 
@@ -126,21 +138,32 @@ function RenameViewDialog({ tableSlug, open, onClose, initialName }: RenameDialo
 
   return (
     <Dialog
-      mode="form"
       handle={handle}
       icon={Pencil}
       title="Rename View"
       description={`Change the name of "${initialName}".`}
-      form={form}
-      mutation={mut}
-      transformSubmit={(data) => ({
-        id: activeViewId ?? '',
-        name: data.name.trim(),
-      })}
-      submitLabel="Rename"
-    >
-      <TextField name="name" label="View name" />
-    </Dialog>
+      content={(close) => (
+        <Form
+          form={form}
+          mutation={mut}
+          className="space-y-4"
+          transformSubmit={(data) => ({
+            id: activeViewId ?? '',
+            name: data.name.trim(),
+          })}
+        >
+          <TextField name="name" label="View name" />
+          <DialogActions>
+            <Button type="button" variant="outline" onClick={close}>
+              Cancel
+            </Button>
+            <Button type="submit" loadingText="Saving...">
+              Rename
+            </Button>
+          </DialogActions>
+        </Form>
+      )}
+    />
   );
 }
 
