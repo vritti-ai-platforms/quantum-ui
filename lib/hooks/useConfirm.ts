@@ -1,14 +1,7 @@
-import { useContext } from 'react';
-import { ConfirmContext, type ConfirmContextValue } from '../context/ConfirmContext';
+import { type ConfirmFn, getConfirmStore } from '../components/ConfirmHost/ConfirmHost';
 
-export type { ConfirmOptions } from '../context/ConfirmContext';
+export type { ConfirmOptions } from '../components/ConfirmHost/ConfirmHost';
 
-// Returns the confirm() function — falls back to window.confirm if no ConfirmProvider
-export function useConfirm(): ConfirmContextValue['confirm'] {
-  const context = useContext(ConfirmContext);
-  if (!context) {
-    // Fallback for module federation where context isn't shared across boundaries
-    return async (options) => window.confirm(options?.description ?? options?.title ?? 'Are you sure?');
-  }
-  return context.confirm;
+export function useConfirm(): ConfirmFn {
+  return getConfirmStore().confirm;
 }

@@ -262,7 +262,6 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
             description={item.dialog.description}
             badgeSlot={item.dialog.badgeSlot}
             content={item.dialog.content}
-            footer={item.dialog.footer}
           />
         );
       })}

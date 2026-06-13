@@ -339,31 +339,57 @@ export function Form<
   // Process children recursively to automatically wrap with Controller
   const processedChildren = processChildren(children, form.control, isSubmitting, form.setValue, onCancel, form.reset);
 
+  const childArray = Children.toArray(processedChildren);
+  const actionsIndex = childArray.findIndex(
+    (child) => isValidElement(child) && (child.type as { displayName?: string })?.displayName === 'DialogActions',
+  );
+  const hasActions = actionsIndex !== -1;
+  const bodyChildren = hasActions ? childArray.filter((_, index) => index !== actionsIndex) : processedChildren;
+  const actions = hasActions ? childArray[actionsIndex] : null;
+
+  const topError =
+    rootErrorPosition === 'top' && form.formState.errors.root ? (
+      <Alert
+        variant="destructive"
+        title={form.formState.errors.root.type || 'Error'}
+        description={form.formState.errors.root.message}
+        action={rootErrorAction}
+        className={cn('mb-4', rootErrorClassName)}
+      />
+    ) : null;
+  const bottomError =
+    rootErrorPosition === 'bottom' && form.formState.errors.root ? (
+      <Alert
+        variant="destructive"
+        title={form.formState.errors.root.type || 'Error'}
+        description={form.formState.errors.root.message}
+        action={rootErrorAction}
+        className={cn('mt-4', rootErrorClassName)}
+      />
+    ) : null;
+
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit} className={cn('space-y-4', className)} {...props}>
-        {/* Top position error */}
-        {rootErrorPosition === 'top' && form.formState.errors.root && (
-          <Alert
-            variant="destructive"
-            title={form.formState.errors.root.type || 'Error'}
-            description={form.formState.errors.root.message}
-            action={rootErrorAction}
-            className={cn('mb-4', rootErrorClassName)}
-          />
-        )}
-
-        {processedChildren}
-
-        {/* Bottom position error */}
-        {rootErrorPosition === 'bottom' && form.formState.errors.root && (
-          <Alert
-            variant="destructive"
-            title={form.formState.errors.root.type || 'Error'}
-            description={form.formState.errors.root.message}
-            action={rootErrorAction}
-            className={cn('mt-4', rootErrorClassName)}
-          />
+      <form
+        onSubmit={handleSubmit}
+        className={cn(hasActions ? 'flex min-h-0 flex-1 flex-col' : 'space-y-4', className)}
+        {...props}
+      >
+        {hasActions ? (
+          <>
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-6 py-4 [scrollbar-gutter:stable]">
+              {topError}
+              {bodyChildren}
+              {bottomError}
+            </div>
+            {actions}
+          </>
+        ) : (
+          <>
+            {topError}
+            {processedChildren}
+            {bottomError}
+          </>
         )}
       </form>
     </FormProvider>

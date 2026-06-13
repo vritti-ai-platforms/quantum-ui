@@ -110,42 +110,42 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
       <Dialog
         handle={dirtyGuard}
         icon={TriangleAlert}
+        iconVariant="warning"
         title="Unsaved Changes"
         description="This view has unsaved changes. What would you like to do?"
-        footer={
-          <div className="flex gap-2 justify-end w-full">
-            <Button
-              variant="outline"
-              onClick={() => {
-                dirtyGuard.close();
-                createDialog.open();
-              }}
-            >
-              Create New View
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                const target = pendingViewId;
-                dirtyGuard.close();
-                setPendingViewId(null);
-                if (target !== null) doActivate(target);
-              }}
-            >
-              Discard
-            </Button>
-            <Button
-              isLoading={saveMut.isPending}
-              onClick={() => {
-                const state = useDataTableStore.getState().tables[tableSlug]?.activeState;
-                if (activeViewId && state) saveMut.mutate({ id: activeViewId, state });
-              }}
-            >
-              Save View
-            </Button>
-          </div>
-        }
-      />
+      >
+        <div className="flex gap-2 justify-end w-full">
+          <Button
+            variant="outline"
+            onClick={() => {
+              dirtyGuard.close();
+              createDialog.open();
+            }}
+          >
+            Create New View
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              const target = pendingViewId;
+              dirtyGuard.close();
+              setPendingViewId(null);
+              if (target !== null) doActivate(target);
+            }}
+          >
+            Discard
+          </Button>
+          <Button
+            isLoading={saveMut.isPending}
+            onClick={() => {
+              const state = useDataTableStore.getState().tables[tableSlug]?.activeState;
+              if (activeViewId && state) saveMut.mutate({ id: activeViewId, state });
+            }}
+          >
+            Save View
+          </Button>
+        </div>
+      </Dialog>
 
       <CreateViewDialog tableSlug={tableSlug} open={createDialog.isOpen} onClose={createDialog.close} />
     </>

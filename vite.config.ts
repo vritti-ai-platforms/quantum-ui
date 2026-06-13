@@ -100,6 +100,7 @@ export default defineConfig({
         'components/DateRangePicker': resolve(__dirname, 'lib/components/DateRangePicker/index.ts'),
         'components/DateTimeRangePicker': resolve(__dirname, 'lib/components/DateTimeRangePicker/index.ts'),
         'components/DateTimePicker': resolve(__dirname, 'lib/components/DateTimePicker/index.ts'),
+        'components/ConfirmHost': resolve(__dirname, 'lib/components/ConfirmHost/index.ts'),
         'components/Dialog': resolve(__dirname, 'lib/components/Dialog/index.ts'),
         'components/DropdownMenu': resolve(__dirname, 'lib/components/DropdownMenu/index.ts'),
         'components/Empty': resolve(__dirname, 'lib/components/Empty/index.ts'),

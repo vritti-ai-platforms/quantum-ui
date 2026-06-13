@@ -212,13 +212,8 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
       icon={Settings2}
       title="Manage Views"
       description="Share or delete saved views for this table."
-      footer={
-        <Button variant="outline" onClick={onClose}>
-          Close
-        </Button>
-      }
     >
-      <div className="flex flex-col gap-1 py-2 max-h-64 overflow-y-auto">
+      <div className="flex max-h-80 min-h-32 flex-col gap-1 overflow-y-auto py-1">
         {views.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No saved views yet.</p>}
         {views.map((view) => (
           <div key={view.id} className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent/50">
@@ -256,6 +251,11 @@ function ManageViewsDialog({ tableSlug, open, onClose }: DialogComponentProps) {
             )}
           </div>
         ))}
+      </div>
+      <div className="-mx-6 mt-4 flex flex-col-reverse gap-2 border-t px-6 pt-4 sm:flex-row sm:justify-end">
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
       </div>
     </Dialog>
   );

@@ -219,8 +219,6 @@ export interface DialogMenuItem extends MenuItemBase {
     badgeSlot?: ReactNode;
     /** Render prop for dialog body — receives a close function */
     content?: (close: () => void) => ReactNode;
-    /** Static footer content */
-    footer?: ReactNode;
   };
 }
 

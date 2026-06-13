@@ -9,6 +9,7 @@ export * from './Card';
 export * from './Checkbox';
 export * from './CheckboxGroup';
 export * from './Collapsible';
+export * from './ConfirmHost';
 export * from './CurrencyField';
 export * from './DangerZone';
 export * from './DataTable';

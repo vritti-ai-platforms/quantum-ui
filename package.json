@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.3.7",
+  "version": "0.3.8",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -323,6 +323,10 @@
     "./DateTimePicker": {
       "types": "./dist/lib/components/DateTimePicker/index.d.ts",
       "import": "./dist/components/DateTimePicker.js"
+    },
+    "./components/ConfirmHost": {
+      "types": "./dist/lib/components/ConfirmHost/index.d.ts",
+      "import": "./dist/components/ConfirmHost.js"
     },
     "./Dialog": {
       "types": "./dist/lib/components/Dialog/index.d.ts",
