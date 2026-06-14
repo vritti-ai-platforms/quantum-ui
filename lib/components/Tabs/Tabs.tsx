@@ -2,6 +2,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
 import type React from 'react';
 import { useId, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   Tabs as ShadcnTabs,
   TabsContent as ShadcnTabsContent,
@@ -26,22 +27,27 @@ export interface TabsProps extends React.ComponentPropsWithoutRef<typeof TabsPri
   disabled?: boolean;
   mountStrategy?: 'active' | 'all';
   animated?: boolean;
+  // When set, the active tab is bound to this URL path param (e.g. "versionTab").
+  // The route must include that segment; switching tabs navigates to update it,
+  // so the selection is deep-linkable and survives refresh.
+  routeParam?: string;
 }
 
-// Tabs root — renders list and content panels from the tabs array
-export function Tabs({
-  tabs,
-  listClassName,
-  contentClassName,
-  disabled,
-  mountStrategy = 'active',
-  animated = true,
-  defaultValue,
-  value,
-  onValueChange,
-  ...props
-}: TabsProps) {
-  const layoutId = useId();
+interface TabsViewProps extends Omit<TabsProps, 'routeParam' | 'defaultValue' | 'value' | 'onValueChange'> {
+  value: string;
+  onValueChange: (value: string) => void;
+}
+
+// Tabs root — URL-path-bound when routeParam is set, otherwise internal/controlled state
+export function Tabs(props: TabsProps) {
+  if (props.routeParam) return <RoutedTabs {...props} routeParam={props.routeParam} />;
+  return <StatefulTabs {...props} />;
+}
+
+Tabs.displayName = 'Tabs';
+
+// Internal-state mode — preserves the original uncontrolled/`value`-controlled behavior
+function StatefulTabs({ routeParam: _routeParam, defaultValue, value, onValueChange, tabs, ...rest }: TabsProps) {
   const [activeTab, setActiveTab] = useState(value ?? defaultValue ?? tabs[0]?.value);
 
   function handleValueChange(newValue: string) {
@@ -49,11 +55,55 @@ export function Tabs({
     onValueChange?.(newValue);
   }
 
-  const controlledValue = value ?? activeTab;
+  return <TabsView value={(value ?? activeTab) as string} onValueChange={handleValueChange} tabs={tabs} {...rest} />;
+}
+
+// URL-path mode — the active tab is read from / written to a route path param
+function RoutedTabs({ routeParam, defaultValue, onValueChange, tabs, ...rest }: TabsProps & { routeParam: string }) {
+  const params = useParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const fallback = ((defaultValue as string) ?? tabs[0]?.value) ?? '';
+  const current = params[routeParam] ?? fallback;
+
+  function handleValueChange(newValue: string) {
+    const existing = params[routeParam];
+    if (existing) {
+      const segments = pathname.split('/');
+      const index = segments.lastIndexOf(existing);
+      if (index >= 0) {
+        segments[index] = newValue;
+        navigate(segments.join('/'));
+      } else {
+        navigate(`${pathname.replace(/\/+$/, '')}/${newValue}`);
+      }
+    } else {
+      navigate(`${pathname.replace(/\/+$/, '')}/${newValue}`);
+    }
+    onValueChange?.(newValue);
+  }
+
+  return <TabsView value={current} onValueChange={handleValueChange} tabs={tabs} {...rest} />;
+}
+
+// Presentational tabs — fully controlled by value + onValueChange
+function TabsView({
+  value,
+  onValueChange,
+  tabs,
+  listClassName,
+  contentClassName,
+  disabled,
+  mountStrategy = 'active',
+  animated = true,
+  ...props
+}: TabsViewProps) {
+  const layoutId = useId();
 
   if (!animated) {
     return (
-      <ShadcnTabs value={controlledValue} onValueChange={handleValueChange} {...props}>
+      <ShadcnTabs value={value} onValueChange={onValueChange} {...props}>
         <ShadcnTabsList className={listClassName}>
           {tabs.map((tab) => (
             <ShadcnTabsTrigger
@@ -80,10 +130,10 @@ export function Tabs({
     );
   }
 
-  const activeTabItem = tabs.find((t) => t.value === controlledValue);
+  const activeTabItem = tabs.find((t) => t.value === value);
 
   return (
-    <ShadcnTabs value={controlledValue} onValueChange={handleValueChange} {...props}>
+    <ShadcnTabs value={value} onValueChange={onValueChange} {...props}>
       <LayoutGroup id={layoutId}>
         <ShadcnTabsList className={listClassName}>
           {tabs.map((tab) => (
@@ -104,15 +154,11 @@ export function Tabs({
                 tab.className,
               )}
             >
-              {controlledValue === tab.value && (
+              {value === tab.value && (
                 <motion.span
                   layoutId="tab-pill"
                   className="absolute inset-0 rounded-md bg-background shadow-sm"
-                  transition={{
-                    type: 'spring',
-                    visualDuration: 0.3,
-                    bounce: 0.05,
-                  }}
+                  transition={{ type: 'spring', visualDuration: 0.3, bounce: 0.05 }}
                 />
               )}
               <span className="relative z-10">{tab.label}</span>
@@ -137,8 +183,6 @@ export function Tabs({
     </ShadcnTabs>
   );
 }
-
-Tabs.displayName = 'Tabs';
 
 export const TabsList = ShadcnTabsList;
 export const TabsContent = ShadcnTabsContent;
