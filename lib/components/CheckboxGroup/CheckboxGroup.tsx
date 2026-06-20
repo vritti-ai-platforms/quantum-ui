@@ -1,4 +1,5 @@
-import React, { useCallback } from 'react';
+import { CheckCheck, X } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
 import { Checkbox as ShadcnCheckbox } from '../../../shadcn/shadcnCheckbox';
 import {
   Field,
@@ -10,6 +11,7 @@ import {
   FieldSet,
 } from '../../../shadcn/shadcnField';
 import { cn } from '../../../shadcn/utils';
+import { Button } from '../Button';
 
 export interface CheckboxOption {
   /** The value associated with this option */
@@ -43,6 +45,13 @@ export interface CheckboxGroupProps {
   columns?: number;
   /** Whether all checkboxes in the group are disabled */
   disabled?: boolean;
+  /**
+   * When `true`, renders compact "Select all" / "Clear" inline actions in the group header
+   * (to the right of the `label`, or above the options when there is no label).
+   * "Select all" selects every non-disabled option; "Clear" empties the selection.
+   * Each action disables itself when it would be a no-op. Defaults to `false`.
+   */
+  clearable?: boolean;
   /** Additional CSS classes for the fieldset wrapper */
   className?: string;
   /** Field name consumed by Form.tsx Controller — not used directly */
@@ -65,6 +74,7 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
       orientation = 'vertical',
       columns,
       disabled,
+      clearable = false,
       className,
       name: _name,
       onBlur,
@@ -80,18 +90,74 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
     const isControlled = controlledValue !== undefined;
     const currentValue = isControlled ? controlledValue : internalValue;
 
-    // Toggle a value in/out of the selection array
-    const handleToggle = useCallback(
-      (optionValue: string, checked: boolean) => {
-        const next = checked ? [...currentValue, optionValue] : currentValue.filter((v) => v !== optionValue);
-
+    // Commit a new selection array through the shared controlled/uncontrolled path
+    const commitValue = useCallback(
+      (next: string[]) => {
         if (!isControlled) {
           setInternalValue(next);
         }
         onValueChange?.(next);
       },
-      [currentValue, isControlled, onValueChange],
+      [isControlled, onValueChange],
     );
+
+    // Toggle a value in/out of the selection array
+    const handleToggle = useCallback(
+      (optionValue: string, checked: boolean) => {
+        const next = checked ? [...currentValue, optionValue] : currentValue.filter((v) => v !== optionValue);
+        commitValue(next);
+      },
+      [currentValue, commitValue],
+    );
+
+    // Values of every option that can be selected (excludes individually disabled options)
+    const selectableValues = useMemo(
+      () => options.filter((option) => !option.disabled).map((option) => option.value),
+      [options],
+    );
+
+    // Header action state: all selectable already chosen / nothing chosen
+    const allSelected = selectableValues.length > 0 && selectableValues.every((v) => currentValue.includes(v));
+    const noneSelected = currentValue.length === 0;
+
+    // Select every non-disabled option's value
+    const handleSelectAll = useCallback(() => {
+      commitValue(selectableValues);
+    }, [commitValue, selectableValues]);
+
+    // Empty the selection
+    const handleClear = useCallback(() => {
+      commitValue([]);
+    }, [commitValue]);
+
+    // Inline "Select all" / "Clear" actions shown when clearable and the group is not disabled
+    const showActions = clearable && !disabled;
+    const headerActions = showActions ? (
+      <div className="-mr-1 flex items-center gap-0.5">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleSelectAll}
+          disabled={allSelected}
+          className="h-7 gap-1.5 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          <CheckCheck className="size-3.5" />
+          Select all
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleClear}
+          disabled={noneSelected}
+          className="h-7 gap-1.5 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          <X className="size-3.5" />
+          Clear
+        </Button>
+      </div>
+    ) : null;
 
     // Render a single checkbox option with label and optional description
     const renderItem = (option: CheckboxOption) => {
@@ -127,7 +193,14 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
 
     return (
       <FieldSet ref={ref} data-invalid={hasError || undefined} className={className} {...props}>
-        {label && <FieldLegend variant="label">{label}</FieldLegend>}
+        {label ? (
+          <div className="flex items-center justify-between gap-4">
+            <FieldLegend variant="label">{label}</FieldLegend>
+            {headerActions}
+          </div>
+        ) : (
+          headerActions && <div className="flex justify-end">{headerActions}</div>
+        )}
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         <div className={groupClassName} style={groupStyle}>
           {options.map(renderItem)}
