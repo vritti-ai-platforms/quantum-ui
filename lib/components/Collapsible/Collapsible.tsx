@@ -38,7 +38,9 @@ export function Collapsible({
   trailing,
   headerClassName,
 }: CollapsibleProps) {
-  const hasHeader = leading || trailing;
+  // Use the full header row whenever any slot OR header styling is provided, so headerClassName
+  // (padding, background, hover) always applies — not only when leading/trailing exist.
+  const hasHeader = Boolean(leading || trailing || headerClassName);
 
   return (
     <ShadcnCollapsible defaultOpen={defaultOpen} open={open} onOpenChange={onOpenChange} className={className}>

@@ -239,6 +239,48 @@ body {
   }
 }
 
+/* Collapsible — smooth height (+ fade) open/close driven by Radix's content-height var */
+@keyframes collapsible-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+[data-slot='collapsible-content'] {
+  overflow: hidden;
+}
+
+[data-slot='collapsible-content'][data-state='open'] {
+  animation: collapsible-down 0.26s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+[data-slot='collapsible-content'][data-state='closed'] {
+  animation: collapsible-up 0.22s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='collapsible-content'][data-state='open'],
+  [data-slot='collapsible-content'][data-state='closed'] {
+    animation: none;
+  }
+}
+
 /* Sonner Toast Styling */
 [data-sonner-toaster] [data-sonner-toast] {
   background-color: var(--card);
