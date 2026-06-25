@@ -6,6 +6,7 @@ export * from './currency';
 export * from './customer';
 export * from './deployment';
 export * from './feature';
+export * from './icon';
 export * from './inventory-item';
 export * from './locale';
 export * from './lot';

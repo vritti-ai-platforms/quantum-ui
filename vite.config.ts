@@ -67,6 +67,8 @@ export default defineConfig({
         'selects/timezone': resolve(__dirname, 'lib/selects/timezone/index.ts'),
         'selects/deployment': resolve(__dirname, 'lib/selects/deployment/index.ts'),
         'selects/feature': resolve(__dirname, 'lib/selects/feature/index.ts'),
+        'selects/icon': resolve(__dirname, 'lib/selects/icon/index.ts'),
+        icons: resolve(__dirname, 'lib/icons/index.ts'),
         'selects/app': resolve(__dirname, 'lib/selects/app/index.ts'),
         'selects/quant': resolve(__dirname, 'lib/selects/quant/index.ts'),
         'selects/app-code': resolve(__dirname, 'lib/selects/app-code/index.ts'),
