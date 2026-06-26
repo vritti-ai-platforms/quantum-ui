@@ -355,3 +355,45 @@ select:-webkit-autofill:active {
   caret-color: var(--foreground) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/**
+ * Self-hosted web fonts. The family names match the --font-sans/serif/mono tokens declared
+ * above, so once these @font-face rules exist the tokens resolve to the real fonts (previously
+ * they fell back to system fonts — e.g. Helvetica). Vite emits each woff2 to dist/assets and
+ * rewrites these urls; consumers that `@import "@vritti/quantum-ui/index.css"` get them for free.
+ */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/IBMPlexSans-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/IBMPlexSans-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./assets/fonts/IBMPlexSans-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./assets/fonts/PlayfairDisplay-SemiBold.woff2') format('woff2');
+}

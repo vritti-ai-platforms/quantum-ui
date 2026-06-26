@@ -23,6 +23,17 @@ function LucideGlyph({ name, className }: { name: string; className?: string }) 
   return Glyph ? <Glyph className={className} aria-hidden /> : null;
 }
 
+// Renders a Material Symbols glyph via the ligature name. quantum-ui does NOT bundle the icon font —
+// the host app must load the Material Symbols font + the `.material-symbols-outlined` class (e.g.
+// cloud-web does in its index.css). Where the font isn't present this harmlessly shows the raw name.
+function MaterialGlyph({ name, className }: { name: string; className?: string }) {
+  return (
+    <span className={cn('material-symbols-outlined', className)} style={{ fontSize: 16, lineHeight: 1 }} aria-hidden>
+      {name}
+    </span>
+  );
+}
+
 // How many names to reveal per "page". The lists are large (lucide 1670, sf 7843,
 // material 4207), so instead of rendering all rows we emulate an async data source:
 // filter locally, hand SingleSelect one page, and grow the page as its infinite-scroll
@@ -111,6 +122,9 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
     };
 
     const isLucide = kind === 'lucide';
+    const isMaterial = kind === 'material';
+    // lucide + material render a real glyph in the trigger/options; sf has no web glyph (shows the name).
+    const hasGlyph = isLucide || isMaterial;
 
     return (
       <SingleSelect
@@ -134,7 +148,7 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
         }}
         asyncState={asyncState}
         anchor={
-          isLucide
+          hasGlyph
             ? ({ selectedOption, open, disabled: anchorDisabled }) => (
                 <SingleSelectTrigger
                   ref={ref}
@@ -148,7 +162,11 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
                   <span className="flex flex-1 items-center gap-2 overflow-hidden">
                     {selectedOption ? (
                       <>
-                        <LucideGlyph name={String(selectedOption.value)} className="size-4 shrink-0" />
+                        {isLucide ? (
+                          <LucideGlyph name={String(selectedOption.value)} className="size-4 shrink-0" />
+                        ) : (
+                          <MaterialGlyph name={String(selectedOption.value)} className="shrink-0" />
+                        )}
                         <span className="truncate">{selectedOption.label}</span>
                       </>
                     ) : (
@@ -177,8 +195,12 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
               onKeyDown={handleKeyDown}
               className="relative flex h-8 w-full cursor-default select-none items-center gap-2 rounded-md px-2 pr-8 text-sm outline-hidden hover:bg-accent hover:text-accent-foreground"
             >
-              {isLucide ? <LucideGlyph name={iconName} className="size-4 shrink-0" /> : null}
-              <span className={cn('truncate', !isLucide && 'font-mono text-xs')}>{iconName}</span>
+              {isLucide ? (
+                <LucideGlyph name={iconName} className="size-4 shrink-0" />
+              ) : isMaterial ? (
+                <MaterialGlyph name={iconName} className="shrink-0" />
+              ) : null}
+              <span className={cn('truncate', !hasGlyph && 'font-mono text-xs')}>{iconName}</span>
               <span className="absolute right-2 flex size-3.5 items-center justify-center">
                 {selected && <CheckIcon className="size-4" />}
               </span>

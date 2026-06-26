@@ -32,6 +32,9 @@ const parseDateOnly = (value: string): Date =>
 
 export const formatString = (value: React.ReactNode): FormattedValue => {
   if (value == null) return { primary: '—' };
+  // Treat an empty / whitespace-only string as "no value" too — only for actual strings,
+  // so JSX/element values (badges, composed nodes) pass through untouched.
+  if (typeof value === 'string' && value.trim() === '') return { primary: '—' };
   return { primary: value };
 };
 
