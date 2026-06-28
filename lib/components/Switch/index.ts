@@ -1,2 +1,2 @@
-export type { SwitchProps } from './Switch';
-export { Switch } from './Switch';
+export type { CompactSwitchProps, SwitchProps } from './Switch';
+export { CompactSwitch, Switch } from './Switch';

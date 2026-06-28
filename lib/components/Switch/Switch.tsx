@@ -83,3 +83,21 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
 );
 
 Switch.displayName = 'Switch';
+
+export type CompactSwitchProps = React.ComponentProps<typeof ShadcnSwitch>;
+
+/**
+ * A bare, compact switch — the native shadcn switch with no Field wrapper, label, or description.
+ * Defaults to the `sm` size; intended for dense layouts like table/matrix cells. Use `Switch` for
+ * form-field usage (label + description + error).
+ *
+ * @example
+ * ```tsx
+ * <CompactSwitch checked={on} onCheckedChange={setOn} />
+ * ```
+ */
+export const CompactSwitch: React.FC<CompactSwitchProps> = ({ size = 'sm', ...props }) => (
+  <ShadcnSwitch size={size} {...props} />
+);
+
+CompactSwitch.displayName = 'CompactSwitch';
