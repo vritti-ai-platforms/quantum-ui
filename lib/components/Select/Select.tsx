@@ -37,6 +37,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     params,
     selectedValues: rest.value != null ? (Array.isArray(rest.value) ? rest.value : [rest.value]) : undefined,
     enabled: open,
+    open,
   });
 
   const isAsync = !!optionsEndpoint;

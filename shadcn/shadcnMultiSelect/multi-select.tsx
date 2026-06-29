@@ -208,13 +208,14 @@ const MultiSelectRow = memo(function MultiSelectRow({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
+      {/* Decorative only — the row (role=option) handles toggle/focus; pointer-events-none routes clicks to the row
+          so this aria-hidden checkbox never receives focus (avoids the "aria-hidden on focused element" warning) */}
       <Checkbox
         checked={checked}
-        onCheckedChange={() => onToggle()}
         disabled={disabled}
         tabIndex={-1}
         aria-hidden="true"
-        className="self-center"
+        className="pointer-events-none self-center"
       />
       <span className="min-w-0 flex-1">
         <span className="block truncate">{name}</span>

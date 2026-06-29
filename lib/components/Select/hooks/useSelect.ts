@@ -14,6 +14,7 @@ export interface UseSelectProps {
   params?: Record<string, string | number | boolean>;
   selectedValues?: SelectValue[];
   enabled?: boolean;
+  open?: boolean;
 }
 
 export interface UseSelectReturn {
@@ -46,6 +47,7 @@ export function useSelect({
   params,
   selectedValues,
   enabled,
+  open,
 }: UseSelectProps): UseSelectReturn {
   const isAsync = !!optionsEndpoint;
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,6 +79,27 @@ export function useSelect({
     [selectedValues],
   );
 
+  // Latest selection in a ref so the freeze effect can read it without depending on the (per-render) array identity
+  const selectedValuesRef = useRef(selectedValues);
+  selectedValuesRef.current = selectedValues;
+
+  // Selection used to RESOLVE + ORDER options. Snapshotted when the popover OPENS, then frozen for the whole
+  // open session — so toggling a selection doesn't refetch select-resolve or reorder the in-memory list (which
+  // would move the clicked row and lose scroll position). Re-captured on the next open, so reopening shows
+  // the current selection ordered selected-first.
+  const [resolveValues, setResolveValues] = useState(selectedValues);
+  useEffect(() => {
+    if (open) setResolveValues(selectedValuesRef.current);
+  }, [open]);
+
+  const serializedResolveValues = useMemo(
+    () =>
+      resolveValues && resolveValues.length > 0
+        ? resolveValues.filter((v): v is string | number => typeof v !== 'boolean').join(',')
+        : undefined,
+    [resolveValues],
+  );
+
   // Query 1: Resolve selected values to full option objects
   const { data: resolvedSelected } = useQuery({
     queryKey: [
@@ -84,17 +107,17 @@ export function useSelect({
       optionsEndpoint,
       stableStringify(fieldKeys),
       stableStringify(params),
-      JSON.stringify(selectedValues),
+      JSON.stringify(resolveValues),
     ],
     queryFn: () =>
       axios
         .get<SelectOptionsResponse>(optionsEndpoint ?? '', {
-          params: { values: serializedValues, ...fieldKeys, ...params },
+          params: { values: serializedResolveValues, ...fieldKeys, ...params },
           showSuccessToast: false,
           showErrorToast: false,
         })
         .then((r) => r.data),
-    enabled: isAsync && (selectedValues?.length ?? 0) > 0,
+    enabled: isAsync && (resolveValues?.length ?? 0) > 0,
     staleTime: 5 * 60_000,
     placeholderData: keepPreviousData,
   });
@@ -134,7 +157,7 @@ export function useSelect({
 
     if (debouncedSearch.trim().length === 0) {
       for (const option of selected) {
-        if (selectedValues?.includes(option.value)) {
+        if (resolveValues?.includes(option.value)) {
           uniqueByValue.set(makeKey(option.value), option);
         }
       }
@@ -147,7 +170,7 @@ export function useSelect({
     }
 
     return Array.from(uniqueByValue.values());
-  }, [resolvedSelected, data, debouncedSearch]);
+  }, [resolvedSelected, data, debouncedSearch, resolveValues]);
 
   const fetchedGroups = data?.pages[0]?.groups ?? staticGroups ?? [];
   const hasSearchResultsData = (data?.pages.length ?? 0) > 0;

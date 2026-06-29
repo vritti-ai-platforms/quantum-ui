@@ -169,18 +169,28 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
           {state.selectedOptions.map((option) => (
             <Badge key={String(option.value)} variant="secondary" className="gap-1 pr-1">
               {transformLabel ? transformLabel(option.label, option, 'trigger') : option.label}
-              <button
-                type="button"
+              {/* biome-ignore lint/a11y/useSemanticElements: must stay a span — it's nested inside the trigger's
+                  <button>, and a nested native <button> is invalid HTML */}
+              <span
+                role="button"
+                tabIndex={0}
                 aria-label={`Remove ${option.label}`}
-                className="rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="inline-flex cursor-pointer rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={(e) => {
                   e.stopPropagation();
                   state.toggleOption(option.value);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    state.toggleOption(option.value);
+                  }
+                }}
               >
                 <X className="size-3 text-muted-foreground hover:text-foreground" />
-              </button>
+              </span>
             </Badge>
           ))}
         </span>
