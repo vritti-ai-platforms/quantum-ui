@@ -1,5 +1,5 @@
 import { CircleHelp, TriangleAlert } from 'lucide-react';
-import { useMemo, useSyncExternalStore } from 'react';
+import { type ReactNode, useMemo, useSyncExternalStore } from 'react';
 import type { DialogHandle } from '../../hooks/useDialog';
 import { Alert } from '../Alert';
 import { Button } from '../Button';
@@ -17,6 +17,8 @@ export interface ConfirmOptions {
   cancelLabel?: string;
   variant?: 'default' | 'destructive';
   alert?: ConfirmAlert;
+  // Rich body rendered between the description and the action buttons (e.g. an impact breakdown)
+  content?: ReactNode;
 }
 
 interface ResolvedConfirmOptions {
@@ -26,6 +28,7 @@ interface ResolvedConfirmOptions {
   cancelLabel: string;
   variant: 'default' | 'destructive';
   alert?: ConfirmAlert;
+  content?: ReactNode;
 }
 
 const DEFAULT_CONFIRM_OPTIONS: ResolvedConfirmOptions = {
@@ -119,7 +122,12 @@ export const ConfirmHost = () => {
       title={options.title}
       description={options.description}
     >
-      {options.alert ? <Alert variant={options.alert.type} description={options.alert.text} /> : null}
+      {options.alert || options.content ? (
+        <div className="mt-4 mb-6 flex flex-col gap-4 text-left">
+          {options.alert ? <Alert variant={options.alert.type} description={options.alert.text} /> : null}
+          {options.content ? <div>{options.content}</div> : null}
+        </div>
+      ) : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" type="button" onClick={store.cancel}>
           {options.cancelLabel}
