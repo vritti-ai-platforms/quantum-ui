@@ -24,7 +24,7 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
             </Typography>
           )}
         </div>
-        {actions}
+        {actions && <div className="flex shrink-0 items-center gap-2 self-center">{actions}</div>}
       </div>
     );
   },

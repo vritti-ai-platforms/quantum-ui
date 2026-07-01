@@ -384,6 +384,10 @@
       "types": "./dist/lib/components/Toggle/index.d.ts",
       "import": "./dist/components/Toggle.js"
     },
+    "./Tooltip": {
+      "types": "./dist/lib/components/Tooltip/index.d.ts",
+      "import": "./dist/components/Tooltip.js"
+    },
     "./TreeView": {
       "types": "./dist/lib/components/TreeView/index.d.ts",
       "import": "./dist/components/TreeView.js"

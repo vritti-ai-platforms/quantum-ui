@@ -115,6 +115,7 @@ export default defineConfig({
         'components/Switch': resolve(__dirname, 'lib/components/Switch/index.ts'),
         'components/Tabs': resolve(__dirname, 'lib/components/Tabs/index.ts'),
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),
+        'components/Tooltip': resolve(__dirname, 'lib/components/Tooltip/index.ts'),
         'components/TreeView': resolve(__dirname, 'lib/components/TreeView/index.ts'),
         'components/FilePreview': resolve(__dirname, 'lib/components/FilePreview/index.ts'),
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),

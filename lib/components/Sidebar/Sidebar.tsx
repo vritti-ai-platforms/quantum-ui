@@ -34,6 +34,10 @@ export interface SidebarNavItem {
   icon: React.ComponentType<{ className?: string }>;
   path: string;
   children?: SidebarNavChild[];
+  // Optional trailing element (e.g. a lock chip), right-aligned after the title
+  endAdornment?: React.ReactNode;
+  // When true the row is greyed and non-navigating (still visible)
+  disabled?: boolean;
 }
 
 export interface SidebarNavGroup {
@@ -89,10 +93,13 @@ const FlatItem: React.FC<{
     <ShadcnSidebarMenuButton
       tooltip={item.title}
       isActive={pathname === item.path || pathname.startsWith(`${item.path}/`)}
-      onClick={() => navigate(item.path)}
+      onClick={() => (item.disabled ? undefined : navigate(item.path))}
+      aria-disabled={item.disabled}
+      className={item.disabled ? 'opacity-60' : undefined}
     >
       <item.icon />
       <span>{item.title}</span>
+      {item.endAdornment && <span className="ml-auto flex items-center">{item.endAdornment}</span>}
     </ShadcnSidebarMenuButton>
   </ShadcnSidebarMenuItem>
 );

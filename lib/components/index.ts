@@ -53,6 +53,7 @@ export * from './TextArea';
 export * from './TextField';
 export * from './ThemeToggle';
 export * from './Toggle';
+export * from './Tooltip';
 export * from './Typography';
 export * from './UploadFile';
 export * from './ValueFilter';
