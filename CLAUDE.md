@@ -107,6 +107,13 @@ When adding a new component, update these files:
    'components/MyComponent': resolve(__dirname, 'lib/components/MyComponent/index.ts'),
    ```
 
+### Shared type modules — `lib/types/*` + `./types/*` subpaths
+
+Cross-app TYPE surfaces (not component props) live in `lib/types/<name>.ts` and are exported at
+`@vritti/quantum-ui/types/<name>` (see `types/catalog-resolver`, `types/api-response`, `types/table-filter`).
+`lib/types/catalog-resolver.ts` is a frontend mirror of `@vritti/api-sdk/catalog-resolver` — keep it
+field-for-field in sync; web apps import from HERE, never from the server SDK.
+
 ### 4. TypeScript Conventions
 
 - Export prop interfaces alongside components

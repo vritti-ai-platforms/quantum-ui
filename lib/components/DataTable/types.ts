@@ -68,6 +68,9 @@ export interface ImportExportConfig<TData = unknown> {
   transformExportRow?: (row: TData) => Record<string, unknown>;
   filename: string;
   onSuccess?: () => void;
+  // "feature.permission" gate codes — the matching entries hide when not granted, disable when plan/BU-locked
+  importPermission?: string;
+  exportPermission?: string;
 }
 
 // --- DataTable component props ---
@@ -84,6 +87,9 @@ export interface DataTableProps<TData> {
   enableViews?: boolean;
   importExport?: ImportExportConfig<TData>;
   mode?: 'page' | 'tab' | 'compact';
+  // "feature.permission" gate for the whole table — renders nothing when not granted,
+  // a locked shell (no data fetching UI) when plan/BU-locked. Inert without a PermissionGateProvider.
+  permission?: string;
   // Fires when a non-actions cell in a row is clicked. Highlights the matching row.
   onRowClick?: (row: TData) => void;
   // Returns the id of the externally-selected row (rendered with the `selected` data-state).

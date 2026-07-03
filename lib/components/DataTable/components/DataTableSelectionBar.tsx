@@ -11,6 +11,10 @@ interface DataTableSelectionBarProps<TData> {
   children?: React.ReactNode;
   className?: string;
   importExport?: ImportExportConfig<TData>;
+  // Export gate resolved by the parent DataTable: hidden removes the button entirely
+  // (including the legacy CSV path), a lock tip renders it disabled with the upsell
+  exportHidden?: boolean;
+  exportLockTip?: string;
 }
 
 // Renders a selection info bar showing selected row count with export and clear actions
@@ -19,6 +23,8 @@ export function DataTableSelectionBar<TData>({
   children,
   className,
   importExport,
+  exportHidden,
+  exportLockTip,
 }: DataTableSelectionBarProps<TData>) {
   const meta = table.options.meta as DataTableMeta | undefined;
   const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -40,7 +46,18 @@ export function DataTableSelectionBar<TData>({
       </span>
       {children}
       <div className="ml-auto flex items-center gap-2">
-        {importExport ? (
+        {exportHidden ? null : exportLockTip ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-sm"
+            disabled
+            disabledTip={exportLockTip}
+            startAdornment={<Download className="h-4 w-4" />}
+          >
+            Export
+          </Button>
+        ) : importExport ? (
           <DropdownMenu
             trigger={{ label: 'Export', variant: 'outline' as const, icon: Download, className: 'h-8 text-sm' }}
             items={[

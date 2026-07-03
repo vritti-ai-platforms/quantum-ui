@@ -10,6 +10,7 @@ import { EMPTY_TABLE_STATE } from '../../types/table-filter';
 import { axios } from '../../utils/axios';
 import { Button } from '../Button';
 import { DropdownMenu } from '../DropdownMenu';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 import { Skeleton } from '../Skeleton';
 import { DataTableColumnHeader } from './components/DataTableColumnHeader';
 import { DataTableEmpty } from './components/DataTableEmpty';
@@ -67,9 +68,15 @@ export function DataTable<TData>({
   mode = 'page',
   onRowClick,
   selectedRowId,
+  permission,
 }: DataTableProps<TData>) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const importDialog = useDialog();
+
+  // Table-level + import/export gates — ALLOW when no code or no provider is mounted
+  const tableGate = usePermission(permission);
+  const importGate = usePermission(importExport?.importPermission);
+  const exportGate = usePermission(importExport?.exportPermission);
 
   const meta = table.options.meta as DataTableMeta | undefined;
   const slug = meta?.slug;
@@ -79,8 +86,11 @@ export function DataTable<TData>({
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
+  // Import/Export respect their gates: hidden when not granted, disabled (with lock) when locked
+  const showImport = !!importExport && importGate.granted;
+  const showExport = !!importExport && exportGate.granted;
   const showToolbar =
-    searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || importExport;
+    searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || showImport || showExport;
 
   const search = meta?.search ?? null;
   const hasActiveView = !!activeViewId;
@@ -110,6 +120,26 @@ export function DataTable<TData>({
       downloadBlob(response.data, `${importExport.filename}.${format}`);
     },
   });
+
+  // render = role: the role doesn't grant this table's feature, so it doesn't exist for this user
+  if (!tableGate.granted) {
+    return null;
+  }
+
+  // enable = role ∧ plan ∧ BU: granted but locked renders the shell with the lock notice instead of data
+  if (tableGate.locked) {
+    return (
+      <div className={cn('flex flex-col gap-2', className)}>
+        <div
+          className="flex flex-col items-center justify-center gap-2 rounded-lg border text-center"
+          style={{ height: MODE_HEIGHTS[mode] }}
+        >
+          <PermissionLockIcon reason={tableGate.reason} className="size-6" />
+          <p className="text-sm text-muted-foreground">{lockedTip(tableGate)}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -150,7 +180,7 @@ export function DataTable<TData>({
             {visibilityEnabled && <DataTableViewOptions table={table} />}
             <DataTableRowDensity table={table as import('@tanstack/react-table').Table<unknown>} />
             {enableViews && slug && <DataTableViewsMenu slug={slug} />}
-            {importExport && (
+            {(showImport || showExport) && (
               <DropdownMenu
                 trigger={{
                   children: (
@@ -160,56 +190,65 @@ export function DataTable<TData>({
                   ),
                 }}
                 items={[
-                  {
-                    type: 'item' as const,
-                    id: 'import',
-                    label: 'Import',
-                    icon: ArrowUpFromLine,
-                    onClick: importDialog.open,
-                  },
-                  {
-                    type: 'sub' as const,
-                    id: 'export',
-                    label: 'Export All',
-                    icon: ArrowDownToLine,
-                    items: [
-                      {
-                        type: 'item' as const,
-                        id: 'csv',
-                        label: 'CSV (.csv)',
-                        disabled: exportMutation.isPending,
-                        onClick: () => exportMutation.mutate('csv'),
-                      },
-                      {
-                        type: 'item' as const,
-                        id: 'xlsx',
-                        label: 'Excel (.xlsx)',
-                        disabled: exportMutation.isPending,
-                        onClick: () => exportMutation.mutate('xlsx'),
-                      },
-                      {
-                        type: 'item' as const,
-                        id: 'xls',
-                        label: 'Excel 97-2004 (.xls)',
-                        disabled: exportMutation.isPending,
-                        onClick: () => exportMutation.mutate('xls'),
-                      },
-                      {
-                        type: 'item' as const,
-                        id: 'ods',
-                        label: 'OpenDocument (.ods)',
-                        disabled: exportMutation.isPending,
-                        onClick: () => exportMutation.mutate('ods'),
-                      },
-                      {
-                        type: 'item' as const,
-                        id: 'tsv',
-                        label: 'TSV (.tsv)',
-                        disabled: exportMutation.isPending,
-                        onClick: () => exportMutation.mutate('tsv'),
-                      },
-                    ],
-                  },
+                  ...(showImport
+                    ? [
+                        {
+                          type: 'item' as const,
+                          id: 'import',
+                          label: 'Import',
+                          icon: ArrowUpFromLine,
+                          disabled: importGate.locked,
+                          onClick: importDialog.open,
+                        },
+                      ]
+                    : []),
+                  ...(showExport
+                    ? [
+                        {
+                          type: 'sub' as const,
+                          id: 'export',
+                          label: 'Export All',
+                          icon: ArrowDownToLine,
+                          items: [
+                            {
+                              type: 'item' as const,
+                              id: 'csv',
+                              label: 'CSV (.csv)',
+                              disabled: exportMutation.isPending || exportGate.locked,
+                              onClick: () => exportMutation.mutate('csv'),
+                            },
+                            {
+                              type: 'item' as const,
+                              id: 'xlsx',
+                              label: 'Excel (.xlsx)',
+                              disabled: exportMutation.isPending || exportGate.locked,
+                              onClick: () => exportMutation.mutate('xlsx'),
+                            },
+                            {
+                              type: 'item' as const,
+                              id: 'xls',
+                              label: 'Excel 97-2004 (.xls)',
+                              disabled: exportMutation.isPending || exportGate.locked,
+                              onClick: () => exportMutation.mutate('xls'),
+                            },
+                            {
+                              type: 'item' as const,
+                              id: 'ods',
+                              label: 'OpenDocument (.ods)',
+                              disabled: exportMutation.isPending || exportGate.locked,
+                              onClick: () => exportMutation.mutate('ods'),
+                            },
+                            {
+                              type: 'item' as const,
+                              id: 'tsv',
+                              label: 'TSV (.tsv)',
+                              disabled: exportMutation.isPending || exportGate.locked,
+                              onClick: () => exportMutation.mutate('tsv'),
+                            },
+                          ],
+                        },
+                      ]
+                    : []),
                 ]}
               />
             )}
@@ -231,7 +270,12 @@ export function DataTable<TData>({
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
-              <DataTableSelectionBar table={table} importExport={importExport}>
+              <DataTableSelectionBar
+                table={table}
+                importExport={importExport}
+                exportHidden={!exportGate.granted}
+                exportLockTip={exportGate.locked ? lockedTip(exportGate) : undefined}
+              >
                 {selectActions?.(table.getFilteredSelectedRowModel().rows)}
               </DataTableSelectionBar>
             </motion.div>
@@ -439,7 +483,7 @@ export function DataTable<TData>({
       )}
 
       {/* Import dialog */}
-      {importExport && (
+      {importExport && showImport && (
         <DataTableImportDialog
           handle={importDialog}
           columns={importExport.columns}

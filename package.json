@@ -208,6 +208,10 @@
       "types": "./dist/lib/icons/index.d.ts",
       "import": "./dist/icons.js"
     },
+    "./types/catalog-resolver": {
+      "types": "./dist/lib/types/catalog-resolver.d.ts",
+      "import": "./dist/types/catalog-resolver.js"
+    },
     "./selects/app": {
       "types": "./dist/lib/selects/app/index.d.ts",
       "import": "./dist/selects/app.js"
@@ -420,11 +424,11 @@
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
     },
-    "./table-filter": {
+    "./types/table-filter": {
       "types": "./dist/lib/types/table-filter.d.ts",
       "import": "./dist/types/table-filter.js"
     },
-    "./api-response": {
+    "./types/api-response": {
       "types": "./dist/lib/types/api-response.d.ts",
       "import": "./dist/types/api-response.js"
     },
