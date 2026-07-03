@@ -389,7 +389,7 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={cn(
                                   densityClasses[density],
-                                  isActionsCell ? 'relative px-2 sticky right-0 z-10' : undefined,
+                                  isActionsCell ? 'px-2 sticky right-0 z-10' : undefined,
                                   onRowClick && !isActionsCell ? 'cursor-pointer' : undefined,
                                 )}
                                 onClick={onRowClick && !isActionsCell ? () => onRowClick(row.original) : undefined}
