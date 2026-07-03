@@ -372,6 +372,10 @@
       "types": "./dist/lib/components/StepProgressIndicator/index.d.ts",
       "import": "./dist/components/StepProgressIndicator.js"
     },
+    "./PermissionGate": {
+      "types": "./dist/lib/components/PermissionGate/index.d.ts",
+      "import": "./dist/components/PermissionGate.js"
+    },
     "./Switch": {
       "types": "./dist/lib/components/Switch/index.d.ts",
       "import": "./dist/components/Switch.js"

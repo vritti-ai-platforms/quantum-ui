@@ -112,6 +112,7 @@ export default defineConfig({
         'components/Sonner': resolve(__dirname, 'lib/components/Sonner/index.ts'),
         'components/Spinner': resolve(__dirname, 'lib/components/Spinner/index.ts'),
         'components/StepProgressIndicator': resolve(__dirname, 'lib/components/StepProgressIndicator/index.ts'),
+        'components/PermissionGate': resolve(__dirname, 'lib/components/PermissionGate/index.ts'),
         'components/Switch': resolve(__dirname, 'lib/components/Switch/index.ts'),
         'components/Tabs': resolve(__dirname, 'lib/components/Tabs/index.ts'),
         'components/Toggle': resolve(__dirname, 'lib/components/Toggle/index.ts'),

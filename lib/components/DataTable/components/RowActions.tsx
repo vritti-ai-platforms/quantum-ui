@@ -4,6 +4,7 @@ import { useDialog } from '../../../hooks/useDialog';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';
+import { lockedTip, usePermissionGate } from '../../PermissionGate';
 
 export interface RowAction {
   id: string;
@@ -13,6 +14,8 @@ export interface RowAction {
   variant?: 'default' | 'destructive';
   disabled?: boolean;
   hidden?: boolean;
+  // "feature.permission" gate code — not granted hides the action (layout reflows), locked disables it with an upsell
+  permission?: string;
   dialog?: {
     title: string;
     description: string;
@@ -27,8 +30,11 @@ export interface RowActionsProps {
   disabledAll?: boolean;
 }
 
+// A RowAction after permission resolution — locked actions carry their upsell tooltip
+type ResolvedAction = RowAction & { lockTip?: string };
+
 // Renders a single action as a direct icon button or dialog trigger
-const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ action, disabledAll }) => {
+const DirectAction: React.FC<{ action: ResolvedAction; disabledAll?: boolean }> = ({ action, disabledAll }) => {
   const Icon = action.icon;
   const destructiveClass = action.variant === 'destructive' ? 'text-destructive hover:text-destructive' : '';
   const dialog = useDialog();
@@ -49,6 +55,7 @@ const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ 
             size="icon"
             className={`size-7 ${destructiveClass}`}
             disabled={disabledAll || action.disabled}
+            disabledTip={action.lockTip}
             onClick={open}
             aria-label={action.label}
           >
@@ -66,6 +73,7 @@ const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ 
       size="icon"
       className={`size-7 ${destructiveClass}`}
       disabled={disabledAll || action.disabled}
+      disabledTip={action.lockTip}
       onClick={action.onClick}
       aria-label={action.label}
     >
@@ -75,7 +83,7 @@ const DirectAction: React.FC<{ action: RowAction; disabledAll?: boolean }> = ({ 
 };
 
 // Converts actions to DropdownMenu items format
-function toDropdownItems(actions: RowAction[], disabledAll?: boolean) {
+function toDropdownItems(actions: ResolvedAction[], disabledAll?: boolean) {
   return actions.map((action) => {
     if (action.dialog) {
       return {
@@ -102,7 +110,19 @@ function toDropdownItems(actions: RowAction[], disabledAll?: boolean) {
 
 // Auto-layout row actions: 0→null, 1→button, 2→side-by-side, 3+→primary + ⋮ dropdown
 export const RowActions: React.FC<RowActionsProps> = ({ actions, disabledAll }) => {
-  const visible = actions.filter((a) => !a.hidden);
+  const gate = usePermissionGate();
+
+  // Resolve each action's permission into the hidden/disabled flags the auto-layout already understands.
+  // Resolution happens BEFORE the visibility filter so the 1/2/3+ layout counts only what the role grants.
+  const resolved: ResolvedAction[] = actions.map((action) => {
+    if (!action.permission) return action;
+    const result = gate(action.permission);
+    if (!result.granted) return { ...action, hidden: true };
+    if (result.locked) return { ...action, disabled: true, lockTip: lockedTip(result) };
+    return action;
+  });
+
+  const visible = resolved.filter((a) => !a.hidden);
 
   if (visible.length === 0) return null;
 

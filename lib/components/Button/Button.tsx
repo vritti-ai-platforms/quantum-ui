@@ -3,6 +3,7 @@ import { forwardRef } from 'react';
 import { buttonVariants, Button as ShadcnButton } from '../../../shadcn/shadcnButton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../shadcn/shadcnTooltip';
 import { cn } from '../../../shadcn/utils';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 import { Spinner } from '../Spinner';
 
 export interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
@@ -11,9 +12,12 @@ export interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
   disabledTip?: string;
+  // "feature.permission" gate code — inert when no PermissionGateProvider is mounted.
+  // Not granted by the role → renders nothing; granted but plan/BU-locked → disabled + lock + upsell tip.
+  permission?: string;
 }
 
-// Button with built-in loading state and adornment support
+// Button with built-in loading state, adornment support, and optional permission gating
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -24,19 +28,29 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       endAdornment,
       disabled,
       disabledTip,
+      permission,
       className,
       asChild,
       ...props
     },
     ref,
   ) => {
-    const isActuallyDisabled = disabled === true;
+    const { granted, locked, reason, unlockPlans } = usePermission(permission);
+
+    // render = role: the role doesn't grant this action, so the control doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const lockTip = locked ? lockedTip({ reason, unlockPlans }) : undefined;
+    const isActuallyDisabled = disabled === true || locked;
 
     const button = (
       <ShadcnButton
         ref={ref}
         asChild={asChild}
-        disabled={disabled || isLoading}
+        disabled={disabled || isLoading || locked}
         aria-busy={isLoading}
         className={cn(isLoading && 'cursor-wait', className)}
         {...props}
@@ -48,7 +62,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         ) : (
           <>
-            {startAdornment}
+            {locked ? <PermissionLockIcon reason={reason} className="size-3.5" /> : startAdornment}
             {children}
             {endAdornment}
           </>
@@ -56,7 +70,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       </ShadcnButton>
     );
 
-    if (!disabledTip || !isActuallyDisabled || asChild) {
+    const tip = lockTip ?? disabledTip;
+    if (!tip || !isActuallyDisabled || asChild) {
       return button;
     }
 
@@ -67,7 +82,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             {/* Disabled buttons do not emit hover/focus events, so the tooltip trigger lives on a wrapper. */}
             <span className="inline-flex max-w-full cursor-not-allowed">{button}</span>
           </TooltipTrigger>
-          <TooltipContent>{disabledTip}</TooltipContent>
+          <TooltipContent>{tip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );

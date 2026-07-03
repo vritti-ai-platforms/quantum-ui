@@ -31,6 +31,7 @@ export * from './LineChart';
 export * from './OTPField';
 export * from './PageContent';
 export * from './PageHeader';
+export * from './PermissionGate';
 export * from './PasswordField';
 export * from './PhoneField';
 export * from './PieChart';
