@@ -1,27 +1,23 @@
-"use client"
+'use client';
 
-import { cn } from "../../../shadcn/utils"
-import {
-  InitialConfigType,
-  LexicalComposer,
-} from "@lexical/react/LexicalComposer"
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin"
-import type { RichTextEditorProps } from "./types"
-
-import { EditorConfigProvider } from "./context/editor-config-context"
-import { nodes } from "./nodes"
-import { Plugins } from "./plugins"
-import { editorTheme } from "./themes/editor-theme"
-import { TooltipProvider } from "./editor-ui/tooltip"
+import { type InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { cn } from '../../../shadcn/utils';
+import { EditorConfigProvider } from './context/editor-config-context';
+import { TooltipProvider } from './editor-ui/tooltip';
+import { nodes } from './nodes';
+import { Plugins } from './plugins';
+import { editorTheme } from './themes/editor-theme';
+import type { RichTextEditorProps } from './types';
 
 const editorConfig: InitialConfigType = {
-  namespace: "RichTextEditor",
+  namespace: 'RichTextEditor',
   theme: editorTheme,
   nodes,
   onError: (error: Error) => {
-    console.error(error)
+    console.error(error);
   },
-}
+};
 
 export function RichTextEditor({
   editorState,
@@ -33,26 +29,19 @@ export function RichTextEditor({
   maxLength = 5000,
   onImageUpload,
   onMentionSearch,
-  placeholder = "Press / for commands...",
+  placeholder = 'Press / for commands...',
   readOnly = false,
   contentOnly = false,
 }: RichTextEditorProps) {
-  const isReadOnly = readOnly || contentOnly
+  const isReadOnly = readOnly || contentOnly;
   return (
-    <div
-      className={cn(
-        "bg-background overflow-hidden rounded-lg border shadow",
-        className
-      )}
-    >
+    <div className={cn('bg-background overflow-hidden rounded-lg border shadow', className)}>
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
           editable: !isReadOnly,
           ...(editorState ? { editorState } : {}),
-          ...(editorSerializedState
-            ? { editorState: JSON.stringify(editorSerializedState) }
-            : {}),
+          ...(editorSerializedState ? { editorState: JSON.stringify(editorSerializedState) } : {}),
         }}
       >
         <TooltipProvider>
@@ -73,14 +62,14 @@ export function RichTextEditor({
           <OnChangePlugin
             ignoreSelectionChange={true}
             onChange={(editorState) => {
-              onChange?.(editorState)
-              onSerializedChange?.(editorState.toJSON())
+              onChange?.(editorState);
+              onSerializedChange?.(editorState.toJSON());
             }}
           />
         </TooltipProvider>
       </LexicalComposer>
     </div>
-  )
+  );
 }
 
 export type {
@@ -88,10 +77,4 @@ export type {
   MentionOption,
   MentionSearchHandler,
   RichTextEditorProps,
-} from "./types"
-
-
-
-
-
-
+} from './types';

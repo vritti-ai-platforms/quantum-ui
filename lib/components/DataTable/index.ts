@@ -2,7 +2,15 @@
 
 export type { CompactTableSkeletonColumn, CompactTableSkeletonProps } from './CompactTableSkeleton';
 export { CompactTableSkeleton } from './CompactTableSkeleton';
-
+// Cell components — wrap useFormatters() for consistent rendering with DetailField.
+export type {
+  CurrencyCellProps,
+  DateCellProps,
+  DateTimeCellProps,
+  NumberCellProps,
+  StringCellProps,
+} from './cells/cells';
+export { CurrencyCell, DateCell, DateTimeCell, NumberCell, StringCell } from './cells/cells';
 // Sub-components
 export { DataTableColumnHeader } from './components/DataTableColumnHeader';
 export { DataTableEmpty } from './components/DataTableEmpty';
@@ -19,7 +27,6 @@ export type { DataTableServerState } from './hooks/useDataTable';
 export { useDataTable } from './hooks/useDataTable';
 export type { TableSlice, TableState } from './store/store';
 export { useDataTableStore } from './store/store';
-
 // Types
 export type {
   ColumnDef,
@@ -35,16 +42,5 @@ export type {
   SearchState,
   SelectActions,
 } from './types';
-
 // Utility
 export { exportToCSV, getSelectionColumn } from './utils';
-
-// Cell components — wrap useFormatters() for consistent rendering with DetailField.
-export type {
-  CurrencyCellProps,
-  DateCellProps,
-  DateTimeCellProps,
-  NumberCellProps,
-  StringCellProps,
-} from './cells/cells';
-export { CurrencyCell, DateCell, DateTimeCell, NumberCell, StringCell } from './cells/cells';

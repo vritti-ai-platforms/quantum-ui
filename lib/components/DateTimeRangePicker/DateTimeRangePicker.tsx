@@ -167,12 +167,9 @@ export const DateTimeRangePicker = forwardRef<HTMLButtonElement, DateTimeRangePi
       }
     };
 
-    const displayText = value?.from
-      ? `${formatDisplay(value.from)} – ${formatDisplay(value.to) ?? '...'}`
-      : undefined;
+    const displayText = value?.from ? `${formatDisplay(value.from)} – ${formatDisplay(value.to) ?? '...'}` : undefined;
 
-    const inputBarClass =
-      'inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1';
+    const inputBarClass = 'inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1';
     const segmentClass =
       '!h-6 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs';
 
@@ -211,7 +208,11 @@ export const DateTimeRangePicker = forwardRef<HTMLButtonElement, DateTimeRangePi
                     onChange={(e) => {
                       const day = digits(e.target.value, 2);
                       if (day === '00') return;
-                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(fromDraftParts, new Date()))) return;
+                      if (
+                        day.length === 2 &&
+                        (Number(day) < 1 || Number(day) > maxDayForParts(fromDraftParts, new Date()))
+                      )
+                        return;
                       const next = { ...fromDraftParts, day };
                       setFromDraftParts(next);
                       commitFrom(next, fromDraftTime);
@@ -256,7 +257,11 @@ export const DateTimeRangePicker = forwardRef<HTMLButtonElement, DateTimeRangePi
                     onChange={(e) => {
                       const day = digits(e.target.value, 2);
                       if (day === '00') return;
-                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(toDraftParts, new Date()))) return;
+                      if (
+                        day.length === 2 &&
+                        (Number(day) < 1 || Number(day) > maxDayForParts(toDraftParts, new Date()))
+                      )
+                        return;
                       const next = { ...toDraftParts, day };
                       setToDraftParts(next);
                       commitTo(next, toDraftTime);

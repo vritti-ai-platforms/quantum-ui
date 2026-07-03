@@ -85,16 +85,20 @@ function itemsToFlow<T extends HierarchyItem>(items: T[]) {
     position: { x: 0, y: 0 },
   }));
 
-  const edges: Edge[] = items
-    .filter((item) => item.parentId)
-    .map((item) => ({
-      id: `e-${item.parentId}-${item.id}`,
-      source: item.parentId!,
-      target: item.id,
-      type: 'smoothstep',
-      animated: false,
-      style: { stroke: 'var(--color-border)', strokeWidth: 2 },
-    }));
+  const edges: Edge[] = items.flatMap((item) =>
+    item.parentId
+      ? [
+          {
+            id: `e-${item.parentId}-${item.id}`,
+            source: item.parentId,
+            target: item.id,
+            type: 'smoothstep',
+            animated: false,
+            style: { stroke: 'var(--color-border)', strokeWidth: 2 },
+          },
+        ]
+      : [],
+  );
 
   return { nodes, edges };
 }

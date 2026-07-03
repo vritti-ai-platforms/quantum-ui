@@ -33,7 +33,8 @@ const ALLOW_GATE: PermissionGate = () => ALLOW;
 const GATE_CONTEXT_KEY = Symbol.for('@vritti/quantum-ui/PermissionGate');
 type GateRegistry = { [GATE_CONTEXT_KEY]?: React.Context<PermissionGate | null> };
 const registry = globalThis as GateRegistry;
-const PermissionGateContext = (registry[GATE_CONTEXT_KEY] ??= createContext<PermissionGate | null>(null));
+registry[GATE_CONTEXT_KEY] ??= createContext<PermissionGate | null>(null);
+const PermissionGateContext = registry[GATE_CONTEXT_KEY];
 
 // Mount once near the app root with the app's gate implementation (e.g. over the SSE permission payload)
 export const PermissionGateProvider = PermissionGateContext.Provider;

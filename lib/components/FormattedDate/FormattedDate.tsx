@@ -20,8 +20,7 @@ const ISO_DATETIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 const formatWithTimeZone = (date: Date, dateFormat: string, timeZone: string, locale?: Locale) =>
   format(date, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
 
-const parseDateOnly = (value: string): Date =>
-  parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
+const parseDateOnly = (value: string): Date => parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
 
 const resolveDateFormat = (value: string, dateFormat?: string, dateOnly?: boolean): string | undefined => {
   if (dateFormat) return dateFormat;
@@ -60,11 +59,7 @@ export const FormattedDate: React.FC<FormattedDateProps> = ({
 
   const resolvedTimeZone = timeZone ?? buTimeZone;
   if (!resolvedTimeZone) {
-    return (
-      <span className={className}>{format(parsed, resolvedFormat, locale ? { locale } : undefined)}</span>
-    );
+    return <span className={className}>{format(parsed, resolvedFormat, locale ? { locale } : undefined)}</span>;
   }
-  return (
-    <span className={className}>{formatWithTimeZone(parsed, resolvedFormat, resolvedTimeZone, locale)}</span>
-  );
+  return <span className={className}>{formatWithTimeZone(parsed, resolvedFormat, resolvedTimeZone, locale)}</span>;
 };

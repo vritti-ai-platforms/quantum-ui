@@ -20,18 +20,16 @@ export const formatLocationPath = (path: string): string =>
     .join(' › ');
 
 // Pre-configured Select for location selection — server returns full ltree path as description
-export const LocationSelector = forwardRef<HTMLButtonElement, LocationSelectorProps>(
-  ({ fieldKeys, ...props }, ref) => (
-    <Select
-      ref={ref}
-      label="Location"
-      placeholder="Select location"
-      searchable
-      optionsEndpoint="commerce-api/locations/select"
-      transformDescription={formatLocationPath}
-      {...props}
-      fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
-    />
-  ),
-);
+export const LocationSelector = forwardRef<HTMLButtonElement, LocationSelectorProps>(({ fieldKeys, ...props }, ref) => (
+  <Select
+    ref={ref}
+    label="Location"
+    placeholder="Select location"
+    searchable
+    optionsEndpoint="commerce-api/locations/select"
+    transformDescription={formatLocationPath}
+    {...props}
+    fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
+  />
+));
 LocationSelector.displayName = 'LocationSelector';

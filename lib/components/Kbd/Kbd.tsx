@@ -66,16 +66,10 @@ interface KbdGroupProps extends Omit<React.ComponentProps<'div'>, 'children'> {
 export function KbdGroup({ shortcut, className, ...props }: KbdGroupProps) {
   const { keys } = formatHotkey(shortcut);
   return (
-    <div
-      data-slot="kbd-group"
-      className={cn('inline-flex items-center gap-0.5', className)}
-      {...props}
-    >
+    <div data-slot="kbd-group" className={cn('inline-flex items-center gap-0.5', className)} {...props}>
       {keys.map((key, i) => (
         <>
-          {i > 0 && (
-            <span className="text-current/40 text-[9px] select-none leading-none">+</span>
-          )}
+          {i > 0 && <span className="text-current/40 text-[9px] select-none leading-none">+</span>}
           <Kbd
             key={key}
             className="bg-current/10 text-current border-current/20 shadow-none h-[18px] min-w-[18px] rounded-[3px] px-1 text-[9px] leading-none"

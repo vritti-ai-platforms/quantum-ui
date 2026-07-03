@@ -23,18 +23,15 @@ const DEFAULT_FIELD_KEYS = {
   labelKey: 'name',
   descriptionKey: 'tracking',
   groupIdKey: 'categoryId',
-  additionalKeys:
-    'symbol,inventoryItemId,uomId,unitPrice,currencyCode,allowDecimal,orderedQuantity,receivedQuantity',
+  additionalKeys: 'symbol,inventoryItemId,uomId,unitPrice,currencyCode,allowDecimal,orderedQuantity,receivedQuantity',
 } as const;
 
 function defaultTransformLabel(label: string, option: SelectOption): string {
   const baseLabel = label.replace(/\s-\s[^-]+$/, '');
   const uom = typeof option.additionals?.symbol === 'string' ? option.additionals.symbol.trim() : '';
   const rawPrice = option.additionals?.unitPrice;
-  const currencyCode =
-    typeof option.additionals?.currencyCode === 'string' ? option.additionals.currencyCode : null;
-  const unitPrice =
-    rawPrice != null && currencyCode != null ? formatCurrency(String(rawPrice), currencyCode) : null;
+  const currencyCode = typeof option.additionals?.currencyCode === 'string' ? option.additionals.currencyCode : null;
+  const unitPrice = rawPrice != null && currencyCode != null ? formatCurrency(String(rawPrice), currencyCode) : null;
   if (unitPrice && uom) return `${baseLabel} - ${unitPrice}/${uom}`;
   if (unitPrice) return `${baseLabel} - ${unitPrice}`;
   if (uom) return `${baseLabel} (${uom})`;

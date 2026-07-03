@@ -1,18 +1,9 @@
-"use client"
+'use client';
 
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-import { Dispatch, JSX, useCallback, useEffect, useRef, useState } from "react"
-import * as React from "react"
-import { $isCodeHighlightNode } from "@lexical/code"
-import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { mergeRegister } from "@lexical/utils"
+import { $isCodeHighlightNode } from '@lexical/code';
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { mergeRegister } from '@lexical/utils';
 import {
   $getSelection,
   $isParagraphNode,
@@ -20,9 +11,9 @@ import {
   $isTextNode,
   COMMAND_PRIORITY_LOW,
   FORMAT_TEXT_COMMAND,
-  LexicalEditor,
+  type LexicalEditor,
   SELECTION_CHANGE_COMMAND,
-} from "lexical"
+} from 'lexical';
 import {
   BoldIcon,
   CodeIcon,
@@ -32,17 +23,21 @@ import {
   SubscriptIcon,
   SuperscriptIcon,
   UnderlineIcon,
-} from "lucide-react"
-import { createPortal } from "react-dom"
-
-import { getDOMRangeRect } from "../utils/get-dom-range-rect"
-import { getSelectedNode } from "../utils/get-selected-node"
-import { setFloatingElemPosition } from "../utils/set-floating-elem-position"
-import { Separator } from "../editor-ui/separator"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "../editor-ui/toggle-group"
+} from 'lucide-react';
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+import { type Dispatch, type JSX, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Separator } from '../editor-ui/separator';
+import { ToggleGroup, ToggleGroupItem } from '../editor-ui/toggle-group';
+import { getDOMRangeRect } from '../utils/get-dom-range-rect';
+import { getSelectedNode } from '../utils/get-selected-node';
+import { setFloatingElemPosition } from '../utils/set-floating-elem-position';
 
 function FloatingTextFormat({
   editor,
@@ -57,78 +52,75 @@ function FloatingTextFormat({
   isSuperscript,
   setIsLinkEditMode,
 }: {
-  editor: LexicalEditor
-  anchorElem: HTMLElement
-  isBold: boolean
-  isCode: boolean
-  isItalic: boolean
-  isLink: boolean
-  isStrikethrough: boolean
-  isSubscript: boolean
-  isSuperscript: boolean
-  isUnderline: boolean
-  setIsLinkEditMode: Dispatch<boolean>
+  editor: LexicalEditor;
+  anchorElem: HTMLElement;
+  isBold: boolean;
+  isCode: boolean;
+  isItalic: boolean;
+  isLink: boolean;
+  isStrikethrough: boolean;
+  isSubscript: boolean;
+  isSuperscript: boolean;
+  isUnderline: boolean;
+  setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element {
-  const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
+  const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null);
 
   const insertLink = useCallback(() => {
     if (!isLink) {
-      setIsLinkEditMode(true)
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, "https://")
+      setIsLinkEditMode(true);
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://');
     } else {
-      setIsLinkEditMode(false)
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
+      setIsLinkEditMode(false);
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
     }
-  }, [editor, isLink, setIsLinkEditMode])
+  }, [editor, isLink, setIsLinkEditMode]);
 
   function mouseMoveListener(e: MouseEvent) {
-    if (
-      popupCharStylesEditorRef?.current &&
-      (e.buttons === 1 || e.buttons === 3)
-    ) {
-      if (popupCharStylesEditorRef.current.style.pointerEvents !== "none") {
-        const x = e.clientX
-        const y = e.clientY
-        const elementUnderMouse = document.elementFromPoint(x, y)
+    if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
+      if (popupCharStylesEditorRef.current.style.pointerEvents !== 'none') {
+        const x = e.clientX;
+        const y = e.clientY;
+        const elementUnderMouse = document.elementFromPoint(x, y);
 
         if (!popupCharStylesEditorRef.current.contains(elementUnderMouse)) {
           // Mouse is not over the target element => not a normal click, but probably a drag
-          popupCharStylesEditorRef.current.style.pointerEvents = "none"
+          popupCharStylesEditorRef.current.style.pointerEvents = 'none';
         }
       }
     }
   }
-  function mouseUpListener(e: MouseEvent) {
+  function mouseUpListener(_e: MouseEvent) {
     if (popupCharStylesEditorRef?.current) {
-      if (popupCharStylesEditorRef.current.style.pointerEvents !== "auto") {
-        popupCharStylesEditorRef.current.style.pointerEvents = "auto"
+      if (popupCharStylesEditorRef.current.style.pointerEvents !== 'auto') {
+        popupCharStylesEditorRef.current.style.pointerEvents = 'auto';
       }
     }
   }
 
   useEffect(() => {
     if (popupCharStylesEditorRef?.current) {
-      document.addEventListener("mousemove", mouseMoveListener)
-      document.addEventListener("mouseup", mouseUpListener)
+      document.addEventListener('mousemove', mouseMoveListener);
+      document.addEventListener('mouseup', mouseUpListener);
 
       return () => {
-        document.removeEventListener("mousemove", mouseMoveListener)
-        document.removeEventListener("mouseup", mouseUpListener)
-      }
+        document.removeEventListener('mousemove', mouseMoveListener);
+        document.removeEventListener('mouseup', mouseUpListener);
+      };
     }
-  }, [popupCharStylesEditorRef])
+  }, [popupCharStylesEditorRef]);
 
   const $updateTextFormatFloatingToolbar = useCallback(() => {
-    const selection = $getSelection()
+    const selection = $getSelection();
 
-    const popupCharStylesEditorElem = popupCharStylesEditorRef.current
-    const nativeSelection = window.getSelection()
+    const popupCharStylesEditorElem = popupCharStylesEditorRef.current;
+    const nativeSelection = window.getSelection();
 
     if (popupCharStylesEditorElem === null) {
-      return
+      return;
     }
 
-    const rootElement = editor.getRootElement()
+    const rootElement = editor.getRootElement();
     if (
       selection !== null &&
       nativeSelection !== null &&
@@ -136,60 +128,55 @@ function FloatingTextFormat({
       rootElement !== null &&
       rootElement.contains(nativeSelection.anchorNode)
     ) {
-      const rangeRect = getDOMRangeRect(nativeSelection, rootElement)
+      const rangeRect = getDOMRangeRect(nativeSelection, rootElement);
 
-      setFloatingElemPosition(
-        rangeRect,
-        popupCharStylesEditorElem,
-        anchorElem,
-        isLink
-      )
+      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, isLink);
     }
-  }, [editor, anchorElem, isLink])
+  }, [editor, anchorElem, isLink]);
 
   useEffect(() => {
-    const scrollerElem = anchorElem.parentElement
+    const scrollerElem = anchorElem.parentElement;
 
     const update = () => {
       editor.getEditorState().read(() => {
-        $updateTextFormatFloatingToolbar()
-      })
-    }
+        $updateTextFormatFloatingToolbar();
+      });
+    };
 
-    window.addEventListener("resize", update)
+    window.addEventListener('resize', update);
     if (scrollerElem) {
-      scrollerElem.addEventListener("scroll", update)
+      scrollerElem.addEventListener('scroll', update);
     }
 
     return () => {
-      window.removeEventListener("resize", update)
+      window.removeEventListener('resize', update);
       if (scrollerElem) {
-        scrollerElem.removeEventListener("scroll", update)
+        scrollerElem.removeEventListener('scroll', update);
       }
-    }
-  }, [editor, $updateTextFormatFloatingToolbar, anchorElem])
+    };
+  }, [editor, $updateTextFormatFloatingToolbar, anchorElem]);
 
   useEffect(() => {
     editor.getEditorState().read(() => {
-      $updateTextFormatFloatingToolbar()
-    })
+      $updateTextFormatFloatingToolbar();
+    });
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
-          $updateTextFormatFloatingToolbar()
-        })
+          $updateTextFormatFloatingToolbar();
+        });
       }),
 
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          $updateTextFormatFloatingToolbar()
-          return false
+          $updateTextFormatFloatingToolbar();
+          return false;
         },
-        COMMAND_PRIORITY_LOW
-      )
-    )
-  }, [editor, $updateTextFormatFloatingToolbar])
+        COMMAND_PRIORITY_LOW,
+      ),
+    );
+  }, [editor, $updateTextFormatFloatingToolbar]);
 
   return (
     <div
@@ -201,21 +188,21 @@ function FloatingTextFormat({
           <ToggleGroup
             type="multiple"
             defaultValue={[
-              isBold ? "bold" : "",
-              isItalic ? "italic" : "",
-              isUnderline ? "underline" : "",
-              isStrikethrough ? "strikethrough" : "",
-              isSubscript ? "subscript" : "",
-              isSuperscript ? "superscript" : "",
-              isCode ? "code" : "",
-              isLink ? "link" : "",
+              isBold ? 'bold' : '',
+              isItalic ? 'italic' : '',
+              isUnderline ? 'underline' : '',
+              isStrikethrough ? 'strikethrough' : '',
+              isSubscript ? 'subscript' : '',
+              isSuperscript ? 'superscript' : '',
+              isCode ? 'code' : '',
+              isLink ? 'link' : '',
             ]}
           >
             <ToggleGroupItem
               value="bold"
               aria-label="Toggle bold"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
               }}
               size="sm"
             >
@@ -225,7 +212,7 @@ function FloatingTextFormat({
               value="italic"
               aria-label="Toggle italic"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
               }}
               size="sm"
             >
@@ -235,7 +222,7 @@ function FloatingTextFormat({
               value="underline"
               aria-label="Toggle underline"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
               }}
               size="sm"
             >
@@ -245,7 +232,7 @@ function FloatingTextFormat({
               value="strikethrough"
               aria-label="Toggle strikethrough"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
               }}
               size="sm"
             >
@@ -256,33 +243,23 @@ function FloatingTextFormat({
               value="code"
               aria-label="Toggle code"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code');
               }}
               size="sm"
             >
               <CodeIcon className="h-4 w-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem
-              value="link"
-              aria-label="Toggle link"
-              onClick={insertLink}
-              size="sm"
-            >
+            <ToggleGroupItem value="link" aria-label="Toggle link" onClick={insertLink} size="sm">
               <LinkIcon className="h-4 w-4" />
             </ToggleGroupItem>
             <Separator orientation="vertical" />
           </ToggleGroup>
-          <ToggleGroup
-            type="single"
-            defaultValue={
-              isSubscript ? "subscript" : isSuperscript ? "superscript" : ""
-            }
-          >
+          <ToggleGroup type="single" defaultValue={isSubscript ? 'subscript' : isSuperscript ? 'superscript' : ''}>
             <ToggleGroupItem
               value="subscript"
               aria-label="Toggle subscript"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "subscript")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript');
               }}
               size="sm"
             >
@@ -292,7 +269,7 @@ function FloatingTextFormat({
               value="superscript"
               aria-label="Toggle superscript"
               onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, "superscript")
+                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript');
               }}
               size="sm"
             >
@@ -302,106 +279,101 @@ function FloatingTextFormat({
         </>
       )}
     </div>
-  )
+  );
 }
 
 function useFloatingTextFormatToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLDivElement | null,
-  setIsLinkEditMode: Dispatch<boolean>
+  setIsLinkEditMode: Dispatch<boolean>,
 ): JSX.Element | null {
-  const [isText, setIsText] = useState(false)
-  const [isLink, setIsLink] = useState(false)
-  const [isBold, setIsBold] = useState(false)
-  const [isItalic, setIsItalic] = useState(false)
-  const [isUnderline, setIsUnderline] = useState(false)
-  const [isStrikethrough, setIsStrikethrough] = useState(false)
-  const [isSubscript, setIsSubscript] = useState(false)
-  const [isSuperscript, setIsSuperscript] = useState(false)
-  const [isCode, setIsCode] = useState(false)
+  const [isText, setIsText] = useState(false);
+  const [isLink, setIsLink] = useState(false);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
+  const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const [isSubscript, setIsSubscript] = useState(false);
+  const [isSuperscript, setIsSuperscript] = useState(false);
+  const [isCode, setIsCode] = useState(false);
 
   const updatePopup = useCallback(() => {
     editor.getEditorState().read(() => {
       // Should not to pop up the floating toolbar when using IME input
       if (editor.isComposing()) {
-        return
+        return;
       }
-      const selection = $getSelection()
-      const nativeSelection = window.getSelection()
-      const rootElement = editor.getRootElement()
+      const selection = $getSelection();
+      const nativeSelection = window.getSelection();
+      const rootElement = editor.getRootElement();
 
       if (
         nativeSelection !== null &&
-        (!$isRangeSelection(selection) ||
-          rootElement === null ||
-          !rootElement.contains(nativeSelection.anchorNode))
+        (!$isRangeSelection(selection) || rootElement === null || !rootElement.contains(nativeSelection.anchorNode))
       ) {
-        setIsText(false)
-        return
+        setIsText(false);
+        return;
       }
 
       if (!$isRangeSelection(selection)) {
-        return
+        return;
       }
 
-      const node = getSelectedNode(selection)
+      const node = getSelectedNode(selection);
 
       // Update text format
-      setIsBold(selection.hasFormat("bold"))
-      setIsItalic(selection.hasFormat("italic"))
-      setIsUnderline(selection.hasFormat("underline"))
-      setIsStrikethrough(selection.hasFormat("strikethrough"))
-      setIsSubscript(selection.hasFormat("subscript"))
-      setIsSuperscript(selection.hasFormat("superscript"))
-      setIsCode(selection.hasFormat("code"))
+      setIsBold(selection.hasFormat('bold'));
+      setIsItalic(selection.hasFormat('italic'));
+      setIsUnderline(selection.hasFormat('underline'));
+      setIsStrikethrough(selection.hasFormat('strikethrough'));
+      setIsSubscript(selection.hasFormat('subscript'));
+      setIsSuperscript(selection.hasFormat('superscript'));
+      setIsCode(selection.hasFormat('code'));
 
       // Update links
-      const parent = node.getParent()
+      const parent = node.getParent();
       if ($isLinkNode(parent) || $isLinkNode(node)) {
-        setIsLink(true)
+        setIsLink(true);
       } else {
-        setIsLink(false)
+        setIsLink(false);
       }
 
-      if (
-        !$isCodeHighlightNode(selection.anchor.getNode()) &&
-        selection.getTextContent() !== ""
-      ) {
-        setIsText($isTextNode(node) || $isParagraphNode(node))
+      if (!$isCodeHighlightNode(selection.anchor.getNode()) && selection.getTextContent() !== '') {
+        setIsText($isTextNode(node) || $isParagraphNode(node));
       } else {
-        setIsText(false)
+        setIsText(false);
       }
 
-      const rawTextContent = selection.getTextContent().replace(/\n/g, "")
-      if (!selection.isCollapsed() && rawTextContent === "") {
-        setIsText(false)
-        return
+      const rawTextContent = selection.getTextContent().replace(/\n/g, '');
+      if (!selection.isCollapsed() && rawTextContent === '') {
+        setIsText(false);
+        return;
       }
-    })
-  }, [editor])
+    });
+  }, [editor]);
 
   useEffect(() => {
-    document.addEventListener("selectionchange", updatePopup)
+    document.addEventListener('selectionchange', updatePopup);
     return () => {
-      document.removeEventListener("selectionchange", updatePopup)
-    }
-  }, [updatePopup])
+      document.removeEventListener('selectionchange', updatePopup);
+    };
+  }, [updatePopup]);
 
   useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(() => {
-        updatePopup()
+        updatePopup();
       }),
       editor.registerRootListener(() => {
         if (editor.getRootElement() === null) {
-          setIsText(false)
+          setIsText(false);
         }
-      })
-    )
-  }, [editor, updatePopup])
+      }),
+    );
+  }, [editor, updatePopup]);
 
   if (!isText || !anchorElem) {
-    return null
+    return null;
   }
 
   return createPortal(
@@ -418,26 +390,20 @@ function useFloatingTextFormatToolbar(
       isCode={isCode}
       setIsLinkEditMode={setIsLinkEditMode}
     />,
-    anchorElem
-  )
+    anchorElem,
+  );
 }
 
 export function FloatingTextFormatToolbarPlugin({
   anchorElem,
   setIsLinkEditMode,
 }: {
-  anchorElem: HTMLDivElement | null
-  setIsLinkEditMode: Dispatch<boolean>
+  anchorElem: HTMLDivElement | null;
+  setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element | null {
-  const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext();
 
-  return useFloatingTextFormatToolbar(editor, anchorElem, setIsLinkEditMode)
+  return useFloatingTextFormatToolbar(editor, anchorElem, setIsLinkEditMode);
 }
 
-export const FloatingTextFormatPlugin = FloatingTextFormatToolbarPlugin
-
-
-
-
-
-
+export const FloatingTextFormatPlugin = FloatingTextFormatToolbarPlugin;

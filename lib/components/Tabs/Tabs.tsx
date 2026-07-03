@@ -64,7 +64,7 @@ function RoutedTabs({ routeParam, defaultValue, onValueChange, tabs, ...rest }: 
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const fallback = ((defaultValue as string) ?? tabs[0]?.value) ?? '';
+  const fallback = (defaultValue as string) ?? tabs[0]?.value ?? '';
   const current = params[routeParam] ?? fallback;
 
   function handleValueChange(newValue: string) {

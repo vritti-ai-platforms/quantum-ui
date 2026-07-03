@@ -22,8 +22,7 @@ export const RadialChart = ({ data, config, dataKey, className }: RadialChartPro
       <RadialBar dataKey={dataKey} background>
         {data.map((entry, index) => {
           const name = (entry as Record<string, unknown>).name as string | undefined;
-          const fill =
-            name && config[name]?.color ? `var(--color-${name})` : `var(--chart-${index + 1})`;
+          const fill = name && config[name]?.color ? `var(--color-${name})` : `var(--chart-${index + 1})`;
           return <Cell key={`cell-${name ?? index}`} fill={fill} />;
         })}
       </RadialBar>

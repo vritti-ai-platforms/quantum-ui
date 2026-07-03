@@ -25,11 +25,6 @@ type Story = StoryObj<typeof RadarChart>;
 
 export const Default: Story = {
   render: () => (
-    <RadarChart
-      data={data}
-      config={config}
-      angleKey="skill"
-      radars={[{ dataKey: 'team' }, { dataKey: 'baseline' }]}
-    />
+    <RadarChart data={data} config={config} angleKey="skill" radars={[{ dataKey: 'team' }, { dataKey: 'baseline' }]} />
   ),
 };

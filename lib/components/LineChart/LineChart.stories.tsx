@@ -25,11 +25,6 @@ type Story = StoryObj<typeof LineChart>;
 
 export const Default: Story = {
   render: () => (
-    <LineChart
-      data={data}
-      config={config}
-      xAxisKey="month"
-      lines={[{ dataKey: 'revenue' }, { dataKey: 'expenses' }]}
-    />
+    <LineChart data={data} config={config} xAxisKey="month" lines={[{ dataKey: 'revenue' }, { dataKey: 'expenses' }]} />
   ),
 };

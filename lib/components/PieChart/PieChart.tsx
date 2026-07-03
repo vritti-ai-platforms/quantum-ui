@@ -23,8 +23,7 @@ export const PieChart = ({ data, config, dataKey, nameKey, className }: PieChart
       <Pie data={data} dataKey={dataKey} nameKey={nameKey}>
         {data.map((entry, index) => {
           const name = (entry as Record<string, unknown>)[nameKey] as string | undefined;
-          const fill =
-            name && config[name]?.color ? `var(--color-${name})` : `var(--chart-${index + 1})`;
+          const fill = name && config[name]?.color ? `var(--color-${name})` : `var(--chart-${index + 1})`;
           return <Cell key={`cell-${name ?? index}`} fill={fill} />;
         })}
       </Pie>

@@ -1,16 +1,7 @@
-"use client"
+'use client';
 
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-import { JSX, useEffect, useRef, useState } from "react"
-import * as React from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { $wrapNodeInElement, mergeRegister } from "@lexical/utils"
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $wrapNodeInElement, mergeRegister } from '@lexical/utils';
 import {
   $createParagraphNode,
   $createRangeSelection,
@@ -26,53 +17,46 @@ import {
   DRAGOVER_COMMAND,
   DRAGSTART_COMMAND,
   DROP_COMMAND,
-  LexicalCommand,
-  LexicalEditor,
-} from "lexical"
+  type LexicalCommand,
+  type LexicalEditor,
+} from 'lexical';
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+import { type JSX, useEffect, useId, useRef, useState } from 'react';
+import { useEditorConfig } from '../context/editor-config-context';
+import { Button } from '../editor-ui/button';
+import { DialogFooter } from '../editor-ui/dialog';
+import { Input } from '../editor-ui/input';
+import { Label } from '../editor-ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../editor-ui/tabs';
+import { $createImageNode, $isImageNode, ImageNode, type ImagePayload } from '../nodes/image-node';
+import { CAN_USE_DOM } from '../shared/can-use-dom';
 
-import {
-  $createImageNode,
-  $isImageNode,
-  ImageNode,
-  ImagePayload,
-} from "../nodes/image-node"
-import { useEditorConfig } from "../context/editor-config-context"
-import { CAN_USE_DOM } from "../shared/can-use-dom"
-import { Button } from "../editor-ui/button"
-import { DialogFooter } from "../editor-ui/dialog"
-import { Input } from "../editor-ui/input"
-import { Label } from "../editor-ui/label"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../editor-ui/tabs"
-
-export type InsertImagePayload = Readonly<ImagePayload>
+export type InsertImagePayload = Readonly<ImagePayload>;
 
 const getDOMSelection = (targetWindow: Window | null): Selection | null =>
-  CAN_USE_DOM ? (targetWindow || window).getSelection() : null
+  CAN_USE_DOM ? (targetWindow || window).getSelection() : null;
 
-export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> =
-  createCommand("INSERT_IMAGE_COMMAND")
+export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
 
-export function InsertImageUriDialogBody({
-  onClick,
-}: {
-  onClick: (payload: InsertImagePayload) => void
-}) {
-  const [src, setSrc] = useState("")
-  const [altText, setAltText] = useState("")
+export function InsertImageUriDialogBody({ onClick }: { onClick: (payload: InsertImagePayload) => void }) {
+  const fieldId = useId();
+  const [src, setSrc] = useState('');
+  const [altText, setAltText] = useState('');
 
-  const isDisabled = src === ""
+  const isDisabled = src === '';
 
   return (
     <div className="grid gap-4 py-4">
       <div className="grid gap-2">
-        <Label htmlFor="image-url">Image URL</Label>
+        <Label htmlFor={`${fieldId}-image-url`}>Image URL</Label>
         <Input
-          id="image-url"
+          id={`${fieldId}-image-url`}
           placeholder="i.e. https://source.unsplash.com/random"
           onChange={(e) => setSrc(e.target.value)}
           value={src}
@@ -80,9 +64,9 @@ export function InsertImageUriDialogBody({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="alt-text">Alt Text</Label>
+        <Label htmlFor={`${fieldId}-alt-text`}>Alt Text</Label>
         <Input
-          id="alt-text"
+          id={`${fieldId}-alt-text`}
           placeholder="Random unsplash image"
           onChange={(e) => setAltText(e.target.value)}
           value={altText}
@@ -100,61 +84,58 @@ export function InsertImageUriDialogBody({
         </Button>
       </DialogFooter>
     </div>
-  )
+  );
 }
 
-export function InsertImageUploadedDialogBody({
-  onClick,
-}: {
-  onClick: (payload: InsertImagePayload) => void
-}) {
-  const { onImageUpload } = useEditorConfig()
-  const [file, setFile] = useState<File | null>(null)
-  const [src, setSrc] = useState("")
-  const [altText, setAltText] = useState("")
-  const [isUploading, setIsUploading] = useState(false)
+export function InsertImageUploadedDialogBody({ onClick }: { onClick: (payload: InsertImagePayload) => void }) {
+  const fieldId = useId();
+  const { onImageUpload } = useEditorConfig();
+  const [file, setFile] = useState<File | null>(null);
+  const [src, setSrc] = useState('');
+  const [altText, setAltText] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
-  const isDisabled = src === "" || isUploading
+  const isDisabled = src === '' || isUploading;
 
   const loadImage = (files: FileList | null) => {
-    const reader = new FileReader()
-    reader.onload = function () {
-      if (typeof reader.result === "string") {
-        setSrc(reader.result)
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setSrc(reader.result);
       }
-      return ""
-    }
+      return '';
+    };
     if (files !== null) {
-      setFile(files[0])
-      reader.readAsDataURL(files[0])
+      setFile(files[0]);
+      reader.readAsDataURL(files[0]);
     }
-  }
+  };
 
   const handleConfirm = async () => {
     if (!src) {
-      return
+      return;
     }
 
     if (onImageUpload && file) {
-      setIsUploading(true)
+      setIsUploading(true);
       try {
-        const uploadedSrc = await onImageUpload(file)
-        onClick({ altText, src: uploadedSrc })
+        const uploadedSrc = await onImageUpload(file);
+        onClick({ altText, src: uploadedSrc });
       } finally {
-        setIsUploading(false)
+        setIsUploading(false);
       }
-      return
+      return;
     }
 
-    onClick({ altText, src })
-  }
+    onClick({ altText, src });
+  };
 
   return (
     <div className="grid gap-4 py-4">
       <div className="grid gap-2">
-        <Label htmlFor="image-upload">Image Upload</Label>
+        <Label htmlFor={`${fieldId}-image-upload`}>Image Upload</Label>
         <Input
-          id="image-upload"
+          id={`${fieldId}-image-upload`}
           type="file"
           onChange={(e) => loadImage(e.target.files)}
           accept="image/*"
@@ -162,51 +143,46 @@ export function InsertImageUploadedDialogBody({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="alt-text">Alt Text</Label>
+        <Label htmlFor={`${fieldId}-alt-text`}>Alt Text</Label>
         <Input
-          id="alt-text"
+          id={`${fieldId}-alt-text`}
           placeholder="Descriptive alternative text"
           onChange={(e) => setAltText(e.target.value)}
           value={altText}
           data-test-id="image-modal-alt-text-input"
         />
       </div>
-      <Button
-        type="submit"
-        disabled={isDisabled}
-        onClick={handleConfirm}
-        data-test-id="image-modal-file-upload-btn"
-      >
-        {isUploading ? "Uploading..." : "Confirm"}
+      <Button type="submit" disabled={isDisabled} onClick={handleConfirm} data-test-id="image-modal-file-upload-btn">
+        {isUploading ? 'Uploading...' : 'Confirm'}
       </Button>
     </div>
-  )
+  );
 }
 
 export function InsertImageDialog({
   activeEditor,
   onClose,
 }: {
-  activeEditor: LexicalEditor
-  onClose: () => void
+  activeEditor: LexicalEditor;
+  onClose: () => void;
 }): JSX.Element {
-  const hasModifier = useRef(false)
+  const hasModifier = useRef(false);
 
   useEffect(() => {
-    hasModifier.current = false
+    hasModifier.current = false;
     const handler = (e: KeyboardEvent) => {
-      hasModifier.current = e.altKey
-    }
-    document.addEventListener("keydown", handler)
+      hasModifier.current = e.altKey;
+    };
+    document.addEventListener('keydown', handler);
     return () => {
-      document.removeEventListener("keydown", handler)
-    }
-  }, [activeEditor])
+      document.removeEventListener('keydown', handler);
+    };
+  }, [activeEditor]);
 
   const onClick = (payload: InsertImagePayload) => {
-    activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload)
-    onClose()
-  }
+    activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
+    onClose();
+  };
 
   return (
     <Tabs defaultValue="url">
@@ -225,79 +201,74 @@ export function InsertImageDialog({
         <InsertImageUploadedDialogBody onClick={onClick} />
       </TabsContent>
     </Tabs>
-  )
+  );
 }
 
-export function ImagesPlugin({
-  captionsEnabled,
-}: {
-  captionsEnabled?: boolean
-}): JSX.Element | null {
-  const [editor] = useLexicalComposerContext()
+export function ImagesPlugin({ captionsEnabled }: { captionsEnabled?: boolean }): JSX.Element | null {
+  const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     if (!editor.hasNodes([ImageNode])) {
-      throw new Error("ImagesPlugin: ImageNode not registered on editor")
+      throw new Error('ImagesPlugin: ImageNode not registered on editor');
     }
 
     return mergeRegister(
       editor.registerCommand<InsertImagePayload>(
         INSERT_IMAGE_COMMAND,
         (payload) => {
-          const imageNode = $createImageNode(payload)
-          $insertNodes([imageNode])
+          const imageNode = $createImageNode(payload);
+          $insertNodes([imageNode]);
           if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
-            $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd()
+            $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
           }
 
-          return true
+          return true;
         },
-        COMMAND_PRIORITY_EDITOR
+        COMMAND_PRIORITY_EDITOR,
       ),
       editor.registerCommand<DragEvent>(
         DRAGSTART_COMMAND,
         (event) => {
-          return $onDragStart(event)
+          return $onDragStart(event);
         },
-        COMMAND_PRIORITY_HIGH
+        COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand<DragEvent>(
         DRAGOVER_COMMAND,
         (event) => {
-          return $onDragover(event)
+          return $onDragover(event);
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand<DragEvent>(
         DROP_COMMAND,
         (event) => {
-          return $onDrop(event, editor)
+          return $onDrop(event, editor);
         },
-        COMMAND_PRIORITY_HIGH
-      )
-    )
-  }, [captionsEnabled, editor])
+        COMMAND_PRIORITY_HIGH,
+      ),
+    );
+  }, [captionsEnabled, editor]);
 
-  return null
+  return null;
 }
 
 function $onDragStart(event: DragEvent): boolean {
-  const node = $getImageNodeInSelection()
+  const node = $getImageNodeInSelection();
   if (!node) {
-    return false
+    return false;
   }
-  const dataTransfer = event.dataTransfer
+  const dataTransfer = event.dataTransfer;
   if (!dataTransfer) {
-    return false
+    return false;
   }
-  const TRANSPARENT_IMAGE =
-    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-  const img = document.createElement("img")
-  img.src = TRANSPARENT_IMAGE
-  dataTransfer.setData("text/plain", "_")
-  dataTransfer.setDragImage(img, 0, 0)
+  const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  const img = document.createElement('img');
+  img.src = TRANSPARENT_IMAGE;
+  dataTransfer.setData('text/plain', '_');
+  dataTransfer.setDragImage(img, 0, 0);
   dataTransfer.setData(
-    "application/x-lexical-drag",
+    'application/x-lexical-drag',
     JSON.stringify({
       data: {
         altText: node.__altText,
@@ -309,112 +280,106 @@ function $onDragStart(event: DragEvent): boolean {
         src: node.__src,
         width: node.__width,
       },
-      type: "image",
-    })
-  )
+      type: 'image',
+    }),
+  );
 
-  return true
+  return true;
 }
 
 function $onDragover(event: DragEvent): boolean {
-  const node = $getImageNodeInSelection()
+  const node = $getImageNodeInSelection();
   if (!node) {
-    return false
+    return false;
   }
   if (!canDropImage(event)) {
-    event.preventDefault()
+    event.preventDefault();
   }
-  return true
+  return true;
 }
 
 function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
-  const node = $getImageNodeInSelection()
+  const node = $getImageNodeInSelection();
   if (!node) {
-    return false
+    return false;
   }
-  const data = getDragImageData(event)
+  const data = getDragImageData(event);
   if (!data) {
-    return false
+    return false;
   }
-  event.preventDefault()
+  event.preventDefault();
   if (canDropImage(event)) {
-    const range = getDragSelection(event)
-    node.remove()
-    const rangeSelection = $createRangeSelection()
+    const range = getDragSelection(event);
+    node.remove();
+    const rangeSelection = $createRangeSelection();
     if (range !== null && range !== undefined) {
-      rangeSelection.applyDOMRange(range)
+      rangeSelection.applyDOMRange(range);
     }
-    $setSelection(rangeSelection)
-    editor.dispatchCommand(INSERT_IMAGE_COMMAND, data)
+    $setSelection(rangeSelection);
+    editor.dispatchCommand(INSERT_IMAGE_COMMAND, data);
   }
-  return true
+  return true;
 }
 
 function $getImageNodeInSelection(): ImageNode | null {
-  const selection = $getSelection()
+  const selection = $getSelection();
   if (!$isNodeSelection(selection)) {
-    return null
+    return null;
   }
-  const nodes = selection.getNodes()
-  const node = nodes[0]
-  return $isImageNode(node) ? node : null
+  const nodes = selection.getNodes();
+  const node = nodes[0];
+  return $isImageNode(node) ? node : null;
 }
 
 function getDragImageData(event: DragEvent): null | InsertImagePayload {
-  const dragData = event.dataTransfer?.getData("application/x-lexical-drag")
+  const dragData = event.dataTransfer?.getData('application/x-lexical-drag');
   if (!dragData) {
-    return null
+    return null;
   }
-  const { type, data } = JSON.parse(dragData)
-  if (type !== "image") {
-    return null
+  const { type, data } = JSON.parse(dragData);
+  if (type !== 'image') {
+    return null;
   }
 
-  return data
+  return data;
 }
 
 declare global {
   interface DragEvent {
-    rangeOffset?: number
-    rangeParent?: Node
+    rangeOffset?: number;
+    rangeParent?: Node;
   }
 }
 
 function canDropImage(event: DragEvent): boolean {
-  const target = event.target
+  const target = event.target;
   return !!(
     target &&
     target instanceof HTMLElement &&
-    !target.closest("code, span.editor-image") &&
+    !target.closest('code, span.editor-image') &&
     target.parentElement &&
-    target.parentElement.closest("div.ContentEditable__root")
-  )
+    target.parentElement.closest('div.ContentEditable__root')
+  );
 }
 
 function getDragSelection(event: DragEvent): Range | null | undefined {
-  let range
-  const target = event.target as null | Element | Document
+  let range: Range | null | undefined;
+  const target = event.target as null | Element | Document;
   const targetWindow =
     target == null
       ? null
       : target.nodeType === 9
         ? (target as Document).defaultView
-        : (target as Element).ownerDocument.defaultView
-  const domSelection = getDOMSelection(targetWindow)
+        : (target as Element).ownerDocument.defaultView;
+  const domSelection = getDOMSelection(targetWindow);
   if (document.caretRangeFromPoint) {
-    range = document.caretRangeFromPoint(event.clientX, event.clientY)
+    range = document.caretRangeFromPoint(event.clientX, event.clientY);
   } else if (event.rangeParent && domSelection !== null) {
-    domSelection.collapse(event.rangeParent, event.rangeOffset || 0)
-    range = domSelection.getRangeAt(0)
+    domSelection.collapse(event.rangeParent, event.rangeOffset || 0);
+    range = domSelection.getRangeAt(0);
   } else {
-    throw Error(`Cannot get the selection when dragging`)
+    throw Error(`Cannot get the selection when dragging`);
   }
 
-  return range
+  return range;
 }
-
-
-
-
-
-

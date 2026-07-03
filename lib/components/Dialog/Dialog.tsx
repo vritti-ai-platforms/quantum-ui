@@ -57,8 +57,9 @@ function ensureEscapeManager() {
     'keydown',
     (e) => {
       if (e.key !== 'Escape') return;
-      const confirmStore = (globalThis as { __quantumUiConfirmStore?: { getSnapshot: () => { open: boolean }; cancel: () => void } })
-        .__quantumUiConfirmStore;
+      const confirmStore = (
+        globalThis as { __quantumUiConfirmStore?: { getSnapshot: () => { open: boolean }; cancel: () => void } }
+      ).__quantumUiConfirmStore;
       if (!confirmStore?.getSnapshot().open) return;
       e.preventDefault();
       e.stopImmediatePropagation();

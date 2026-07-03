@@ -152,7 +152,8 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
                     onChange={(e) => {
                       const day = digits(e.target.value, 2);
                       if (day === '00') return;
-                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(fromDraft, new Date()))) return;
+                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(fromDraft, new Date())))
+                        return;
                       commitFromDraft({ ...fromDraft, day });
                     }}
                   />
@@ -189,7 +190,8 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
                     onChange={(e) => {
                       const day = digits(e.target.value, 2);
                       if (day === '00') return;
-                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(toDraft, new Date()))) return;
+                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(toDraft, new Date())))
+                        return;
                       commitToDraft({ ...toDraft, day });
                     }}
                   />

@@ -1,21 +1,19 @@
-"use client"
+'use client';
 
-import { TableIcon } from "lucide-react"
+import { TableIcon } from 'lucide-react';
 
-import { useToolbarContext } from "../../../context/toolbar-context"
-import { InsertTableDialog } from "../../table-plugin"
-import { SelectItem } from "../../../editor-ui/select"
+import { useToolbarContext } from '../../../context/toolbar-context';
+import { SelectItem } from '../../../editor-ui/select';
+import { InsertTableDialog } from '../../table-plugin';
 
 export function InsertTable() {
-  const { activeEditor, showModal } = useToolbarContext()
+  const { activeEditor, showModal } = useToolbarContext();
 
   return (
     <SelectItem
       value="table"
       onPointerDown={() =>
-        showModal("Insert Table", (onClose) => (
-          <InsertTableDialog activeEditor={activeEditor} onClose={onClose} />
-        ))
+        showModal('Insert Table', (onClose) => <InsertTableDialog activeEditor={activeEditor} onClose={onClose} />)
       }
       className=""
     >
@@ -24,11 +22,5 @@ export function InsertTable() {
         <span>Table</span>
       </div>
     </SelectItem>
-  )
+  );
 }
-
-
-
-
-
-

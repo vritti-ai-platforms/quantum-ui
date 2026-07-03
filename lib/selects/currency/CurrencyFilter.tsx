@@ -10,7 +10,9 @@ export type CurrencyFilterProps = Omit<SelectFilterProps, 'options' | 'name'> & 
 // Pre-configured SelectFilter for currency filtering with static local options
 export const CurrencyFilter = Object.assign(
   forwardRef<HTMLButtonElement, CurrencyFilterProps>(({ excludeCodes, ...props }, ref) => {
-    const options = excludeCodes?.length ? CURRENCIES.filter((c) => !excludeCodes.includes(String(c.value))) : CURRENCIES;
+    const options = excludeCodes?.length
+      ? CURRENCIES.filter((c) => !excludeCodes.includes(String(c.value)))
+      : CURRENCIES;
     return (
       <SelectFilter
         ref={ref}

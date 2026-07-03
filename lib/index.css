@@ -262,21 +262,21 @@ body {
   }
 }
 
-[data-slot='collapsible-content'] {
+[data-slot="collapsible-content"] {
   overflow: hidden;
 }
 
-[data-slot='collapsible-content'][data-state='open'] {
+[data-slot="collapsible-content"][data-state="open"] {
   animation: collapsible-down 0.26s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-[data-slot='collapsible-content'][data-state='closed'] {
+[data-slot="collapsible-content"][data-state="closed"] {
   animation: collapsible-up 0.22s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='collapsible-content'][data-state='open'],
-  [data-slot='collapsible-content'][data-state='closed'] {
+  [data-slot="collapsible-content"][data-state="open"],
+  [data-slot="collapsible-content"][data-state="closed"] {
     animation: none;
   }
 }
@@ -363,37 +363,37 @@ select:-webkit-autofill:active {
  * rewrites these urls; consumers that `@import "@vritti/quantum-ui/index.css"` get them for free.
  */
 @font-face {
-  font-family: 'IBM Plex Sans';
+  font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('./assets/fonts/IBMPlexSans-Regular.woff2') format('woff2');
+  src: url("./assets/fonts/IBMPlexSans-Regular.woff2") format("woff2");
 }
 @font-face {
-  font-family: 'IBM Plex Sans';
+  font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('./assets/fonts/IBMPlexSans-Medium.woff2') format('woff2');
+  src: url("./assets/fonts/IBMPlexSans-Medium.woff2") format("woff2");
 }
 @font-face {
-  font-family: 'IBM Plex Sans';
+  font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('./assets/fonts/IBMPlexSans-SemiBold.woff2') format('woff2');
+  src: url("./assets/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
 }
 @font-face {
-  font-family: 'JetBrains Mono';
+  font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('./assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  src: url("./assets/fonts/JetBrainsMono-Regular.woff2") format("woff2");
 }
 @font-face {
-  font-family: 'Playfair Display';
+  font-family: "Playfair Display";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('./assets/fonts/PlayfairDisplay-SemiBold.woff2') format('woff2');
+  src: url("./assets/fonts/PlayfairDisplay-SemiBold.woff2") format("woff2");
 }

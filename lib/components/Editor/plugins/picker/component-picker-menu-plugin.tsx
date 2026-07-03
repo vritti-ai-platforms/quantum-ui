@@ -1,4 +1,1 @@
-export { ComponentPickerMenuPlugin } from "../component-picker-menu-plugin"
-
-
-
+export { ComponentPickerMenuPlugin } from '../component-picker-menu-plugin';

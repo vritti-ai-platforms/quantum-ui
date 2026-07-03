@@ -3,7 +3,12 @@ import { Select, type SelectProps } from '../../components/Select/Select';
 
 export type UomSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
-const DEFAULT_FIELD_KEYS = { valueKey: 'id', labelKey: 'name', additionalKeys: 'allowDecimal', groupIdKey: 'dimensionId' } as const;
+const DEFAULT_FIELD_KEYS = {
+  valueKey: 'id',
+  labelKey: 'name',
+  additionalKeys: 'allowDecimal',
+  groupIdKey: 'dimensionId',
+} as const;
 
 // Pre-configured Select for unit of measure selection, grouped by dimension
 export const UomSelector = forwardRef<HTMLButtonElement, UomSelectorProps>(({ fieldKeys, ...props }, ref) => (

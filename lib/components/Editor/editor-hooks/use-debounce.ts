@@ -1,5 +1,6 @@
-"use client"
+'use client';
 
+import { debounce } from 'lodash';
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -7,31 +8,23 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import { useMemo, useRef } from "react"
-import { debounce } from "lodash"
+import { useMemo, useRef } from 'react';
 
-export function useDebounce<T extends (...args: never[]) => void>(
-  fn: T,
-  ms: number,
-  maxWait?: number
-) {
-  const funcRef = useRef<T | null>(null)
-  funcRef.current = fn
+export function useDebounce<T extends (...args: never[]) => void>(fn: T, ms: number, maxWait?: number) {
+  const funcRef = useRef<T | null>(null);
+  funcRef.current = fn;
 
   return useMemo(
     () =>
       debounce(
         (...args: Parameters<T>) => {
           if (funcRef.current) {
-            funcRef.current(...args)
+            funcRef.current(...args);
           }
         },
         ms,
-        { maxWait }
+        { maxWait },
       ),
-    [ms, maxWait]
-  )
+    [ms, maxWait],
+  );
 }
-
-
-

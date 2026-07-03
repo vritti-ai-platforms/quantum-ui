@@ -37,9 +37,15 @@ export interface NumericFieldOptions {
 // anything else → `number`. Without these overloads, TS widens the return type
 // across both internal branches, so every caller would see `number | null`
 // regardless of how they configured `nullable`.
-export function zodNumericField(options?: Omit<NumericFieldOptions, 'nullable'> & { nullable?: false }): z.ZodType<number, number>;
-export function zodNumericField(options: Omit<NumericFieldOptions, 'nullable'> & { nullable: true }): z.ZodType<number | null, number | null>;
-export function zodNumericField(options: NumericFieldOptions = {}): z.ZodType<number, number> | z.ZodType<number | null, number | null> {
+export function zodNumericField(
+  options?: Omit<NumericFieldOptions, 'nullable'> & { nullable?: false },
+): z.ZodType<number, number>;
+export function zodNumericField(
+  options: Omit<NumericFieldOptions, 'nullable'> & { nullable: true },
+): z.ZodType<number | null, number | null>;
+export function zodNumericField(
+  options: NumericFieldOptions = {},
+): z.ZodType<number, number> | z.ZodType<number | null, number | null> {
   const {
     required = 'Required',
     nullable = false,
@@ -60,20 +66,23 @@ export function zodNumericField(options: NumericFieldOptions = {}): z.ZodType<nu
       .union([z.number(), z.nan(), z.null()])
       .transform((v) => (v === null || Number.isNaN(v as number) ? null : v))
       .pipe(
-        z.number().nullable().superRefine((v, ctx) => {
-          if (v === null) return;
-          if (integer && !Number.isInteger(v)) {
-            ctx.addIssue({ code: 'custom', message: integerMessage });
-          } else if (nonZero && v === 0) {
-            ctx.addIssue({ code: 'custom', message: nonZeroMessage });
-          } else if (positive && v <= 0) {
-            ctx.addIssue({ code: 'custom', message: positiveMessage });
-          } else if (min != null && v < min) {
-            ctx.addIssue({ code: 'custom', message: minMessage ?? `Must be at least ${min}` });
-          } else if (max != null && v > max) {
-            ctx.addIssue({ code: 'custom', message: maxMessage ?? `Must be at most ${max}` });
-          }
-        }),
+        z
+          .number()
+          .nullable()
+          .superRefine((v, ctx) => {
+            if (v === null) return;
+            if (integer && !Number.isInteger(v)) {
+              ctx.addIssue({ code: 'custom', message: integerMessage });
+            } else if (nonZero && v === 0) {
+              ctx.addIssue({ code: 'custom', message: nonZeroMessage });
+            } else if (positive && v <= 0) {
+              ctx.addIssue({ code: 'custom', message: positiveMessage });
+            } else if (min != null && v < min) {
+              ctx.addIssue({ code: 'custom', message: minMessage ?? `Must be at least ${min}` });
+            } else if (max != null && v > max) {
+              ctx.addIssue({ code: 'custom', message: maxMessage ?? `Must be at most ${max}` });
+            }
+          }),
       );
   }
 
@@ -94,7 +103,6 @@ export function zodNumericField(options: NumericFieldOptions = {}): z.ZodType<nu
   });
 }
 
-
 export interface CurrencyFieldOptions {
   required?: string;
   positive?: boolean;
@@ -107,15 +115,13 @@ export interface CurrencyFieldOptions {
 export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
   const { required = 'Required', positive = true, positiveMessage = 'Must be greater than 0' } = options;
 
-  return z
-    .union([z.object({ currency: z.string(), value: z.string() }), z.undefined()])
-    .superRefine((v, ctx) => {
-      if (!v?.value) {
-        ctx.addIssue({ code: 'custom', message: required });
-      } else if (positive && Number(v.value) <= 0) {
-        ctx.addIssue({ code: 'custom', message: positiveMessage });
-      }
-    });
+  return z.union([z.object({ currency: z.string(), value: z.string() }), z.undefined()]).superRefine((v, ctx) => {
+    if (!v?.value) {
+      ctx.addIssue({ code: 'custom', message: required });
+    } else if (positive && Number(v.value) <= 0) {
+      ctx.addIssue({ code: 'custom', message: positiveMessage });
+    }
+  });
 }
 
 export interface PhoneFieldOptions {
@@ -127,8 +133,13 @@ export interface PhoneFieldOptions {
 // Validates with react-phone-number-input's isValidPhoneNumber. Pass optional:true
 // to allow empty values without triggering the required message.
 export function zodPhoneField(options?: { required?: string; optional?: false }): z.ZodType<string, string>;
-export function zodPhoneField(options: { required?: string; optional: true }): z.ZodType<string | undefined, string | undefined>;
-export function zodPhoneField(options: PhoneFieldOptions = {}): z.ZodType<string, string> | z.ZodType<string | undefined, string | undefined> {
+export function zodPhoneField(options: {
+  required?: string;
+  optional: true;
+}): z.ZodType<string | undefined, string | undefined>;
+export function zodPhoneField(
+  options: PhoneFieldOptions = {},
+): z.ZodType<string, string> | z.ZodType<string | undefined, string | undefined> {
   const { required = 'Required', optional = false } = options;
 
   if (optional) {
@@ -139,7 +150,5 @@ export function zodPhoneField(options: PhoneFieldOptions = {}): z.ZodType<string
     });
   }
 
-  return z
-    .string({ error: required })
-    .refine((v) => isValidPhoneNumber(v), 'Invalid phone number');
+  return z.string({ error: required }).refine((v) => isValidPhoneNumber(v), 'Invalid phone number');
 }

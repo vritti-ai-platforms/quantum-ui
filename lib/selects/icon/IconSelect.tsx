@@ -1,4 +1,4 @@
-import { CheckIcon, icons as lucideIcons, type LucideIcon } from 'lucide-react';
+import { CheckIcon, type LucideIcon, icons as lucideIcons } from 'lucide-react';
 import type React from 'react';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';

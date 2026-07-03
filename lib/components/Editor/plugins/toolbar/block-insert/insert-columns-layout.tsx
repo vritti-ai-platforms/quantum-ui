@@ -1,19 +1,19 @@
-"use client"
+'use client';
 
-import { Columns3Icon } from "lucide-react"
+import { Columns3Icon } from 'lucide-react';
 
-import { useToolbarContext } from "../../../context/toolbar-context"
-import { InsertLayoutDialog } from "../../layout-plugin"
-import { SelectItem } from "../../../editor-ui/select"
+import { useToolbarContext } from '../../../context/toolbar-context';
+import { SelectItem } from '../../../editor-ui/select';
+import { InsertLayoutDialog } from '../../layout-plugin';
 
 export function InsertColumnsLayout() {
-  const { activeEditor, showModal } = useToolbarContext()
+  const { activeEditor, showModal } = useToolbarContext();
 
   return (
     <SelectItem
       value="columns"
       onPointerDown={() =>
-        showModal("Insert Columns Layout", (onClose) => (
+        showModal('Insert Columns Layout', (onClose) => (
           <InsertLayoutDialog activeEditor={activeEditor} onClose={onClose} />
         ))
       }
@@ -24,11 +24,5 @@ export function InsertColumnsLayout() {
         <span>Columns Layout</span>
       </div>
     </SelectItem>
-  )
+  );
 }
-
-
-
-
-
-

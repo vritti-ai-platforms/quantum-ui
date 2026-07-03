@@ -25,11 +25,6 @@ type Story = StoryObj<typeof AreaChart>;
 
 export const Default: Story = {
   render: () => (
-    <AreaChart
-      data={data}
-      config={config}
-      xAxisKey="month"
-      areas={[{ dataKey: 'visitors' }, { dataKey: 'signups' }]}
-    />
+    <AreaChart data={data} config={config} xAxisKey="month" areas={[{ dataKey: 'visitors' }, { dataKey: 'signups' }]} />
   ),
 };

@@ -62,7 +62,7 @@ export function Breadcrumb({
   const segments = pathname.split('/').filter(Boolean);
 
   const items: BreadcrumbSegment[] = segments.map((segment, index) => {
-    const path = '/' + segments.slice(0, index + 1).join('/');
+    const path = `/${segments.slice(0, index + 1).join('/')}`;
     const tildeIdx = segment.indexOf('~');
     const slug = tildeIdx >= 0 ? segment.slice(0, tildeIdx) : null;
     const id = tildeIdx >= 0 ? segment.slice(tildeIdx + 1) : null;

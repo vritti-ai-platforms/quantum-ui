@@ -27,8 +27,7 @@ const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const formatWithTimeZone = (date: Date, dateFormat: string, timeZone: string, locale?: Locale) =>
   format(date, dateFormat, locale ? { in: tz(timeZone), locale } : { in: tz(timeZone) });
 
-const parseDateOnly = (value: string): Date =>
-  parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
+const parseDateOnly = (value: string): Date => parseISO(DATE_ONLY_PATTERN.test(value) ? `${value}T00:00:00Z` : value);
 
 export const formatString = (value: React.ReactNode): FormattedValue => {
   if (value == null) return { primary: '—' };
@@ -78,12 +77,7 @@ export const formatCurrency = (
   const primary = formatCurrencyMajor(amount, currency);
 
   const { buCurrency, exchangeRate } = options;
-  if (
-    exchangeRate != null &&
-    Number.isFinite(exchangeRate) &&
-    buCurrency &&
-    buCurrency !== currency
-  ) {
+  if (exchangeRate != null && Number.isFinite(exchangeRate) && buCurrency && buCurrency !== currency) {
     const buAmount = new Decimal(amountStr).times(exchangeRate).toNumber();
     if (Number.isFinite(buAmount)) {
       return { primary, secondary: `≈ ${formatCurrencyMajor(buAmount, buCurrency)}` };
@@ -96,10 +90,7 @@ export interface FormatDateOptions {
   locale?: Locale;
 }
 
-export const formatDate = (
-  value: string | null | undefined,
-  options: FormatDateOptions = {},
-): FormattedValue => {
+export const formatDate = (value: string | null | undefined, options: FormatDateOptions = {}): FormattedValue => {
   if (value == null) return { primary: '—' };
   const parsed = DATE_ONLY_PATTERN.test(value) ? parseDateOnly(value) : parseISO(value);
   if (!isValid(parsed)) return { primary: '—' };

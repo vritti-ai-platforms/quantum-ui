@@ -1,21 +1,19 @@
-"use client"
+'use client';
 
-import { ImageIcon } from "lucide-react"
+import { ImageIcon } from 'lucide-react';
 
-import { useToolbarContext } from "../../../context/toolbar-context"
-import { InsertImageDialog } from "../../images-plugin"
-import { SelectItem } from "../../../editor-ui/select"
+import { useToolbarContext } from '../../../context/toolbar-context';
+import { SelectItem } from '../../../editor-ui/select';
+import { InsertImageDialog } from '../../images-plugin';
 
 export function InsertImage() {
-  const { activeEditor, showModal } = useToolbarContext()
+  const { activeEditor, showModal } = useToolbarContext();
 
   return (
     <SelectItem
       value="image"
       onPointerDown={() => {
-        showModal("Insert Image", (onClose) => (
-          <InsertImageDialog activeEditor={activeEditor} onClose={onClose} />
-        ))
+        showModal('Insert Image', (onClose) => <InsertImageDialog activeEditor={activeEditor} onClose={onClose} />);
       }}
       className=""
     >
@@ -24,11 +22,5 @@ export function InsertImage() {
         <span>Image</span>
       </div>
     </SelectItem>
-  )
+  );
 }
-
-
-
-
-
-

@@ -30,12 +30,7 @@ export const BarChart = ({ data, config, xAxisKey, bars, className }: BarChartPr
       <ChartTooltip content={<ChartTooltipContent />} />
       <ChartLegend content={<ChartLegendContent />} />
       {bars.map((bar) => (
-        <Bar
-          key={bar.dataKey}
-          dataKey={bar.dataKey}
-          fill={`var(--color-${bar.dataKey})`}
-          radius={bar.radius ?? 4}
-        />
+        <Bar key={bar.dataKey} dataKey={bar.dataKey} fill={`var(--color-${bar.dataKey})`} radius={bar.radius ?? 4} />
       ))}
     </RechartsBarChart>
   </ChartContainer>

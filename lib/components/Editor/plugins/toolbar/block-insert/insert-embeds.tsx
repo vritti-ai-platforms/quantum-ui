@@ -1,19 +1,19 @@
-"use client"
+'use client';
 
-import { INSERT_EMBED_COMMAND } from "@lexical/react/LexicalAutoEmbedPlugin"
+import { INSERT_EMBED_COMMAND } from '@lexical/react/LexicalAutoEmbedPlugin';
 
-import { useToolbarContext } from "../../../context/toolbar-context"
-import { EmbedConfigs } from "../../embeds/auto-embed-plugin"
-import { SelectItem } from "../../../editor-ui/select"
+import { useToolbarContext } from '../../../context/toolbar-context';
+import { SelectItem } from '../../../editor-ui/select';
+import { EmbedConfigs } from '../../embeds/auto-embed-plugin';
 
 export function InsertEmbeds() {
-  const { activeEditor } = useToolbarContext()
+  const { activeEditor } = useToolbarContext();
   return EmbedConfigs.map((embedConfig) => (
     <SelectItem
       key={embedConfig.type}
       value={embedConfig.type}
       onPointerDown={() => {
-        activeEditor.dispatchCommand(INSERT_EMBED_COMMAND, embedConfig.type)
+        activeEditor.dispatchCommand(INSERT_EMBED_COMMAND, embedConfig.type);
       }}
       className=""
     >
@@ -22,11 +22,5 @@ export function InsertEmbeds() {
         <span>{embedConfig.contentName}</span>
       </div>
     </SelectItem>
-  ))
+  ));
 }
-
-
-
-
-
-

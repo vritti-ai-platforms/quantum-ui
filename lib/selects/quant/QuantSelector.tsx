@@ -2,8 +2,8 @@ import { Check } from 'lucide-react';
 import type React from 'react';
 import { forwardRef } from 'react';
 import { cn } from '../../../shadcn/utils';
-import { Select, type SelectProps } from '../../components/Select/Select';
 import type { SingleSelectOptionRenderProps } from '../../components/Select/components/SingleSelect/SingleSelect';
+import { Select, type SelectProps } from '../../components/Select/Select';
 
 export type QuantSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
@@ -39,7 +39,8 @@ function QuantOptionRow({ option, selected, onSelect }: SingleSelectOptionRender
       </span>
       {qty != null && (
         <span className="shrink-0 pr-5 text-xs tabular-nums text-muted-foreground">
-          {String(qty)}{symbol ? ` ${symbol}` : ''}
+          {String(qty)}
+          {symbol ? ` ${symbol}` : ''}
         </span>
       )}
       <span className="absolute right-2 flex size-3.5 items-center justify-center">

@@ -193,7 +193,9 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
                     tabIndex={-1}
                     className="flex h-1/2 items-center justify-center border-b border-border text-muted-foreground hover:bg-accent"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) + 1)))}
+                    onClick={() =>
+                      setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) + 1)))
+                    }
                     aria-label="Increase value"
                   >
                     <ChevronUp className="size-2.5" />
@@ -203,7 +205,9 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
                     tabIndex={-1}
                     className="flex h-1/2 items-center justify-center text-muted-foreground hover:bg-accent"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) - 1)))}
+                    onClick={() =>
+                      setDraftValue((v) => String(Math.max(0, (Number.isFinite(Number(v)) ? Number(v) : 0) - 1)))
+                    }
                     aria-label="Decrease value"
                   >
                     <ChevronDown className="size-2.5" />

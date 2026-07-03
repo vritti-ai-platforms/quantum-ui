@@ -96,11 +96,7 @@ export function PageContentPanel({
 
   const showEmpty = !isLoading && isEmpty;
 
-  const resolvedBody = isLoading
-    ? (loadingContent ?? <PanelSkeleton />)
-    : showEmpty
-      ? emptyState
-      : panelBody;
+  const resolvedBody = isLoading ? (loadingContent ?? <PanelSkeleton />) : showEmpty ? emptyState : panelBody;
 
   const resolvedContentClassName = showEmpty
     ? cn('flex-1 overflow-auto flex items-center justify-center', contentClassName)
@@ -118,9 +114,7 @@ export function PageContentPanel({
           {actions ? <div className="shrink-0">{actions}</div> : null}
         </div>
       )}
-      <div className={resolvedContentClassName}>
-        {resolvedBody}
-      </div>
+      <div className={resolvedContentClassName}>{resolvedBody}</div>
     </div>
   );
 }
@@ -148,11 +142,7 @@ export function PageContentDetails({
   const body = content ?? children;
   const showEmpty = !isLoading && isEmpty;
 
-  const resolved = isLoading
-    ? (loadingContent ?? <PanelSkeleton />)
-    : showEmpty
-      ? emptyState
-      : body;
+  const resolved = isLoading ? (loadingContent ?? <PanelSkeleton />) : showEmpty ? emptyState : body;
 
   const layoutClass = showEmpty
     ? 'flex-1 overflow-auto p-6 min-w-0 flex items-center justify-center'

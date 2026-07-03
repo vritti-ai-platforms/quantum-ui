@@ -25,19 +25,10 @@ import { useLocale } from './useLocale';
 // so it's safe to put in `useMemo` dependency arrays for column definitions.
 export interface Formatters {
   string: (value: React.ReactNode) => FormattedValue;
-  number: (
-    value: number | string | null | undefined,
-    options?: { fractionDigits?: number },
-  ) => FormattedValue;
-  currency: (
-    value: CurrencyAmount | null | undefined,
-    options?: { exchangeRate?: number | null },
-  ) => FormattedValue;
+  number: (value: number | string | null | undefined, options?: { fractionDigits?: number }) => FormattedValue;
+  currency: (value: CurrencyAmount | null | undefined, options?: { exchangeRate?: number | null }) => FormattedValue;
   date: (value: string | null | undefined) => FormattedValue;
-  dateTime: (
-    value: string | null | undefined,
-    options?: { timeZone?: string },
-  ) => FormattedValue;
+  dateTime: (value: string | null | undefined, options?: { timeZone?: string }) => FormattedValue;
 }
 
 export function useFormatters(): Formatters {
@@ -49,13 +40,10 @@ export function useFormatters(): Formatters {
   return useMemo<Formatters>(
     () => ({
       string: formatString,
-      number: (value, options) =>
-        formatNumber(value, { localeTag, fractionDigits: options?.fractionDigits }),
-      currency: (value, options) =>
-        formatCurrency(value, { buCurrency, exchangeRate: options?.exchangeRate ?? null }),
+      number: (value, options) => formatNumber(value, { localeTag, fractionDigits: options?.fractionDigits }),
+      currency: (value, options) => formatCurrency(value, { buCurrency, exchangeRate: options?.exchangeRate ?? null }),
       date: (value) => formatDate(value, { locale }),
-      dateTime: (value, options) =>
-        formatDateTime(value, { locale, buTimeZone, timeZoneOverride: options?.timeZone }),
+      dateTime: (value, options) => formatDateTime(value, { locale, buTimeZone, timeZoneOverride: options?.timeZone }),
     }),
     [locale, buTimeZone, buCurrency, localeTag],
   );

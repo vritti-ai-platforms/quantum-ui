@@ -1,2 +1,2 @@
-export { FormattedDate } from './FormattedDate';
 export type { FormattedDateProps } from './FormattedDate';
+export { FormattedDate } from './FormattedDate';

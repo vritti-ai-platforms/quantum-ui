@@ -1,4 +1,1 @@
-export { Plugins } from "./plugins/plugins"
-
-
-
+export { Plugins } from './plugins/plugins';

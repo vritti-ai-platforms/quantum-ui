@@ -25,11 +25,6 @@ type Story = StoryObj<typeof BarChart>;
 
 export const Default: Story = {
   render: () => (
-    <BarChart
-      data={data}
-      config={config}
-      xAxisKey="month"
-      bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]}
-    />
+    <BarChart data={data} config={config} xAxisKey="month" bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]} />
   ),
 };
