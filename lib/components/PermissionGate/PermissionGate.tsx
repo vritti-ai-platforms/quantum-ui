@@ -19,28 +19,28 @@ export interface PermissionGateResult {
 }
 
 // The contract an app installs: a pure, synchronous resolver over already-loaded permission state
-export type PermissionGate = (code: string) => PermissionGateResult;
+export type PermissionGateFn = (code: string) => PermissionGateResult;
 
 // Everything-allowed result — the no-op behavior when no permission system is installed
 const ALLOW: PermissionGateResult = Object.freeze({ granted: true, locked: false, reason: null, unlockPlans: [] });
 
-const ALLOW_GATE: PermissionGate = () => ALLOW;
+const ALLOW_GATE: PermissionGateFn = () => ALLOW;
 
 // null = no permission system installed → `permission` props on components are inert.
 // The context is registered on globalThis so every bundled copy of this module (module-federation host +
 // remotes each inline their own chunk) resolves to the SAME context instance — otherwise a remote's gated
 // components would never see the provider the host mounts.
 const GATE_CONTEXT_KEY = Symbol.for('@vritti/quantum-ui/PermissionGate');
-type GateRegistry = { [GATE_CONTEXT_KEY]?: React.Context<PermissionGate | null> };
+type GateRegistry = { [GATE_CONTEXT_KEY]?: React.Context<PermissionGateFn | null> };
 const registry = globalThis as GateRegistry;
-registry[GATE_CONTEXT_KEY] ??= createContext<PermissionGate | null>(null);
+registry[GATE_CONTEXT_KEY] ??= createContext<PermissionGateFn | null>(null);
 const PermissionGateContext = registry[GATE_CONTEXT_KEY];
 
 // Mount once near the app root with the app's gate implementation (e.g. over the SSE permission payload)
 export const PermissionGateProvider = PermissionGateContext.Provider;
 
 // The raw gate for mapping over collections; ALLOW-everything when no provider is mounted
-export function usePermissionGate(): PermissionGate {
+export function usePermissionGate(): PermissionGateFn {
   return useContext(PermissionGateContext) ?? ALLOW_GATE;
 }
 
@@ -66,3 +66,29 @@ export function lockedTip({ reason, unlockPlans }: Pick<PermissionGateResult, 'r
   if (reason === 'BU') return 'Not enabled for this business unit';
   return unlockPlans.length > 0 ? `Available in ${unlockPlans.join(', ')}` : 'Not included in your plan';
 }
+
+export interface PermissionGateProps {
+  // Permission code to gate on ("feature.permission", e.g. "uom.view"). Omit to always render children.
+  permission?: string;
+  children: React.ReactNode;
+  // Rendered when access is unavailable (not granted, or granted-but-locked). A function form receives
+  // the gate result so it can show the lock reason + upsell plans. Default: nothing when not granted,
+  // a lock chip (with upsell tooltip) when locked.
+  fallback?: React.ReactNode | ((result: PermissionGateResult) => React.ReactNode);
+}
+
+// Default locked indicator — the lock symbol whose tooltip explains the plan/BU restriction
+const DefaultLockChip: React.FC<Pick<PermissionGateResult, 'reason' | 'unlockPlans'>> = ({ reason, unlockPlans }) => (
+  <span className="inline-flex items-center gap-1 text-muted-foreground" title={lockedTip({ reason, unlockPlans })}>
+    <PermissionLockIcon reason={reason} className="h-4 w-4" />
+  </span>
+);
+
+// Gates a subtree by permission code: children mount ONLY when the code is granted AND unlocked, so
+// their data queries never fire when the user lacks access. Renders `fallback` otherwise.
+export const PermissionGate: React.FC<PermissionGateProps> = ({ permission, children, fallback }) => {
+  const result = usePermission(permission);
+  if (result.granted && !result.locked) return <>{children}</>;
+  if (fallback !== undefined) return <>{typeof fallback === 'function' ? fallback(result) : fallback}</>;
+  return result.locked ? <DefaultLockChip reason={result.reason} unlockPlans={result.unlockPlans} /> : null;
+};

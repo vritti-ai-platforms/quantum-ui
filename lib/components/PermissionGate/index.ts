@@ -1,6 +1,8 @@
 export {
   lockedTip,
-  type PermissionGate,
+  PermissionGate,
+  type PermissionGateFn,
+  type PermissionGateProps,
   PermissionGateProvider,
   type PermissionGateResult,
   PermissionLockIcon,
