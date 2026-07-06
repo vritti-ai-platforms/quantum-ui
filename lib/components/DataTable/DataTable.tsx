@@ -126,20 +126,10 @@ export function DataTable<TData>({
     return null;
   }
 
-  // enable = role ∧ plan ∧ BU: granted but locked renders the shell with the lock notice instead of data
-  if (tableGate.locked) {
-    return (
-      <div className={cn('flex flex-col gap-2', className)}>
-        <div
-          className="flex flex-col items-center justify-center gap-2 rounded-lg border text-center"
-          style={{ height: MODE_HEIGHTS[mode] }}
-        >
-          <PermissionLockIcon reason={tableGate.reason} className="size-6" />
-          <p className="text-sm text-muted-foreground">{lockedTip(tableGate)}</p>
-        </div>
-      </div>
-    );
-  }
+  // enable = role ∧ plan ∧ BU: granted but locked keeps the table shell but shows a lock notice in the
+  // empty state and disables filters instead of data. The caller should also disable its query so no
+  // request is made — the guarded endpoint would 403 anyway.
+  const locked = tableGate.locked;
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -166,6 +156,7 @@ export function DataTable<TData>({
                   size="sm"
                   className={cn('h-8 w-8 p-0', (filtersOpen || appliedFilterCount > 0) && 'border border-transparent')}
                   onClick={() => setFiltersOpen((v) => !v)}
+                  disabled={locked}
                   aria-label="Toggle filters"
                 >
                   <Funnel className="h-4 w-4" />
@@ -362,7 +353,7 @@ export function DataTable<TData>({
                 </TableRow>
               ))}
             </TableHeader>
-            {(isLoading || table.getRowModel().rows.length > 0) && (
+            {!locked && (isLoading || table.getRowModel().rows.length > 0) && (
               <TableBody>
                 {isLoading
                   ? Array.from(
@@ -433,9 +424,14 @@ export function DataTable<TData>({
               </TableBody>
             )}
           </table>
-          {!isLoading && table.getRowModel().rows.length === 0 && (
+          {(locked || (!isLoading && table.getRowModel().rows.length === 0)) && (
             <div className="flex flex-1 items-center justify-center">
-              {isFiltered ? (
+              {locked ? (
+                <div className="flex flex-col items-center justify-center gap-2 text-center">
+                  <PermissionLockIcon reason={tableGate.reason} className="size-6" />
+                  <p className="text-sm text-muted-foreground">{lockedTip(tableGate)}</p>
+                </div>
+              ) : isFiltered ? (
                 <DataTableEmpty
                   icon={emptyStateConfig?.icon}
                   title="No results found"
