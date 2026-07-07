@@ -181,6 +181,11 @@ export interface LockedPermission {
   unlockPlans: string[];
 }
 
+export interface PlanUpsell {
+  plan: string;
+  features: string[];
+}
+
 export interface PermissionFeature {
   code: string;
   name: string;
@@ -192,6 +197,7 @@ export interface PermissionFeature {
   lockReason: LockReason | null;
   unlockPlans: string[];
   lockedPermissions: LockedPermission[];
+  upsell: PlanUpsell[];
   route: {
     remoteEntry: string;
     exposedModule: string;
