@@ -24,6 +24,7 @@ export interface SnapshotPermission {
   label: string;
   isGlobal: boolean;
   businesses: string[];
+  dependsOn: string[];
 }
 
 export interface SnapshotMicrofrontendWeb {
@@ -142,6 +143,7 @@ export interface BuMatrixCell {
 export interface BuMatrixPermission {
   code: string;
   label: string;
+  dependsOn: string[];
   web: BuMatrixCell | null;
   mobile: BuMatrixCell | null;
 }

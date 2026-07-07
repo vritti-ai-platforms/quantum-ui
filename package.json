@@ -208,6 +208,10 @@
       "types": "./dist/lib/selects/feature/index.d.ts",
       "import": "./dist/selects/feature.js"
     },
+    "./selects/feature-permission": {
+      "types": "./dist/lib/selects/feature-permission/index.d.ts",
+      "import": "./dist/selects/feature-permission.js"
+    },
     "./selects/icon": {
       "types": "./dist/lib/selects/icon/index.d.ts",
       "import": "./dist/selects/icon.js"
@@ -479,6 +483,10 @@
     "./money": {
       "types": "./dist/lib/utils/money.d.ts",
       "import": "./dist/utils/money.js"
+    },
+    "./permission-deps": {
+      "types": "./dist/lib/utils/permission-deps.d.ts",
+      "import": "./dist/utils/permission-deps.js"
     },
     "./format": {
       "types": "./dist/lib/utils/format.d.ts",
