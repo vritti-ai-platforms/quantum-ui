@@ -62,6 +62,8 @@ export default defineConfig({
         'selects/business': resolve(__dirname, 'lib/selects/business/index.ts'),
         'selects/region': resolve(__dirname, 'lib/selects/region/index.ts'),
         'selects/plan': resolve(__dirname, 'lib/selects/plan/index.ts'),
+        'selects/billing-cycle': resolve(__dirname, 'lib/selects/billing-cycle/index.ts'),
+        'selects/country': resolve(__dirname, 'lib/selects/country/index.ts'),
         'selects/currency': resolve(__dirname, 'lib/selects/currency/index.ts'),
         'selects/locale': resolve(__dirname, 'lib/selects/locale/index.ts'),
         'selects/timezone': resolve(__dirname, 'lib/selects/timezone/index.ts'),

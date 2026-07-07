@@ -180,6 +180,14 @@
       "types": "./dist/lib/selects/plan/index.d.ts",
       "import": "./dist/selects/plan.js"
     },
+    "./selects/billing-cycle": {
+      "types": "./dist/lib/selects/billing-cycle/index.d.ts",
+      "import": "./dist/selects/billing-cycle.js"
+    },
+    "./selects/country": {
+      "types": "./dist/lib/selects/country/index.d.ts",
+      "import": "./dist/selects/country.js"
+    },
     "./selects/currency": {
       "types": "./dist/lib/selects/currency/index.d.ts",
       "import": "./dist/selects/currency.js"
