@@ -11,7 +11,7 @@ export const TaxGroupFilter = Object.assign(
       name="taxGroupId"
       label="Tax Group"
       placeholder="Select tax group"
-      optionsEndpoint="commerce-api/tax-groups/select"
+      optionsEndpoint="commerce-api/select-api/tax-groups"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

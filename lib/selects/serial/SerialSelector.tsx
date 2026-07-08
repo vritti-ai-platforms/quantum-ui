@@ -14,7 +14,7 @@ export const SerialSelector = forwardRef<HTMLButtonElement, SerialSelectorProps>
     label="Serial"
     placeholder="Select serial number"
     searchable
-    optionsEndpoint="commerce-api/inventory-item-serials/select"
+    optionsEndpoint="commerce-api/select-api/inventory-item-serials"
     params={params}
     fieldKeys={{ valueKey: 'id', labelKey: 'serialNumber' }}
     {...props}

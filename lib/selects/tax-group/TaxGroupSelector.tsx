@@ -10,7 +10,7 @@ export const TaxGroupSelector = forwardRef<HTMLButtonElement, TaxGroupSelectorPr
     label="Tax Group"
     placeholder="Select tax group"
     searchable
-    optionsEndpoint="commerce-api/tax-groups/select"
+    optionsEndpoint="commerce-api/select-api/tax-groups"
     fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
     {...props}
   />

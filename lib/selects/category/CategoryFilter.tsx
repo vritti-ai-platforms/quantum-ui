@@ -12,10 +12,11 @@ export const CategoryFilter = Object.assign(
       name="categoryId"
       label="Category"
       placeholder="Select category"
-      optionsEndpoint="commerce-api/categories/select"
+      optionsEndpoint="commerce-api/select-api/categories"
       fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'path' }}
       transformDescription={formatCategoryPath}
       {...props}
+      params={{ role: 'CATEGORY', status: 'active', ...props.params }}
     />
   )),
   { displayName: 'CategoryFilter', defaultLabel: 'Category', defaultName: 'categoryId' },

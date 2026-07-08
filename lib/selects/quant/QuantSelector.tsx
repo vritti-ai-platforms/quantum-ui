@@ -57,7 +57,7 @@ export const QuantSelector = forwardRef<HTMLButtonElement, QuantSelectorProps>((
     label="Quant"
     placeholder="Select quant"
     searchable
-    optionsEndpoint="commerce-api/inventory-item-quants/select"
+    optionsEndpoint="commerce-api/select-api/inventory-item-quants"
     renderOption={(p) => <QuantOptionRow {...p} />}
     {...props}
   />

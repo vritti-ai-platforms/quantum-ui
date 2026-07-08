@@ -11,7 +11,7 @@ export const InventoryItemFilter = Object.assign(
       name="inventoryItemId"
       label="Inventory Item"
       placeholder="Select inventory item"
-      optionsEndpoint="commerce-api/inventory-items/select"
+      optionsEndpoint="commerce-api/select-api/inventory-items"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

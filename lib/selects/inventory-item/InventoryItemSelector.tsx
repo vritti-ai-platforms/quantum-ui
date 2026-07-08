@@ -13,7 +13,7 @@ export const InventoryItemSelector = forwardRef<HTMLButtonElement, InventoryItem
       label="Inventory Item"
       placeholder="Select inventory item"
       searchable
-      optionsEndpoint="commerce-api/inventory-items/select"
+      optionsEndpoint="commerce-api/select-api/inventory-items"
       {...props}
       fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
     />

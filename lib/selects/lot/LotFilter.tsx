@@ -16,7 +16,7 @@ export const LotFilter = Object.assign(
       name="lotId"
       label="Lot"
       placeholder="Select lot"
-      optionsEndpoint="commerce-api/inventory-item-lots/select"
+      optionsEndpoint="commerce-api/select-api/inventory-item-lots"
       params={params}
       fieldKeys={{ valueKey: 'id', labelKey: 'lotNumber' }}
       {...props}

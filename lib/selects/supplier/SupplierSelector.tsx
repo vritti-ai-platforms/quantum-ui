@@ -27,7 +27,7 @@ export const SupplierSelector = forwardRef<HTMLButtonElement, SupplierSelectorPr
     label="Supplier"
     placeholder="Select supplier"
     searchable
-    optionsEndpoint="commerce-api/suppliers/select"
+    optionsEndpoint="commerce-api/select-api/suppliers"
     transformDescription={defaultTransformDescription}
     {...props}
     fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}

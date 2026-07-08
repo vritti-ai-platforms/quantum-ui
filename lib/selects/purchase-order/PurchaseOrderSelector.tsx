@@ -17,7 +17,7 @@ export const PurchaseOrderSelector = forwardRef<HTMLButtonElement, PurchaseOrder
       placeholder="Select purchase order"
       searchable
       clearable
-      optionsEndpoint="commerce-api/purchase-orders/select"
+      optionsEndpoint="commerce-api/select-api/purchase-orders"
       {...props}
       fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
     />

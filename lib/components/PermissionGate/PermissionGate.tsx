@@ -11,6 +11,7 @@ export interface PermissionGateResult {
   reason: PermissionLockReason | null;
   unlockPlans: string[];
   available: boolean;
+  featureName: string | null;
 }
 
 export type PermissionGateFn = (code: string) => PermissionGateResult;
@@ -21,6 +22,7 @@ const ALLOW: PermissionGateResult = Object.freeze({
   reason: null,
   unlockPlans: [],
   available: true,
+  featureName: null,
 });
 
 const ALLOW_GATE: PermissionGateFn = () => ALLOW;
@@ -61,13 +63,35 @@ export function lockedTip({ reason, unlockPlans }: Pick<PermissionGateResult, 'r
   return unlockPlans.length > 0 ? `Available in ${unlockPlans.join(', ')}` : 'Not included in your plan';
 }
 
-// Resolves a blocked control's heading + description for both not-granted and locked cases
-function lockMessages(result: Pick<PermissionGateResult, 'granted' | 'reason' | 'unlockPlans'>): {
+// Resolves a blocked control's heading + description, keyed off the resolved feature name when known
+function lockMessages(result: Pick<PermissionGateResult, 'granted' | 'reason' | 'unlockPlans' | 'featureName'>): {
   title: string;
   tip: string;
 } {
-  if (!result.granted) return { title: 'No access', tip: "You don't have permission to access this." };
-  return { title: result.reason === 'BU' ? 'Not available here' : 'Upgrade required', tip: lockedTip(result) };
+  const name = result.featureName;
+  if (!result.granted) {
+    return {
+      title: name ? `${name} is restricted` : 'No access',
+      tip: name ? `You don't have permission to view ${name}.` : "You don't have permission to access this.",
+    };
+  }
+  if (result.reason === 'BU') {
+    return {
+      title: name ? `${name} not enabled here` : 'Not available here',
+      tip: name ? `${name} isn't enabled for this business unit.` : 'Not enabled for this business unit.',
+    };
+  }
+  if (result.unlockPlans.length > 0) {
+    const plans = result.unlockPlans.join(', ');
+    return {
+      title: name ? `Unlock ${name}` : 'Upgrade required',
+      tip: name ? `${name} is available on ${plans}.` : `Available in ${plans}.`,
+    };
+  }
+  return {
+    title: name ? `Unlock ${name}` : 'Upgrade required',
+    tip: name ? `${name} isn't included in your plan.` : 'Not included in your plan.',
+  };
 }
 
 export interface PermissionGateProps {
@@ -76,11 +100,12 @@ export interface PermissionGateProps {
   fallback?: React.ReactNode | ((result: PermissionGateResult & { title: string; tip: string }) => React.ReactNode);
 }
 
-// Default locked indicator — the lock symbol whose tooltip explains the plan/BU restriction
-const DefaultLockChip: React.FC<Pick<PermissionGateResult, 'reason' | 'unlockPlans'>> = ({ reason, unlockPlans }) => (
-  <span className="inline-flex items-center gap-1 text-muted-foreground" title={lockedTip({ reason, unlockPlans })}>
-    <PermissionLockIcon reason={reason} className="h-4 w-4" />
-  </span>
+// Default fallback — a centered lock panel with the feature-specific restriction message
+const DefaultLockFallback: React.FC<{ result: PermissionGateResult }> = ({ result }) => (
+  <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+    <PermissionLockIcon reason={result.reason} className="size-10" />
+    <p className="max-w-sm text-sm text-muted-foreground">{lockMessages(result).tip}</p>
+  </div>
 );
 
 // Gates a subtree by permission code: children mount only when granted AND unlocked, else renders `fallback`
@@ -89,5 +114,5 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({ permission, chil
   if (result.available) return <>{children}</>;
   if (fallback !== undefined)
     return <>{typeof fallback === 'function' ? fallback({ ...result, ...lockMessages(result) }) : fallback}</>;
-  return result.locked ? <DefaultLockChip reason={result.reason} unlockPlans={result.unlockPlans} /> : null;
+  return <DefaultLockFallback result={result} />;
 };

@@ -10,7 +10,7 @@ export const CustomerSelector = forwardRef<HTMLButtonElement, CustomerSelectorPr
     label="Customer"
     placeholder="Search by name, phone, or email"
     searchable
-    optionsEndpoint="commerce-api/customers/select"
+    optionsEndpoint="commerce-api/select-api/customers"
     fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
     {...props}
   />

@@ -11,7 +11,7 @@ export const UomFilter = Object.assign(
       name="uomId"
       label="Unit of Measure"
       placeholder="Select unit"
-      optionsEndpoint="commerce-api/uom/select"
+      optionsEndpoint="commerce-api/select-api/uom"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

@@ -17,7 +17,7 @@ export const UomSelector = forwardRef<HTMLButtonElement, UomSelectorProps>(({ fi
     label="Unit of Measure"
     placeholder="Select unit"
     searchable
-    optionsEndpoint="commerce-api/uom/select"
+    optionsEndpoint="commerce-api/select-api/uom"
     {...props}
     fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}
   />

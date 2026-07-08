@@ -10,7 +10,7 @@ export const PurchaseOrderFilter = Object.assign(
       ref={ref}
       name="purchaseOrderId"
       label="Purchase Order"
-      optionsEndpoint="commerce-api/purchase-orders/select"
+      optionsEndpoint="commerce-api/select-api/purchase-orders"
       fieldKeys={{ valueKey: 'id', labelKey: 'poNumber' }}
       {...props}
     />

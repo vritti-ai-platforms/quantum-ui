@@ -10,7 +10,7 @@ export const CostCategoryFilter = Object.assign(
       name="categoryId"
       label="Category"
       placeholder="Select category"
-      optionsEndpoint="commerce-api/cost-categories/select"
+      optionsEndpoint="commerce-api/select-api/cost-categories"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

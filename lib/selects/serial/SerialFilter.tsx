@@ -16,7 +16,7 @@ export const SerialFilter = Object.assign(
       name="serialId"
       label="Serial"
       placeholder="Select serial"
-      optionsEndpoint="commerce-api/inventory-item-serials/select"
+      optionsEndpoint="commerce-api/select-api/inventory-item-serials"
       params={params}
       fieldKeys={{ valueKey: 'id', labelKey: 'serialNumber' }}
       {...props}

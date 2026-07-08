@@ -11,17 +11,18 @@ export const formatCategoryPath = (path: string): string =>
     .map((segment) => segment.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
     .join(' › ');
 
-// Pre-configured Select for category selection — server returns leaves only with full ltree path as description
+// Pre-configured Select for category selection — defaults to active leaf categories; override role/status via params
 export const CategorySelector = forwardRef<HTMLButtonElement, CategorySelectorProps>((props, ref) => (
   <Select
     ref={ref}
     label="Category"
     placeholder="Select category"
     searchable
-    optionsEndpoint="commerce-api/categories/select"
+    optionsEndpoint="commerce-api/select-api/categories"
     fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'path' }}
     transformDescription={formatCategoryPath}
     {...props}
+    params={{ role: 'CATEGORY', status: 'active', ...props.params }}
   />
 ));
 CategorySelector.displayName = 'CategorySelector';

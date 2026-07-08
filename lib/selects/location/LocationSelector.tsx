@@ -25,7 +25,7 @@ export const LocationSelector = forwardRef<HTMLButtonElement, LocationSelectorPr
     label="Location"
     placeholder="Select location"
     searchable
-    optionsEndpoint="commerce-api/locations/select"
+    optionsEndpoint="commerce-api/select-api/locations"
     transformDescription={formatLocationPath}
     {...props}
     fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}

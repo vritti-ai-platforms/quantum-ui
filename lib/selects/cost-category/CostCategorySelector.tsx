@@ -16,7 +16,7 @@ function defaultTransformDescription(value: string, option: SelectOption): strin
   return kind || '';
 }
 
-// Pre-configured Select for cost-category selection, hitting GET /commerce-api/cost-categories/select.
+// Pre-configured Select for cost-category selection, hitting GET /commerce-api/select-api/cost-categories.
 export const CostCategorySelector = forwardRef<HTMLButtonElement, CostCategorySelectorProps>(
   ({ fieldKeys, ...props }, ref) => (
     <Select
@@ -24,7 +24,7 @@ export const CostCategorySelector = forwardRef<HTMLButtonElement, CostCategorySe
       label="Cost Category"
       placeholder="Select cost category"
       searchable
-      optionsEndpoint="commerce-api/cost-categories/select"
+      optionsEndpoint="commerce-api/select-api/cost-categories"
       transformDescription={defaultTransformDescription}
       {...props}
       fieldKeys={{ ...DEFAULT_FIELD_KEYS, ...fieldKeys }}

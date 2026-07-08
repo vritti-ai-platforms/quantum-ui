@@ -10,7 +10,7 @@ export const LocationFilter = Object.assign(
       name="locationId"
       label="Location"
       placeholder="Select location"
-      optionsEndpoint="commerce-api/locations/select"
+      optionsEndpoint="commerce-api/select-api/locations"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

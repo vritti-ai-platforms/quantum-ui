@@ -11,7 +11,7 @@ export const SupplierFilter = Object.assign(
       name="supplierId"
       label="Supplier"
       placeholder="Select supplier"
-      optionsEndpoint="commerce-api/suppliers/select"
+      optionsEndpoint="commerce-api/select-api/suppliers"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

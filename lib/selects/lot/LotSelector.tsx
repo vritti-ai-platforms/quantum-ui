@@ -14,7 +14,7 @@ export const LotSelector = forwardRef<HTMLButtonElement, LotSelectorProps>(({ pa
     label="Lot"
     placeholder="Select or type a lot number"
     searchable
-    optionsEndpoint="commerce-api/inventory-item-lots/select"
+    optionsEndpoint="commerce-api/select-api/inventory-item-lots"
     params={params}
     fieldKeys={{ valueKey: 'id', labelKey: 'lotNumber' }}
     {...props}

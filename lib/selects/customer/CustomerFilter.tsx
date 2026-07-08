@@ -11,7 +11,7 @@ export const CustomerFilter = Object.assign(
       name="customerId"
       label="Customer"
       placeholder="Search by name, phone, or email"
-      optionsEndpoint="commerce-api/customers/select"
+      optionsEndpoint="commerce-api/select-api/customers"
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       {...props}
     />

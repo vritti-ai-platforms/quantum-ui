@@ -56,7 +56,7 @@ export const SupplierItemSelector = forwardRef<HTMLButtonElement, SupplierItemSe
       label="Supplier Item"
       placeholder="Select supplier item"
       searchable
-      optionsEndpoint="commerce-api/supplier-items/select"
+      optionsEndpoint="commerce-api/select-api/supplier-items"
       params={params}
       transformLabel={defaultTransformLabel}
       transformDescription={defaultTransformDescription}

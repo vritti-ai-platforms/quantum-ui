@@ -11,7 +11,7 @@ export const QuantFilter = Object.assign(
       name="quantId"
       label="Quant"
       placeholder="Select quant"
-      optionsEndpoint="commerce-api/inventory-item-quants/select"
+      optionsEndpoint="commerce-api/select-api/inventory-item-quants"
       {...props}
     />
   )),

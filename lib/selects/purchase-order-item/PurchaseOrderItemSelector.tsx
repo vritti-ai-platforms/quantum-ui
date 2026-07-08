@@ -55,7 +55,7 @@ export const PurchaseOrderItemSelector = forwardRef<HTMLButtonElement, PurchaseO
       label="Purchase Order Item"
       placeholder="Select item from purchase order"
       searchable
-      optionsEndpoint="commerce-api/purchase-order-items/select"
+      optionsEndpoint="commerce-api/select-api/purchase-order-items"
       params={params}
       transformLabel={defaultTransformLabel}
       transformDescription={defaultTransformDescription}
