@@ -67,14 +67,25 @@ export function lockedTip({ reason, unlockPlans }: Pick<PermissionGateResult, 'r
   return unlockPlans.length > 0 ? `Available in ${unlockPlans.join(', ')}` : 'Not included in your plan';
 }
 
+// Ready-to-render heading + description for a blocked control, covering BOTH cases the fallback sees:
+// not-granted (role lacks it) and granted-but-locked (plan/BU gate). Surfaced only via the fallback.
+function lockMessages(result: Pick<PermissionGateResult, 'granted' | 'reason' | 'unlockPlans'>): {
+  title: string;
+  tip: string;
+} {
+  if (!result.granted) return { title: 'No access', tip: "You don't have permission to access this." };
+  return { title: result.reason === 'BU' ? 'Not available here' : 'Upgrade required', tip: lockedTip(result) };
+}
+
 export interface PermissionGateProps {
   // Permission code to gate on ("feature.permission", e.g. "uom.view"). Omit to always render children.
   permission?: string;
   children: React.ReactNode;
   // Rendered when access is unavailable (not granted, or granted-but-locked). A function form receives
-  // the gate result so it can show the lock reason + upsell plans. Default: nothing when not granted,
-  // a lock chip (with upsell tooltip) when locked.
-  fallback?: React.ReactNode | ((result: PermissionGateResult) => React.ReactNode);
+  // the gate result plus a ready-to-render `title` + `tip` that already resolve the not-granted vs
+  // granted-but-locked split — callers render them directly, no branching. Default: nothing when not
+  // granted, a lock chip (with upsell tooltip) when locked.
+  fallback?: React.ReactNode | ((result: PermissionGateResult & { title: string; tip: string }) => React.ReactNode);
 }
 
 // Default locked indicator — the lock symbol whose tooltip explains the plan/BU restriction
@@ -89,6 +100,7 @@ const DefaultLockChip: React.FC<Pick<PermissionGateResult, 'reason' | 'unlockPla
 export const PermissionGate: React.FC<PermissionGateProps> = ({ permission, children, fallback }) => {
   const result = usePermission(permission);
   if (result.granted && !result.locked) return <>{children}</>;
-  if (fallback !== undefined) return <>{typeof fallback === 'function' ? fallback(result) : fallback}</>;
+  if (fallback !== undefined)
+    return <>{typeof fallback === 'function' ? fallback({ ...result, ...lockMessages(result) }) : fallback}</>;
   return result.locked ? <DefaultLockChip reason={result.reason} unlockPlans={result.unlockPlans} /> : null;
 };
