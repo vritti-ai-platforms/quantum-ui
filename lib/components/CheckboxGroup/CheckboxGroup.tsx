@@ -14,49 +14,26 @@ import { cn } from '../../../shadcn/utils';
 import { Button } from '../Button';
 
 export interface CheckboxOption {
-  /** The value associated with this option */
   value: string;
-  /** Label displayed next to the checkbox */
   label: React.ReactNode;
-  /** Optional description displayed below the label */
   description?: React.ReactNode;
-  /** Whether this individual option is disabled */
   disabled?: boolean;
 }
 
 export interface CheckboxGroupProps {
-  /** Array of checkbox options to render */
   options: CheckboxOption[];
-  /** Controlled value — array of selected option values */
   value?: string[];
-  /** Callback fired when the selection changes */
   onValueChange?: (value: string[]) => void;
-  /** Default selected values for uncontrolled mode */
   defaultValue?: string[];
-  /** Group label rendered as a fieldset legend */
   label?: React.ReactNode;
-  /** Description displayed below the label */
   description?: React.ReactNode;
-  /** Error message displayed below the group */
   error?: string;
-  /** Layout direction of the checkbox options */
   orientation?: 'vertical' | 'horizontal';
-  /** Number of grid columns — overrides orientation layout */
   columns?: number;
-  /** Whether all checkboxes in the group are disabled */
   disabled?: boolean;
-  /**
-   * When `true`, renders compact "Select all" / "Clear" inline actions in the group header
-   * (to the right of the `label`, or above the options when there is no label).
-   * "Select all" selects every non-disabled option; "Clear" empties the selection.
-   * Each action disables itself when it would be a no-op. Defaults to `false`.
-   */
   clearable?: boolean;
-  /** Additional CSS classes for the fieldset wrapper */
   className?: string;
-  /** Field name consumed by Form.tsx Controller — not used directly */
   name?: string;
-  /** Blur handler wired by Form.tsx Controller */
   onBlur?: () => void;
 }
 

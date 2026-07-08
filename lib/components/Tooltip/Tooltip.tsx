@@ -7,19 +7,12 @@ import {
 } from '../../../shadcn/shadcnTooltip';
 
 export interface TooltipProps {
-  /** The hover content shown in the floating tooltip */
   content: React.ReactNode;
-  /** The trigger element the tooltip is anchored to */
   children: React.ReactNode;
-  /** Side the tooltip opens toward */
   side?: 'top' | 'right' | 'bottom' | 'left';
-  /** Alignment along the trigger edge */
   align?: 'start' | 'center' | 'end';
-  /** Extra classes for the content surface */
   className?: string;
-  /** Hover delay before opening (ms) */
   delayDuration?: number;
-  /** When true (default), the trigger renders as its child instead of a wrapping button */
   asChild?: boolean;
 }
 

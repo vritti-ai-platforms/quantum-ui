@@ -29,9 +29,6 @@ export interface TabsProps extends React.ComponentPropsWithoutRef<typeof TabsPri
   disabled?: boolean;
   mountStrategy?: 'active' | 'all';
   animated?: boolean;
-  // When set, the active tab is bound to this URL path param (e.g. "versionTab").
-  // The route must include that segment; switching tabs navigates to update it,
-  // so the selection is deep-linkable and survives refresh.
   routeParam?: string;
 }
 

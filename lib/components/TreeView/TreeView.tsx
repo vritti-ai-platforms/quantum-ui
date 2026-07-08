@@ -50,8 +50,6 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   isLoading?: boolean;
   loadingRowCount?: number;
   initialSelectedItemId?: string;
-  // Controlled selection: when provided (string or null), the highlight follows this value rather
-  // than internal click state. `null` clears the selection; omit entirely for uncontrolled behavior.
   selectedItemId?: string | null;
   onSelectChange?: (item: TreeDataItem | undefined) => void;
   onReorder?: (payload: TreeReorderPayload) => void;
@@ -102,8 +100,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       [isSelectionControlled, onSelectChange],
     );
 
-    // When controlled, expansion follows the controlled selection so external selection changes
-    // reveal (expand toward) the target; otherwise it tracks the initial selection as before.
+    // When controlled, expansion follows the controlled selection so external changes reveal the target; otherwise it tracks the initial selection.
     const revealTargetId = isSelectionControlled ? selectedItemId : initialSelectedItemId;
 
     const expandedItemIds = React.useMemo(() => {
@@ -130,9 +127,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       }
 
       walkTreeItems(data, revealTargetId);
-      // In controlled mode the reveal target follows selection, so expand only its ancestors — not
-      // the target itself — otherwise selecting a parent would force it open and clicking couldn't
-      // collapse it. Uncontrolled mode keeps the original behavior (reveal path is static).
+      // In controlled mode expand only the target's ancestors, not the target itself, so a selected parent can still be collapsed; uncontrolled keeps the static reveal path.
       return expandAll || !isSelectionControlled ? ids : ids.filter((id) => id !== revealTargetId);
     }, [data, expandAll, isSelectionControlled, revealTargetId]);
 
@@ -350,8 +345,7 @@ const TreeNode = ({
   const isSelected = selectedItemId === item.id;
   const isOpen = value.includes(item.id);
 
-  // Reveal-to-selection: when this node enters the reveal path (e.g. selection changed externally),
-  // open it. Additive only — never force-collapses a node the user opened.
+  // Reveal-to-selection: open this node when it enters the reveal path; additive only, never force-collapses a node the user opened.
   React.useEffect(() => {
     if (expandedItemIds.includes(item.id)) {
       setValue((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));

@@ -10,8 +10,7 @@ export interface ScanBarcodeButtonProps {
   loadingText?: string;
 }
 
-// Toggle button for a `useBarcodeScanner`. Reflects the scanner's active state (filled when on) and
-// its pending state (spinner while a scanned code is being submitted), and surfaces the toggle hotkey.
+// Toggle button for a `useBarcodeScanner` reflecting its active/pending state and surfacing the toggle hotkey
 export function ScanBarcodeButton({
   scanner,
   disabled,

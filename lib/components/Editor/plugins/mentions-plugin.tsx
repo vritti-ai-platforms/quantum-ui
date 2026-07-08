@@ -29,11 +29,8 @@ const PUNC = DocumentMentionsRegex.PUNCTUATION;
 
 const TRIGGERS = ['@'].join('');
 
-// Chars we expect to see in a mention (non-space, non-punctuation).
 const VALID_CHARS = `[^${TRIGGERS}${PUNC}\\s]`;
 
-// Non-standard series of chars. Each series must be preceded and followed by
-// a valid char.
 const VALID_JOINS =
   '(?:' +
   '\\.[ |$]|' + // E.g. "r. " in "Mr. Smith"
@@ -49,15 +46,12 @@ const AtSignMentionsRegex = new RegExp(
   `(^|\\s|\\()([${TRIGGERS}]((?:${VALID_CHARS}${VALID_JOINS}){0,${LENGTH_LIMIT}}))$`,
 );
 
-// 50 is the longest alias length limit.
 const ALIAS_LENGTH_LIMIT = 50;
 
-// Regex used to match alias.
 const AtSignMentionsRegexAliasRegex = new RegExp(
   `(^|\\s|\\()([${TRIGGERS}]((?:${VALID_CHARS}){0,${ALIAS_LENGTH_LIMIT}}))$`,
 );
 
-// At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 
 const mentionsCache = new Map<string, MentionOption[]>();
@@ -518,9 +512,7 @@ function checkForAtSignMentions(text: string, minMatchLength: number): MenuTextM
     match = AtSignMentionsRegexAliasRegex.exec(text);
   }
   if (match !== null) {
-    // The strategy ignores leading whitespace but we need to know it's
-    // length to add it to the leadOffset
-
+    // Ignore leading whitespace but keep its length to add to the leadOffset
     const maybeLeadingWhitespace = match[1];
 
     const matchingString = match[3];
@@ -604,7 +596,7 @@ export function MentionsPlugin(): JSX.Element | null {
       menuRenderFn={(anchorElementRef, { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }) => {
         return anchorElementRef.current && results.length
           ? createPortal(
-              <div className="fixed z-10 w-[200px] rounded-md shadow-md">
+              <div className="fixed z-10 w-50 rounded-md shadow-md">
                 <Command
                   onKeyDown={(e) => {
                     if (e.key === 'ArrowUp') {
@@ -630,7 +622,7 @@ export function MentionsPlugin(): JSX.Element | null {
                             selectOptionAndCleanUp(option);
                           }}
                           className={`flex items-center gap-2 ${
-                            selectedIndex === index ? 'bg-accent' : '!bg-transparent'
+                            selectedIndex === index ? 'bg-accent' : 'bg-transparent!'
                           }`}
                         >
                           {option.picture}

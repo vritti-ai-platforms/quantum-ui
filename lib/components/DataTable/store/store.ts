@@ -28,7 +28,6 @@ export interface TableSlice {
   setPagination: (slug: string, pagination: { limit: number; offset: number }) => void;
   setActiveViewState: (slug: string, viewState: TableViewState) => void;
   syncActiveViewState: (slug: string) => void;
-  // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
   consumeSkipUpsert: (slug: string) => boolean;
 }
 
@@ -70,9 +69,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState, activeViewId, and activeViewState.
-  // Merges with EMPTY_TABLE_STATE so old server payloads missing new fields still work.
-  // skipUpsert defaults to true (page-load); pass false for user-driven tab activation.
+  // Sets activeState/viewId/viewState, merging with EMPTY_TABLE_STATE; skipUpsert defaults true (page-load)
   loadViewState: (slug, state, viewId, skipUpsert = true) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
@@ -87,8 +84,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
             ...currentTable,
             activeState: mergedState,
             activeViewId: viewId,
-            // On page-load (skipUpsert=true), activeViewState is set later via setActiveViewState
-            // once the views list loads. On user tab activation, set it immediately.
+            // On page-load, activeViewState is set later via setActiveViewState; on user tab activation, set it immediately
             activeViewState: !skipUpsert && viewId !== null ? mergedState : null,
             _skipUpsert: skipUpsert,
             lastAccessed: Date.now(),

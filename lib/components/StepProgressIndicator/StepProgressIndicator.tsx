@@ -11,9 +11,7 @@ export interface StepDef {
 
 export interface StepProgressIndicatorProps {
   steps: StepDef[];
-  // 1-based index of the currently active step
   currentStep: number;
-  // 0-100 within-step progress for the active step (defaults to 0)
   progress?: number;
 }
 

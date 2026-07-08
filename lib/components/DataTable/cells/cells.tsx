@@ -1,10 +1,4 @@
-// Cell components that wrap useFormatters so DataTable rows pick up the same locale/timezone/
-// currency formatting as DetailField. Use these inside a column's `cell` callback:
-//
-//   { accessorKey: 'totalPrice', cell: ({ row }) => <CurrencyCell value={row.original.totalPrice} /> }
-//
-// For composed cells (cross-UOM hints, badges + values, etc.), call the `useFormatters` hook at
-// the top of your component and use the formatter functions directly.
+// Cell components that wrap useFormatters so DataTable rows share DetailField's locale/timezone/currency formatting
 
 import type React from 'react';
 import { useFormatters } from '../../../hooks/useFormatters';
@@ -12,7 +6,6 @@ import type { CurrencyAmount } from '../../../utils/format';
 
 export interface StringCellProps {
   value: React.ReactNode;
-  // Render in a monospace font (for identifier-style strings: PO numbers, codes, IDs).
   mono?: boolean;
   className?: string;
 }
@@ -37,8 +30,6 @@ export const NumberCell: React.FC<NumberCellProps> = ({ value, fractionDigits, c
 
 export interface CurrencyCellProps {
   value: CurrencyAmount | null | undefined;
-  // PO→BU multiplier. When set and BU currency differs, renders the BU-currency equivalent in
-  // muted small text alongside the primary.
   exchangeRate?: number | null;
   className?: string;
 }

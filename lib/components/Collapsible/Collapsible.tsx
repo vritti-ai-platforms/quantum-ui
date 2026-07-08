@@ -16,11 +16,8 @@ export interface CollapsibleProps {
   className?: string;
   triggerClassName?: string;
   showChevron?: boolean;
-  /** Content rendered alongside the trigger but outside the clickable area (e.g. checkboxes, badges) */
   leading?: React.ReactNode;
-  /** Content rendered after the trigger but outside the clickable area */
   trailing?: React.ReactNode;
-  /** Class name for the header row that contains leading + trigger + trailing */
   headerClassName?: string;
 }
 
@@ -38,8 +35,7 @@ export function Collapsible({
   trailing,
   headerClassName,
 }: CollapsibleProps) {
-  // Use the full header row whenever any slot OR header styling is provided, so headerClassName
-  // (padding, background, hover) always applies — not only when leading/trailing exist.
+  // Use the full header row whenever any slot OR header styling is provided, so headerClassName always applies
   const hasHeader = Boolean(leading || trailing || headerClassName);
 
   return (

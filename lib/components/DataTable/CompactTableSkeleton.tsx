@@ -3,18 +3,13 @@ import { cn } from '../../../shadcn/utils';
 import { Skeleton } from '../Skeleton';
 
 export interface CompactTableSkeletonColumn {
-  // Tailwind width class for the header-cell skeleton (e.g. 'w-20').
   headerWidth?: string;
-  // Tailwind width class for the body-cell skeleton (e.g. 'w-28').
   cellWidth?: string;
 }
 
 export interface CompactTableSkeletonProps {
-  // Either a column count (uses sensible defaults) or per-column width hints.
   columns?: number | CompactTableSkeletonColumn[];
-  // Number of body rows to render. Defaults to 5.
   rows?: number;
-  // Append a fixed-width trailing column for row actions.
   actions?: boolean;
   className?: string;
 }
@@ -25,8 +20,7 @@ const DEFAULT_COLUMNS: CompactTableSkeletonColumn[] = [
   { headerWidth: 'w-16', cellWidth: 'w-16' },
 ];
 
-// Mirrors the shape of <DataTable mode="compact" />: bordered card, tinted header row, tight
-// padded body rows. Use as a loading placeholder when the actual data is being fetched.
+// Loading placeholder mirroring the shape of <DataTable mode="compact" />
 export const CompactTableSkeleton: React.FC<CompactTableSkeletonProps> = ({
   columns = DEFAULT_COLUMNS,
   rows = 5,

@@ -10,8 +10,7 @@ const DEFAULT_FIELD_KEYS = {
   groupIdKey: 'locationRole',
 } as const;
 
-// Renders the parent breadcrumb from an ltree path: main.sales.sales_rack_a.bin_1 → "Main › Sales › Sales Rack A"
-// Drops the leaf segment because it's already shown as the option label.
+// Renders the parent breadcrumb from an ltree path, dropping the leaf segment shown as the option label.
 export const formatLocationPath = (path: string): string =>
   path
     .split('.')

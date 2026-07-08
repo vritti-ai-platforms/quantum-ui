@@ -17,7 +17,6 @@ export interface ConfirmOptions {
   cancelLabel?: string;
   variant?: 'default' | 'destructive';
   alert?: ConfirmAlert;
-  // Rich body rendered between the description and the action buttons (e.g. an impact breakdown)
   content?: ReactNode;
 }
 

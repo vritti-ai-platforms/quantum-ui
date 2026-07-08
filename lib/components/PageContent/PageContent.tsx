@@ -48,7 +48,7 @@ export function PanelSkeleton() {
   );
 }
 
-/** Reusable selectable row button for side-panel lists. */
+// Reusable selectable row button for side-panel lists.
 export function SidePanelListItem({ active = false, className, type = 'button', ...props }: SidePanelListItemProps) {
   return (
     <button
@@ -63,7 +63,7 @@ export function SidePanelListItem({ active = false, className, type = 'button', 
   );
 }
 
-/** A bordered container that fills available viewport height, used for split-panel layouts. */
+// A bordered container that fills available viewport height, used for split-panel layouts.
 export function PageContent({ children, className, ...props }: PageContentProps) {
   return (
     <div
@@ -76,7 +76,7 @@ export function PageContent({ children, className, ...props }: PageContentProps)
   );
 }
 
-/** Left panel region inside PageContent. Supports standard header/actions/content layout. */
+// Left panel region inside PageContent. Supports standard header/actions/content layout.
 export function PageContentPanel({
   children,
   className,
@@ -119,16 +119,7 @@ export function PageContentPanel({
   );
 }
 
-/**
- * Right details region inside PageContent.
- *
- * State precedence: isLoading → loadingContent (or PanelSkeleton fallback)
- *                   isEmpty   → emptyState (centered)
- *                   else      → content || children
- *
- * Mirrors PageContentPanel's loading/empty API so callers can declaratively express
- * all three states without inline ternaries.
- */
+// Right details region inside PageContent — precedence isLoading → loadingContent, isEmpty → emptyState, else content||children
 export function PageContentDetails({
   children,
   className,

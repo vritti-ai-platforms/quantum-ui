@@ -67,8 +67,7 @@ export function useDataTable<TData>({
     useDataTableStore.getState().loadViewState(slug, serverState.state, serverState.activeViewId ?? null);
   }, [serverState?.state, serverState?.activeViewId, slug]);
 
-  // Init in useLayoutEffect to avoid mutating the Zustand store during the render phase,
-  // which would cause React's useSyncExternalStore consistency check to fail.
+  // Init in useLayoutEffect to avoid mutating the Zustand store during render (breaks useSyncExternalStore)
   const initializedSlug = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (initializedSlug.current !== slug) {

@@ -12,16 +12,9 @@ import { Input } from './input';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
-/**
- * @see https://github.com/radix-ui/primitives/blob/main/packages/react/compose-refs/src/compose-refs.tsx
- */
-
 type PossibleRef<T> = React.Ref<T> | undefined;
 
-/**
- * Set a given ref to a given value
- * This utility takes care of different types of refs: callback refs and RefObject(s)
- */
+// Set a given ref to a given value; handles callback refs and RefObject(s)
 function setRef<T>(ref: PossibleRef<T>, value: T) {
   if (typeof ref === 'function') {
     return ref(value);
@@ -32,10 +25,7 @@ function setRef<T>(ref: PossibleRef<T>, value: T) {
   }
 }
 
-/**
- * A utility to compose multiple refs together
- * Accepts callback refs and RefObject(s)
- */
+// Compose multiple refs together; accepts callback refs and RefObject(s)
 function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
   return (node) => {
     let hasCleanup = false;
@@ -47,10 +37,7 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
       return cleanup;
     });
 
-    // React <19 will log an error to the console if a callback ref returns a
-    // value. We don't use ref cleanups internally so this will only happen if a
-    // user's ref callback returns a value, which we only expect if they are
-    // using the cleanup functionality added in React 19.
+    // React <19 logs an error if a callback ref returns a value; only happens for user refs using React 19 cleanup
     if (hasCleanup) {
       return () => {
         for (let i = 0; i < cleanups.length; i++) {
@@ -66,10 +53,7 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
   };
 }
 
-/**
- * A custom hook that composes multiple refs
- * Accepts callback refs and RefObject(s)
- */
+// A custom hook that composes multiple refs; accepts callback refs and RefObject(s)
 function useComposedRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
   // biome-ignore lint/correctness/useExhaustiveDependencies: we want to memoize by all values
   return React.useCallback(composeRefs(...refs), refs);
@@ -210,9 +194,6 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
   );
 }
 
-/**
- * @see https://gist.github.com/bkrmendy/f4582173f50fab209ddfef1377ab31e3
- */
 interface EyeDropper {
   open: (options?: { signal?: AbortSignal }) => Promise<{ sRGBHex: string }>;
 }

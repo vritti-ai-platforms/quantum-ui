@@ -3,15 +3,10 @@ import type { LexicalEditor } from 'lexical';
 import type { JSX } from 'react';
 
 export class ComponentPickerOption extends MenuOption {
-  // What shows up in the editor
   title: string;
-  // Icon for display
   icon?: JSX.Element;
-  // For extra searching.
   keywords: Array<string>;
-  // TBD
   keyboardShortcut?: string;
-  // What happens when you select this option?
   onSelect: (
     queryString: string,
     editor: LexicalEditor,

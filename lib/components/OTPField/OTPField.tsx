@@ -4,55 +4,24 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '../../../shadcn/shadcnInp
 import { cn } from '../../../shadcn/utils';
 
 export interface OTPFieldProps {
-  /**
-   * Field name for react-hook-form integration (used by Form component)
-   */
   name?: string;
 
-  /**
-   * OTP value
-   */
   value?: string;
 
-  /**
-   * Callback when OTP changes
-   */
   onChange?: (value: string) => void;
 
-  /**
-   * Number of OTP digits
-   * @default 6
-   */
   length?: number;
 
-  /**
-   * Label for the field
-   */
   label?: string;
 
-  /**
-   * Helper text or description to display below the field
-   */
   description?: React.ReactNode;
 
-  /**
-   * Error message to display below the field
-   */
   error?: string;
 
-  /**
-   * Whether the field is disabled
-   */
   disabled?: boolean;
 
-  /**
-   * Whether the field is required
-   */
   required?: boolean;
 
-  /**
-   * CSS class name for styling
-   */
   className?: string;
 }
 

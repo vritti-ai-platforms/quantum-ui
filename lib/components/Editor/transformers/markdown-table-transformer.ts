@@ -28,7 +28,6 @@ import { IMAGE } from './markdown-image-transformer';
 
 // import { TWEET } from "./markdown-tweet-transformer"
 
-// Very primitive table setup
 const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/;
 

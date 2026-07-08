@@ -4,9 +4,7 @@ import type { SelectOption } from '../../components/Select/types';
 import { formatCurrency } from '../../utils/money';
 
 export type PurchaseOrderItemSelectorParams = {
-  // The PO whose lines drive the select. Required.
   purchaseOrderId: string;
-  // Excludes PO lines whose (inventoryItemId, uomId) is already on this goods receipt.
   excludeOnGoodsReceiptId?: string;
 };
 
@@ -14,10 +12,6 @@ export type PurchaseOrderItemSelectorProps = Omit<SelectProps, 'optionsEndpoint'
   params: PurchaseOrderItemSelectorParams;
 };
 
-// Pre-configured Select for purchase-order line items. Hits GET /commerce-api/purchase-order-items/select.
-// The option `additionals` carries (inventoryItemId, uomId, unitPrice, currencyCode, allowDecimal,
-// symbol, orderedQuantity, receivedQuantity) so the consumer can submit a payload keyed on
-// (inventoryItemId, uomId) directly without a lookup hop.
 const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
@@ -38,8 +32,7 @@ function defaultTransformLabel(label: string, option: SelectOption): string {
   return baseLabel;
 }
 
-// Humanises the `inventory_items.tracking` enum (`quantity` / `lot` / `serial` / `lot_serial`)
-// that the backend serves as the option description.
+// Humanises the `inventory_items.tracking` enum that the backend serves as the option description.
 function defaultTransformDescription(value: string): string {
   switch (value) {
     case 'quantity':

@@ -405,10 +405,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
                 }}
                 selected={calendarSelected}
                 onSelect={(next) => {
-                  // react-day-picker's mode="single" toggles to undefined when the user clicks
-                  // the already-selected date. Ignore that path — clicking a highlighted date
-                  // shouldn't silently clear the value (it's nearly always an accident). To clear,
-                  // use the manual input or a dedicated Clear UI.
+                  // Ignore react-day-picker's toggle-to-undefined when clicking the already-selected date (accidental clear); use manual input to clear
                   if (!next) return;
                   if (!isWithinDayBounds(next, minDay, maxDay)) return;
                   commit(next);

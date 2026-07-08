@@ -152,51 +152,7 @@ const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: str
   }
 };
 
-/**
- * DropdownMenu - A flexible, data-driven dropdown menu component
- *
- * This component provides a declarative API for building dropdown menus without
- * manually composing primitive components. It supports all dropdown menu features
- * including items, checkboxes, radio groups, submenus, separators, labels, and groups.
- *
- * @example
- * ```tsx
- * import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
- * import { Settings, User, LogOut } from 'lucide-react';
- *
- * function UserMenu() {
- *   const [showStatus, setShowStatus] = useState(true);
- *
- *   return (
- *     <DropdownMenu
- *       trigger={{ label: 'Menu', variant: 'outline' }}
- *       items={[
- *         { type: 'label', id: 'account-label', label: 'My Account' },
- *         { type: 'item', id: 'profile', label: 'Profile', icon: User, shortcut: '⌘P' },
- *         { type: 'item', id: 'settings', label: 'Settings', icon: Settings },
- *         { type: 'separator' },
- *         {
- *           type: 'checkbox',
- *           id: 'status',
- *           label: 'Show Status',
- *           checked: showStatus,
- *           onCheckedChange: setShowStatus,
- *         },
- *         { type: 'separator' },
- *         {
- *           type: 'item',
- *           id: 'logout',
- *           label: 'Log out',
- *           icon: LogOut,
- *           variant: 'destructive',
- *         },
- *       ]}
- *       align="end"
- *     />
- *   );
- * }
- * ```
- */
+// A flexible, data-driven dropdown menu built from a declarative items array
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   trigger,
   items,

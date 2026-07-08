@@ -3,7 +3,6 @@ import { cn } from '../../../shadcn/utils';
 import { Skeleton } from '../Skeleton';
 
 export interface CardSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Number of skeleton cards to render */
   count?: number;
 }
 

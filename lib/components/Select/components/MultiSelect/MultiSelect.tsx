@@ -39,11 +39,8 @@ export interface MultiSelectProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
-  // Transforms how label is displayed in option rows and selected trigger chips
   transformLabel?: (label: string, option: SelectOption, context: 'option' | 'trigger') => string;
-  // Transforms how description is displayed in option rows
   transformDescription?: (description: string, option: SelectOption) => string;
-  // Called when the popover open state changes
   onOpenChange?: (open: boolean) => void;
 }
 

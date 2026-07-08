@@ -34,9 +34,7 @@ export interface SidebarNavItem {
   icon: React.ComponentType<{ className?: string }>;
   path: string;
   children?: SidebarNavChild[];
-  // Optional trailing element (e.g. a lock chip), right-aligned after the title
   endAdornment?: React.ReactNode;
-  // When true the row is greyed and non-navigating (still visible)
   disabled?: boolean;
 }
 

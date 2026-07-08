@@ -10,15 +10,10 @@ import {
 import { cn } from '../../../shadcn/utils';
 
 export interface AlertProps extends Omit<React.ComponentProps<'div'>, 'title'>, VariantProps<typeof alertVariants> {
-  /** Short heading text */
   title?: React.ReactNode;
-  /** Body / description text */
   description?: React.ReactNode;
-  /** Action element positioned in the top-right corner (e.g. button or link) */
   action?: React.ReactNode;
-  /** Override the default variant-based icon */
   icon?: React.ReactNode;
-  /** Hide the icon entirely */
   hideIcon?: boolean;
 }
 

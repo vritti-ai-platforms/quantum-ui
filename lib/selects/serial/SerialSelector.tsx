@@ -7,8 +7,7 @@ export type SerialSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'params'
   params?: SerialSelectorParams;
 };
 
-// Pre-configured Select for picking specific physical serials within a quant.
-// Returns only AVAILABLE serials, scoped to the given quant.
+// Pre-configured Select for picking available physical serials scoped to a quant.
 export const SerialSelector = forwardRef<HTMLButtonElement, SerialSelectorProps>(({ params, ...props }, ref) => (
   <Select
     ref={ref}

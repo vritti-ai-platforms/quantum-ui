@@ -11,7 +11,6 @@ import {
 } from '../../../shadcn/shadcnBreadcrumb';
 import { cn } from '../../../shadcn/utils';
 
-// Parsed segment shape exposed to consumers via renderSegment
 export interface BreadcrumbSegment {
   path: string;
   raw: string;
@@ -22,13 +21,9 @@ export interface BreadcrumbSegment {
 }
 
 export interface BreadcrumbProps extends React.ComponentProps<'nav'> {
-  // Full path → display label (e.g. { '/settings/profile': 'Profile' })
   routes?: Record<string, string>;
-  // Custom separator node (defaults to ChevronRight in the primitive)
   separator?: React.ReactNode;
-  // Max visible segments before collapsing middle items (0 = no limit)
   maxItems?: number;
-  // Custom renderer — return ReactNode to override, or null/undefined for default
   renderSegment?: (segment: BreadcrumbSegment) => React.ReactNode | null | undefined;
 }
 

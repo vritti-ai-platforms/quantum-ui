@@ -3,8 +3,7 @@ import { Select, type SelectProps } from '../../components/Select/Select';
 
 export type CategorySelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
-// Renders the parent breadcrumb from an ltree path: medicines.prescription.antibiotics → "Medicines › Prescription"
-// Drops the leaf segment because it's already shown as the option label.
+// Renders the parent breadcrumb from an ltree path, dropping the leaf segment shown as the option label.
 export const formatCategoryPath = (path: string): string =>
   path
     .split('.')

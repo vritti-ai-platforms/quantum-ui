@@ -16,10 +16,7 @@ function defaultTransformDescription(value: string, option: SelectOption): strin
   return kind || '';
 }
 
-// Pre-configured Select for cost-category selection.
-// Hits GET /commerce-api/cost-categories/select. Default description = the category's `kind`
-// enum value (item / freight / duty / insurance / service / other); callers can read `kind` and
-// `code` off the selected option via additionalKeys.
+// Pre-configured Select for cost-category selection, hitting GET /commerce-api/cost-categories/select.
 export const CostCategorySelector = forwardRef<HTMLButtonElement, CostCategorySelectorProps>(
   ({ fieldKeys, ...props }, ref) => (
     <Select

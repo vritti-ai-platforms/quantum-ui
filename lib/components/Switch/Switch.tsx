@@ -3,46 +3,14 @@ import { Field, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 import { Switch as ShadcnSwitch } from '../../../shadcn/shadcnSwitch';
 
 export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof ShadcnSwitch> {
-  /**
-   * Label for the switch
-   */
   label?: React.ReactNode;
 
-  /**
-   * Helper text or description displayed beside the toggle — required for field layout
-   */
   description: React.ReactNode;
 
-  /**
-   * Error message to display below the switch
-   */
   error?: string;
 }
 
-/**
- * Switch component for toggling between two states (on/off).
- *
- * Description is required. The label and description stack vertically on the
- * left, with the toggle pinned to the right of the row.
- *
- * @example
- * ```tsx
- * // With Field system (form usage)
- * <Switch
- *   label="Enable notifications"
- *   description="Receive email updates about your account"
- * />
- *
- * // In a Form component
- * <Form form={form} onSubmit={handleSubmit}>
- *   <Switch
- *     name="marketing"
- *     label="Marketing emails"
- *     description="Receive promotional content"
- *   />
- * </Form>
- * ```
- */
+// Switch for toggling on/off; label + description stack left with the toggle pinned right (description required)
 export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, SwitchProps>(
   ({ label, description, error, id, size = 'lg', ...props }, ref) => {
     const generatedId = React.useId();
@@ -86,16 +54,7 @@ Switch.displayName = 'Switch';
 
 export type CompactSwitchProps = React.ComponentProps<typeof ShadcnSwitch>;
 
-/**
- * A bare, compact switch — the native shadcn switch with no Field wrapper, label, or description.
- * Defaults to the `sm` size; intended for dense layouts like table/matrix cells. Use `Switch` for
- * form-field usage (label + description + error).
- *
- * @example
- * ```tsx
- * <CompactSwitch checked={on} onCheckedChange={setOn} />
- * ```
- */
+// Bare compact switch with no Field wrapper, defaults to sm size for dense layouts like table/matrix cells
 export const CompactSwitch: React.FC<CompactSwitchProps> = ({ size = 'sm', ...props }) => (
   <ShadcnSwitch size={size} {...props} />
 );

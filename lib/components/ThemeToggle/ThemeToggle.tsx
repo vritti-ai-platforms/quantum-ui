@@ -4,28 +4,12 @@ import { useTheme } from '../../hooks/useTheme';
 import { Button } from '../Button/Button';
 
 export interface ThemeToggleProps {
-  /**
-   * Custom className for the toggle button
-   */
   className?: string;
 
-  /**
-   * Size of the toggle button
-   */
   size?: 'sm' | 'md' | 'lg';
 }
 
-/**
- * ThemeToggle component for switching between light and dark themes.
- *
- * Uses the useTheme hook internally for theme state management.
- *
- * @example
- * ```tsx
- * <ThemeToggle />
- * <ThemeToggle size="lg" className="custom-class" />
- * ```
- */
+// ThemeToggle component for switching between light and dark themes.
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, size = 'md' }) => {
   const { theme, toggleTheme } = useTheme();
   const isDarkMode = theme === 'dark';

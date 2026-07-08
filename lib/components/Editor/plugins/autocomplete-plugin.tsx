@@ -241,10 +241,6 @@ export function AutocompletePlugin(): JSX.Element | null {
   return null;
 }
 
-/*
- * Simulate an asynchronous autocomplete server (typical in more common use cases like GMail where
- * the data is not static).
- */
 class AutocompleteServer {
   DATABASE = DICTIONARY;
   LATENCY = 200;
@@ -294,7 +290,6 @@ class AutocompleteServer {
   };
 }
 
-// https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-usa-no-swears-long.txt
 const DICTIONARY = [
   'information',
   'available',

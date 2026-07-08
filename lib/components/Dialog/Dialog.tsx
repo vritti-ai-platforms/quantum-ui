@@ -17,8 +17,7 @@ export interface DialogActionsProps {
   className?: string;
 }
 
-// Standard dialog/form action bar — a top divider with right-aligned buttons that stack on mobile.
-// Use to wrap a form's submit/cancel buttons so every dialog shares the same footer layout.
+// Standard dialog/form action bar — a top divider with right-aligned buttons that stack on mobile
 export function DialogActions({ children, className }: DialogActionsProps) {
   return (
     <div className={cn('flex flex-col-reverse gap-2 border-t px-6 pt-4 pb-6 sm:flex-row sm:justify-end', className)}>
@@ -70,22 +69,14 @@ function ensureEscapeManager() {
 }
 
 export interface DialogProps {
-  // Handle from useDialog() — controls open state and cleanup
   handle: DialogHandle;
-  // anchor — render prop that receives open(); button renders outside DialogTrigger
   anchor?: (open: () => void) => React.ReactNode;
-  // content — render prop that receives close()
   content?: (close: () => void) => React.ReactNode;
-  // trigger — legacy ReactNode trigger (wrapped in DialogTrigger automatically)
   trigger?: React.ReactNode;
-  // Required header icon — rendered as a badge before the title to standardize dialog headers.
   icon: LucideIcon;
-  // Colour of the header icon badge. Use 'destructive' for delete dialogs, 'warning' for cautions.
   iconVariant?: 'default' | 'destructive' | 'warning';
   title: React.ReactNode;
   description: React.ReactNode;
-  // Optional badge-style slot rendered inline with the title in the header.
-  // Use for short status indicators tied to the dialog's subject (e.g. "Draft", "Derived unit").
   badgeSlot?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;

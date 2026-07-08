@@ -109,16 +109,10 @@ export function LayoutPlugin(): null {
     };
 
     return mergeRegister(
-      // When layout is the last child pressing down/right arrow will insert paragraph
-      // below it to allow adding more content. It's similar what $insertBlockNode
-      // (mainly for decorators), except it'll always be possible to continue adding
-      // new content even if trailing paragraph is accidentally deleted
+      // When layout is the last child, down/right arrow inserts a paragraph below it to keep adding content
       editor.registerCommand(KEY_ARROW_DOWN_COMMAND, () => $onEscape(false), COMMAND_PRIORITY_LOW),
       editor.registerCommand(KEY_ARROW_RIGHT_COMMAND, () => $onEscape(false), COMMAND_PRIORITY_LOW),
-      // When layout is the first child pressing up/left arrow will insert paragraph
-      // above it to allow adding more content. It's similar what $insertBlockNode
-      // (mainly for decorators), except it'll always be possible to continue adding
-      // new content even if leading paragraph is accidentally deleted
+      // When layout is the first child, up/left arrow inserts a paragraph above it to keep adding content
       editor.registerCommand(KEY_ARROW_UP_COMMAND, () => $onEscape(true), COMMAND_PRIORITY_LOW),
       editor.registerCommand(KEY_ARROW_LEFT_COMMAND, () => $onEscape(true), COMMAND_PRIORITY_LOW),
       editor.registerCommand(
@@ -175,9 +169,7 @@ export function LayoutPlugin(): null {
         },
         COMMAND_PRIORITY_EDITOR,
       ),
-      // Structure enforcing transformers for each node type. In case nesting structure is not
-      // "Container > Item" it'll unwrap nodes and convert it back
-      // to regular content.
+      // Structure-enforcing transformers unwrap nodes when nesting isn't "Container > Item"
       editor.registerNodeTransform(LayoutItemNode, (node) => {
         const parent = node.getParent<ElementNode>();
         if (!$isLayoutContainerNode(parent)) {

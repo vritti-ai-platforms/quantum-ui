@@ -10,7 +10,6 @@ export interface DangerZoneProps {
   onClick: () => void;
   disabled?: boolean;
   isLoading?: boolean;
-  // When set, renders a warning alert below the action row
   warning?: string;
 }
 

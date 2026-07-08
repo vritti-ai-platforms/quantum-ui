@@ -15,8 +15,7 @@ export default function simpleDiffWithCursor(
   const bLength = b.length;
   let left = 0; // number of same characters counting from left
   let right = 0; // number of same characters counting from right
-  // Iterate left to the right until we find a changed character
-  // First iteration considers the current cursor position
+  // Iterate left to right until a changed character; first iteration considers the current cursor position
   while (left < aLength && left < bLength && a[left] === b[left] && left < cursor) {
     left++;
   }

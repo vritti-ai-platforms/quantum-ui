@@ -5,10 +5,7 @@ import { formatCurrency } from '../../utils/money';
 
 export type SupplierItemSelectorParams = {
   supplierId?: string;
-  // Excludes supplier items whose (inventoryItemId, uomId) is already on this PO. Used by the PO add-line dialog.
   excludeOnPurchaseOrderId?: string;
-  // Excludes supplier items whose (inventoryItemId, uomId) is already on this goods receipt.
-  // Used by the GR add-item dialog when the receipt has no linked PO.
   excludeOnGoodsReceiptId?: string;
 };
 
@@ -16,11 +13,6 @@ export type SupplierItemSelectorProps = Omit<SelectProps, 'optionsEndpoint' | 'p
   params?: SupplierItemSelectorParams;
 };
 
-// Pre-configured Select for inventory items offered by suppliers.
-// Hits GET /commerce-api/supplier-items/select.
-// Pass supplierId via `params` to scope results to a single supplier; otherwise
-// results span all suppliers and each option includes a `description` with the
-// supplier name.
 const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'name',
@@ -41,8 +33,7 @@ function defaultTransformLabel(label: string, option: SelectOption): string {
   return baseLabel;
 }
 
-// Humanises the `inventory_items.tracking` enum (`quantity` / `lot` / `serial` / `lot_serial`)
-// that the backend serves as the option description.
+// Humanises the inventory_items.tracking enum served as the option description.
 function defaultTransformDescription(value: string): string {
   switch (value) {
     case 'quantity':

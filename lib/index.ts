@@ -1,6 +1,4 @@
-// Styles - Import CSS for bundling
-// index.css ships the @theme directive (uncompiled); utilities.css ships the
-// compiled component utilities. cssCodeSplit:false merges both into quantum-ui.css.
+// index.css ships the @theme directive; utilities.css ships compiled utilities; cssCodeSplit:false merges both into quantum-ui.css.
 import './index.css';
 import './utilities.css';
 

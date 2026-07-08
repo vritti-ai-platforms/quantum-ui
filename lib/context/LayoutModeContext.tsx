@@ -18,8 +18,7 @@ export const LayoutModeProvider = ({ children }: { children: ReactNode }) => {
   return <LayoutModeContext.Provider value={value}>{children}</LayoutModeContext.Provider>;
 };
 
-// Returns current layout mode and a setter.
-// MF pages call setMode('full') on mount and reset to 'padded' on unmount.
+// Returns current layout mode and a setter; MF pages set 'full' on mount and reset to 'padded' on unmount.
 export function useLayoutMode(): LayoutModeContextValue {
   return useContext(LayoutModeContext);
 }

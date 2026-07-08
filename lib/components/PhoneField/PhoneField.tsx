@@ -5,59 +5,26 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '.
 import { cn } from '../../../shadcn/utils';
 
 export interface PhoneFieldProps {
-  /**
-   * Field name for react-hook-form integration (used by Form component)
-   */
   name?: string;
 
-  /**
-   * Phone number value in E.164 format (e.g., +14155552671)
-   */
   value?: Value;
 
-  /**
-   * Callback when phone number changes
-   */
   onChange?: (value: Value | undefined) => void;
 
-  /**
-   * Callback when country changes
-   */
   onCountryChange?: (country: Country | undefined) => void;
 
-  /**
-   * Default country code (e.g., 'US', 'IN', 'GB')
-   */
   defaultCountry?: Country;
 
-  /**
-   * Label for the field
-   */
   label?: string;
 
-  /**
-   * Helper text or description to display below the field
-   */
   description?: React.ReactNode;
 
-  /**
-   * Error message to display below the field
-   */
   error?: string;
 
-  /**
-   * Whether the field is disabled
-   */
   disabled?: boolean;
 
-  /**
-   * CSS class name for styling
-   */
   className?: string;
 
-  /**
-   * Placeholder text for the input
-   */
   placeholder?: string;
 }
 

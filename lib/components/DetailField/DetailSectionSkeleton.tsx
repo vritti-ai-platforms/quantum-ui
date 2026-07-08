@@ -2,15 +2,12 @@ import { Skeleton } from '../Skeleton';
 import { DetailSection } from './DetailSection';
 
 export interface DetailSectionSkeletonProps {
-  /** Number of field placeholders to render */
   count?: number;
-  /** Allow the plate to wrap onto multiple rows */
   wrap?: boolean;
   className?: string;
 }
 
-// Loading placeholder matching <DetailSection> with <DetailField> children: a bordered, divided
-// plate where each cell is a label + value skeleton.
+// Loading placeholder matching <DetailSection> with <DetailField> children — label + value skeleton per cell
 export const DetailSectionSkeleton = ({ count = 3, wrap, className }: DetailSectionSkeletonProps) => (
   <DetailSection wrap={wrap} className={className}>
     {Array.from({ length: count }).map((_, i) => (

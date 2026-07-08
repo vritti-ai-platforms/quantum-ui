@@ -6,39 +6,26 @@ import { Button } from '../Button';
 import { Field, FieldError, FieldLabel } from '../Field';
 import { FilePreview } from '../FilePreview';
 
-// Preset anchor string values
 type AnchorPreset = 'dropzone' | 'button' | 'avatar';
 
 interface UploadFileBaseProps {
-  // Trigger style — preset string or custom ReactNode (default: 'dropzone')
   anchor?: AnchorPreset | React.ReactNode;
-  // Allow multiple file selection (default: false, returns single File)
   multiple?: boolean;
-  // File type filter (accepts all files by default)
   accept?: string;
-  // Disable the file input
   disabled?: boolean;
-  // Optional field label
   label?: string;
-  // Validation error message
   error?: string;
-  // Primary text on the anchor (varies by anchor type)
   placeholder?: string;
-  // Secondary descriptive text (e.g., "PNG, JPG up to 10MB")
   hint?: string;
-  // Current file value — injected by Form Controller or passed directly
   value?: File | File[] | null;
-  // Shows a pulsing loading animation on the file row during upload/processing.
   isLoading?: boolean;
 }
 
-// Standalone usage — onChange is required
 interface UploadFileStandaloneProps extends UploadFileBaseProps {
   name?: never;
   onChange: (files: File | File[] | undefined) => void;
 }
 
-// Form usage — Controller injects onChange via name prop
 interface UploadFileFormProps extends UploadFileBaseProps {
   name: string;
   onChange?: (files: File | File[] | undefined) => void;

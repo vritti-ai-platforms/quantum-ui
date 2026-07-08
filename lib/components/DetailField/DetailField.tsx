@@ -16,8 +16,6 @@ interface DetailFieldBase {
 interface DetailFieldStringProps extends DetailFieldBase {
   type: 'string';
   value: React.ReactNode;
-  // Render in a monospace font. Use for identifier-style strings (PO numbers, GR numbers,
-  // codes, IDs) where visual alignment of characters matters.
   mono?: boolean;
 }
 

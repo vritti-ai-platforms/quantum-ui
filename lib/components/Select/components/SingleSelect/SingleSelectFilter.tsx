@@ -54,9 +54,7 @@ export interface SingleSelectFilterProps {
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
   onOpenChange?: (open: boolean) => void;
-  // Transforms how label is displayed in option rows
   transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
-  // Transforms how description is displayed in option rows
   transformDescription?: (description: string, option: SelectOption) => string;
 }
 

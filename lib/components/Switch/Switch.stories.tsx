@@ -43,9 +43,7 @@ const meta: Meta<typeof Switch> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// ============================================================================
 // Basic Usage (Bare Switch)
-// ============================================================================
 
 export const Default: Story = {
   args: {},
@@ -83,9 +81,7 @@ export const DisabledChecked: Story = {
   },
 };
 
-// ============================================================================
 // With Manual Label (Old Pattern - Still Supported)
-// ============================================================================
 
 export const WithManualLabel: Story = {
   render: (args) => (
@@ -116,9 +112,7 @@ export const AllSizes: Story = {
   ),
 };
 
-// ============================================================================
 // Field System Integration (New Pattern)
-// ============================================================================
 
 export const WithLabel: Story = {
   args: {
@@ -162,9 +156,7 @@ export const MultipleWithLabels: Story = {
   ),
 };
 
-// ============================================================================
 // Form Integration
-// ============================================================================
 
 export const InForm: Story = {
   render: () => {

@@ -27,10 +27,7 @@ import { UploadFile } from '../UploadFile';
 // Re-export Controller for explicit usage
 export { Controller } from 'react-hook-form';
 
-/**
- * Recursively process children to wrap form fields with Controller
- * and inject loading state into submit buttons
- */
+// Recursively process children to wrap form fields with Controller and inject loading state into submit buttons
 function processChildren<
   TFieldValues extends FieldValues = FieldValues,
   _TContext = any,
@@ -172,106 +169,32 @@ export interface FormProps<
   TMutationError = Error,
   TMutationVariables = any,
 > extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
-  /**
-   * The react-hook-form form instance
-   */
   form: UseFormReturn<TFieldValues, TContext, TTransformedValues>;
 
-  /**
-   * Form submit handler - receives the transformed values if transformation is applied.
-   * Optional when using `mutation` prop.
-   */
   onSubmit?: Parameters<UseFormReturn<TFieldValues, TContext, TTransformedValues>['handleSubmit']>[0];
 
-  /**
-   * Children elements - automatically wrapped with Controller if they have a name prop
-   */
   children: React.ReactNode;
 
-  /**
-   * Position of the root error display
-   * @default 'bottom'
-   */
   rootErrorPosition?: 'top' | 'bottom';
 
-  /**
-   * Additional classes for the root error display
-   */
   rootErrorClassName?: string;
 
-  /**
-   * Action element rendered in the root error Alert (e.g. button or link)
-   * Positioned in the top-right corner using AlertAction
-   */
   rootErrorAction?: React.ReactNode;
 
-  /**
-   * Field mapping for automatic API error mapping
-   * Maps API field names to form field names
-   */
   fieldMapping?: FieldMapping;
 
-  /**
-   * TanStack Query mutation for automatic handling.
-   * When provided, the form will use `mutateAsync` to submit data and handle errors automatically.
-   * The mutation's own callbacks (onSuccess, onError, etc.) will fire automatically.
-   * Form only adds `mapApiErrorsToForm` as an extra error handling layer.
-   * Optional - you can use `onSubmit` instead for forms that don't use mutations.
-   */
   mutation?: UseMutationResult<TMutationData, TMutationError, TMutationVariables, unknown>;
 
-  /**
-   * Transform form data to mutation variables before submission.
-   * Only used when `mutation` prop is provided.
-   */
   transformSubmit?: (
     data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues,
   ) => TMutationVariables;
 
-  /**
-   * Automatically calls form.reset() after a successful mutation.
-   * Set to false for "edit" forms where resetting clears pre-populated values.
-   * @default true
-   */
   resetOnSuccess?: boolean;
 
-  /**
-   * Called when a cancel button (marked with data-cancel) is clicked.
-   * Form.reset() is called automatically before invoking this callback.
-   */
   onCancel?: () => void;
 }
 
-/**
- * Smart Form component that automatically wraps children with Controller
- *
- * Usage with onSubmit:
- * ```tsx
- * <Form form={form} onSubmit={handleSubmit}>
- *   <TextField name="email" label="Email" description="Your email address" />
- *   <PasswordField name="password" label="Password" />
- *   <Button type="submit">Submit</Button>
- * </Form>
- * ```
- *
- * Usage with TanStack Query mutation:
- * ```tsx
- * const mutation = useMutation({
- *   mutationFn: (data) => api.post('/login', data),
- *   onSuccess: (data) => console.log('Success!', data),
- *   onError: (error) => console.error('Error!', error),
- * });
- *
- * <Form
- *   form={form}
- *   mutation={mutation}
- *   transformSubmit={(data) => ({ ...data, timestamp: Date.now() })}
- * >
- *   <TextField name="email" label="Email" />
- *   <Button type="submit">Submit</Button>
- * </Form>
- * ```
- */
+// Smart Form component that automatically wraps children with Controller
 export function Form<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
@@ -297,8 +220,7 @@ export function Form<
   // Compute isSubmitting from both form state and mutation state
   const isSubmitting = form.formState.isSubmitting || (mutation?.isPending ?? false);
 
-  // Wrap the submit handler with automatic error mapping (always enabled)
-  // Form only adds mapApiErrorsToForm - the mutation's own callbacks fire automatically
+  // Wrap the submit handler with automatic error mapping; the mutation's own callbacks fire automatically
   const wrappedOnSubmit = useCallback(
     async (data: TTransformedValues extends undefined ? TFieldValues : TTransformedValues) => {
       // Suppress error toasts during form submission — Form handles errors inline
@@ -319,8 +241,7 @@ export function Form<
         // Reset form after successful submission (default: true)
         if (resetOnSuccess !== false) form.reset();
       } catch (error) {
-        // Form's only job: map API errors to form fields
-        // mapApiErrorsToForm handles axios error structure extraction internally
+        // Map API errors to form fields — mapApiErrorsToForm extracts the axios error structure internally
         mapApiErrorsToForm(error, form as any, {
           fieldMapping,
         });

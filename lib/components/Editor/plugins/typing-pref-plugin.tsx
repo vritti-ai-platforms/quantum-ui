@@ -58,8 +58,7 @@ export function TypingPerfPlugin(): JSX.Element | null {
         timerId = null;
       }
 
-      // We use a setTimeout(0) instead of requestAnimationFrame, due to
-      // inconsistencies between the sequencing of rAF in different browsers.
+      // Use setTimeout(0) instead of requestAnimationFrame due to inconsistent rAF sequencing across browsers
       keyPressTimerId = setTimeout(measureEventEnd, 0);
       // Schedule a timer to report the results.
       timerId = setTimeout(() => {
@@ -68,8 +67,7 @@ export function TypingPerfPlugin(): JSX.Element | null {
         report(reportedText);
         log = [];
       }, 2000);
-      // Make the time after we do the previous logic, so we don't measure the overhead
-      // for it all.
+      // Record start after the previous logic so its overhead isn't measured
       start = performance.now();
     };
 

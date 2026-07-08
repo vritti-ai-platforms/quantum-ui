@@ -11,8 +11,6 @@ interface DataTableSelectionBarProps<TData> {
   children?: React.ReactNode;
   className?: string;
   importExport?: ImportExportConfig<TData>;
-  // Export gate resolved by the parent DataTable: hidden removes the button entirely
-  // (including the legacy CSV path), a lock tip renders it disabled with the upsell
   exportHidden?: boolean;
   exportLockTip?: string;
 }

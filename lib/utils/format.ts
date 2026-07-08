@@ -1,15 +1,4 @@
-// Single source of truth for value formatting across DetailField, DataTable cells, and any
-// future consumer. Pure functions — they take all locale/timezone/currency context as options,
-// never call hooks. Components & the `useFormatters()` hook adapt them to React-land.
-//
-// Every function returns the same shape:
-//   { primary, secondary? }
-//
-// `primary` is what the consumer renders. `secondary` is a muted-style supplementary line —
-// used today for the BU-currency equivalent (≈ INR 1,049.38) and the user-timezone shift
-// ("Your time: ...") on dateTime values. Consumers decide where to put it: DetailField stacks
-// it below the primary, DataTable cells could put it inline or in a tooltip.
-
+// Pure value-formatting helpers (no hooks) returning { primary, secondary? } for DetailField, DataTable cells, etc.
 import { tz } from '@date-fns/tz';
 import type { Locale } from 'date-fns';
 import { format, isValid, parseISO } from 'date-fns';
@@ -31,8 +20,7 @@ const parseDateOnly = (value: string): Date => parseISO(DATE_ONLY_PATTERN.test(v
 
 export const formatString = (value: React.ReactNode): FormattedValue => {
   if (value == null) return { primary: '—' };
-  // Treat an empty / whitespace-only string as "no value" too — only for actual strings,
-  // so JSX/element values (badges, composed nodes) pass through untouched.
+  // Treat empty/whitespace strings as "no value", but let JSX/element values pass through untouched.
   if (typeof value === 'string' && value.trim() === '') return { primary: '—' };
   return { primary: value };
 };
@@ -59,10 +47,7 @@ export const formatNumber = (
 };
 
 export interface FormatCurrencyOptions {
-  // BU's authoritative currency (typically pulled from useBUCurrency at the call site).
   buCurrency?: string | null;
-  // Multiplier: value × exchangeRate = BU-currency amount. When provided alongside a BU currency
-  // that differs from the value's currency, a `≈ {bu-formatted}` secondary line is returned.
   exchangeRate?: number | null;
 }
 
@@ -94,16 +79,13 @@ export const formatDate = (value: string | null | undefined, options: FormatDate
   if (value == null) return { primary: '—' };
   const parsed = DATE_ONLY_PATTERN.test(value) ? parseDateOnly(value) : parseISO(value);
   if (!isValid(parsed)) return { primary: '—' };
-  // Render date-only values in UTC so the displayed day matches the stored YYYY-MM-DD
-  // regardless of the user's local offset.
+  // Render date-only values in UTC so the displayed day matches the stored YYYY-MM-DD.
   return { primary: formatWithTimeZone(parsed, 'P', 'UTC', options.locale) };
 };
 
 export interface FormatDateTimeOptions {
   locale?: Locale;
-  // BU timezone (from useBUTimezone). Used as the primary timezone when no override is given.
   buTimeZone?: string | null;
-  // Overrides BU timezone. When set, the value renders in this zone.
   timeZoneOverride?: string;
 }
 

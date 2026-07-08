@@ -3,19 +3,10 @@ import { Checkbox as ShadcnCheckbox } from '../../../shadcn/shadcnCheckbox';
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 
 export interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof ShadcnCheckbox> {
-  /**
-   * Label for the checkbox
-   */
   label?: React.ReactNode;
 
-  /**
-   * Helper text or description to display below the checkbox
-   */
   description?: React.ReactNode;
 
-  /**
-   * Error message to display below the checkbox
-   */
   error?: string;
 }
 

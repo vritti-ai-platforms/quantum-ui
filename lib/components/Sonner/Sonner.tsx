@@ -5,13 +5,7 @@ import { TOAST_EVENT, type ToastEventDetail } from './toast';
 
 type ToasterProps = React.ComponentProps<typeof ShadcnToaster>;
 
-/**
- * Toaster component that listens for global toast events.
- *
- * This component should be mounted once in the host application.
- * It listens for toast events emitted from any micro-frontend
- * and displays them using sonner.
- */
+// Toaster that listens for global toast events; mount once in the host app to display toasts from any micro-frontend
 export const Toaster: React.FC<ToasterProps> = (props) => {
   useEffect(() => {
     const handleToast = (event: Event) => {

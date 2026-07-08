@@ -1,75 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getConfig } from '../config';
 
-/**
- * Options for the useSSE hook
- *
- * @typeParam EventMap - Maps SSE event names to their parsed JSON data types
- */
 export interface UseSSEOptions<EventMap extends Record<string, unknown> = Record<string, unknown>> {
-  /** API path resolved against quantum-ui baseURL (e.g. '/cloud-api/events/whatsapp') */
   path: string;
-  /** SSE event names to listen for via addEventListener */
   events: (keyof EventMap & string)[];
-  /** Whether to connect. Set false to disconnect and reset state. @default true */
   enabled?: boolean;
-  /** Whether to auto-reconnect when the server closes the connection. @default true */
   autoReconnect?: boolean;
-  /** Whether to send cookies with the request. @default true */
   withCredentials?: boolean;
-  /** Called when the EventSource connection encounters an error */
   onError?: (event: Event) => void;
-  /** Called when the EventSource connection opens */
   onOpen?: () => void;
 }
 
-/**
- * Return type for the useSSE hook
- *
- * @typeParam EventMap - Maps SSE event names to their parsed JSON data types
- */
 export interface UseSSEReturn<EventMap extends Record<string, unknown>> {
-  /** The SSE event name of the last received event */
   eventType: keyof EventMap | null;
-  /** The parsed JSON data of the last received event */
   data: EventMap[keyof EventMap] | null;
-  /** UPPER_CASE enum of event names for comparison (e.g. eventTypes.VERIFIED === 'verified') */
   eventTypes: { [K in keyof EventMap as Uppercase<K & string>]: K };
-  /** Whether the EventSource connection is currently open */
   isConnected: boolean;
-  /** Human-readable error message if the connection failed */
   error: string | null;
-  /** Manually close the connection */
   disconnect: () => void;
 }
 
-/**
- * Generic Server-Sent Events hook that returns the last event as `eventType` + `data`.
- *
- * Registers a `addEventListener` for each name in `events`, parses `event.data`
- * as JSON, and stores the latest event type and data in state.
- *
- * @typeParam EventMap - Maps SSE event names to their data shapes
- *
- * @example
- * ```tsx
- * type VerificationEvents = {
- *   initiated: { verificationCode: string; instructions: string };
- *   verified: { phone: string };
- *   error: { message: string };
- *   expired: { message: string };
- * };
- *
- * const { eventType, data, eventTypes, disconnect } = useSSE<VerificationEvents>({
- *   path: '/cloud-api/onboarding/mobile-verification/events/whatsapp',
- *   events: ['initiated', 'verified', 'error', 'expired'],
- * });
- *
- * if (!eventType) return <Spinner />;
- * if (eventType === eventTypes.VERIFIED) handleSuccess((data as VerificationEvents['verified']).phone);
- * if (eventType === eventTypes.INITIATED) return <QRCode value={(data as VerificationEvents['initiated']).verificationCode} />;
- * ```
- */
+// Generic Server-Sent Events hook that returns the last event as `eventType` + `data`.
 export function useSSE<EventMap extends Record<string, unknown> = Record<string, unknown>>(
   options: UseSSEOptions<EventMap>,
 ): UseSSEReturn<EventMap> {

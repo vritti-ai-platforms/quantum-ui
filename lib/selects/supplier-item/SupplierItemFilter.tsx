@@ -7,9 +7,7 @@ export type SupplierItemFilterProps = Omit<SelectFilterProps, 'optionsEndpoint' 
   params?: SupplierItemSelectorParams;
 };
 
-// Pre-configured SelectFilter for supplier-item filtering. Shares the params shape with
-// SupplierItemSelector so the same scoping rules (supplierId / purchaseOrderId / excludeOn*)
-// apply identically in tables and forms.
+// Pre-configured SelectFilter for supplier-item filtering, sharing SupplierItemSelector's params shape.
 export const SupplierItemFilter = Object.assign(
   forwardRef<HTMLButtonElement, SupplierItemFilterProps>((props, ref) => (
     <SelectFilter

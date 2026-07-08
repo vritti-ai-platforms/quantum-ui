@@ -21,9 +21,6 @@ function defaultTransformDescription(value: string, option: SelectOption): strin
 }
 
 // Pre-configured Select for supplier selection with async search.
-// Hits GET /commerce-api/suppliers/select. Default `additionalKeys` includes
-// currencyCode + paymentTerms so callers can read them off the selected option
-// without re-specifying. Description defaults to the supplier currency code.
 export const SupplierSelector = forwardRef<HTMLButtonElement, SupplierSelectorProps>(({ fieldKeys, ...props }, ref) => (
   <Select
     ref={ref}

@@ -10,14 +10,8 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
   error?: string;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
-  // Blocks negative values and '-'/'e' keys. Combined with `integer`, also blocks `0` and
-  // sets min to 1 (so positive+integer means ≥1). For decimal mode, zero is still typeable so
-  // the user can start "0.5"; zod is the final gate.
   positive?: boolean;
-  // Blocks zero. Combined with `integer`, blocks `0` as the first keystroke. Use independently
-  // from `positive` when the field accepts signed-but-not-zero values.
   nonZero?: boolean;
-  // Blocks decimal input ('.' and ','); switches inputMode to numeric
   integer?: boolean;
 }
 
@@ -45,10 +39,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     const isNumberType = props.type === 'number';
     const normalizedType = isNumberType ? 'text' : props.type;
     const normalizedInputMode = props.inputMode ?? (isNumberType ? (integer ? 'numeric' : 'decimal') : undefined);
-    // Resolve the actual minimum: positive floor takes precedence when both are set, so
-    // `positive` always blocks negatives even if a contradictory `min` is passed.
-    // For integer mode, `positive` means ≥1 (floor 1). For decimal mode, HTML min stays at 0 so
-    // values like 0.3 / 0.5 remain typeable; the form/zod layer rejects plain 0.
+    // Resolve the actual minimum: positive floor takes precedence over `min`; integer+positive means ≥1, decimal keeps min 0 so 0.x stays typeable.
     const positiveFloor = positive ? (integer ? 1 : 0) : undefined;
     const propsMinNum = props.min != null && props.min !== '' ? Number(props.min) : undefined;
     const propsMinValid = propsMinNum !== undefined && Number.isFinite(propsMinNum) ? propsMinNum : undefined;
@@ -57,13 +48,9 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         ? Math.max(positiveFloor, propsMinValid)
         : (propsMinValid ?? positiveFloor);
     const inputRef = React.useRef<HTMLInputElement>(null);
-    // Tracks the last raw string typed so intermediate states like "-" or "0." survive the
-    // round-trip through RHF. Must be state (not a ref) so updates trigger a re-render and
-    // React's controlled input doesn't revert the DOM to the canonical number.
+    // Tracks the last raw string typed so intermediate states like "-" or "0." survive the RHF round-trip; must be state so updates re-render and don't revert the controlled input.
     const [rawInput, setRawInput] = React.useState<string>('');
-    // Trailing overlay (constraint hint + stepper / end adornment) is measured at runtime so the
-    // input reserves exactly its width as right padding — a one-char hint like "+" no longer costs
-    // the same as "Range: 0 - 100". Re-measures on content/size changes via ResizeObserver.
+    // Trailing overlay is measured at runtime so the input reserves exactly its width as right padding; re-measures via ResizeObserver.
     const endOverlayRef = React.useRef<HTMLDivElement>(null);
     const [endPadding, setEndPadding] = React.useState<number | undefined>(undefined);
 
@@ -133,8 +120,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           event.preventDefault();
           return;
         }
-        // Block '0' as the first keystroke in integer mode when either `positive` (≥1) or
-        // `nonZero` is set. Decimal mode needs '0' to remain typeable so the user can start "0.3".
+        // Block '0' as the first keystroke in integer mode when `positive` (≥1) or `nonZero` is set; decimal mode keeps '0' typeable so the user can start "0.3".
         if (
           (positive || nonZero) &&
           integer &&
@@ -155,9 +141,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       [isNumberType, disabled, positive, nonZero, integer, setInputNumericValue, props.onKeyDown],
     );
 
-    // For number fields, prefer the raw typed string when it represents the same value as
-    // the stored number — preserves intermediate states like "0.", "1.50", "-" that would
-    // otherwise be lost as React reconciles the controlled input back to the canonical form.
+    // For number fields, prefer the raw typed string when it represents the same value as the stored number, preserving intermediate states like "0.", "1.50", "-".
     let displayValue: TextFieldProps['value'] = props.value;
     if (isNumberType && typeof props.value === 'number') {
       if (Number.isNaN(props.value)) {

@@ -4,24 +4,12 @@ import { cn } from '../../../shadcn/utils';
 import { TextField, type TextFieldProps } from '../TextField/TextField';
 
 export interface PasswordFieldProps extends Omit<TextFieldProps, 'type' | 'endAdornment'> {
-  /**
-   * Whether to show password strength indicator
-   */
   showStrengthIndicator?: boolean;
 
-  /**
-   * Whether to show password match indicator
-   */
   showMatchIndicator?: boolean;
 
-  /**
-   * Password to match against (for confirm password fields)
-   */
   matchPassword?: string;
 
-  /**
-   * Custom aria-label for the visibility toggle button
-   */
   toggleAriaLabel?: string;
 }
 

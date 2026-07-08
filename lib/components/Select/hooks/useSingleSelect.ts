@@ -12,7 +12,6 @@ interface UseSingleSelectStateProps {
 }
 
 // Manages controlled/uncontrolled single-select state, search filtering, and grouping
-// No ref needed here — selectOption receives the value as an argument rather than reading current state
 export function useSingleSelect({
   options,
   groups,
@@ -82,8 +81,7 @@ export function useSingleSelect({
 
   const selectedOption = selectedValue ? optionMap.get(selectedValue) : undefined;
 
-  // Fire onOptionSelect once when the initial value resolves from the async option map.
-  // Tracks whether we've already notified so re-renders don't re-fire it.
+  // Fire onOptionSelect once when the initial value resolves from the async option map
   const notifiedInitialRef = useRef<SelectValue | null>(null);
   useEffect(() => {
     if (selectedOption && notifiedInitialRef.current !== selectedValue) {

@@ -7,79 +7,34 @@ import { CurrencySelector } from '../../selects/currency/CurrencySelector';
 import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
 
 export interface CurrencyFieldProps {
-  /**
-   * Field name for react-hook-form integration (used by Form component)
-   */
   name?: string;
 
-  /**
-   * Composite currency value: `{ currency, value }`.
-   * `value` is a string (not a number) to avoid float precision loss.
-   */
   value?: CurrencyValue;
 
-  /**
-   * Callback fired whenever the currency or amount changes.
-   */
   onChange?: (value: CurrencyValue) => void;
 
-  /**
-   * When set, locks the selector to this ISO 4217 currency code (e.g., 'INR').
-   * The selector is replaced by a read-only badge.
-   */
   currencyCode?: string;
 
-  /**
-   * Initial currency when the selector is not locked and no value is provided.
-   * @default 'USD'
-   */
   defaultCurrencyCode?: string;
 
-  /**
-   * Label rendered above the field.
-   */
   label?: React.ReactNode;
 
-  /**
-   * Helper text rendered below the field.
-   */
   description?: React.ReactNode;
 
-  /**
-   * Error message rendered below the field.
-   */
   error?: React.ReactNode;
 
-  /**
-   * Whether the field is disabled.
-   */
   disabled?: boolean;
 
-  /**
-   * Tooltip text shown on hover when the field is disabled.
-   */
   disabledTip?: string;
 
-  /**
-   * Placeholder text for the amount input.
-   */
   placeholder?: string;
 
-  /**
-   * CSS class name applied to the outer input shell.
-   */
   className?: string;
 
-  /**
-   * Marks the field as required for accessibility.
-   */
   required?: boolean;
 }
 
-/**
- * Truncates an amount string to at most `decimals` fractional digits.
- * Returns the original string if it already fits or is not a finite number.
- */
+// Truncates an amount string to at most `decimals` fractional digits
 function truncateDecimals(amount: string, decimals: number): string {
   if (amount === '') return amount;
   if (!Number.isFinite(Number(amount))) return amount;
@@ -90,20 +45,13 @@ function truncateDecimals(amount: string, decimals: number): string {
   return `${whole}.${fraction.slice(0, decimals)}`;
 }
 
-/**
- * Returns the `step` attribute for an input given a currency exponent.
- * e.g., 2 -> '0.01', 3 -> '0.001', 0 -> '1'.
- */
+// Returns the `step` attribute for an input given a currency exponent
 function stepForDecimals(decimals: number): string {
   if (decimals <= 0) return '1';
   return `0.${'0'.repeat(decimals - 1)}1`;
 }
 
-/**
- * Currency-aware money input. Combines a currency selector (or locked badge)
- * with a numeric amount input that respects the currency's ISO 4217 exponent.
- * Emits `{ currency, value }` where `value` is a string.
- */
+// Currency-aware money input combining a currency selector with an exponent-aware amount input
 export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldProps>(
   (
     {

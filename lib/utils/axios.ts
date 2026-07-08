@@ -5,24 +5,16 @@ import { getConfig } from '../config';
 // Extend AxiosRequestConfig with custom options
 declare module 'axios' {
   export interface AxiosRequestConfig {
-    /** Skip auth for public endpoints (login, signup, etc.) */
     public?: boolean;
-    /** Skip redirect to login on 401 (for auth check endpoints like /me) */
     skipAuthRedirect?: boolean;
-    /** Show success toast for mutations (default: true for POST/PUT/PATCH/DELETE) */
     showSuccessToast?: boolean;
-    /** Show error toast for errors (default: true) */
     showErrorToast?: boolean;
-    /** Custom success message (overrides API response message) */
     successMessage?: string;
-    /** Show loading toast during request - auto updates to success/error on completion */
     loadingMessage?: string;
-    /** Internal: toast ID for loading → success/error updates */
     _toastId?: string;
   }
 }
 
-// Type for API error response
 interface ApiErrorResponse {
   title?: string;
   label?: string;
@@ -32,20 +24,14 @@ interface ApiErrorResponse {
   errors?: Array<{ field: string; message: string }>;
 }
 
-// =============================================================================
 // State
-// =============================================================================
-
 let accessToken: string | null = null;
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 let sessionRecoveryPromise: Promise<boolean> | null = null;
 let csrfToken: string | null = null;
 let csrfFetchPromise: Promise<string | null> | null = null;
 
-// =============================================================================
 // Token Management
-// =============================================================================
-
 export const setToken = (token: string): void => {
   if (token && typeof token === 'string') {
     accessToken = token;
@@ -62,10 +48,7 @@ export const clearToken = (): void => {
   }
 };
 
-// =============================================================================
 // CSRF Token Management
-// =============================================================================
-
 export const setCsrfToken = (token: string): void => {
   if (token && typeof token === 'string') {
     csrfToken = token;
@@ -78,11 +61,9 @@ export const clearCsrfToken = (): void => {
   csrfToken = null;
 };
 
-// =============================================================================
 // Session Recovery & Refresh
-// =============================================================================
 
-/** Recovers session from httpOnly cookie */
+// Recovers session from httpOnly cookie
 export async function recoverToken(): Promise<{ success: boolean; expiresIn: number }> {
   const config = getConfig();
 
@@ -111,7 +92,7 @@ export async function recoverToken(): Promise<{ success: boolean; expiresIn: num
   }
 }
 
-/** Auto-recovers session if no token (used by request interceptor) */
+// Auto-recovers session if no token (used by request interceptor)
 async function recoverTokenIfNeeded(): Promise<boolean> {
   const config = getConfig();
 
@@ -142,7 +123,7 @@ async function recoverTokenIfNeeded(): Promise<boolean> {
   return sessionRecoveryPromise;
 }
 
-/** Schedules proactive token refresh at 80% of token lifetime */
+// Schedules proactive token refresh at 80% of token lifetime
 export function scheduleTokenRefresh(expiresIn: number): void {
   cancelTokenRefresh();
 
@@ -179,10 +160,7 @@ export function cancelTokenRefresh(): void {
   }
 }
 
-// =============================================================================
 // CSRF Token Fetching
-// =============================================================================
-
 async function fetchCsrfToken(): Promise<string | null> {
   if (csrfFetchPromise) return csrfFetchPromise;
 
@@ -213,14 +191,7 @@ async function fetchCsrfToken(): Promise<string | null> {
   return csrfFetchPromise;
 }
 
-// =============================================================================
-// Helpers
-// =============================================================================
-
-// =============================================================================
 // Axios Instance & Interceptors
-// =============================================================================
-
 function createAxiosInstance(): AxiosInstance {
   const config = getConfig();
   return Axios.create({

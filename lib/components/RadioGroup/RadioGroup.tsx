@@ -65,8 +65,7 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
         <Field
           key={option.value}
           orientation="horizontal"
-          // Field defaults to `w-full`; override when the outer group is horizontal
-          // so each option hugs its content instead of spanning the full row.
+          // Field defaults to `w-full`; override to `w-auto` when horizontal so each option hugs its content
           className={orientation === 'horizontal' ? 'w-auto' : undefined}
           data-disabled={isItemDisabled || undefined}
         >

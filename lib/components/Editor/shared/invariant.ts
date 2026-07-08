@@ -6,9 +6,7 @@
  *
  */
 
-// invariant(condition, message) will refine types based on "condition", and
-// if "condition" is false will throw an error. This function is special-cased
-// in flow itself, so we can't name it anything else.
+// invariant(cond, message) refines types by cond and throws if false; special-cased in Flow so it can't be renamed
 export function invariant(cond?: boolean, message?: string, ..._args: string[]): asserts cond {
   if (cond) {
     return;

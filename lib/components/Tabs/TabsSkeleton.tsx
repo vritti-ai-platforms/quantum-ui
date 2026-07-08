@@ -5,11 +5,8 @@ import { Skeleton } from '../Skeleton';
 const DEFAULT_TAB_WIDTHS = ['w-20', 'w-14', 'w-16', 'w-24', 'w-18'];
 
 export interface TabsSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Number of tab triggers to render */
   count?: number;
-  /** Height of the content area below the tabs */
   contentHeight?: string;
-  /** Custom widths for each tab trigger (Tailwind width classes) */
   tabWidths?: string[];
 }
 

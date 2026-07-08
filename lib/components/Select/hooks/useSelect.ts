@@ -83,10 +83,7 @@ export function useSelect({
   const selectedValuesRef = useRef(selectedValues);
   selectedValuesRef.current = selectedValues;
 
-  // Selection used to RESOLVE + ORDER options. Snapshotted when the popover OPENS, then frozen for the whole
-  // open session — so toggling a selection doesn't refetch select-resolve or reorder the in-memory list (which
-  // would move the clicked row and lose scroll position). Re-captured on the next open, so reopening shows
-  // the current selection ordered selected-first.
+  // Selection used to resolve + order options, snapshotted on open and frozen for the session, re-captured on next open
   const [resolveValues, setResolveValues] = useState(selectedValues);
   useEffect(() => {
     if (open) setResolveValues(selectedValuesRef.current);
@@ -147,8 +144,7 @@ export function useSelect({
     refetchOnMount: 'always',
   });
 
-  // Merge options with value-based dedup.
-  // During active search, show only live search results (do not prepend previously selected options).
+  // Merge options with value-based dedup; during active search show only live results, not previously selected options
   const fetchedOptions = useMemo(() => {
     const searchResults = data?.pages.flatMap((p) => p.options) ?? [];
     const selected = resolvedSelected?.options ?? [];

@@ -3,9 +3,6 @@ import { Select, type SelectProps } from '../../components/Select/Select';
 
 export type PurchaseOrderSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
 
-// Pre-configured Select for purchase order selection with async search. Default `additionalKeys`
-// expose the PO's currency + locked-rate fields so consumers (e.g. GR creation dialog) can decide
-// whether to ask the user for an exchange rate at GR creation time.
 const DEFAULT_FIELD_KEYS = {
   valueKey: 'id',
   labelKey: 'poNumber',

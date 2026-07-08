@@ -8,9 +8,6 @@ import { SingleSelect } from '../../components/Select/components/SingleSelect/Si
 import type { AsyncSelectState, SelectOption } from '../../components/Select/types';
 import { ICON_NAMES, type IconKind } from '../../icons';
 
-// Renders a lucide glyph via the STATIC icons map (no per-icon dynamic import) -- the icon
-// list is pre-filtered to names this map can resolve. The map adds bundle weight, so it's
-// used only here (a heavy picker); data-driven single icons elsewhere keep DynamicIcon.
 const ICON_MAP = lucideIcons as Record<string, LucideIcon>;
 const toPascalCase = (kebab: string) =>
   kebab
@@ -23,9 +20,7 @@ function LucideGlyph({ name, className }: { name: string; className?: string }) 
   return Glyph ? <Glyph className={className} aria-hidden /> : null;
 }
 
-// Renders a Material Symbols glyph via the ligature name. quantum-ui does NOT bundle the icon font —
-// the host app must load the Material Symbols font + the `.material-symbols-outlined` class (e.g.
-// cloud-web does in its index.css). Where the font isn't present this harmlessly shows the raw name.
+// Renders a Material Symbols glyph via the ligature name; the host app must load the Material Symbols font.
 function MaterialGlyph({ name, className }: { name: string; className?: string }) {
   return (
     <span className={cn('material-symbols-outlined', className)} style={{ fontSize: 16, lineHeight: 1 }} aria-hidden>
@@ -34,18 +29,11 @@ function MaterialGlyph({ name, className }: { name: string; className?: string }
   );
 }
 
-// How many names to reveal per "page". The lists are large (lucide 1670, sf 7843,
-// material 4207), so instead of rendering all rows we emulate an async data source:
-// filter locally, hand SingleSelect one page, and grow the page as its infinite-scroll
-// sentinel comes into view (the same mechanism the optionsEndpoint selects use).
 const PAGE_SIZE = 50;
 
 export interface IconSelectProps {
-  // Icon family whose names are listed
   kind: IconKind;
-  // Selected icon name (controlled)
   value?: string;
-  // Fired with the chosen icon name
   onChange?: (name: string) => void;
   onBlur?: () => void;
   label?: string;
@@ -60,9 +48,7 @@ export interface IconSelectProps {
   error?: string;
 }
 
-// Searchable icon-name selector backed by a local paginated source (renders one page,
-// loads more on scroll). lucide names render their real glyph; sf/material render as
-// monospace text (native mobile symbols, not web-renderable).
+// Searchable icon-name selector backed by a local paginated source that renders one page and loads more on scroll.
 export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
   (
     {

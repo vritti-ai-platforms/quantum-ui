@@ -54,19 +54,12 @@ export interface SingleSelectProps {
   searchPlaceholder?: string;
   clearable?: boolean;
   asyncState?: AsyncSelectState;
-  // Custom trigger -- replaces the default SingleSelectTrigger
   anchor?: (props: SingleSelectAnchorProps) => React.ReactElement;
-  // Custom option row renderer -- replaces the default SingleSelectRow
   renderOption?: (props: SingleSelectOptionRenderProps) => React.ReactNode;
-  // Transforms how labels are displayed in trigger and option rows
   transformLabel?: (label: string, option: SelectOption, context: SingleSelectLabelTransformContext) => string;
-  // Transforms how description is displayed in option rows
   transformDescription?: (description: string, option: SelectOption) => string;
-  // Content rendered below the option list
   footer?: React.ReactNode;
-  // Custom className for the popover content panel
   contentClassName?: string;
-  // Called when the popover open state changes
   onOpenChange?: (open: boolean) => void;
 }
 

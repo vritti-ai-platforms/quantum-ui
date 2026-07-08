@@ -2,14 +2,8 @@ import type React from 'react';
 import { cn } from '../../../shadcn/utils';
 
 export interface TypographyProps {
-  /**
-   * The content to render
-   */
   children: React.ReactNode;
 
-  /**
-   * The semantic variant of the typography
-   */
   variant?:
     | 'h1'
     | 'h2'
@@ -27,19 +21,10 @@ export interface TypographyProps {
     | 'code'
     | 'blockquote';
 
-  /**
-   * The color intent of the text
-   */
   intent?: 'default' | 'primary' | 'secondary' | 'muted' | 'success' | 'warning' | 'error';
 
-  /**
-   * Whether text should be centered
-   */
   align?: 'left' | 'center' | 'right' | 'justify';
 
-  /**
-   * Custom className
-   */
   className?: string;
 }
 

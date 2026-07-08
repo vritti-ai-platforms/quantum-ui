@@ -32,8 +32,7 @@ export function MaxLengthPlugin({ maxLength }: { maxLength: number }): null {
         const anchor = selection.anchor;
 
         if (delCount > 0) {
-          // Restore the old editor state instead if the last
-          // text content was already at the limit.
+          // Restore the old editor state if the last text content was already at the limit.
           if (prevTextContentSize === maxLength && lastRestoredEditorState !== prevEditorState) {
             lastRestoredEditorState = prevEditorState;
             $restoreEditorState(editor, prevEditorState);

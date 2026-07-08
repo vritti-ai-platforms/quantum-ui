@@ -20,7 +20,6 @@ function extractRawValue(
 }
 
 interface SelectFilterBaseProps {
-  // Used as both the FilterResult field identifier and Form Controller registration key
   name: string;
   optionsEndpoint?: string;
   searchDebounceMs?: number;

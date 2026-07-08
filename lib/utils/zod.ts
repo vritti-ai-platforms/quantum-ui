@@ -2,8 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import { z } from 'zod';
 
-// Re-export the full zod API + the @hookform/resolvers/zod adapter so apps consume
-// validation libs through quantum-ui (single bundled copy, version-locked here).
+// Re-export zod + the @hookform/resolvers/zod adapter so apps consume one bundled, version-locked copy.
 export * from 'zod';
 export { zodResolver };
 
@@ -22,21 +21,7 @@ export interface NumericFieldOptions {
   maxMessage?: string;
 }
 
-// NaN-aware numeric field builder. NaN (empty input) shows required message,
-// or becomes null when nullable:true. integer/positive/min/max constraints
-// show their own messages and are never silently swallowed.
-//
-// Semantics (mirrors TextField):
-//   - `positive: true`              → value must be > 0 (zero is rejected)
-//   - `positive: true` + `integer`  → value must be ≥ 1
-//   - `nonZero: true`               → value must be ≠ 0 (use for signed-but-not-zero cases;
-//                                     redundant when `positive: true` is also set)
-//   - `integer: true`               → value must be a whole number
-//
-// Overloads narrow the inferred output type: `nullable: true` → `number | null`,
-// anything else → `number`. Without these overloads, TS widens the return type
-// across both internal branches, so every caller would see `number | null`
-// regardless of how they configured `nullable`.
+// NaN-aware numeric field builder; overloads narrow the output type by `nullable`.
 export function zodNumericField(
   options?: Omit<NumericFieldOptions, 'nullable'> & { nullable?: false },
 ): z.ZodType<number, number>;
@@ -110,8 +95,6 @@ export interface CurrencyFieldOptions {
 }
 
 // CurrencyField returns undefined when empty and { currency, value } when filled.
-// Accept undefined explicitly so the required message fires instead of a generic
-// Zod type error from z.object({...}).
 export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
   const { required = 'Required', positive = true, positiveMessage = 'Must be greater than 0' } = options;
 
@@ -129,9 +112,7 @@ export interface PhoneFieldOptions {
   optional?: boolean;
 }
 
-// PhoneField returns a string (E.164) when filled or undefined/empty when empty.
-// Validates with react-phone-number-input's isValidPhoneNumber. Pass optional:true
-// to allow empty values without triggering the required message.
+// PhoneField returns an E.164 string when filled or undefined when empty; optional:true skips the required check.
 export function zodPhoneField(options?: { required?: string; optional?: false }): z.ZodType<string, string>;
 export function zodPhoneField(options: {
   required?: string;

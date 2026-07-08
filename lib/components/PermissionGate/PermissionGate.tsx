@@ -25,7 +25,6 @@ const ALLOW: PermissionGateResult = Object.freeze({
 
 const ALLOW_GATE: PermissionGateFn = () => ALLOW;
 
-// Registered on globalThis so every bundled copy (MF host + remotes) resolves to one shared context instance
 const GATE_CONTEXT_KEY = Symbol.for('@vritti/quantum-ui/PermissionGate');
 type GateRegistry = { [GATE_CONTEXT_KEY]?: React.Context<PermissionGateFn | null> };
 const registry = globalThis as GateRegistry;
@@ -84,8 +83,7 @@ const DefaultLockChip: React.FC<Pick<PermissionGateResult, 'reason' | 'unlockPla
   </span>
 );
 
-// Gates a subtree by permission code: children mount ONLY when the code is granted AND unlocked, so
-// their data queries never fire when the user lacks access. Renders `fallback` otherwise.
+// Gates a subtree by permission code: children mount only when granted AND unlocked, else renders `fallback`
 export const PermissionGate: React.FC<PermissionGateProps> = ({ permission, children, fallback }) => {
   const result = usePermission(permission);
   if (result.available) return <>{children}</>;
