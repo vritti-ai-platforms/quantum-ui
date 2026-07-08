@@ -14,7 +14,6 @@ export interface RowAction {
   variant?: 'default' | 'destructive';
   disabled?: boolean;
   hidden?: boolean;
-  // "feature.permission" gate code — not granted hides the action (layout reflows), locked disables it with an upsell
   permission?: string;
   dialog?: {
     title: string;
@@ -30,7 +29,6 @@ export interface RowActionsProps {
   disabledAll?: boolean;
 }
 
-// A RowAction after permission resolution — locked actions carry their upsell tooltip
 type ResolvedAction = RowAction & { lockTip?: string };
 
 // Renders a single action as a direct icon button or dialog trigger
@@ -112,8 +110,7 @@ function toDropdownItems(actions: ResolvedAction[], disabledAll?: boolean) {
 export const RowActions: React.FC<RowActionsProps> = ({ actions, disabledAll }) => {
   const gate = usePermissionGate();
 
-  // Resolve each action's permission into the hidden/disabled flags the auto-layout already understands.
-  // Resolution happens BEFORE the visibility filter so the 1/2/3+ layout counts only what the role grants.
+  // Resolve permissions before the visibility filter so the 1/2/3+ layout counts only what the role grants
   const resolved: ResolvedAction[] = actions.map((action) => {
     if (!action.permission) return action;
     const result = gate(action.permission);

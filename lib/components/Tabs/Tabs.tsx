@@ -10,6 +10,7 @@ import {
   TabsTrigger as ShadcnTabsTrigger,
 } from '../../../shadcn/shadcnTabs';
 import { cn } from '../../../shadcn/utils';
+import { lockedTip, PermissionLockIcon, usePermissionGate } from '../PermissionGate';
 
 export interface TabItem {
   value: string;
@@ -18,6 +19,7 @@ export interface TabItem {
   disabled?: boolean;
   className?: string;
   contentClassName?: string;
+  permission?: string;
 }
 
 export interface TabsProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> {
@@ -38,17 +40,52 @@ interface TabsViewProps extends Omit<TabsProps, 'routeParam' | 'defaultValue' | 
   onValueChange: (value: string) => void;
 }
 
+// Drops tabs the role doesn't grant and disables plan/BU-locked ones with a lock + upsell tip
+function useGatedTabs(tabs: TabItem[]): TabItem[] {
+  const gate = usePermissionGate();
+  const gated: TabItem[] = [];
+  for (const tab of tabs) {
+    if (!tab.permission) {
+      gated.push(tab);
+      continue;
+    }
+    const result = gate(tab.permission);
+    if (!result.granted) continue;
+    if (!result.locked) {
+      gated.push(tab);
+      continue;
+    }
+    gated.push({
+      ...tab,
+      disabled: true,
+      label: (
+        <span className="inline-flex items-center gap-1.5" title={lockedTip(result)}>
+          <PermissionLockIcon reason={result.reason} className="size-3.5" />
+          {tab.label}
+        </span>
+      ),
+    });
+  }
+  return gated;
+}
+
+// First tab a user can actually open — skips locked/disabled tabs so the default selection lands on a real one
+function firstSelectableValue(tabs: TabItem[]): string | undefined {
+  return (tabs.find((tab) => !tab.disabled) ?? tabs[0])?.value;
+}
+
 // Tabs root — URL-path-bound when routeParam is set, otherwise internal/controlled state
 export function Tabs(props: TabsProps) {
-  if (props.routeParam) return <RoutedTabs {...props} routeParam={props.routeParam} />;
-  return <StatefulTabs {...props} />;
+  const tabs = useGatedTabs(props.tabs);
+  if (props.routeParam) return <RoutedTabs {...props} tabs={tabs} routeParam={props.routeParam} />;
+  return <StatefulTabs {...props} tabs={tabs} />;
 }
 
 Tabs.displayName = 'Tabs';
 
 // Internal-state mode — preserves the original uncontrolled/`value`-controlled behavior
 function StatefulTabs({ routeParam: _routeParam, defaultValue, value, onValueChange, tabs, ...rest }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(value ?? defaultValue ?? tabs[0]?.value);
+  const [activeTab, setActiveTab] = useState(value ?? defaultValue ?? firstSelectableValue(tabs));
 
   function handleValueChange(newValue: string) {
     setActiveTab(newValue);
@@ -64,7 +101,7 @@ function RoutedTabs({ routeParam, defaultValue, onValueChange, tabs, ...rest }: 
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const fallback = (defaultValue as string) ?? tabs[0]?.value ?? '';
+  const fallback = (defaultValue as string) ?? firstSelectableValue(tabs) ?? '';
   const current = params[routeParam] ?? fallback;
 
   function handleValueChange(newValue: string) {

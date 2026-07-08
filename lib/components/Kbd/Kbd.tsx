@@ -72,7 +72,7 @@ export function KbdGroup({ shortcut, className, ...props }: KbdGroupProps) {
           {i > 0 && <span className="text-current/40 text-[9px] select-none leading-none">+</span>}
           <Kbd
             key={key}
-            className="bg-current/10 text-current border-current/20 shadow-none h-[18px] min-w-[18px] rounded-[3px] px-1 text-[9px] leading-none"
+            className="bg-current/10 text-current border-current/20 shadow-none h-4.5 min-w-4.5 rounded-[3px] px-1 text-[9px] leading-none"
           >
             {key}
           </Kbd>

@@ -126,9 +126,7 @@ export function DataTable<TData>({
     return null;
   }
 
-  // enable = role ∧ plan ∧ BU: granted but locked keeps the table shell but shows a lock notice in the
-  // empty state and disables filters instead of data. The caller should also disable its query so no
-  // request is made — the guarded endpoint would 403 anyway.
+  // Locked keeps the table shell but shows a lock empty-state and disables filters instead of data
   const locked = tableGate.locked;
 
   return (

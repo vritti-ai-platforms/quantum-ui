@@ -12,8 +12,6 @@ export interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
   disabledTip?: string;
-  // "feature.permission" gate code — inert when no PermissionGateProvider is mounted.
-  // Not granted by the role → renders nothing; granted but plan/BU-locked → disabled + lock + upsell tip.
   permission?: string;
 }
 

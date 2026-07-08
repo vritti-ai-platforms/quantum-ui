@@ -1,7 +1,4 @@
-// Frontend mirror of @vritti/api-sdk/catalog-resolver permission-deps — keep in sync field-for-field.
-// Intra-feature permission prerequisites (e.g. add depends on view, view depends on dim.view). Only DIRECT edges
-// are declared per permission; the transitive closure is computed by recursion here. All traversals are cycle-guarded.
-
+// Frontend mirror of @vritti/api-sdk/catalog-resolver permission-deps — keep in sync field-for-field
 export type DependsMap = Map<string, string[]>;
 
 // Builds a dependency map from a feature's permissions, keeping only edges to codes present in the set

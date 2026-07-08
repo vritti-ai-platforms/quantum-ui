@@ -1,6 +1,4 @@
-// Frontend mirror of @vritti/api-sdk/catalog-resolver types — keep field-for-field in sync.
-// Web apps import from HERE (quantum-ui), never from the server SDK.
-
+// Frontend mirror of @vritti/api-sdk/catalog-resolver types — keep field-for-field in sync
 export type PlatformBucket = 'web' | 'mobile';
 
 export const PLATFORMS: PlatformBucket[] = ['web', 'mobile'];
