@@ -15,7 +15,8 @@ export interface PlatformDenyCodes {
 
 export type FeatureUnlocks = Record<string, PlatformCodes>;
 
-export type BuFeatureLocks = Record<string, PlatformDenyCodes>;
+export type FeatureLocks = Record<string, PlatformDenyCodes>;
+export type SiteFeatureLocks = FeatureLocks;
 
 export interface SnapshotPermission {
   code: string;
@@ -47,12 +48,16 @@ export interface SnapshotMicrofrontends {
   mobile?: SnapshotMicrofrontendMobile;
 }
 
+export type ScopeType = 'ORG' | 'LE' | 'SITE_GROUP' | 'SITE';
+export type SiteType = 'OUTLET' | 'WAREHOUSE' | 'PRODUCTION';
 export interface SnapshotFeature {
   code: string;
   name: string;
   lucideIcon: string;
   sfSymbol: string;
   materialSymbol: string;
+  scope: ScopeType;
+  applicableSiteTypes: SiteType[];
   permissions: SnapshotPermission[];
   microfrontends: SnapshotMicrofrontends;
 }
@@ -68,6 +73,8 @@ export interface SnapshotApp {
 export interface SnapshotRoleTemplate {
   name: string;
   code: string;
+  scope: ScopeType;
+  siteType: SiteType;
   features: FeatureUnlocks;
 }
 
@@ -75,12 +82,24 @@ export interface SnapshotPlan {
   code: string;
   name: string;
   isCustom: boolean;
-  maxBusinessUnits: number | null;
+  maxSites: number | null;
   unlockedPermissions: FeatureUnlocks;
 }
 
+export interface VocabularyEntry {
+  singular: string;
+  plural: string;
+}
+export interface BusinessVocabulary {
+  site?: VocabularyEntry;
+  siteGroup?: VocabularyEntry;
+  outlet?: VocabularyEntry;
+  warehouse?: VocabularyEntry;
+  production?: VocabularyEntry;
+}
 export interface SnapshotBusiness {
   name: string;
+  vocabulary?: BusinessVocabulary;
   apps: SnapshotApp[];
   roleTemplates: Record<string, SnapshotRoleTemplate>;
   plans: Record<string, SnapshotPlan>;
@@ -94,7 +113,7 @@ export interface VersionSnapshot {
 
 export const SNAPSHOT_SCHEMA_VERSION = 1;
 
-export type LockReason = 'PLAN' | 'BU';
+export type LockReason = 'PLAN' | 'SITE';
 
 export interface CatalogPermission {
   code: string;
@@ -132,43 +151,44 @@ export interface FeatureCatalogEntry {
 
 export type RoleItem = SnapshotRoleTemplate;
 
-export interface BuMatrixCell {
+export interface SiteMatrixCell {
   inPlan: boolean;
   selected: boolean;
   availableIn: string[];
 }
 
-export interface BuMatrixPermission {
+export interface SiteMatrixPermission {
   code: string;
   label: string;
   dependsOn: string[];
-  web: BuMatrixCell | null;
-  mobile: BuMatrixCell | null;
+  web: SiteMatrixCell | null;
+  mobile: SiteMatrixCell | null;
 }
 
-export interface BuMatrixFeature {
+export interface SiteMatrixFeature {
   code: string;
   name: string;
   icon: string | null;
+  applicableSiteTypes: SiteType[];
   platforms: PlatformBucket[];
   inPlan: boolean;
   availableIn: string[];
-  permissions: BuMatrixPermission[];
+  permissions: SiteMatrixPermission[];
 }
 
-export interface BuMatrixApp {
+export interface SiteMatrixApp {
   code: string;
   name: string;
   icon: string | null;
   unlockedCount: number;
   totalCount: number;
-  features: BuMatrixFeature[];
+  features: SiteMatrixFeature[];
 }
 
-export interface BuMatrix {
+export interface SiteMatrix {
   plan: { code: string; name: string };
-  apps: BuMatrixApp[];
-  locks: BuFeatureLocks;
+  apps: SiteMatrixApp[];
+  locks: SiteFeatureLocks;
 }
 
 export type RevokedGrants = Record<string, PlatformDenyCodes>;
@@ -213,7 +233,7 @@ export interface ResolveUserFeaturesParams {
   snapshot: VersionSnapshot;
   businessCode: string;
   planCode: string | undefined;
-  buLocks: BuFeatureLocks | undefined;
+  siteLocks: SiteFeatureLocks | undefined;
   roleFeatures: FeatureUnlocks;
   platform: ClientPlatform;
 }

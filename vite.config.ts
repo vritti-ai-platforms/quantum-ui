@@ -141,6 +141,7 @@ export default defineConfig({
         'utils/axios': resolve(__dirname, 'lib/utils/axios.ts'),
         'utils/motion': resolve(__dirname, 'lib/utils/motion.ts'),
         'utils/slug': resolve(__dirname, 'lib/utils/slug.ts'),
+        'utils/cn': resolve(__dirname, 'lib/utils/cn.ts'),
         'utils/lodash': resolve(__dirname, 'lib/utils/lodash.ts'),
         'utils/locale': resolve(__dirname, 'lib/utils/locale.ts'),
         'utils/timezone': resolve(__dirname, 'lib/utils/timezone.ts'),

@@ -3,7 +3,7 @@ import type React from 'react';
 import { createContext, useContext } from 'react';
 import { cn } from '../../../shadcn/utils';
 
-export type PermissionLockReason = 'PLAN' | 'BU';
+export type PermissionLockReason = 'PLAN' | 'SITE';
 
 export interface PermissionGateResult {
   granted: boolean;
@@ -51,7 +51,7 @@ export const PermissionLockIcon: React.FC<{ reason: PermissionLockReason | null;
   reason,
   className,
 }) =>
-  reason === 'BU' ? (
+  reason === 'SITE' ? (
     <LockKeyhole className={cn('text-destructive', className)} />
   ) : (
     <Lock className={cn('text-warning', className)} />
@@ -59,7 +59,7 @@ export const PermissionLockIcon: React.FC<{ reason: PermissionLockReason | null;
 
 // Shared tooltip copy for locked controls — upsell for plan locks, restriction notice for BU locks
 export function lockedTip({ reason, unlockPlans }: Pick<PermissionGateResult, 'reason' | 'unlockPlans'>): string {
-  if (reason === 'BU') return 'Not enabled for this business unit';
+  if (reason === 'SITE') return 'Not enabled for this site';
   return unlockPlans.length > 0 ? `Available in ${unlockPlans.join(', ')}` : 'Not included in your plan';
 }
 
@@ -75,10 +75,10 @@ function lockMessages(result: Pick<PermissionGateResult, 'granted' | 'reason' | 
       tip: name ? `You don't have permission to view ${name}.` : "You don't have permission to access this.",
     };
   }
-  if (result.reason === 'BU') {
+  if (result.reason === 'SITE') {
     return {
       title: name ? `${name} not enabled here` : 'Not available here',
-      tip: name ? `${name} isn't enabled for this business unit.` : 'Not enabled for this business unit.',
+      tip: name ? `${name} isn't enabled for this site.` : 'Not enabled for this site.',
     };
   }
   if (result.unlockPlans.length > 0) {

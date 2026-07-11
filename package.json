@@ -456,6 +456,10 @@
       "types": "./dist/lib/utils/slug.d.ts",
       "import": "./dist/utils/slug.js"
     },
+    "./cn": {
+      "types": "./dist/lib/utils/cn.d.ts",
+      "import": "./dist/utils/cn.js"
+    },
     "./lodash": {
       "types": "./dist/lib/utils/lodash.d.ts",
       "import": "./dist/utils/lodash.js"
