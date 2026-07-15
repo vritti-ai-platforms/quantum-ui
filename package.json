@@ -248,6 +248,10 @@
       "types": "./dist/lib/selects/inventory-item/index.d.ts",
       "import": "./dist/selects/inventory-item.js"
     },
+    "./selects/iso-country": {
+      "types": "./dist/lib/selects/iso-country/index.d.ts",
+      "import": "./dist/selects/iso-country.js"
+    },
     "./selects/variant-option": {
       "types": "./dist/lib/selects/variant-option/index.d.ts",
       "import": "./dist/selects/variant-option.js"
@@ -303,6 +307,18 @@
     "./selects/microfrontend": {
       "types": "./dist/lib/selects/microfrontend/index.d.ts",
       "import": "./dist/selects/microfrontend.js"
+    },
+    "./selects/legal-entity": {
+      "types": "./dist/lib/selects/legal-entity/index.d.ts",
+      "import": "./dist/selects/legal-entity.js"
+    },
+    "./selects/site-group": {
+      "types": "./dist/lib/selects/site-group/index.d.ts",
+      "import": "./dist/selects/site-group.js"
+    },
+    "./selects/role": {
+      "types": "./dist/lib/selects/role/index.d.ts",
+      "import": "./dist/selects/role.js"
     },
     "./selects/version": {
       "types": "./dist/lib/selects/version/index.d.ts",

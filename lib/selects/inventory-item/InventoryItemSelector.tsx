@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { Select, type SelectProps } from '../../components/Select/Select';
 
-export type InventoryItemSelectorProps = Omit<SelectProps, 'optionsEndpoint'>;
+export type InventoryItemSelectorProps = SelectProps;
 
 const DEFAULT_FIELD_KEYS = { valueKey: 'id', labelKey: 'name', groupIdKey: 'categoryId' } as const;
 

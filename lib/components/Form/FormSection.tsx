@@ -20,11 +20,11 @@ export function FormSection({
 }: FormSectionProps) {
   return (
     <section className={cn('space-y-3', className)}>
-      <div className={cn('space-y-1', headerClassName)}>
-        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      <div className={cn('border-b pb-2', headerClassName)}>
+        <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{title}</div>
+        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
       </div>
-      <div className={cn(contentClassName)}>{children}</div>
+      <div className={cn(contentClassName ?? 'grid grid-cols-2 gap-4')}>{children}</div>
     </section>
   );
 }
