@@ -366,11 +366,16 @@ export function DataTable<TData>({
                         ))}
                       </TableRow>
                     ))
-                  : table.getRowModel().rows.map((row) => {
+                  : table.getRowModel().rows.map((row, index) => {
                       const externallySelected = selectedRowId != null && row.id === selectedRowId;
                       const isSelected = row.getIsSelected() || externallySelected;
                       return (
-                        <TableRow key={row.id} data-state={isSelected ? 'selected' : undefined} className="group">
+                        <TableRow
+                          key={row.id}
+                          data-state={isSelected ? 'selected' : undefined}
+                          className="group animate-in fade-in duration-300"
+                          style={{ animationDelay: `${Math.min(index, 12) * 25}ms`, animationFillMode: 'both' }}
+                        >
                           {row.getVisibleCells().map((cell) => {
                             const isActionsCell = cell.column.id === 'actions';
                             return (

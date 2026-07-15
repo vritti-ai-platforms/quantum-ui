@@ -12,7 +12,14 @@ export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
   ({ title, titleSlot, description, actions, className, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('flex items-start justify-between gap-4', className)} {...props}>
+      <div
+        ref={ref}
+        className={cn(
+          'flex items-start justify-between gap-4 animate-in fade-in slide-in-from-bottom-1 duration-300',
+          className,
+        )}
+        {...props}
+      >
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Typography variant="h3">{title}</Typography>

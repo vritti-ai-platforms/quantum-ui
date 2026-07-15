@@ -126,6 +126,7 @@ function TabsView({
   value,
   onValueChange,
   tabs,
+  className,
   listClassName,
   contentClassName,
   disabled,
@@ -134,10 +135,12 @@ function TabsView({
   ...props
 }: TabsViewProps) {
   const layoutId = useId();
+  const rootClassName = cn('min-h-0 flex-1', className);
+  const contentBaseClassName = 'flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1';
 
   if (!animated) {
     return (
-      <ShadcnTabs value={value} onValueChange={onValueChange} {...props}>
+      <ShadcnTabs value={value} onValueChange={onValueChange} className={rootClassName} {...props}>
         <ShadcnTabsList className={listClassName}>
           {tabs.map((tab) => (
             <ShadcnTabsTrigger
@@ -155,7 +158,7 @@ function TabsView({
             key={tab.value}
             value={tab.value}
             forceMount={mountStrategy === 'all' ? true : undefined}
-            className={cn(contentClassName, tab.contentClassName)}
+            className={cn(contentBaseClassName, contentClassName, tab.contentClassName)}
           >
             {tab.content}
           </ShadcnTabsContent>
@@ -167,7 +170,7 @@ function TabsView({
   const activeTabItem = tabs.find((t) => t.value === value);
 
   return (
-    <ShadcnTabs value={value} onValueChange={onValueChange} {...props}>
+    <ShadcnTabs value={value} onValueChange={onValueChange} className={rootClassName} {...props}>
       <LayoutGroup id={layoutId}>
         <ShadcnTabsList className={listClassName}>
           {tabs.map((tab) => (
@@ -208,7 +211,7 @@ function TabsView({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className={cn('flex-1 outline-none', contentClassName, activeTabItem.contentClassName)}
+            className={cn(contentBaseClassName, 'outline-none', contentClassName, activeTabItem.contentClassName)}
           >
             {activeTabItem.content}
           </motion.div>

@@ -133,3 +133,25 @@ export function zodPhoneField(
 
   return z.string({ error: required }).refine((v) => isValidPhoneNumber(v), 'Invalid phone number');
 }
+
+// Canonical entity "code" format — keep in sync with @vritti/api-sdk/decorators (code-pattern.ts).
+const CODE_SEGMENT = '[a-z][a-z0-9-]*';
+export const CODE_PATTERN = new RegExp(`^${CODE_SEGMENT}$`);
+export const DOTTED_CODE_PATTERN = new RegExp(`^${CODE_SEGMENT}(\\.${CODE_SEGMENT})*$`);
+
+export interface CodeFieldOptions {
+  dotted?: boolean;
+  max?: number;
+  required?: string;
+}
+
+// A lowercase-kebab code field; { dotted: true } allows dot-separated segments (permission codes).
+export function zodCodeField(options: CodeFieldOptions = {}) {
+  const { dotted = false, max, required = 'Code is required' } = options;
+  const pattern = dotted ? DOTTED_CODE_PATTERN : CODE_PATTERN;
+  const message = dotted
+    ? 'Dot-separated lowercase words (e.g. add.salt)'
+    : 'Single lowercase word, hyphens allowed (e.g. inventory-items)';
+  const schema = z.string().min(1, required).regex(pattern, message);
+  return max != null ? schema.max(max, `Code must be ${max} characters or less`) : schema;
+}

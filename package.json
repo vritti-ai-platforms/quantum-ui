@@ -500,6 +500,26 @@
       "types": "./dist/lib/utils/zod.d.ts",
       "import": "./dist/utils/zod.js"
     },
+    "./react-flow": {
+      "types": "./dist/lib/utils/react-flow.d.ts",
+      "import": "./dist/utils/react-flow.js"
+    },
+    "./dagre": {
+      "types": "./dist/lib/utils/dagre.d.ts",
+      "import": "./dist/utils/dagre.js"
+    },
+    "./dnd-kit/core": {
+      "types": "./dist/lib/utils/dnd-kit/core.d.ts",
+      "import": "./dist/utils/dnd-kit/core.js"
+    },
+    "./dnd-kit/sortable": {
+      "types": "./dist/lib/utils/dnd-kit/sortable.d.ts",
+      "import": "./dist/utils/dnd-kit/sortable.js"
+    },
+    "./dnd-kit/utilities": {
+      "types": "./dist/lib/utils/dnd-kit/utilities.d.ts",
+      "import": "./dist/utils/dnd-kit/utilities.js"
+    },
     "./money": {
       "types": "./dist/lib/utils/money.d.ts",
       "import": "./dist/utils/money.js"
