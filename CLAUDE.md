@@ -344,6 +344,12 @@ The DropdownMenu tracks `activeDialogId` internally and renders all dialog-type 
 
 ---
 
+## Permission gating — the `permission` prop
+
+Components consume the app's RBAC gate via `@vritti/quantum-ui/PermissionGate` (`usePermission(code) → { granted, locked, reason, unlockPlans, available }`; no provider mounted → everything resolves granted). A `permission?: string` prop is built into: **`Button`**, **`DataTable`**, **`RowActions`** items, **`Tabs`** `TabItem`, and **`DangerZone`**. Behavior: not granted → hidden (a `TabItem` is dropped); granted but locked → disabled + lock icon + upsell tooltip. `DangerZone` also hides the whole card when not granted and takes **`showWarning: boolean`** to render its `warning` alert.
+
+When adding a NEW interactive component that represents a gated action, follow the same pattern — accept an optional `permission`, resolve with `usePermission`, hide when `!granted`, disable + `PermissionLockIcon`/`lockedTip` when `locked` (mirror `Button`). Never gate by CSS-hiding a mounted subtree.
+
 ## Troubleshooting
 
 ### Build Errors
