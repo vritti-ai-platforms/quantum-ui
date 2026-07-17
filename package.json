@@ -160,6 +160,14 @@
       "types": "./dist/lib/components/Select/index.d.ts",
       "import": "./dist/components/Select.js"
     },
+    "./PersonSelector": {
+      "types": "./dist/lib/components/PersonSelector/index.d.ts",
+      "import": "./dist/components/PersonSelector.js"
+    },
+    "./CompanySelector": {
+      "types": "./dist/lib/components/CompanySelector/index.d.ts",
+      "import": "./dist/components/CompanySelector.js"
+    },
     "./Sortable": {
       "types": "./dist/lib/components/Sortable/index.d.ts",
       "import": "./dist/components/Sortable.js"
@@ -295,6 +303,10 @@
     "./selects/tax-group": {
       "types": "./dist/lib/selects/tax-group/index.d.ts",
       "import": "./dist/selects/tax-group.js"
+    },
+    "./selects/tax-class": {
+      "types": "./dist/lib/selects/tax-class/index.d.ts",
+      "import": "./dist/selects/tax-class.js"
     },
     "./selects/uom": {
       "types": "./dist/lib/selects/uom/index.d.ts",

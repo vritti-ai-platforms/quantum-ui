@@ -89,6 +89,12 @@ export function useSelect({
     if (open) setResolveValues(selectedValuesRef.current);
   }, [open]);
 
+  // While closed, track the bound value so a programmatic change (autofill / async reset) resolves its display
+  // label. Keyed on the serialized (stable) value — NOT the array identity — to avoid a render loop.
+  useEffect(() => {
+    if (!open) setResolveValues(selectedValuesRef.current);
+  }, [serializedValues, open]);
+
   const serializedResolveValues = useMemo(
     () =>
       resolveValues && resolveValues.length > 0

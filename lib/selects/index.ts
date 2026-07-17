@@ -27,6 +27,7 @@ export * from './serial';
 export * from './site-group';
 export * from './supplier';
 export * from './supplier-item';
+export * from './tax-class';
 export * from './timezone';
 export * from './uom';
 export * from './user';
