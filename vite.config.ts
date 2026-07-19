@@ -101,6 +101,7 @@ export default defineConfig({
         'selects/microfrontend': resolve(__dirname, 'lib/selects/microfrontend/index.ts'),
         'selects/version': resolve(__dirname, 'lib/selects/version/index.ts'),
         'selects/legal-entity': resolve(__dirname, 'lib/selects/legal-entity/index.ts'),
+        'selects/site': resolve(__dirname, 'lib/selects/site/index.ts'),
         'selects/site-group': resolve(__dirname, 'lib/selects/site-group/index.ts'),
         'selects/role': resolve(__dirname, 'lib/selects/role/index.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),

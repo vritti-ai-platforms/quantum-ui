@@ -24,6 +24,7 @@ export * from './quant';
 export * from './region';
 export * from './role';
 export * from './serial';
+export * from './site';
 export * from './site-group';
 export * from './supplier';
 export * from './supplier-item';

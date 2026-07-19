@@ -324,6 +324,10 @@
       "types": "./dist/lib/selects/legal-entity/index.d.ts",
       "import": "./dist/selects/legal-entity.js"
     },
+    "./selects/site": {
+      "types": "./dist/lib/selects/site/index.d.ts",
+      "import": "./dist/selects/site.js"
+    },
     "./selects/site-group": {
       "types": "./dist/lib/selects/site-group/index.d.ts",
       "import": "./dist/selects/site-group.js"
