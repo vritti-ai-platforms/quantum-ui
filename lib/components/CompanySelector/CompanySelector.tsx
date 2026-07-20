@@ -11,7 +11,7 @@ export const CompanySelector = forwardRef<HTMLButtonElement, CompanySelectorProp
     placeholder="Search companies"
     searchable
     optionsEndpoint="commerce-api/select-api/companies"
-    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    fieldKeys={{ valueKey: 'id', labelKey: 'displayName' }}
     {...props}
   />
 ));

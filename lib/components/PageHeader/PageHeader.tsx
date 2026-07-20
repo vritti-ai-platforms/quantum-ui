@@ -25,11 +25,10 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
             <Typography variant="h3">{title}</Typography>
             {titleSlot}
           </div>
-          {description && (
-            <Typography variant="body2" intent="muted">
-              {description}
-            </Typography>
-          )}
+          {/* Always render the description line (non-breaking space when empty) so the header height is stable */}
+          <Typography variant="body2" intent="muted">
+            {description || '\u00A0'}
+          </Typography>
         </div>
         {actions && <div className="flex shrink-0 items-center gap-2 self-center">{actions}</div>}
       </div>

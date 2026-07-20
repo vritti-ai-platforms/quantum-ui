@@ -22,7 +22,7 @@ export function useSingleSelect({
   remoteSearch,
 }: UseSingleSelectStateProps) {
   const isControlled = controlledValue !== undefined;
-  const [internalValue, setInternalValue] = useState<SelectValue>(defaultValue ?? '');
+  const [internalValue, setInternalValue] = useState<SelectValue>(defaultValue ?? null);
   const selectedValue = isControlled ? controlledValue : internalValue;
 
   const [open, setOpen] = useState(false);
@@ -68,7 +68,7 @@ export function useSingleSelect({
   // Clear the selection and close the popover
   const clearSelection = useCallback(() => {
     onOptionSelect?.(null);
-    updateSelection('');
+    updateSelection(null);
     setOpen(false);
   }, [updateSelection, onOptionSelect]);
 

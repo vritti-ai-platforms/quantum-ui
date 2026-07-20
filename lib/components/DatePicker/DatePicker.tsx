@@ -133,8 +133,8 @@ export interface DatePickerProps {
   error?: string;
   placeholder?: string;
   value?: DatePickerValue;
-  onValueChange?: (value: string | undefined) => void;
-  onChange?: (value: string | undefined) => void;
+  onValueChange?: (value: string | null) => void;
+  onChange?: (value: string | null) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   calendarProps?: CalendarProps;
@@ -241,8 +241,8 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
     const nextMaxDay = maxDayTime === null ? undefined : new Date(maxDayTime);
     setMonth((currentMonth) => clampMonth(currentMonth, nextMinDay, nextMaxDay));
 
-    onValueChange?.(undefined);
-    onChange?.(undefined);
+    onValueChange?.(null);
+    onChange?.(null);
   }, [controlled, rawSelectedTime, selectedTime, minDayTime, maxDayTime, onValueChange, onChange]);
 
   useEffect(() => {
@@ -253,7 +253,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
   }, [selectedTime, minDayTime, maxDayTime]);
 
   const emit = (next?: Date) => {
-    const iso = toIso(next);
+    const iso = toIso(next) ?? null;
     onValueChange?.(iso);
     onChange?.(iso);
   };

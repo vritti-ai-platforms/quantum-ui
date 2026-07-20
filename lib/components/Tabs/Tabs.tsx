@@ -9,6 +9,7 @@ import {
   TabsList as ShadcnTabsList,
   TabsTrigger as ShadcnTabsTrigger,
 } from '../../../shadcn/shadcnTabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../shadcn/shadcnTooltip';
 import { cn } from '../../../shadcn/utils';
 import { lockedTip, PermissionLockIcon, usePermissionGate } from '../PermissionGate';
 
@@ -20,6 +21,8 @@ export interface TabItem {
   className?: string;
   contentClassName?: string;
   permission?: string;
+  // Set internally by permission gating: the upsell tip shown when a tab is plan/BU-locked
+  lockTip?: string;
 }
 
 export interface TabsProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> {
@@ -55,8 +58,9 @@ function useGatedTabs(tabs: TabItem[]): TabItem[] {
     gated.push({
       ...tab,
       disabled: true,
+      lockTip: lockedTip(result),
       label: (
-        <span className="inline-flex items-center gap-1.5" title={lockedTip(result)}>
+        <span className="inline-flex items-center gap-1.5">
           <PermissionLockIcon reason={result.reason} className="size-3.5" />
           {tab.label}
         </span>
@@ -69,6 +73,22 @@ function useGatedTabs(tabs: TabItem[]): TabItem[] {
 // First tab a user can actually open — skips locked/disabled tabs so the default selection lands on a real one
 function firstSelectableValue(tabs: TabItem[]): string | undefined {
   return (tabs.find((tab) => !tab.disabled) ?? tabs[0])?.value;
+}
+
+// Wraps a plan/BU-locked (disabled) trigger in a hover tooltip — disabled triggers don't emit hover, so the
+// trigger sits inside a hoverable wrapper span (mirrors Button's locked tooltip)
+function withLockTooltip(trigger: React.ReactNode, tab: TabItem): React.ReactNode {
+  if (!tab.lockTip) return trigger;
+  return (
+    <TooltipProvider key={tab.value}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex cursor-not-allowed">{trigger}</span>
+        </TooltipTrigger>
+        <TooltipContent>{tab.lockTip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 // Tabs root — URL-path-bound when routeParam is set, otherwise internal/controlled state
@@ -142,16 +162,19 @@ function TabsView({
     return (
       <ShadcnTabs value={value} onValueChange={onValueChange} className={rootClassName} {...props}>
         <ShadcnTabsList className={listClassName}>
-          {tabs.map((tab) => (
-            <ShadcnTabsTrigger
-              key={tab.value}
-              value={tab.value}
-              disabled={disabled || tab.disabled}
-              className={tab.className}
-            >
-              {tab.label}
-            </ShadcnTabsTrigger>
-          ))}
+          {tabs.map((tab) =>
+            withLockTooltip(
+              <ShadcnTabsTrigger
+                key={tab.value}
+                value={tab.value}
+                disabled={disabled || tab.disabled}
+                className={tab.className}
+              >
+                {tab.label}
+              </ShadcnTabsTrigger>,
+              tab,
+            ),
+          )}
         </ShadcnTabsList>
         {tabs.map((tab) => (
           <ShadcnTabsContent
@@ -173,34 +196,37 @@ function TabsView({
     <ShadcnTabs value={value} onValueChange={onValueChange} className={rootClassName} {...props}>
       <LayoutGroup id={layoutId}>
         <ShadcnTabsList className={listClassName}>
-          {tabs.map((tab) => (
-            <TabsPrimitive.Trigger
-              key={tab.value}
-              value={tab.value}
-              disabled={disabled || tab.disabled}
-              className={cn(
-                'relative inline-flex items-center justify-center gap-1.5',
-                'rounded-md px-3 py-1',
-                'text-sm font-medium whitespace-nowrap',
-                'text-muted-foreground',
-                'data-[state=active]:text-foreground',
-                'transition-colors duration-150',
-                'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-                'disabled:pointer-events-none disabled:opacity-50',
-                "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-                tab.className,
-              )}
-            >
-              {value === tab.value && (
-                <motion.span
-                  layoutId="tab-pill"
-                  className="absolute inset-0 rounded-md bg-background shadow-sm"
-                  transition={{ type: 'spring', visualDuration: 0.3, bounce: 0.05 }}
-                />
-              )}
-              <span className="relative z-10">{tab.label}</span>
-            </TabsPrimitive.Trigger>
-          ))}
+          {tabs.map((tab) =>
+            withLockTooltip(
+              <TabsPrimitive.Trigger
+                key={tab.value}
+                value={tab.value}
+                disabled={disabled || tab.disabled}
+                className={cn(
+                  'relative inline-flex items-center justify-center gap-1.5',
+                  'rounded-md px-3 py-1',
+                  'text-sm font-medium whitespace-nowrap',
+                  'text-muted-foreground',
+                  'data-[state=active]:text-foreground',
+                  'transition-colors duration-150',
+                  'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                  'disabled:pointer-events-none disabled:opacity-50',
+                  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                  tab.className,
+                )}
+              >
+                {value === tab.value && (
+                  <motion.span
+                    layoutId="tab-pill"
+                    className="absolute inset-0 rounded-md bg-background shadow-sm"
+                    transition={{ type: 'spring', visualDuration: 0.3, bounce: 0.05 }}
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
+              </TabsPrimitive.Trigger>,
+              tab,
+            ),
+          )}
         </ShadcnTabsList>
       </LayoutGroup>
       <AnimatePresence mode="wait" initial={false}>

@@ -11,7 +11,7 @@ export const PersonSelector = forwardRef<HTMLButtonElement, PersonSelectorProps>
     placeholder="Search people by name"
     searchable
     optionsEndpoint="commerce-api/select-api/people"
-    fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
+    fieldKeys={{ valueKey: 'id', labelKey: 'displayName' }}
     {...props}
   />
 ));

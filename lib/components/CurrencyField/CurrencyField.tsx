@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import { cn } from '../../../shadcn/utils';
 import { CurrencySelector } from '../../selects/currency/CurrencySelector';
 import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
+import type { SelectValue } from '../Select';
 
 export interface CurrencyFieldProps {
   name?: string;
@@ -109,7 +110,8 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
     );
 
     const handleCurrencyChange = React.useCallback(
-      (nextValue: string | number | boolean) => {
+      (nextValue: SelectValue) => {
+        if (nextValue == null) return;
         const nextCurrency = String(nextValue);
         const nextDecimals = getCurrencyExponent(nextCurrency);
         const truncated = truncateDecimals(amount, nextDecimals);
