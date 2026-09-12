@@ -1,23 +1,23 @@
 import { useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { useForm } from 'react-hook-form';
 import { AreaChart } from '../lib/components/AreaChart';
+import type { ChartConfig } from '../lib/components/BarChart';
 import { BarChart } from '../lib/components/BarChart';
+import { Button } from '../lib/components/Button';
+import { DatePicker } from '../lib/components/DatePicker';
+import { DateRangePicker } from '../lib/components/DateRangePicker';
+import { DateTimePicker } from '../lib/components/DateTimePicker';
+import type { DateTimeRange } from '../lib/components/DateTimeRangePicker';
+import { DateTimeRangePicker } from '../lib/components/DateTimeRangePicker';
+import { Form } from '../lib/components/Form/Form';
 import { LineChart } from '../lib/components/LineChart';
 import { PieChart } from '../lib/components/PieChart';
 import { RadarChart } from '../lib/components/RadarChart';
 import { RadialChart } from '../lib/components/RadialChart';
-import type { ChartConfig } from '../lib/components/BarChart';
-import { Button } from '../lib/components/Button';
-import { ThemeToggle } from '../lib/components/ThemeToggle';
-import { DatePicker } from '../lib/components/DatePicker';
-import { DateRangePicker } from '../lib/components/DateRangePicker';
-import type { DateRange } from 'react-day-picker';
-import { DateTimeRangePicker } from '../lib/components/DateTimeRangePicker';
-import type { DateTimeRange } from '../lib/components/DateTimeRangePicker';
-import { DateTimePicker } from '../lib/components/DateTimePicker';
-import { Form } from '../lib/components/Form/Form';
 import { SelectFilter } from '../lib/components/Select/SelectFilter';
 import type { FilterResult } from '../lib/components/Select/types';
+import { ThemeToggle } from '../lib/components/ThemeToggle';
 import { ConfirmProvider } from '../lib/context/ConfirmContext';
 import { useConfirm } from '../lib/hooks/useConfirm';
 
@@ -154,11 +154,7 @@ const DateRangePickerSection = () => {
     <div className="space-y-10">
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">A. Standalone (uncontrolled)</p>
-        <DateRangePicker
-          label="Date Range"
-          description="Select a start and end date"
-          placeholder="Select date range"
-        />
+        <DateRangePicker label="Date Range" description="Select a start and end date" placeholder="Select date range" />
       </div>
 
       <div className="space-y-3">
@@ -185,20 +181,12 @@ const DateRangePickerSection = () => {
 
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">C. Single month view</p>
-        <DateRangePicker
-          label="Sprint Window"
-          placeholder="Select sprint dates"
-          numberOfMonths={1}
-        />
+        <DateRangePicker label="Sprint Window" placeholder="Select sprint dates" numberOfMonths={1} />
       </div>
 
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">D. Error state</p>
-        <DateRangePicker
-          label="Report Period"
-          placeholder="Select report period"
-          error="Date range is required"
-        />
+        <DateRangePicker label="Report Period" placeholder="Select report period" error="Date range is required" />
       </div>
     </div>
   );
@@ -224,11 +212,7 @@ const DateTimeRangePickerSection = () => {
 
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">B. Single month view</p>
-        <DateTimeRangePicker
-          label="Sprint Window"
-          placeholder="Select sprint start & end"
-          numberOfMonths={1}
-        />
+        <DateTimeRangePicker label="Sprint Window" placeholder="Select sprint start & end" numberOfMonths={1} />
       </div>
 
       <div className="space-y-3">
@@ -404,15 +388,36 @@ const ChartsSection = () => (
   <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">BarChart</p>
-      <BarChart data={monthlyData} config={multiSeriesConfig} xAxisKey="month" bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]} />
+      <BarChart
+        data={monthlyData}
+        config={multiSeriesConfig}
+        xAxisKey="month"
+        bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]}
+      />
     </div>
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">LineChart</p>
-      <LineChart data={monthlyData} config={multiSeriesConfig} xAxisKey="month" lines={[{ dataKey: 'desktop', type: 'monotone' }, { dataKey: 'mobile', type: 'monotone' }]} />
+      <LineChart
+        data={monthlyData}
+        config={multiSeriesConfig}
+        xAxisKey="month"
+        lines={[
+          { dataKey: 'desktop', type: 'monotone' },
+          { dataKey: 'mobile', type: 'monotone' },
+        ]}
+      />
     </div>
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">AreaChart</p>
-      <AreaChart data={monthlyData} config={multiSeriesConfig} xAxisKey="month" areas={[{ dataKey: 'desktop', type: 'monotone' }, { dataKey: 'mobile', type: 'monotone' }]} />
+      <AreaChart
+        data={monthlyData}
+        config={multiSeriesConfig}
+        xAxisKey="month"
+        areas={[
+          { dataKey: 'desktop', type: 'monotone' },
+          { dataKey: 'mobile', type: 'monotone' },
+        ]}
+      />
     </div>
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">PieChart</p>
@@ -420,7 +425,12 @@ const ChartsSection = () => (
     </div>
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">RadarChart</p>
-      <RadarChart data={radarData} config={radarConfig} angleKey="subject" radars={[{ dataKey: 'A' }, { dataKey: 'B' }]} />
+      <RadarChart
+        data={radarData}
+        config={radarConfig}
+        angleKey="subject"
+        radars={[{ dataKey: 'A' }, { dataKey: 'B' }]}
+      />
     </div>
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">RadialChart</p>

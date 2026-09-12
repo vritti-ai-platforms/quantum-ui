@@ -224,6 +224,14 @@
       "types": "./dist/lib/selects/feature-permission/index.d.ts",
       "import": "./dist/selects/feature-permission.js"
     },
+    "./selects/offering": {
+      "types": "./dist/lib/selects/offering/index.d.ts",
+      "import": "./dist/selects/offering.js"
+    },
+    "./selects/offering-variant": {
+      "types": "./dist/lib/selects/offering-variant/index.d.ts",
+      "import": "./dist/selects/offering-variant.js"
+    },
     "./selects/permission-group": {
       "types": "./dist/lib/selects/permission-group/index.d.ts",
       "import": "./dist/selects/permission-group.js"

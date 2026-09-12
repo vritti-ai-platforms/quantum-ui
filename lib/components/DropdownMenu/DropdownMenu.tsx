@@ -1,5 +1,6 @@
+import type { LucideIcon } from 'lucide-react';
 import type React from 'react';
-import { Fragment, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import {
   DropdownMenuCheckboxItem as ShadcnDropdownMenuCheckboxItem,
   DropdownMenuContent as ShadcnDropdownMenuContent,
@@ -20,6 +21,13 @@ import {
 import type { DialogHandle } from '../../hooks/useDialog';
 import { Button } from '../Button';
 import { Dialog } from '../Dialog';
+import {
+  lockedTip,
+  type PermissionGateFn,
+  PermissionLockIcon,
+  type PermissionLockReason,
+  usePermissionGate,
+} from '../PermissionGate';
 import type { DialogMenuItem, DropdownMenuProps, MenuItem } from './types';
 
 const DropdownMenuRoot = ShadcnDropdownMenuRoot;
@@ -38,8 +46,60 @@ const DropdownMenuSubContent = ShadcnDropdownMenuSubContent;
 const DropdownMenuSubTrigger = ShadcnDropdownMenuSubTrigger;
 const DropdownMenuTrigger = ShadcnDropdownMenuTrigger;
 
+interface LockInfo {
+  reason: PermissionLockReason | null;
+  tip: string;
+}
+
+type LockMap = Map<string, LockInfo>;
+
+const resolveItems = (items: MenuItem[], gate: PermissionGateFn, locks: LockMap): MenuItem[] => {
+  const resolved: MenuItem[] = [];
+
+  for (const item of items) {
+    const entry =
+      item.type === 'sub' || item.type === 'group' ? { ...item, items: resolveItems(item.items, gate, locks) } : item;
+
+    if ((entry.type === 'sub' || entry.type === 'group') && entry.items.length === 0) continue;
+    if ('hidden' in entry && entry.hidden) continue;
+
+    if (!('permission' in entry) || !entry.permission) {
+      resolved.push(entry);
+      continue;
+    }
+
+    const result = gate(entry.permission);
+    if (!result.granted) continue;
+    if (result.locked) {
+      locks.set(entry.id, { reason: result.reason, tip: lockedTip(result) });
+      resolved.push({ ...entry, disabled: true });
+      continue;
+    }
+    resolved.push(entry);
+  }
+
+  return resolved.filter((item, index, list) => {
+    if (item.type !== 'separator') return true;
+    const previous = list[index - 1];
+    const next = list.slice(index + 1).find((candidate) => candidate.type !== 'separator');
+    return previous !== undefined && previous.type !== 'separator' && next !== undefined;
+  });
+};
+
+const LeadingIcon: React.FC<{ icon?: LucideIcon; lock?: LockInfo }> = ({ icon: Icon, lock }) => {
+  if (lock) return <PermissionLockIcon reason={lock.reason} className="mr-2 h-4 w-4" />;
+  return Icon ? <Icon className="mr-2 h-4 w-4" /> : null;
+};
+
 // Renders a single menu item based on its type — supports nested submenus
-const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: string) => void): React.ReactNode => {
+const renderMenuItem = (
+  item: MenuItem,
+  index: number,
+  locks: LockMap,
+  onDialogSelect?: (id: string) => void,
+): React.ReactNode => {
+  const lock = item.id ? locks.get(item.id) : undefined;
+
   switch (item.type) {
     case 'separator':
       return <DropdownMenuSeparator key={item.id ?? `separator-${index}`} />;
@@ -48,23 +108,22 @@ const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: str
       return <DropdownMenuLabel key={item.id}>{item.label}</DropdownMenuLabel>;
 
     case 'item': {
-      const Icon = item.icon;
+      const trailing = lock?.tip ?? item.shortcut;
       return (
         <DropdownMenuItem
           key={item.id}
           onClick={item.onClick}
           disabled={item.disabled}
-          className={item.variant === 'destructive' ? 'text-destructive focus:text-destructive' : undefined}
+          className={item.variant === 'destructive' && !lock ? 'text-destructive focus:text-destructive' : undefined}
         >
-          {Icon && <Icon className="mr-2 h-4 w-4" />}
+          <LeadingIcon icon={item.icon} lock={lock} />
           <span>{item.label}</span>
-          {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
+          {trailing && <DropdownMenuShortcut>{trailing}</DropdownMenuShortcut>}
         </DropdownMenuItem>
       );
     }
 
-    case 'checkbox': {
-      const Icon = item.icon;
+    case 'checkbox':
       return (
         <DropdownMenuCheckboxItem
           key={item.id}
@@ -72,11 +131,11 @@ const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: str
           onCheckedChange={item.onCheckedChange}
           disabled={item.disabled}
         >
-          {Icon && <Icon className="mr-2 h-4 w-4" />}
+          <LeadingIcon icon={item.icon} lock={lock} />
           {item.label}
+          {lock && <DropdownMenuShortcut>{lock.tip}</DropdownMenuShortcut>}
         </DropdownMenuCheckboxItem>
       );
-    }
 
     case 'radio-group':
       return (
@@ -93,33 +152,30 @@ const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: str
         </DropdownMenuRadioGroup>
       );
 
-    case 'sub': {
-      const Icon = item.icon;
+    case 'sub':
       return (
         <DropdownMenuSub key={item.id}>
           <DropdownMenuSubTrigger disabled={item.disabled}>
-            {Icon && <Icon className="mr-2 h-4 w-4" />}
+            <LeadingIcon icon={item.icon} lock={lock} />
             <span>{item.label}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
-              {item.items.map((subItem, subIndex) => renderMenuItem(subItem, subIndex, onDialogSelect))}
+              {item.items.map((subItem, subIndex) => renderMenuItem(subItem, subIndex, locks, onDialogSelect))}
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
       );
-    }
 
     case 'group':
       return (
         <DropdownMenuGroup key={item.id}>
           {item.label && <DropdownMenuLabel>{item.label}</DropdownMenuLabel>}
-          {item.items.map((groupItem, groupIndex) => renderMenuItem(groupItem, groupIndex, onDialogSelect))}
+          {item.items.map((groupItem, groupIndex) => renderMenuItem(groupItem, groupIndex, locks, onDialogSelect))}
         </DropdownMenuGroup>
       );
 
-    case 'dialog': {
-      const Icon = item.icon;
+    case 'dialog':
       return (
         <DropdownMenuItem
           key={item.id}
@@ -129,11 +185,11 @@ const renderMenuItem = (item: MenuItem, index: number, onDialogSelect?: (id: str
             onDialogSelect?.(item.id);
           }}
         >
-          {Icon && <Icon className="mr-2 h-4 w-4" />}
+          <LeadingIcon icon={item.icon} lock={lock} />
           <span>{item.label}</span>
+          {lock && <DropdownMenuShortcut>{lock.tip}</DropdownMenuShortcut>}
         </DropdownMenuItem>
       );
-    }
 
     case 'custom': {
       const content = typeof item.render === 'function' ? item.render() : item.render;
@@ -163,6 +219,12 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 }) => {
   const [activeDialogId, setActiveDialogId] = useState<string | null>(null);
   const TriggerIcon = trigger.icon;
+  const gate = usePermissionGate();
+
+  const { visible, locks } = useMemo(() => {
+    const resolvedLocks: LockMap = new Map();
+    return { visible: resolveItems(items, gate, resolvedLocks), locks: resolvedLocks };
+  }, [items, gate]);
 
   // Collect all dialog-type items (including nested) for rendering outside the Radix root
   const collectDialogItems = (menuItems: MenuItem[]): DialogMenuItem[] => {
@@ -174,7 +236,9 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
     return result;
   };
 
-  const dialogItems = collectDialogItems(items);
+  const dialogItems = collectDialogItems(visible);
+
+  if (visible.length === 0) return null;
 
   return (
     <>
@@ -197,7 +261,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
             }
           }}
         >
-          {items.map((item, index) => renderMenuItem(item, index, setActiveDialogId))}
+          {visible.map((item, index) => renderMenuItem(item, index, locks, setActiveDialogId))}
         </DropdownMenuContent>
       </DropdownMenuRoot>
       {dialogItems.map((item) => {

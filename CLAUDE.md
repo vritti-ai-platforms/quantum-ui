@@ -342,11 +342,17 @@ The `DropdownMenu` `items` array supports a `dialog` type that renders a Dialog 
 
 The DropdownMenu tracks `activeDialogId` internally and renders all dialog-type items' Dialogs as siblings outside the Radix `DropdownMenuRoot`.
 
+### Gating items
+
+`item` / `checkbox` / `sub` / `dialog` / `custom` items take `permission?: string` and `hidden?: boolean`. Not granted → the item is dropped (and if it was a `dialog`, its Dialog never mounts); locked → disabled, its icon swapped for the `PermissionLockIcon`, and the reason rendered in the trailing shortcut slot (a disabled Radix item swallows pointer events, so a hover tooltip would never fire). A `sub`/`group` whose children are all revoked is dropped, and a menu left with no items renders nothing at all rather than an empty kebab. `group` itself is NOT gated — it is a label plus its children, each of which carries its own code.
+
+**`RowActions` is for DataTable rows only.** Card and panel actions use `DropdownMenu` directly — the two have different action styling.
+
 ---
 
 ## Permission gating — the `permission` prop
 
-Components consume the app's RBAC gate via `@vritti/quantum-ui/PermissionGate` (`usePermission(code) → { granted, locked, reason, unlockPlans, available }`; no provider mounted → everything resolves granted). A `permission?: string` prop is built into: **`Button`**, **`DataTable`**, **`RowActions`** items, **`Tabs`** `TabItem`, and **`DangerZone`**. Behavior: not granted → hidden (a `TabItem` is dropped); granted but locked → disabled + lock icon + upsell tooltip. `DangerZone` also hides the whole card when not granted and takes **`showWarning: boolean`** to render its `warning` alert.
+Components consume the app's RBAC gate via `@vritti/quantum-ui/PermissionGate` (`usePermission(code) → { granted, locked, reason, unlockPlans, available }`; no provider mounted → everything resolves granted). A `permission?: string` prop is built into: **`Button`**, **`Switch`**, **`CompactSwitch`**, **`DataTable`**, **`RowActions`** items, **`DropdownMenu`** items, **`Tabs`** `TabItem`, and **`DangerZone`**. Behavior: not granted → hidden (a `TabItem` is dropped); granted but locked → disabled + lock icon + upsell tooltip. `DangerZone` also hides the whole card when not granted and takes **`showWarning: boolean`** to render its `warning` alert.
 
 When adding a NEW interactive component that represents a gated action, follow the same pattern — accept an optional `permission`, resolve with `usePermission`, hide when `!granted`, disable + `PermissionLockIcon`/`lockedTip` when `locked` (mirror `Button`). Never gate by CSS-hiding a mounted subtree.
 

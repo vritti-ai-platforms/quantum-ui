@@ -19,6 +19,8 @@ export * from './lot';
 export * from './microfrontend';
 export * from './modifier-group';
 export * from './plan';
+export * from './offering';
+export * from './offering-variant';
 export * from './purchase-order';
 export * from './quant';
 export * from './region';

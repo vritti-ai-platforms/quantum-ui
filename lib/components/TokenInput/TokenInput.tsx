@@ -87,10 +87,14 @@ export const TokenInput = React.forwardRef<HTMLInputElement, TokenInputProps>(
       <Field data-disabled={disabled}>
         {label && <FieldLabel>{label}</FieldLabel>}
 
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => inputRef.current?.focus()}
+        {/* A div, not a button: the tokens carry their own remove buttons and a button cannot contain
+            one. The click only forwards focus to the input, which is itself a tab stop — so this adds
+            a mouse target for the padding rather than any behaviour of its own. */}
+        {/** biome-ignore lint/a11y/useKeyWithClickEvents: the nested input is the keyboard path */}
+        {/** biome-ignore lint/a11y/noStaticElementInteractions: click-to-focus surface, not a control */}
+        <div
+          aria-disabled={disabled}
+          onClick={disabled ? undefined : () => inputRef.current?.focus()}
           aria-invalid={!!error}
           className={cn(
             'flex min-h-11 flex-wrap items-center gap-2 rounded-md border bg-background px-2.5 py-2 text-left',
@@ -148,7 +152,7 @@ export const TokenInput = React.forwardRef<HTMLInputElement, TokenInputProps>(
               className="w-24 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
             />
           </span>
-        </button>
+        </div>
 
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         {error && <FieldError>{error}</FieldError>}

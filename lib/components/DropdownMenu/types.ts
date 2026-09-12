@@ -6,6 +6,8 @@ export interface MenuItemBase {
   label: string;
   icon?: LucideIcon;
   disabled?: boolean;
+  permission?: string;
+  hidden?: boolean;
 }
 
 export interface StandardMenuItem extends MenuItemBase {
@@ -63,6 +65,8 @@ export interface CustomMenuItem {
   asMenuItem?: boolean;
   onClick?: () => void;
   disabled?: boolean;
+  permission?: string;
+  hidden?: boolean;
 }
 
 export interface DialogMenuItem extends MenuItemBase {
