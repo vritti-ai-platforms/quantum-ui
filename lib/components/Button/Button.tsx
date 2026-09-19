@@ -33,7 +33,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const { granted, locked, reason, unlockPlans } = usePermission(permission);
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
 
     // render = role: the role doesn't grant this action, so the control doesn't exist for this user
     if (!granted) {
@@ -41,7 +42,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
-    const lockTip = locked ? lockedTip({ reason, unlockPlans }) : undefined;
+    const lockTip = locked ? lockedTip(gate) : undefined;
     const isActuallyDisabled = disabled === true || locked;
 
     const button = (

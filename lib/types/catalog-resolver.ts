@@ -49,7 +49,7 @@ export interface PlatformDenyCodes {
 export type FeatureUnlocks = Record<string, PlatformCodes>;
 
 export type FeatureLocks = Record<string, PlatformDenyCodes>;
-export type SiteFeatureLocks = FeatureLocks;
+export type WorkspaceFeatureLocks = FeatureLocks;
 
 export interface PermissionGroupRef {
   code: string;
@@ -171,7 +171,7 @@ export function snapshotFeatureKey(code: string, scope: ScopeType): string {
 
 export const SNAPSHOT_SCHEMA_VERSION = 6;
 
-export type LockReason = 'PLAN' | 'SITE' | 'SERVICE';
+export type LockReason = 'PLAN' | 'WORKSPACE' | 'SERVICE';
 
 export interface CatalogPermission {
   code: string;
@@ -258,7 +258,7 @@ export interface SiteMatrixApp {
 export interface SiteMatrix {
   plan: { code: string; name: string };
   apps: SiteMatrixApp[];
-  locks: SiteFeatureLocks;
+  locks: WorkspaceFeatureLocks;
 }
 
 export type RevokedGrants = Record<string, PlatformDenyCodes>;
@@ -306,7 +306,7 @@ export interface ResolveUserFeaturesParams {
   snapshot: VersionSnapshot;
   businessCode: string;
   planCode: string | undefined;
-  siteLocks: SiteFeatureLocks | undefined;
+  workspaceLocks: WorkspaceFeatureLocks | undefined;
   roleFeatures: FeatureUnlocks;
   platform: ClientPlatform;
 }

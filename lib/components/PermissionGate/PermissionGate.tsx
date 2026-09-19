@@ -2,10 +2,10 @@ import { Lock, LockKeyhole } from 'lucide-react';
 import type React from 'react';
 import { createContext, useContext } from 'react';
 import { cn } from '../../../shadcn/utils';
-import type { ServiceCode } from '../../types/catalog-resolver';
+import type { ScopeType, ServiceCode } from '../../types/catalog-resolver';
 import { serviceLabels } from '../../utils/services';
 
-export type PermissionLockReason = 'PLAN' | 'SITE' | 'SERVICE';
+export type PermissionLockReason = 'PLAN' | 'WORKSPACE' | 'SERVICE';
 
 export interface PermissionGateResult {
   granted: boolean;
@@ -16,6 +16,10 @@ export interface PermissionGateResult {
   missingServices: ServiceCode[];
   available: boolean;
   featureName: string | null;
+  // The workspace holding the lock — its name when the host resolved one, else its scope, so a
+  // WORKSPACE lock can say which workspace rather than assuming a site
+  workspaceLabel: string | null;
+  workspaceScope: ScopeType | null;
 }
 
 export type PermissionGateFn = (code: string) => PermissionGateResult;
@@ -28,6 +32,8 @@ const ALLOW: PermissionGateResult = Object.freeze({
   missingServices: [],
   available: true,
   featureName: null,
+  workspaceLabel: null,
+  workspaceScope: null,
 });
 
 const ALLOW_GATE: PermissionGateFn = () => ALLOW;
@@ -51,14 +57,14 @@ export function usePermission(code?: string): PermissionGateResult {
   return code && gate ? gate(code) : ALLOW;
 }
 
-// The lock symbol for a locked control — plan locks show a warning lock, BU locks a red keyhole lock,
-// service locks a red lock (blocked until the org provisions it, not an entitlement the user can buy)
+// The lock symbol for a locked control — plan locks show a warning lock, workspace locks a red keyhole
+// lock, service locks a red lock (blocked until the org provisions it, not an entitlement the user can buy)
 export const PermissionLockIcon: React.FC<{ reason: PermissionLockReason | null; className?: string }> = ({
   reason,
   className,
 }) => {
   switch (reason) {
-    case 'SITE':
+    case 'WORKSPACE':
       return <LockKeyhole className={cn('text-destructive', className)} />;
     case 'SERVICE':
       return <Lock className={cn('text-destructive', className)} />;
@@ -67,17 +73,34 @@ export const PermissionLockIcon: React.FC<{ reason: PermissionLockReason | null;
   }
 };
 
-// Shared tooltip copy for locked controls — upsell for plan locks, restriction notice for BU locks,
-// setup notice for service locks
+// Names the workspace a lock sits on: its own name when the host resolved one, else the noun for its
+// scope, else a neutral fallback. A lock may sit on the org, legal entity, site group or site, so the
+// copy must never assume a site.
+const SCOPE_NOUN: Record<ScopeType, string> = {
+  ORG: 'this organization',
+  LE: 'this company',
+  SITE_GROUP: 'this group',
+  SITE: 'this outlet',
+};
+
+function workspaceNoun(label: string | null, scope: ScopeType | null): string {
+  return label ?? (scope ? SCOPE_NOUN[scope] : 'this workspace');
+}
+
+// Shared tooltip copy for locked controls — upsell for plan locks, restriction notice for workspace
+// locks, setup notice for service locks. A workspace lock may sit on the org, legal entity, site group
+// or site, so the copy names the workspace rather than assuming a site.
 export function lockedTip({
   reason,
   unlockPlans,
   missingServices = [],
+  workspaceLabel = null,
+  workspaceScope = null,
 }: Pick<PermissionGateResult, 'reason' | 'unlockPlans'> &
-  Partial<Pick<PermissionGateResult, 'missingServices'>>): string {
+  Partial<Pick<PermissionGateResult, 'missingServices' | 'workspaceLabel' | 'workspaceScope'>>): string {
   switch (reason) {
-    case 'SITE':
-      return 'Not enabled for this site';
+    case 'WORKSPACE':
+      return `Not enabled for ${workspaceNoun(workspaceLabel, workspaceScope)}`;
     case 'SERVICE':
       return `Requires ${serviceLabels(missingServices)}`;
     default:
@@ -88,7 +111,7 @@ export function lockedTip({
 // Resolves a blocked control's heading + description, keyed off the resolved feature name when known
 function lockMessages(
   result: Pick<PermissionGateResult, 'granted' | 'reason' | 'unlockPlans' | 'featureName'> &
-    Partial<Pick<PermissionGateResult, 'missingServices'>>,
+    Partial<Pick<PermissionGateResult, 'missingServices' | 'workspaceLabel' | 'workspaceScope'>>,
 ): {
   title: string;
   tip: string;
@@ -101,11 +124,13 @@ function lockMessages(
     };
   }
   switch (result.reason) {
-    case 'SITE':
+    case 'WORKSPACE': {
+      const where = workspaceNoun(result.workspaceLabel ?? null, result.workspaceScope ?? null);
       return {
         title: name ? `${name} not enabled here` : 'Not available here',
-        tip: name ? `${name} isn't enabled for this site.` : 'Not enabled for this site.',
+        tip: name ? `${name} isn't enabled for ${where}.` : `Not enabled for ${where}.`,
       };
+    }
     case 'SERVICE': {
       const needs = serviceLabels(result.missingServices ?? []);
       return {

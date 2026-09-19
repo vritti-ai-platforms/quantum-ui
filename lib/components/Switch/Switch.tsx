@@ -22,7 +22,8 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
     const generatedId = React.useId();
     const fieldId = id || generatedId;
     const hasError = !!error;
-    const { granted, locked, reason, unlockPlans } = usePermission(permission);
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
 
     // render = role: the role doesn't grant this action, so the control doesn't exist for this user
     if (!granted) {
@@ -31,7 +32,7 @@ export const Switch = React.forwardRef<React.ElementRef<typeof ShadcnSwitch>, Sw
 
     // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
     const isDisabled = props.disabled || locked;
-    const tip = locked ? lockedTip({ reason, unlockPlans }) : disabledTip;
+    const tip = locked ? lockedTip(gate) : disabledTip;
 
     return (
       <Field data-disabled={isDisabled} data-invalid={hasError}>
@@ -80,12 +81,13 @@ export type CompactSwitchProps = React.ComponentProps<typeof ShadcnSwitch> & {
 
 // Bare compact switch with no Field wrapper, defaults to sm size for dense layouts like table/matrix cells
 export const CompactSwitch: React.FC<CompactSwitchProps> = ({ size = 'sm', disabledTip, permission, ...props }) => {
-  const { granted, locked, reason, unlockPlans } = usePermission(permission);
+  const gate = usePermission(permission);
+  const { granted, locked } = gate;
   if (!granted) return null;
 
   // No adornment slot here, so a locked switch reads as disabled with the upsell on hover
   const isDisabled = props.disabled || locked;
-  const tip = locked ? lockedTip({ reason, unlockPlans }) : disabledTip;
+  const tip = locked ? lockedTip(gate) : disabledTip;
   return withDisabledTip(<ShadcnSwitch size={size} {...props} disabled={isDisabled} />, tip, isDisabled);
 };
 
