@@ -3,9 +3,9 @@ import React from 'react';
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '../../../shadcn/shadcnField';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../shadcn/shadcnTooltip';
 import { cn } from '../../../shadcn/utils';
-import { CurrencySelector } from '../../selects/currency/CurrencySelector';
+import { CURRENCIES } from '../../selects/currency/currencies';
 import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
-import type { SelectValue } from '../Select';
+import { Select, type SelectValue } from '../Select';
 
 export interface CurrencyFieldProps {
   name?: string;
@@ -175,7 +175,10 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
               </span>
             ) : (
               <div className="flex items-center border-r border-input">
-                <CurrencySelector
+                <Select
+                  options={CURRENCIES}
+                  searchable
+                  placeholder="Select currency"
                   value={currency}
                   onChange={handleCurrencyChange}
                   disabled={disabled}
