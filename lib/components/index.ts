@@ -50,6 +50,7 @@ export * from './Sonner';
 export * from './Sortable';
 export * from './Spinner';
 export * from './StepProgressIndicator';
+export * from './StatusSwitch';
 export * from './Switch';
 export * from './Tabs';
 export * from './TextArea';

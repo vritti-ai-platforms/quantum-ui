@@ -61,8 +61,8 @@ export interface ImportExportColumn {
 export interface ImportExportConfig<TData = unknown> {
   columns: ImportExportColumn[];
   sampleData?: Record<string, string>[];
-  importEndpoint: string;
-  exportEndpoint: string;
+  importEndpoint?: string;
+  exportEndpoint?: string;
   transformExportRow?: (row: TData) => Record<string, unknown>;
   filename: string;
   onSuccess?: () => void;

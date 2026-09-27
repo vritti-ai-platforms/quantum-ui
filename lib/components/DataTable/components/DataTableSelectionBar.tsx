@@ -4,7 +4,7 @@ import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { DropdownMenu } from '../../DropdownMenu';
 import type { DataTableMeta, ImportExportConfig } from '../types';
-import { exportSelectedRows, exportToCSV } from '../utils';
+import { exportSelectedRows } from '../utils';
 
 interface DataTableSelectionBarProps<TData> {
   table: Table<TData>;
@@ -32,9 +32,18 @@ export function DataTableSelectionBar<TData>({
 
   if (count === 0) return null;
 
-  // Exports selected rows to CSV using the table slug as filename (legacy behavior)
-  const handleLegacyExport = () => {
-    exportToCSV(selectedRows, table.getAllColumns(), meta?.slug ?? 'export');
+  // A table that declares no import template still exports its selection, taking the visible columns as the headers
+  // and the table slug as the filename — so both paths offer the same formats instead of the bare one a CSV-only
+  // fallback gave
+  const exportConfig: ImportExportConfig<TData> = importExport ?? {
+    columns: table
+      .getAllColumns()
+      .filter((column) => 'accessorKey' in column.columnDef && column.getIsVisible())
+      .map((column) => ({
+        key: column.id,
+        label: typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id,
+      })),
+    filename: meta?.slug ?? 'export',
   };
 
   return (
@@ -53,49 +62,49 @@ export function DataTableSelectionBar<TData>({
             disabledTip={exportLockTip}
             startAdornment={<Download className="h-4 w-4" />}
           >
-            Export
+            Export Selected
           </Button>
-        ) : importExport ? (
+        ) : (
           <DropdownMenu
-            trigger={{ label: 'Export', variant: 'outline' as const, icon: Download, className: 'h-8 text-sm' }}
+            trigger={{
+              label: 'Export Selected',
+              variant: 'outline' as const,
+              icon: Download,
+              className: 'h-8 text-sm',
+            }}
             items={[
               {
                 type: 'item' as const,
                 id: 'csv',
                 label: 'CSV (.csv)',
-                onClick: () => exportSelectedRows(selectedRows, importExport, 'csv'),
+                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'csv'),
               },
               {
                 type: 'item' as const,
                 id: 'xlsx',
                 label: 'Excel (.xlsx)',
-                onClick: () => exportSelectedRows(selectedRows, importExport, 'xlsx'),
+                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'xlsx'),
               },
               {
                 type: 'item' as const,
                 id: 'xls',
                 label: 'Excel 97-2004 (.xls)',
-                onClick: () => exportSelectedRows(selectedRows, importExport, 'xls'),
+                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'xls'),
               },
               {
                 type: 'item' as const,
                 id: 'ods',
                 label: 'OpenDocument (.ods)',
-                onClick: () => exportSelectedRows(selectedRows, importExport, 'ods'),
+                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'ods'),
               },
               {
                 type: 'item' as const,
                 id: 'tsv',
                 label: 'TSV (.tsv)',
-                onClick: () => exportSelectedRows(selectedRows, importExport, 'tsv'),
+                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'tsv'),
               },
             ]}
           />
-        ) : (
-          <Button variant="outline" size="sm" onClick={handleLegacyExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
         )}
       </div>
     </div>

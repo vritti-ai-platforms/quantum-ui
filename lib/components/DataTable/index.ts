@@ -43,4 +43,4 @@ export type {
   SelectActions,
 } from './types';
 // Utility
-export { exportToCSV, getSelectionColumn } from './utils';
+export { getSelectionColumn } from './utils';

@@ -98,8 +98,8 @@ export function DataTable<TData>({
   const columnCount = table.getAllColumns().length;
   const visibilityEnabled = table.options.enableHiding !== false;
   // Import/Export respect their gates: hidden when not granted, disabled (with lock) when locked
-  const showImport = !!importExport && importGate.granted;
-  const showExport = !!importExport && exportGate.granted;
+  const showImport = !!importExport?.importEndpoint && importGate.granted;
+  const showExport = !!importExport?.exportEndpoint && exportGate.granted;
   const showToolbar =
     searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || showImport || showExport;
 
@@ -123,7 +123,7 @@ export function DataTable<TData>({
 
   const exportMutation = useMutation({
     mutationFn: async (format: string) => {
-      if (!importExport) return;
+      if (!importExport?.exportEndpoint) return;
       const response = await axios.get(`${importExport.exportEndpoint}/${format}`, {
         responseType: 'blob',
         showSuccessToast: false,
@@ -523,7 +523,7 @@ export function DataTable<TData>({
       )}
 
       {/* Import dialog */}
-      {importExport && showImport && (
+      {importExport?.importEndpoint && showImport && (
         <DataTableImportDialog
           handle={importDialog}
           columns={importExport.columns}

@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -275,6 +275,10 @@
     "./PermissionGate": {
       "types": "./dist/lib/components/PermissionGate/index.d.ts",
       "import": "./dist/components/PermissionGate.js"
+    },
+    "./StatusSwitch": {
+      "types": "./dist/lib/components/StatusSwitch/index.d.ts",
+      "import": "./dist/components/StatusSwitch.js"
     },
     "./Switch": {
       "types": "./dist/lib/components/Switch/index.d.ts",
