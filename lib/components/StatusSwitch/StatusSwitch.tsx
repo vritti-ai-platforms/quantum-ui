@@ -78,7 +78,7 @@ export const StatusSwitch: React.FC<StatusSwitchProps> = ({
         'inline-flex items-center gap-2 rounded-full border border-dotted transition-colors duration-200',
         dimensions.pill,
         checked ? pill : 'border-border bg-transparent',
-        isBlocked && 'opacity-60',
+        isBlocked && 'opacity-70',
         className,
       )}
     >
@@ -100,9 +100,11 @@ export const StatusSwitch: React.FC<StatusSwitchProps> = ({
           ))}
         </span>
       )}
+      {/* The pill already dims as a whole, and CSS opacity multiplies down the tree — leaving the switch's own
+          disabled:opacity-50 in place would render the control at 35% against a 70% label */}
       <CompactSwitch
         size={dimensions.switchSize}
-        className={track}
+        className={cn(track, 'disabled:opacity-100')}
         checked={checked}
         permission={permission}
         disabled={isBlocked}
