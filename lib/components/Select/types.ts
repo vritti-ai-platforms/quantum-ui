@@ -1,10 +1,12 @@
 export type SelectValue = string | number | boolean | null;
 
+export type SelectAdditionalValue = SelectValue | object;
+
 export interface SelectOption {
   value: SelectValue;
   label: string;
   description?: string;
-  additionals?: Record<string, string | number | boolean | null>;
+  additionals?: Record<string, SelectAdditionalValue>;
   disabled?: boolean;
   groupId?: string | number;
 }

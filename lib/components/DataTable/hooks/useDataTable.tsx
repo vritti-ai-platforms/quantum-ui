@@ -1,4 +1,4 @@
-import type { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import pluralize from 'pluralize-esm';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -21,7 +21,7 @@ interface UseDataTableOptions<TData> {
   serverState?: DataTableServerState<TData>;
   enableSorting?: boolean;
   enableMultiSort?: boolean;
-  enableRowSelection?: boolean;
+  enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
   enableHiding?: boolean;
   enableColumnResizing?: boolean;
   onStatePush?: () => void;
@@ -71,7 +71,7 @@ export function useDataTable<TData>({
   const initializedSlug = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (initializedSlug.current !== slug) {
-      useDataTableStore.getState().initTable(slug, { pinSelectColumn: enableRowSelection });
+      useDataTableStore.getState().initTable(slug, { pinSelectColumn: enableRowSelection !== false });
       initializedSlug.current = slug;
     }
   }, [slug, enableRowSelection]);
