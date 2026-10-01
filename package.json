@@ -583,5 +583,6 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "4.5.4",
     "zustand": "^5.0.11"
-  }
+  },
+  "license": "MIT"
 }
