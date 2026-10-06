@@ -1,4 +1,4 @@
-import { Camera, Upload, User, X } from 'lucide-react';
+import { Camera, Image, Upload, User, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 import { cn } from '../../../shadcn/utils';
@@ -6,7 +6,7 @@ import { Button } from '../Button';
 import { Field, FieldError, FieldLabel } from '../Field';
 import { FilePreview } from '../FilePreview';
 
-type AnchorPreset = 'dropzone' | 'button' | 'avatar';
+type AnchorPreset = 'dropzone' | 'button' | 'avatar' | 'logo';
 
 interface UploadFileBaseProps {
   anchor?: AnchorPreset | React.ReactNode;
@@ -78,7 +78,9 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   const imageSrc = hasFiles ? selectedImageUrl : (previewUrl ?? null);
 
   // True when using a preset string anchor (not a custom ReactNode)
-  const isPreset = anchor === 'dropzone' || anchor === 'button' || anchor === 'avatar';
+  const isPreset = anchor === 'dropzone' || anchor === 'button' || anchor === 'avatar' || anchor === 'logo';
+  // Both tile presets share one 80px picker; avatar crops to a circle, logo keeps the whole image in a square
+  const isTile = anchor === 'avatar' || anchor === 'logo';
 
   // Opens the native file picker
   function handleClick() {
@@ -168,8 +170,11 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       );
     }
 
-    if (anchor === 'avatar') {
+    if (isTile) {
       const avatarSize = 80;
+      const isLogo = anchor === 'logo';
+      const shape = isLogo ? 'rounded-lg' : 'rounded-full';
+      const Placeholder = isLogo ? Image : User;
 
       return (
         // Wrapper provides positioning context for the badge outside overflow-hidden
@@ -179,7 +184,8 @@ export const UploadFile: React.FC<UploadFileProps> = ({
             onClick={handleClick}
             disabled={disabled}
             className={cn(
-              'group relative h-full w-full overflow-hidden rounded-full bg-muted',
+              'group relative h-full w-full overflow-hidden bg-muted',
+              shape,
               disabled ? 'cursor-default' : 'cursor-pointer',
               // A shown image is content, not an affordance — only dim the empty placeholder
               disabled && !imageSrc && 'opacity-50',
@@ -190,19 +196,25 @@ export const UploadFile: React.FC<UploadFileProps> = ({
                 <img
                   src={imageSrc}
                   alt={firstFile?.name ?? ''}
-                  className="rounded-full object-cover w-full h-full"
+                  // A logo must stay whole, so it is contained; an avatar fills its circle
+                  className={cn('w-full h-full', shape, isLogo ? 'object-contain' : 'object-cover')}
                   style={{ width: avatarSize, height: avatarSize }}
                 />
                 {/* Camera overlay on hover — omitted when read-only, since nothing can be picked */}
                 {!disabled && (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div
+                    className={cn(
+                      'absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100',
+                      shape,
+                    )}
+                  >
                     <Camera className="h-5 w-5 text-white" />
                   </div>
                 )}
               </>
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <User className="h-8 w-8 text-muted-foreground" />
+                <Placeholder className="h-8 w-8 text-muted-foreground" />
               </div>
             )}
           </button>
@@ -220,9 +232,9 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     return null;
   }
 
-  // Renders the file list below the anchor for preset anchors (not avatar)
+  // Renders the file list below the anchor for preset anchors (not the tile presets, which preview inline)
   function renderFileList() {
-    if (!isPreset || !hasFiles || anchor === 'avatar') return null;
+    if (!isPreset || !hasFiles || isTile) return null;
 
     return (
       <div className="flex flex-col gap-2">
@@ -261,9 +273,9 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   }
 
   return (
-    // Field is w-full by default; the avatar is a fixed 80px circle, so it hugs its content
+    // Field is w-full by default; a tile is a fixed 80px square or circle, so it hugs its content
     // instead of claiming the whole row and pushing sibling content to the far edge
-    <Field data-disabled={disabled} className={cn(anchor === 'avatar' && 'w-fit', className)}>
+    <Field data-disabled={disabled} className={cn(isTile && 'w-fit', className)}>
       {label && <FieldLabel>{label}</FieldLabel>}
 
       {renderAnchor()}
