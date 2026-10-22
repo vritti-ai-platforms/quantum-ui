@@ -12,6 +12,16 @@ export function parseSlug(segment: string): { slug: string; id: string } | null 
   return { slug: segment.slice(0, idx), id: segment.slice(idx + 1) };
 }
 
+// Converts "acme-corp" → "Acme Corp", so a page can title itself from the URL instead of awaiting a request.
+// Lossy by nature: slugify folds away case and punctuation, so this restores word breaks only.
+export function unslugify(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 // Converts "Acme Corp" → "acme-corp", passes through already-slugified text
 export function slugify(text: string): string {
   return text

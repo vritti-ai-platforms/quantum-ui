@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { parseSlug } from '../utils/slug';
+import { parseSlug, unslugify } from '../utils/slug';
 
 export interface SlugParam {
   slug: string;
@@ -12,7 +12,7 @@ type SlugParamMap<T extends string[]> = { [K in T[number]]: SlugParam };
 function parseParam(value: string | undefined): SlugParam {
   const v = value ?? '';
   const parsed = parseSlug(v);
-  return { slug: v, name: parsed?.slug ?? '', id: parsed?.id ?? v };
+  return { slug: v, name: unslugify(parsed?.slug ?? ''), id: parsed?.id ?? v };
 }
 
 // Single param — returns SlugParam directly for clean destructuring
