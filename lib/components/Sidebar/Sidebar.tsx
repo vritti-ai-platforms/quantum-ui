@@ -21,6 +21,7 @@ import {
   SidebarMenuSubButton as ShadcnSidebarMenuSubButton,
   SidebarMenuSubItem as ShadcnSidebarMenuSubItem,
   SidebarRail as ShadcnSidebarRail,
+  useSidebar as shadcnUseSidebar,
   useSidebarMode as shadcnUseSidebarMode,
 } from '../../../shadcn/shadcnSidebar';
 
@@ -43,8 +44,13 @@ export interface SidebarNavGroup {
   items: SidebarNavItem[];
 }
 
+export interface SidebarFooterState {
+  isCollapsed: boolean;
+}
+
 export interface SidebarProps {
   groups: SidebarNavGroup[];
+  footer?: React.ReactNode | ((state: SidebarFooterState) => React.ReactNode);
   topOffset?: number;
 }
 
@@ -103,10 +109,12 @@ const FlatItem: React.FC<{
 );
 
 // Data-driven sidebar that renders grouped nav items with collapsible support
-export const Sidebar: React.FC<SidebarProps> = ({ groups, topOffset = 14 }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ groups, footer, topOffset = 14 }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sidebarProps, controlProps } = shadcnUseSidebarMode();
+  const { state, isMobile } = shadcnUseSidebar();
+  const isCollapsed = state === 'collapsed' && !isMobile;
 
   return (
     <ShadcnSidebar
@@ -139,6 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ groups, topOffset = 14 }) => {
       </ShadcnSidebarContent>
 
       <ShadcnSidebarFooter>
+        {typeof footer === 'function' ? footer({ isCollapsed }) : footer}
         <ShadcnSidebarControl {...controlProps} />
       </ShadcnSidebarFooter>
 

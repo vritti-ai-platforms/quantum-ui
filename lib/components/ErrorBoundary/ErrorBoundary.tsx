@@ -24,17 +24,28 @@ export const QueryErrorFallback = ({ error, resetErrorBoundary }: FallbackProps)
   );
 };
 
-// Catches query errors and renders status-specific fallback UI
-export const QueryErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+interface QueryErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+// Catches query errors and renders status-specific fallback UI, or the given fallback in its place
+export const QueryErrorBoundary = ({ children, fallback }: QueryErrorBoundaryProps) => {
   const { pathname } = useLocation();
 
   return (
     <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary onReset={reset} resetKeys={[pathname]} FallbackComponent={QueryErrorFallback}>
-          {children}
-        </ErrorBoundary>
-      )}
+      {({ reset }) =>
+        fallback === undefined ? (
+          <ErrorBoundary onReset={reset} resetKeys={[pathname]} FallbackComponent={QueryErrorFallback}>
+            {children}
+          </ErrorBoundary>
+        ) : (
+          <ErrorBoundary onReset={reset} resetKeys={[pathname]} fallback={fallback}>
+            {children}
+          </ErrorBoundary>
+        )
+      }
     </QueryErrorResetBoundary>
   );
 };

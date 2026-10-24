@@ -1,5 +1,6 @@
 export {
   Sidebar,
+  type SidebarFooterState,
   SidebarInset,
   type SidebarNavChild,
   type SidebarNavGroup,
