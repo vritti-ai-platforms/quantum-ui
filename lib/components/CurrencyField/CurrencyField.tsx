@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import { cn } from '../../../shadcn/utils';
 import { CURRENCIES } from '../../selects/currency/currencies';
 import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
-import { Select, type SelectValue } from '../Select';
+import { Select, type SelectOption, type SelectValue } from '../Select';
 
 export interface CurrencyFieldProps {
   name?: string;
@@ -15,6 +15,8 @@ export interface CurrencyFieldProps {
   onChange?: (value: CurrencyValue) => void;
 
   currencyCode?: string;
+
+  currencies?: string[];
 
   defaultCurrencyCode?: string;
 
@@ -52,6 +54,12 @@ function stepForDecimals(decimals: number): string {
   return `0.${'0'.repeat(decimals - 1)}1`;
 }
 
+// The selectable currencies, in the caller's order; a code missing from the ISO list still appears as itself
+function currencyOptions(currencies?: string[]): SelectOption[] {
+  if (!currencies) return CURRENCIES;
+  return currencies.map((code) => CURRENCIES.find((option) => option.value === code) ?? { value: code, label: code });
+}
+
 // Currency-aware money input combining a currency selector with an exponent-aware amount input
 export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldProps>(
   (
@@ -60,6 +68,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       value,
       onChange,
       currencyCode,
+      currencies,
       defaultCurrencyCode = 'USD',
       label,
       description,
@@ -74,9 +83,14 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
   ) => {
     const fieldId = React.useId();
     const hasError = !!error;
-    const isLocked = !!currencyCode;
+    const isLocked = !!currencyCode || currencies?.length === 1;
+    const options = React.useMemo(() => currencyOptions(currencies), [currencies]);
+    const fallbackCurrency =
+      currencies && currencies.length > 0 && !currencies.includes(defaultCurrencyCode)
+        ? currencies[0]
+        : defaultCurrencyCode;
 
-    const initialCurrency = value?.currency ?? currencyCode ?? defaultCurrencyCode ?? 'USD';
+    const initialCurrency = value?.currency ?? currencyCode ?? fallbackCurrency ?? 'USD';
     const [currency, setCurrency] = React.useState<string>(initialCurrency);
     const [amount, setAmount] = React.useState<string>(value?.value ?? '');
 
@@ -98,6 +112,14 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
         setCurrency(currencyCode);
       }
     }, [currencyCode]);
+
+    // A narrowed list that no longer holds the current currency moves it to the first one allowed
+    // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitting internal state to avoid feedback loops
+    React.useEffect(() => {
+      if (!currencyCode && currencies && currencies.length > 0 && !currencies.includes(currency)) {
+        setCurrency(currencies[0]);
+      }
+    }, [currencyCode, currencies?.join(',')]);
 
     const decimals = getCurrencyExponent(currency);
     const step = stepForDecimals(decimals);
@@ -176,7 +198,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
             ) : (
               <div className="flex items-center border-r border-input">
                 <Select
-                  options={CURRENCIES}
+                  options={options}
                   searchable
                   placeholder="Select currency"
                   value={currency}

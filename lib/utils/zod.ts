@@ -90,17 +90,23 @@ export function zodNumericField(
 
 export interface CurrencyFieldOptions {
   required?: string;
+  optional?: boolean;
   positive?: boolean;
   positiveMessage?: string;
 }
 
-// CurrencyField returns undefined when empty and { currency, value } when filled.
+// CurrencyField returns undefined when untouched and { currency, value } once used; optional:true accepts an empty amount
 export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
-  const { required = 'Required', positive = true, positiveMessage = 'Must be greater than 0' } = options;
+  const {
+    required = 'Required',
+    optional = false,
+    positive = true,
+    positiveMessage = 'Must be greater than 0',
+  } = options;
 
   return z.union([z.object({ currency: z.string(), value: z.string() }), z.undefined()]).superRefine((v, ctx) => {
     if (!v?.value) {
-      ctx.addIssue({ code: 'custom', message: required });
+      if (!optional) ctx.addIssue({ code: 'custom', message: required });
     } else if (positive && Number(v.value) <= 0) {
       ctx.addIssue({ code: 'custom', message: positiveMessage });
     }
