@@ -17,8 +17,11 @@ import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { cn } from '../../../shadcn/utils';
 import { useLocale } from '../../hooks/useLocale';
+import { withDisabledTip } from '../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 type DatePickerValue = string | undefined;
 type DateParts = { day: string; month: string; year: string };
@@ -146,6 +149,8 @@ export interface DatePickerProps {
   displayFormat?: string;
   minDate?: Date;
   maxDate?: Date;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProps, ref) => {
@@ -165,13 +170,19 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
     className,
     id,
     onBlur,
-    disabled,
+    disabled: disabledProp,
+    permission,
     disableInput = true,
     displayFormat = DEFAULT_DISPLAY,
     minDate,
     maxDate,
     ...props
   } = rawProps;
+
+  const gate = usePermission(permission);
+  const { granted, locked, reason } = gate;
+  // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+  const disabled = disabledProp || locked;
 
   const locale = useLocale();
   const formatOptions = locale ? { locale } : undefined;
@@ -282,141 +293,156 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
     commit(parsedDate);
   };
 
+  // render = role: the role doesn't grant this field, so it doesn't exist for this user
+  if (!granted) {
+    return null;
+  }
+
   return (
     <Field data-disabled={disabled} className={className}>
-      {label && <FieldLabel htmlFor={inputId}>{label}</FieldLabel>}
-      <div className="relative">
-        <Input
-          ref={ref}
-          id={inputId}
-          value={selected ? format(selected, displayFormat, formatOptions) : ''}
-          disabled={disabled}
-          readOnly
-          aria-invalid={!!error}
-          placeholder={placeholder}
-          className="w-full pr-10"
-          onClick={() => !disabled && setOpen(true)}
-          onBlur={() => onBlur?.()}
-          onKeyDown={(e) => {
-            if (e.key !== 'ArrowDown') return;
-            e.preventDefault();
-            setOpen(true);
-          }}
-          {...props}
-        />
-        <div className="absolute inset-y-0 right-1 flex items-center">
-          <Popover open={isOpen} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label="Select date"
-                disabled={disabled}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <CalendarIcon />
-                <span className="sr-only">Select date</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto overflow-hidden p-0" align="end" sideOffset={10}>
-              {!disableInput && (
-                <div className="border-b p-2">
-                  <div className="flex items-center justify-center">
-                    <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
-                      <Input
-                        value={draftParts.day}
-                        placeholder="DD"
-                        inputMode="numeric"
-                        maxLength={2}
-                        className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                        onChange={(e) => {
-                          const day = digits(e.target.value, 2);
-                          if (day === '00') return;
-                          if (day.length === 2) {
-                            const nextDay = Number(day);
-                            if (nextDay < 1 || nextDay > maxDayForParts(draftParts, month)) return;
-                          }
-                          updateDraftDate({ ...draftParts, day });
-                        }}
-                      />
-                      <Input
-                        value={draftParts.month}
-                        placeholder="MM"
-                        inputMode="numeric"
-                        maxLength={2}
-                        className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                        onChange={(e) => {
-                          const monthValue = digits(e.target.value, 2);
-                          if (monthValue === '00') return;
-                          if (monthValue.length === 2) {
-                            const nextMonth = Number(monthValue);
-                            if (nextMonth < 1 || nextMonth > 12) return;
-                          }
+      {label && (
+        <FieldLabel htmlFor={inputId} className={cn(locked && 'items-center gap-1.5')}>
+          {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+          {label}
+        </FieldLabel>
+      )}
+      {withDisabledTip(
+        <div className="relative">
+          <Input
+            ref={ref}
+            id={inputId}
+            value={selected ? format(selected, displayFormat, formatOptions) : ''}
+            disabled={disabled}
+            readOnly
+            aria-invalid={!!error}
+            placeholder={placeholder}
+            className="w-full pr-10"
+            onClick={() => !disabled && setOpen(true)}
+            onBlur={() => onBlur?.()}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowDown') return;
+              e.preventDefault();
+              setOpen(true);
+            }}
+            {...props}
+          />
+          <div className="absolute inset-y-0 right-1 flex items-center">
+            <Popover open={isOpen} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Select date"
+                  disabled={disabled}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <CalendarIcon />
+                  <span className="sr-only">Select date</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto overflow-hidden p-0" align="end" sideOffset={10}>
+                {!disableInput && (
+                  <div className="border-b p-2">
+                    <div className="flex items-center justify-center">
+                      <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
+                        <Input
+                          value={draftParts.day}
+                          placeholder="DD"
+                          inputMode="numeric"
+                          maxLength={2}
+                          className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                          onChange={(e) => {
+                            const day = digits(e.target.value, 2);
+                            if (day === '00') return;
+                            if (day.length === 2) {
+                              const nextDay = Number(day);
+                              if (nextDay < 1 || nextDay > maxDayForParts(draftParts, month)) return;
+                            }
+                            updateDraftDate({ ...draftParts, day });
+                          }}
+                        />
+                        <Input
+                          value={draftParts.month}
+                          placeholder="MM"
+                          inputMode="numeric"
+                          maxLength={2}
+                          className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                          onChange={(e) => {
+                            const monthValue = digits(e.target.value, 2);
+                            if (monthValue === '00') return;
+                            if (monthValue.length === 2) {
+                              const nextMonth = Number(monthValue);
+                              if (nextMonth < 1 || nextMonth > 12) return;
+                            }
 
-                          let day = draftParts.day;
-                          if (day.length === 2) {
-                            const cappedDay = Math.min(
-                              Number(day),
-                              maxDayForParts({ ...draftParts, month: monthValue }, month),
-                            );
-                            day = String(cappedDay).padStart(2, '0');
-                          }
+                            let day = draftParts.day;
+                            if (day.length === 2) {
+                              const cappedDay = Math.min(
+                                Number(day),
+                                maxDayForParts({ ...draftParts, month: monthValue }, month),
+                              );
+                              day = String(cappedDay).padStart(2, '0');
+                            }
 
-                          updateDraftDate({ ...draftParts, day, month: monthValue });
-                        }}
-                      />
-                      <Input
-                        value={draftParts.year}
-                        placeholder="YYYY"
-                        inputMode="numeric"
-                        maxLength={4}
-                        className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                        onChange={(e) => updateDraftDate({ ...draftParts, year: digits(e.target.value, 4) })}
-                        onKeyDown={(e) => {
-                          if (e.key !== 'Enter') return;
-                          e.preventDefault();
-                          updateDraftDate(draftParts);
-                          setOpen(false);
-                        }}
-                      />
+                            updateDraftDate({ ...draftParts, day, month: monthValue });
+                          }}
+                        />
+                        <Input
+                          value={draftParts.year}
+                          placeholder="YYYY"
+                          inputMode="numeric"
+                          maxLength={4}
+                          className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                          onChange={(e) => updateDraftDate({ ...draftParts, year: digits(e.target.value, 4) })}
+                          onKeyDown={(e) => {
+                            if (e.key !== 'Enter') return;
+                            e.preventDefault();
+                            updateDraftDate(draftParts);
+                            setOpen(false);
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              <Calendar
-                {...calendarRestProps}
-                locale={calendarRestProps.locale ?? locale}
-                mode="single"
-                captionLayout="label"
-                startMonth={startMonth}
-                endMonth={endMonth}
-                disabled={calendarDisabled}
-                month={month}
-                onMonthChange={(nextMonth) => {
-                  const safeMonth = clampMonth(nextMonth, minDay, maxDay);
-                  setMonth(safeMonth);
-                  setDraftParts((current) => ({
-                    ...current,
-                    month: format(safeMonth, 'MM', formatOptions),
-                    year: format(safeMonth, 'yyyy', formatOptions),
-                  }));
-                  calendarOnMonthChange?.(safeMonth);
-                }}
-                selected={calendarSelected}
-                onSelect={(next) => {
-                  // Ignore react-day-picker's toggle-to-undefined when clicking the already-selected date (accidental clear); use manual input to clear
-                  if (!next) return;
-                  if (!isWithinDayBounds(next, minDay, maxDay)) return;
-                  commit(next);
-                  onBlur?.();
-                  setOpen(false);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
+                )}
+                <Calendar
+                  {...calendarRestProps}
+                  locale={calendarRestProps.locale ?? locale}
+                  mode="single"
+                  captionLayout="label"
+                  startMonth={startMonth}
+                  endMonth={endMonth}
+                  disabled={calendarDisabled}
+                  month={month}
+                  onMonthChange={(nextMonth) => {
+                    const safeMonth = clampMonth(nextMonth, minDay, maxDay);
+                    setMonth(safeMonth);
+                    setDraftParts((current) => ({
+                      ...current,
+                      month: format(safeMonth, 'MM', formatOptions),
+                      year: format(safeMonth, 'yyyy', formatOptions),
+                    }));
+                    calendarOnMonthChange?.(safeMonth);
+                  }}
+                  selected={calendarSelected}
+                  onSelect={(next) => {
+                    // Ignore react-day-picker's toggle-to-undefined when clicking the already-selected date (accidental clear); use manual input to clear
+                    if (!next) return;
+                    if (!isWithinDayBounds(next, minDay, maxDay)) return;
+                    commit(next);
+                    onBlur?.();
+                    setOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>,
+        locked ? lockedTip(gate) : undefined,
+        disabled,
+        'block w-full',
+      )}
       {description && !error && <FieldDescription>{description}</FieldDescription>}
       {error && <FieldError>{error}</FieldError>}
     </Field>

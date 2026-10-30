@@ -46,6 +46,8 @@ export interface IconSelectProps {
   id?: string;
   name?: string;
   error?: string;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // Searchable icon-name selector backed by a local paginated source that renders one page and loads more on scroll.
@@ -66,6 +68,7 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
       id,
       name,
       error,
+      permission,
     },
     ref,
   ) => {
@@ -126,6 +129,7 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
         id={id}
         name={name}
         error={error}
+        permission={permission}
         options={options}
         value={value}
         onChange={(v) => {

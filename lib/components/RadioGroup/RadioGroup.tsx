@@ -10,6 +10,8 @@ import {
 } from '../../../shadcn/shadcnField';
 import { ShadcnRadioGroup, ShadcnRadioGroupItem } from '../../../shadcn/shadcnRadioGroup';
 import { cn } from '../../../shadcn/utils';
+import { withDisabledTip } from '../../utils/disabledTip';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 export interface RadioOption {
   value: string;
@@ -31,6 +33,8 @@ export interface RadioGroupProps {
   disabled?: boolean;
   className?: string;
   name?: string;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // RadioGroup component with classic and card variants
@@ -46,7 +50,8 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
       error,
       orientation = 'vertical',
       variant = 'classic',
-      disabled,
+      disabled: disabledProp,
+      permission,
       className,
       name: _name,
       ...props
@@ -55,6 +60,16 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
   ) => {
     const groupId = React.useId();
     const hasError = !!error;
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
+
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const disabled = disabledProp || locked;
 
     // Render a classic radio item with label and optional description
     const renderClassicItem = (option: RadioOption) => {
@@ -118,25 +133,35 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
           : 'flex flex-col gap-3'
         : orientation === 'horizontal'
           ? 'flex flex-row flex-wrap gap-4'
-          : 'flex flex-col gap-3',
+          : 'flex flex-col gap-2',
     );
 
     return (
       <FieldSet data-invalid={hasError || undefined} className={className}>
-        {label && <FieldLegend variant="label">{label}</FieldLegend>}
+        {label && (
+          <FieldLegend variant="label" className={cn(locked && 'flex items-center gap-1.5')}>
+            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+            {label}
+          </FieldLegend>
+        )}
         {description && !error && <FieldDescription>{description}</FieldDescription>}
-        <ShadcnRadioGroup
-          ref={ref}
-          value={value}
-          onValueChange={onValueChange}
-          defaultValue={defaultValue}
-          disabled={disabled}
-          orientation={orientation}
-          className={groupClassName}
-          {...props}
-        >
-          {options.map(renderItem)}
-        </ShadcnRadioGroup>
+        {withDisabledTip(
+          <ShadcnRadioGroup
+            ref={ref}
+            value={value}
+            onValueChange={onValueChange}
+            defaultValue={defaultValue}
+            disabled={disabled}
+            orientation={orientation}
+            className={groupClassName}
+            {...props}
+          >
+            {options.map(renderItem)}
+          </ShadcnRadioGroup>,
+          locked ? lockedTip(gate) : undefined,
+          disabled,
+          'block w-full',
+        )}
         {error && <FieldError>{error}</FieldError>}
       </FieldSet>
     );

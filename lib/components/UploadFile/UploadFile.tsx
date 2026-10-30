@@ -2,9 +2,11 @@ import { Camera, Image, Upload, User, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 import { cn } from '../../../shadcn/utils';
+import { withDisabledTip } from '../../utils/disabledTip';
 import { Button } from '../Button';
 import { Field, FieldError, FieldLabel } from '../Field';
 import { FilePreview } from '../FilePreview';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 type AnchorPreset = 'dropzone' | 'button' | 'avatar' | 'logo';
 
@@ -22,6 +24,8 @@ interface UploadFileBaseProps {
   /** URL of an already-persisted file (e.g. a saved avatar). Shown as the preview until a new file is picked. */
   previewUrl?: string;
   isLoading?: boolean;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 interface UploadFileStandaloneProps extends UploadFileBaseProps {
@@ -55,7 +59,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   multiple = false,
   accept,
   className,
-  disabled,
+  disabled: disabledProp,
   label,
   error,
   placeholder,
@@ -64,8 +68,13 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   previewUrl,
   onChange,
   isLoading,
+  permission,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const gate = usePermission(permission);
+  const { granted, locked, reason } = gate;
+  // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+  const disabled = disabledProp || locked;
 
   // Normalize value to an array for consistent handling
   const files: File[] = !value ? [] : Array.isArray(value) ? value : [value];
@@ -272,13 +281,31 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     );
   }
 
+  // render = role: the role doesn't grant this field, so it doesn't exist for this user
+  if (!granted) {
+    return null;
+  }
+
+  const anchorElement = renderAnchor();
+
   return (
     // Field is w-full by default; a tile is a fixed 80px square or circle, so it hugs its content
     // instead of claiming the whole row and pushing sibling content to the far edge
     <Field data-disabled={disabled} className={cn(isTile && 'w-fit', className)}>
-      {label && <FieldLabel>{label}</FieldLabel>}
+      {label && (
+        <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
+          {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+          {label}
+        </FieldLabel>
+      )}
 
-      {renderAnchor()}
+      {anchorElement &&
+        withDisabledTip(
+          anchorElement,
+          locked ? lockedTip(gate) : undefined,
+          disabled,
+          anchor === 'dropzone' ? 'block w-full' : undefined,
+        )}
       {renderFileList()}
 
       <input

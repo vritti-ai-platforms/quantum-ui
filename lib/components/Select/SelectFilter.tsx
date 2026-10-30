@@ -40,6 +40,7 @@ export interface SelectFilterProps
 export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((props, ref) => {
   const {
     multiple,
+    mode,
     name,
     optionsEndpoint,
     searchDebounceMs,
@@ -150,6 +151,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     <SingleSelectFilter
       ref={ref}
       {...(sharedProps as Omit<SingleSelectFilterProps, 'onChange' | 'value'>)}
+      mode={mode}
       value={rawValue as SelectValue | undefined}
       onChange={handleSingleChange}
     />

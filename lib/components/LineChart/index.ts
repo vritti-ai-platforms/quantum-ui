@@ -1,3 +1,3 @@
 export type { ChartConfig } from '../../../shadcn/shadcnChart';
-export type { LineChartProps } from './LineChart';
+export type { LineChartMarker, LineChartProps, LineCurveType, LineSeries } from './LineChart';
 export { LineChart } from './LineChart';

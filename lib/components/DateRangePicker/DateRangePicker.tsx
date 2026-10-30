@@ -9,6 +9,8 @@ import { Input } from '../../../shadcn/shadcnInput';
 import { Label } from '../../../shadcn/shadcnLabel';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
 import { cn } from '../../../shadcn/utils';
+import { withDisabledTip } from '../../utils/disabledTip';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 type DateParts = { day: string; month: string; year: string };
 
@@ -43,6 +45,8 @@ export interface DateRangePickerProps {
   className?: string;
   id?: string;
   numberOfMonths?: number;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProps>(
@@ -60,10 +64,13 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
       className,
       id = 'date-range',
       numberOfMonths = 2,
+      permission,
       ...props
     },
     ref,
   ) => {
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
     const [internalOpen, setInternalOpen] = useState(false);
     const [internalRange, setInternalRange] = useState<DateRange | undefined>(value);
     const [fromDraft, setFromDraft] = useState<DateParts>(() => toParts(value?.from));
@@ -118,117 +125,132 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
       return `${displayRange.from.toLocaleDateString()} – ${displayRange.to.toLocaleDateString()}`;
     })();
 
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
     return (
       <div className="flex flex-col gap-3">
         {label && (
-          <Label htmlFor={id} className="px-1">
+          <Label htmlFor={id} className={cn('px-1', locked && 'gap-1.5')}>
+            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
             {label}
           </Label>
         )}
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              ref={ref}
-              variant="outline"
-              id={id}
-              aria-invalid={!!error}
-              className={cn('w-72 justify-between font-normal', !displayText && 'text-muted-foreground', className)}
-              {...props}
-            >
-              {displayText ?? placeholder}
-              <ChevronDownIcon />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-            <div className="border-b p-2">
-              <div className="flex items-center justify-center gap-2">
-                <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
-                  <Input
-                    value={fromDraft.day}
-                    placeholder="DD"
-                    inputMode="numeric"
-                    maxLength={2}
-                    className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                    onChange={(e) => {
-                      const day = digits(e.target.value, 2);
-                      if (day === '00') return;
-                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(fromDraft, new Date())))
-                        return;
-                      commitFromDraft({ ...fromDraft, day });
-                    }}
-                  />
-                  <Input
-                    value={fromDraft.month}
-                    placeholder="MM"
-                    inputMode="numeric"
-                    maxLength={2}
-                    className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                    onChange={(e) => {
-                      const month = digits(e.target.value, 2);
-                      if (month === '00') return;
-                      if (month.length === 2 && (Number(month) < 1 || Number(month) > 12)) return;
-                      commitFromDraft({ ...fromDraft, month });
-                    }}
-                  />
-                  <Input
-                    value={fromDraft.year}
-                    placeholder="YYYY"
-                    inputMode="numeric"
-                    maxLength={4}
-                    className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                    onChange={(e) => commitFromDraft({ ...fromDraft, year: digits(e.target.value, 4) })}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground">→</span>
-                <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
-                  <Input
-                    value={toDraft.day}
-                    placeholder="DD"
-                    inputMode="numeric"
-                    maxLength={2}
-                    className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                    onChange={(e) => {
-                      const day = digits(e.target.value, 2);
-                      if (day === '00') return;
-                      if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(toDraft, new Date())))
-                        return;
-                      commitToDraft({ ...toDraft, day });
-                    }}
-                  />
-                  <Input
-                    value={toDraft.month}
-                    placeholder="MM"
-                    inputMode="numeric"
-                    maxLength={2}
-                    className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                    onChange={(e) => {
-                      const month = digits(e.target.value, 2);
-                      if (month === '00') return;
-                      if (month.length === 2 && (Number(month) < 1 || Number(month) > 12)) return;
-                      commitToDraft({ ...toDraft, month });
-                    }}
-                  />
-                  <Input
-                    value={toDraft.year}
-                    placeholder="YYYY"
-                    inputMode="numeric"
-                    maxLength={4}
-                    className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                    onChange={(e) => commitToDraft({ ...toDraft, year: digits(e.target.value, 4) })}
-                  />
+        {withDisabledTip(
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                ref={ref}
+                variant="outline"
+                id={id}
+                aria-invalid={!!error}
+                className={cn('w-72 justify-between font-normal', !displayText && 'text-muted-foreground', className)}
+                {...props}
+                // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+                disabled={locked || undefined}
+              >
+                {displayText ?? placeholder}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <div className="border-b p-2">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
+                    <Input
+                      value={fromDraft.day}
+                      placeholder="DD"
+                      inputMode="numeric"
+                      maxLength={2}
+                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => {
+                        const day = digits(e.target.value, 2);
+                        if (day === '00') return;
+                        if (
+                          day.length === 2 &&
+                          (Number(day) < 1 || Number(day) > maxDayForParts(fromDraft, new Date()))
+                        )
+                          return;
+                        commitFromDraft({ ...fromDraft, day });
+                      }}
+                    />
+                    <Input
+                      value={fromDraft.month}
+                      placeholder="MM"
+                      inputMode="numeric"
+                      maxLength={2}
+                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => {
+                        const month = digits(e.target.value, 2);
+                        if (month === '00') return;
+                        if (month.length === 2 && (Number(month) < 1 || Number(month) > 12)) return;
+                        commitFromDraft({ ...fromDraft, month });
+                      }}
+                    />
+                    <Input
+                      value={fromDraft.year}
+                      placeholder="YYYY"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => commitFromDraft({ ...fromDraft, year: digits(e.target.value, 4) })}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground">→</span>
+                  <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
+                    <Input
+                      value={toDraft.day}
+                      placeholder="DD"
+                      inputMode="numeric"
+                      maxLength={2}
+                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => {
+                        const day = digits(e.target.value, 2);
+                        if (day === '00') return;
+                        if (day.length === 2 && (Number(day) < 1 || Number(day) > maxDayForParts(toDraft, new Date())))
+                          return;
+                        commitToDraft({ ...toDraft, day });
+                      }}
+                    />
+                    <Input
+                      value={toDraft.month}
+                      placeholder="MM"
+                      inputMode="numeric"
+                      maxLength={2}
+                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => {
+                        const month = digits(e.target.value, 2);
+                        if (month === '00') return;
+                        if (month.length === 2 && (Number(month) < 1 || Number(month) > 12)) return;
+                        commitToDraft({ ...toDraft, month });
+                      }}
+                    />
+                    <Input
+                      value={toDraft.year}
+                      placeholder="YYYY"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                      onChange={(e) => commitToDraft({ ...toDraft, year: digits(e.target.value, 4) })}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <Calendar
-              {...calendarProps}
-              mode="range"
-              selected={displayRange}
-              captionLayout="label"
-              numberOfMonths={numberOfMonths}
-              onSelect={handleRangeSelect as (range: DateRange | undefined) => void}
-            />
-          </PopoverContent>
-        </Popover>
+              <Calendar
+                {...calendarProps}
+                mode="range"
+                selected={displayRange}
+                captionLayout="label"
+                numberOfMonths={numberOfMonths}
+                onSelect={handleRangeSelect as (range: DateRange | undefined) => void}
+              />
+            </PopoverContent>
+          </Popover>,
+          locked ? lockedTip(gate) : undefined,
+          locked,
+        )}
         {description && !error && <p className="text-sm text-muted-foreground px-1">{description}</p>}
         {error && <p className="text-sm text-destructive px-1">{error}</p>}
       </div>

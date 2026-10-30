@@ -100,6 +100,7 @@ export default defineConfig({
         'components/TreeView': resolve(__dirname, 'lib/components/TreeView/index.ts'),
         'components/FilePreview': resolve(__dirname, 'lib/components/FilePreview/index.ts'),
         'components/UploadFile': resolve(__dirname, 'lib/components/UploadFile/index.ts'),
+        'components/DateFilter': resolve(__dirname, 'lib/components/DateFilter/index.ts'),
         'components/ValueFilter': resolve(__dirname, 'lib/components/ValueFilter/index.ts'),
         'components/ViewTabs': resolve(__dirname, 'lib/components/ViewTabs/index.ts'),
         'components/RichTextEditor': resolve(__dirname, 'lib/components/Editor/index.tsx'),

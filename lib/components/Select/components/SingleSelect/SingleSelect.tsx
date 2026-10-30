@@ -15,7 +15,9 @@ import {
   SingleSelectTrigger,
 } from '../../../../../shadcn/shadcnSingleSelect';
 import { cn } from '../../../../../shadcn/utils';
+import { withDisabledTip } from '../../../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
+import { lockedTip, PermissionLockIcon, usePermission } from '../../../PermissionGate';
 import { useSingleSelect } from '../../hooks/useSingleSelect';
 import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
@@ -61,6 +63,8 @@ export interface SingleSelectProps {
   footer?: React.ReactNode;
   contentClassName?: string;
   onOpenChange?: (open: boolean) => void;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // Single-value form field wrapper built on Popover primitives
@@ -78,7 +82,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       onOptionSelect,
       onBlur,
       name,
-      disabled = false,
+      disabled: disabledProp = false,
       required,
       className,
       id,
@@ -94,9 +98,15 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       footer,
       contentClassName,
       onOpenChange,
+      permission,
     },
     ref,
   ) => {
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const disabled = disabledProp || locked;
+    const lockTip = locked ? lockedTip(gate) : undefined;
     const state = useSingleSelect({
       options: options ?? [],
       groups,
@@ -219,17 +229,32 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       );
     }
 
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
     // Custom anchor path -- skip Field wrapper and use PopoverTrigger asChild
     if (anchor) {
       return (
         <Field data-disabled={disabled}>
-          {label && <FieldLabel>{label}</FieldLabel>}
-          <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
-            <PopoverTrigger asChild>
-              {anchor({ selectedOption: state.selectedOption, open: state.open, disabled })}
-            </PopoverTrigger>
-            {renderContent()}
-          </SingleSelectRoot>
+          {label && (
+            <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
+              {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+              {label}
+            </FieldLabel>
+          )}
+          {withDisabledTip(
+            <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
+              <PopoverTrigger asChild>
+                {anchor({ selectedOption: state.selectedOption, open: state.open, disabled })}
+              </PopoverTrigger>
+              {renderContent()}
+            </SingleSelectRoot>,
+            lockTip,
+            disabled,
+            'block w-full',
+          )}
           {name && state.selectedValue && <input type="hidden" name={name} value={String(state.selectedValue)} />}
           {description && !error && <FieldDescription>{description}</FieldDescription>}
           {error && <FieldError>{error}</FieldError>}
@@ -240,34 +265,44 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
     // Default path -- Field wrapper with SingleSelectTrigger
     return (
       <Field data-disabled={disabled}>
-        {label && <FieldLabel>{label}</FieldLabel>}
+        {label && (
+          <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
+            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+            {label}
+          </FieldLabel>
+        )}
 
-        <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
-          <SingleSelectTrigger
-            ref={ref}
-            id={id}
-            open={state.open}
-            listboxId={state.listboxId}
-            aria-invalid={!!error}
-            aria-required={required}
-            disabled={disabled}
-            onBlur={onBlur}
-            className={cn('w-full', className)}
-          >
-            <span className="flex flex-1 items-center overflow-hidden">
-              {state.selectedOption ? (
-                <span className="truncate">
-                  {transformLabel
-                    ? transformLabel(state.selectedOption.label, state.selectedOption, 'trigger')
-                    : state.selectedOption.label}
-                </span>
-              ) : (
-                <span className="text-muted-foreground">{placeholder}</span>
-              )}
-            </span>
-          </SingleSelectTrigger>
-          {renderContent()}
-        </SingleSelectRoot>
+        {withDisabledTip(
+          <SingleSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
+            <SingleSelectTrigger
+              ref={ref}
+              id={id}
+              open={state.open}
+              listboxId={state.listboxId}
+              aria-invalid={!!error}
+              aria-required={required}
+              disabled={disabled}
+              onBlur={onBlur}
+              className={cn('w-full', className)}
+            >
+              <span className="flex flex-1 items-center overflow-hidden">
+                {state.selectedOption ? (
+                  <span className="truncate">
+                    {transformLabel
+                      ? transformLabel(state.selectedOption.label, state.selectedOption, 'trigger')
+                      : state.selectedOption.label}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">{placeholder}</span>
+                )}
+              </span>
+            </SingleSelectTrigger>
+            {renderContent()}
+          </SingleSelectRoot>,
+          lockTip,
+          disabled,
+          'block w-full',
+        )}
 
         {name && state.selectedValue && <input type="hidden" name={name} value={String(state.selectedValue)} />}
 

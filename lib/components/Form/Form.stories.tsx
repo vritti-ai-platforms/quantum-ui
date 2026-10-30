@@ -6,9 +6,11 @@ import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 import { FieldGroup, FieldLegend, FieldSet } from '../Field';
 import { PasswordField } from '../PasswordField';
+import { type PermissionGateFn, PermissionGateProvider } from '../PermissionGate';
 import { TextArea } from '../TextArea';
 import { TextField } from '../TextField';
 import { Form } from './Form';
+import { FormSection } from './FormSection';
 
 const meta: Meta<typeof Form> = {
   title: 'Components/Form',
@@ -428,6 +430,68 @@ export const AllFieldTypes: Story = {
           </Button>
         </Form>
       </div>
+    );
+  },
+};
+
+// Story-only gate: demo.hidden is not granted, demo.plan-locked is granted but locked, everything else is granted
+const sectionGate: PermissionGateFn = (code) => {
+  const hidden = code === 'demo.hidden';
+  const locked = code === 'demo.plan-locked';
+  return {
+    granted: !hidden,
+    locked,
+    reason: locked ? 'PLAN' : null,
+    unlockPlans: locked ? ['Pro', 'Enterprise'] : [],
+    missingServices: [],
+    available: !hidden && !locked,
+    featureName: null,
+    workspaceLabel: null,
+    workspaceScope: null,
+  };
+};
+
+const sectionSchema = z.object({
+  name: z.string(),
+  billingEmail: z.string(),
+  secret: z.string(),
+  internalCode: z.string(),
+  notes: z.string(),
+});
+
+type SectionFormValues = z.infer<typeof sectionSchema>;
+
+// Section gating derives from the fields: a section disappears only when every field in it is gated out
+export const WithSectionPermission: Story = {
+  render: () => {
+    const form = useForm<SectionFormValues>({
+      resolver: zodResolver(sectionSchema),
+      defaultValues: { name: '', billingEmail: '', secret: '', internalCode: '', notes: '' },
+    });
+
+    return (
+      <PermissionGateProvider value={sectionGate}>
+        <div className="w-[32rem]">
+          <Form form={form} onSubmit={(data) => console.log('Form data:', data)} className="space-y-6">
+            <FormSection title="General" description="Ungated field">
+              <TextField name="name" label="Name" placeholder="Editable" />
+            </FormSection>
+            <FormSection title="Billing" description="Granted but plan locked, the field draws its own lock">
+              <TextField name="billingEmail" label="Billing email" permission="demo.plan-locked" />
+            </FormSection>
+            <FormSection title="Restricted (never rendered)">
+              <TextField name="secret" label="Secret" permission="demo.hidden" />
+            </FormSection>
+            <FormSection title="Mixed" description="One field hidden, one granted, so the section shows">
+              <TextField name="internalCode" label="Internal code (hidden)" permission="demo.hidden" />
+              <TextField name="notes" label="Notes" permission="demo.granted" />
+            </FormSection>
+            <Button type="submit" className="w-full">
+              Submit
+            </Button>
+          </Form>
+        </div>
+      </PermissionGateProvider>
     );
   },
 };

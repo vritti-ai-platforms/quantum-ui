@@ -11,7 +11,9 @@ import {
   FieldSet,
 } from '../../../shadcn/shadcnField';
 import { cn } from '../../../shadcn/utils';
+import { withDisabledTip } from '../../utils/disabledTip';
 import { Button } from '../Button';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 export interface CheckboxOption {
   value: string;
@@ -35,6 +37,8 @@ export interface CheckboxGroupProps {
   className?: string;
   name?: string;
   onBlur?: () => void;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // CheckboxGroup component for multi-select with Field system integration
@@ -50,7 +54,8 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
       error,
       orientation = 'vertical',
       columns,
-      disabled,
+      disabled: disabledProp,
+      permission,
       clearable = false,
       className,
       name: _name,
@@ -61,6 +66,10 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
   ) => {
     const groupId = React.useId();
     const hasError = !!error;
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const disabled = disabledProp || locked;
 
     // Internal state for uncontrolled mode
     const [internalValue, setInternalValue] = React.useState<string[]>(defaultValue ?? []);
@@ -168,20 +177,33 @@ export const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroup
     // Dynamic grid-cols style when columns prop is provided
     const groupStyle = columns ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : undefined;
 
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
     return (
       <FieldSet ref={ref} data-invalid={hasError || undefined} className={className} {...props}>
         {label ? (
           <div className="flex items-center justify-between gap-4">
-            <FieldLegend variant="label">{label}</FieldLegend>
+            <FieldLegend variant="label" className={cn(locked && 'flex items-center gap-1.5')}>
+              {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+              {label}
+            </FieldLegend>
             {headerActions}
           </div>
         ) : (
           headerActions && <div className="flex justify-end">{headerActions}</div>
         )}
         {description && !error && <FieldDescription>{description}</FieldDescription>}
-        <div className={groupClassName} style={groupStyle}>
-          {options.map(renderItem)}
-        </div>
+        {withDisabledTip(
+          <div className={groupClassName} style={groupStyle}>
+            {options.map(renderItem)}
+          </div>,
+          locked ? lockedTip(gate) : undefined,
+          disabled,
+          'block w-full',
+        )}
         {error && <FieldError>{error}</FieldError>}
       </FieldSet>
     );

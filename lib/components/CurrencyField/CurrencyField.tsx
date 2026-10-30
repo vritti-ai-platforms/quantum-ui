@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../
 import { cn } from '../../../shadcn/utils';
 import { CURRENCIES } from '../../selects/currency/currencies';
 import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 import { Select, type SelectOption, type SelectValue } from '../Select';
 
 export interface CurrencyFieldProps {
@@ -35,6 +36,9 @@ export interface CurrencyFieldProps {
   className?: string;
 
   required?: boolean;
+
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // Truncates an amount string to at most `decimals` fractional digits
@@ -73,16 +77,22 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       label,
       description,
       error,
-      disabled,
+      disabled: disabledProp,
       disabledTip,
       placeholder,
       className,
       required,
+      permission,
     },
     ref,
   ) => {
     const fieldId = React.useId();
     const hasError = !!error;
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const disabled = disabledProp || locked;
+    const tip = locked ? lockedTip(gate) : disabledTip;
     const isLocked = !!currencyCode || currencies?.length === 1;
     const options = React.useMemo(() => currencyOptions(currencies), [currencies]);
     const fallbackCurrency =
@@ -173,9 +183,19 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       }
     }, [amount, currency, decimals, emit]);
 
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
     const field = (
       <Field data-disabled={disabled}>
-        {label && <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>}
+        {label && (
+          <FieldLabel htmlFor={fieldId} className={cn(locked && 'items-center gap-1.5')}>
+            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+            {label}
+          </FieldLabel>
+        )}
 
         <FieldContent>
           <div
@@ -258,7 +278,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       </Field>
     );
 
-    if (!disabledTip || !disabled) {
+    if (!tip || !disabled) {
       return field;
     }
 
@@ -269,7 +289,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
           <TooltipTrigger asChild>
             <span className="inline-flex w-full cursor-not-allowed">{field}</span>
           </TooltipTrigger>
-          <TooltipContent>{disabledTip}</TooltipContent>
+          <TooltipContent>{tip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );

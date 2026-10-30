@@ -79,6 +79,9 @@ export interface DataTableProps<TData> {
   emptyStateConfig?: DataTableEmptyConfig;
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
+  /** Controls that set what the table is about (e.g. a site, an as-of date) rather than narrow it; shown at the start
+   * of the toolbar, before the views, set apart by a separator. Not filters: they are not counted, reset or saved. */
+  contextBar?: React.ReactNode;
   isLoading?: boolean;
   className?: string;
   enableViews?: boolean;

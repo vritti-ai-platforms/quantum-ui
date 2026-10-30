@@ -103,6 +103,7 @@ interface ChartTooltipContentProps extends React.ComponentProps<'div'> {
   label?: string;
   labelFormatter?: (value: unknown, payload: PayloadItem[]) => React.ReactNode;
   formatter?: (value: unknown, name: string, item: PayloadItem, index: number, payload: unknown) => React.ReactNode;
+  valueFormatter?: (value: number) => React.ReactNode;
   hideLabel?: boolean;
   hideIndicator?: boolean;
   indicator?: 'line' | 'dot' | 'dashed';
@@ -123,6 +124,7 @@ function ChartTooltipContent({
   labelFormatter,
   labelClassName,
   formatter,
+  valueFormatter,
   color,
   nameKey,
   labelKey,
@@ -208,16 +210,22 @@ function ChartTooltipContent({
                     )
                   )}
                   <div
-                    className={cn('flex flex-1 justify-between leading-none', nestLabel ? 'items-end' : 'items-center')}
+                    className={cn('flex flex-1 justify-between gap-4 leading-none', nestLabel ? 'items-end' : 'items-center')}
                   >
                     <div className="grid gap-1.5">
                       {nestLabel ? tooltipLabel : null}
                       <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
                     </div>
-                    {item.value && (
+                    {valueFormatter && typeof item.value === 'number' ? (
                       <span className="text-foreground font-mono font-medium tabular-nums">
-                        {item.value.toLocaleString()}
+                        {valueFormatter(item.value)}
                       </span>
+                    ) : (
+                      item.value && (
+                        <span className="text-foreground font-mono font-medium tabular-nums">
+                          {item.value.toLocaleString()}
+                        </span>
+                      )
                     )}
                   </div>
                 </>

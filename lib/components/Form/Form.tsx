@@ -23,6 +23,7 @@ import { PhoneField } from '../PhoneField';
 import { RadioGroup } from '../RadioGroup';
 import { Switch } from '../Switch';
 import { UploadFile } from '../UploadFile';
+import type { FieldGateProps } from './fieldPermissions';
 
 // Re-export Controller for explicit usage
 export { Controller } from 'react-hook-form';
@@ -52,10 +53,13 @@ function processChildren<
     // Handle form fields with name prop (but not Fragments)
     if (!isFragment && childProps.name && typeof childProps.name === 'string') {
       const name = childProps.name as FieldPath<TFieldValues>;
+      // Carried on the Controller element so FormSection can still read the field's gate after wiring
+      const gate: FieldGateProps = { permission: childProps.permission };
 
       return (
         <Controller
           key={name}
+          {...gate}
           control={control}
           name={name}
           render={({ field, fieldState }) => {

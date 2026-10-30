@@ -14,7 +14,10 @@ import {
   MultiSelectSearch,
   MultiSelectTrigger,
 } from '../../../../../shadcn/shadcnMultiSelect';
+import { cn } from '../../../../../shadcn/utils';
+import { withDisabledTip } from '../../../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
+import { lockedTip, PermissionLockIcon, usePermission } from '../../../PermissionGate';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
 import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
@@ -42,6 +45,8 @@ export interface MultiSelectProps {
   transformLabel?: (label: string, option: SelectOption, context: 'option' | 'trigger') => string;
   transformDescription?: (description: string, option: SelectOption) => string;
   onOpenChange?: (open: boolean) => void;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // Multi-value select with checkbox options, search, and badge chips
@@ -59,7 +64,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       onOptionsSelect,
       onBlur,
       name,
-      disabled = false,
+      disabled: disabledProp = false,
       required,
       className,
       id,
@@ -71,9 +76,15 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       transformLabel,
       transformDescription,
       onOpenChange,
+      permission,
     },
     ref,
   ) => {
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const disabled = disabledProp || locked;
+    const lockTip = locked ? lockedTip(gate) : undefined;
     const state = useMultiSelect({
       options: options ?? [],
       groups,
@@ -194,44 +205,59 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       );
     }
 
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
     return (
       <Field data-disabled={disabled}>
-        {label && <FieldLabel>{label}</FieldLabel>}
+        {label && (
+          <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
+            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+            {label}
+          </FieldLabel>
+        )}
 
-        <MultiSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
-          <MultiSelectTrigger
-            ref={ref}
-            id={id}
-            open={state.open}
-            listboxId={state.listboxId}
-            aria-invalid={!!error}
-            aria-required={required}
-            disabled={disabled}
-            onBlur={onBlur}
-            className={className}
-          >
-            <span className="flex flex-1 flex-wrap items-center gap-1 overflow-hidden">{renderTriggerContent()}</span>
-          </MultiSelectTrigger>
+        {withDisabledTip(
+          <MultiSelectRoot open={state.open} onOpenChange={handleOpenChange} disabled={disabled}>
+            <MultiSelectTrigger
+              ref={ref}
+              id={id}
+              open={state.open}
+              listboxId={state.listboxId}
+              aria-invalid={!!error}
+              aria-required={required}
+              disabled={disabled}
+              onBlur={onBlur}
+              className={className}
+            >
+              <span className="flex flex-1 flex-wrap items-center gap-1 overflow-hidden">{renderTriggerContent()}</span>
+            </MultiSelectTrigger>
 
-          <MultiSelectContent>
-            {showSearch && (
-              <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
-            )}
-
-            <MultiSelectList id={state.listboxId}>
-              {renderOptions()}
-              {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
-              {asyncState?.loadingMore && (
-                <div className="flex items-center justify-center gap-2 py-2">
-                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Loading more...</span>
-                </div>
+            <MultiSelectContent>
+              {showSearch && (
+                <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
               )}
-            </MultiSelectList>
 
-            <MultiSelectActions onSelectAll={state.selectAll} onClear={state.clearAll} disabled={disabled} />
-          </MultiSelectContent>
-        </MultiSelectRoot>
+              <MultiSelectList id={state.listboxId}>
+                {renderOptions()}
+                {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
+                {asyncState?.loadingMore && (
+                  <div className="flex items-center justify-center gap-2 py-2">
+                    <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Loading more...</span>
+                  </div>
+                )}
+              </MultiSelectList>
+
+              <MultiSelectActions onSelectAll={state.selectAll} onClear={state.clearAll} disabled={disabled} />
+            </MultiSelectContent>
+          </MultiSelectRoot>,
+          lockTip,
+          disabled,
+          'block w-full',
+        )}
 
         {name && state.selectedValues.map((v) => <input key={String(v)} type="hidden" name={name} value={String(v)} />)}
 

@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import React from 'react';
+import { type PermissionGateFn, PermissionGateProvider } from '../PermissionGate';
 import { TextField } from './TextField';
 
 const meta: Meta<typeof TextField> = {
@@ -422,4 +423,41 @@ export const InteractiveAdornments: Story = {
   parameters: {
     layout: 'centered',
   },
+};
+
+// Story-only gate: one code per state so each field below shows a different permission outcome
+const storyGate: PermissionGateFn = (code) => {
+  const hidden = code === 'demo.hidden';
+  const reason = code === 'demo.plan-locked' ? 'PLAN' : code === 'demo.workspace-locked' ? 'WORKSPACE' : null;
+  return {
+    granted: !hidden,
+    locked: reason !== null,
+    reason,
+    unlockPlans: reason === 'PLAN' ? ['Pro', 'Enterprise'] : [],
+    missingServices: [],
+    available: !hidden && reason === null,
+    featureName: null,
+    workspaceLabel: null,
+    workspaceScope: reason === 'WORKSPACE' ? 'SITE' : null,
+  };
+};
+
+// Permission gating: not granted renders nothing, locked renders disabled with a lock icon and upsell tooltip
+export const WithPermission: Story = {
+  render: () => (
+    <PermissionGateProvider value={storyGate}>
+      <div className="w-96 space-y-4">
+        <TextField label="Granted" placeholder="Editable" permission="demo.granted" />
+        <TextField label="Plan locked" placeholder="Hover for the upsell" permission="demo.plan-locked" />
+        <TextField label="Workspace locked" placeholder="Hover for the reason" permission="demo.workspace-locked" />
+        <TextField label="Not granted (never rendered)" permission="demo.hidden" />
+        <TextField
+          label="Granted, explicitly disabled"
+          placeholder="disabled wins"
+          permission="demo.granted"
+          disabled
+        />
+      </div>
+    </PermissionGateProvider>
+  ),
 };

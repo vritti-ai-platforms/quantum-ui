@@ -1,5 +1,6 @@
 import type React from 'react';
 import { forwardRef, useState } from 'react';
+import { usePermission } from '../PermissionGate';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
 import { useSelect } from './hooks/useSelect';
@@ -26,11 +27,13 @@ export type SelectMultiProps = SelectProps;
 export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
   const { multiple, optionsEndpoint, searchDebounceMs, limit, fieldKeys, params, onOpenChange, ...rest } = props;
   const [open, setOpen] = useState(false);
+  // Hidden fields must not fetch: drop the endpoint so the selected-label resolve query never fires
+  const { granted } = usePermission(rest.permission);
 
   const selectData = useSelect({
     options: rest.options,
     groups: rest.groups,
-    optionsEndpoint,
+    optionsEndpoint: granted ? optionsEndpoint : undefined,
     searchDebounceMs,
     limit,
     fieldKeys,
@@ -65,6 +68,9 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     setOpen(o);
     onOpenChange?.(o);
   };
+
+  // render = role: the role doesn't grant this field, so it doesn't exist for this user
+  if (!granted) return null;
 
   if (multiple) {
     return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} onOpenChange={handleOpenChange} />;

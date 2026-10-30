@@ -1,5 +1,7 @@
 import type React from 'react';
 import { cn } from '../../../shadcn/utils';
+import { useAnyPermissionGranted } from '../PermissionGate';
+import { sectionPermissionCodes } from './fieldPermissions';
 
 export interface FormSectionProps {
   title: React.ReactNode;
@@ -10,6 +12,7 @@ export interface FormSectionProps {
   contentClassName?: string;
 }
 
+// Hides itself when every field inside is gated and none of their codes is granted (locked counts as granted)
 export function FormSection({
   title,
   description,
@@ -18,6 +21,9 @@ export function FormSection({
   headerClassName,
   contentClassName,
 }: FormSectionProps) {
+  const granted = useAnyPermissionGranted(sectionPermissionCodes(children));
+  if (!granted) return null;
+
   return (
     <section className={cn('space-y-3', className)}>
       <div className={cn('border-b pb-2', headerClassName)}>

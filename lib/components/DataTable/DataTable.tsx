@@ -3,6 +3,7 @@ import { flexRender } from '@tanstack/react-table';
 import { ArrowDownToLine, ArrowUpFromLine, Funnel, TableProperties } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { Separator } from '../../../shadcn/shadcnSeparator';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { useDialog } from '../../hooks/useDialog';
@@ -61,6 +62,7 @@ export function DataTable<TData>({
   emptyStateConfig,
   toolbarActions,
   filters,
+  contextBar,
   isLoading = false,
   className,
   enableViews = true,
@@ -101,7 +103,14 @@ export function DataTable<TData>({
   const showImport = !!importExport?.importEndpoint && importGate.granted;
   const showExport = !!importExport?.exportEndpoint && exportGate.granted;
   const showToolbar =
-    searchConfig || visibilityEnabled || toolbarActions || filters || (enableViews && slug) || showImport || showExport;
+    searchConfig ||
+    visibilityEnabled ||
+    toolbarActions ||
+    filters ||
+    contextBar ||
+    (enableViews && slug) ||
+    showImport ||
+    showExport;
 
   const search = meta?.search ?? null;
   const hasActiveView = !!activeViewId;
@@ -145,8 +154,16 @@ export function DataTable<TData>({
       {/* Toolbar */}
       {showToolbar && (
         <div className="flex items-center gap-4">
-          {/* LEFT: view tabs (flex-1) when viewsConfig set; otherwise spacer */}
-          <div className="flex min-w-0 flex-1">{enableViews && slug && <DataTableViewTabs slug={slug} />}</div>
+          {/* LEFT: the context bar, then view tabs (flex-1) when views are on; otherwise spacer */}
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            {contextBar && (
+              <>
+                <div className="flex shrink-0 items-center gap-2">{contextBar}</div>
+                <Separator orientation="vertical" className="h-6" />
+              </>
+            )}
+            <div className="flex min-w-0 flex-1">{enableViews && slug && <DataTableViewTabs slug={slug} />}</div>
+          </div>
 
           {/* RIGHT: icon buttons */}
           <div className="flex items-center gap-2 shrink-0">

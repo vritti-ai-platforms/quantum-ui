@@ -8,6 +8,7 @@ export {
   type PermissionGateResult,
   PermissionLockIcon,
   type PermissionLockReason,
+  useAnyPermissionGranted,
   usePermission,
   usePermissionGate,
 } from './PermissionGate';

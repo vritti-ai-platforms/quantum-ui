@@ -20,9 +20,12 @@ import { Button } from '../../../shadcn/shadcnButton';
 import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { cn } from '../../../shadcn/utils';
 import { useBUTimezone } from '../../hooks/useBUTimezone';
 import { useLocale } from '../../hooks/useLocale';
+import { withDisabledTip } from '../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 type DateTimePickerValue = string | undefined;
 type DateParts = { day: string; month: string; year: string };
@@ -185,6 +188,8 @@ export interface DateTimePickerProps {
   maxDate?: Date;
   minDateTime?: string;
   maxDateTime?: string;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>((rawProps, ref) => {
@@ -204,7 +209,8 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
     className,
     id,
     onBlur,
-    disabled,
+    disabled: disabledProp,
+    permission,
     displayFormat = DEFAULT_DISPLAY,
     minDate,
     maxDate,
@@ -212,6 +218,11 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
     maxDateTime,
     ...props
   } = rawProps;
+
+  const gate = usePermission(permission);
+  const { granted, locked, reason } = gate;
+  // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+  const disabled = disabledProp || locked;
 
   const locale = useLocale();
   const timeZone = useBUTimezone() ?? 'UTC';
@@ -342,183 +353,198 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
     commit(nextDateTime);
   };
 
+  // render = role: the role doesn't grant this field, so it doesn't exist for this user
+  if (!granted) {
+    return null;
+  }
+
   return (
     <Field data-disabled={disabled} className={className}>
-      {label && <FieldLabel htmlFor={inputId}>{label}</FieldLabel>}
-      <div className="relative">
-        <Input
-          ref={ref}
-          id={inputId}
-          value={selected ? formatInTimeZone(selected, displayFormat, timeZone, locale) : ''}
-          disabled={disabled}
-          readOnly
-          aria-invalid={!!error}
-          placeholder={placeholder}
-          className="w-full pr-10"
-          onClick={() => !disabled && setOpen(true)}
-          onBlur={() => onBlur?.()}
-          onKeyDown={(e) => {
-            if (e.key !== 'ArrowDown') return;
-            e.preventDefault();
-            setOpen(true);
-          }}
-          {...props}
-        />
-        <div className="absolute inset-y-0 right-1 flex items-center">
-          <Popover open={isOpen} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label="Select date and time"
-                disabled={disabled}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <CalendarIcon />
-                <span className="sr-only">Select date and time</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto overflow-hidden p-0" align="end" sideOffset={10}>
-              <div className="border-b p-2">
-                <div className="flex items-center justify-center">
-                  <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
-                    <Input
-                      value={draftParts.day}
-                      placeholder="DD"
-                      inputMode="numeric"
-                      maxLength={2}
-                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                      onChange={(e) => {
-                        const day = digits(e.target.value, 2);
-                        if (day === '00') return;
-                        if (day.length === 2) {
-                          const nextDay = Number(day);
-                          if (nextDay < 1 || nextDay > maxDayForParts(draftParts, month)) return;
-                        }
-                        updateDraftDate({ ...draftParts, day });
-                      }}
-                    />
-                    <Input
-                      value={draftParts.month}
-                      placeholder="MM"
-                      inputMode="numeric"
-                      maxLength={2}
-                      className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                      onChange={(e) => {
-                        const monthValue = digits(e.target.value, 2);
-                        if (monthValue === '00') return;
-                        if (monthValue.length === 2) {
-                          const nextMonth = Number(monthValue);
-                          if (nextMonth < 1 || nextMonth > 12) return;
-                        }
+      {label && (
+        <FieldLabel htmlFor={inputId} className={cn(locked && 'items-center gap-1.5')}>
+          {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+          {label}
+        </FieldLabel>
+      )}
+      {withDisabledTip(
+        <div className="relative">
+          <Input
+            ref={ref}
+            id={inputId}
+            value={selected ? formatInTimeZone(selected, displayFormat, timeZone, locale) : ''}
+            disabled={disabled}
+            readOnly
+            aria-invalid={!!error}
+            placeholder={placeholder}
+            className="w-full pr-10"
+            onClick={() => !disabled && setOpen(true)}
+            onBlur={() => onBlur?.()}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowDown') return;
+              e.preventDefault();
+              setOpen(true);
+            }}
+            {...props}
+          />
+          <div className="absolute inset-y-0 right-1 flex items-center">
+            <Popover open={isOpen} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Select date and time"
+                  disabled={disabled}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <CalendarIcon />
+                  <span className="sr-only">Select date and time</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto overflow-hidden p-0" align="end" sideOffset={10}>
+                <div className="border-b p-2">
+                  <div className="flex items-center justify-center">
+                    <div className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/40 p-1">
+                      <Input
+                        value={draftParts.day}
+                        placeholder="DD"
+                        inputMode="numeric"
+                        maxLength={2}
+                        className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                        onChange={(e) => {
+                          const day = digits(e.target.value, 2);
+                          if (day === '00') return;
+                          if (day.length === 2) {
+                            const nextDay = Number(day);
+                            if (nextDay < 1 || nextDay > maxDayForParts(draftParts, month)) return;
+                          }
+                          updateDraftDate({ ...draftParts, day });
+                        }}
+                      />
+                      <Input
+                        value={draftParts.month}
+                        placeholder="MM"
+                        inputMode="numeric"
+                        maxLength={2}
+                        className="!h-6 w-10 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                        onChange={(e) => {
+                          const monthValue = digits(e.target.value, 2);
+                          if (monthValue === '00') return;
+                          if (monthValue.length === 2) {
+                            const nextMonth = Number(monthValue);
+                            if (nextMonth < 1 || nextMonth > 12) return;
+                          }
 
-                        let day = draftParts.day;
-                        if (day.length === 2) {
-                          const cappedDay = Math.min(
-                            Number(day),
-                            maxDayForParts({ ...draftParts, month: monthValue }, month),
-                          );
-                          day = String(cappedDay).padStart(2, '0');
-                        }
+                          let day = draftParts.day;
+                          if (day.length === 2) {
+                            const cappedDay = Math.min(
+                              Number(day),
+                              maxDayForParts({ ...draftParts, month: monthValue }, month),
+                            );
+                            day = String(cappedDay).padStart(2, '0');
+                          }
 
-                        updateDraftDate({ ...draftParts, day, month: monthValue });
-                      }}
-                    />
+                          updateDraftDate({ ...draftParts, day, month: monthValue });
+                        }}
+                      />
+                      <Input
+                        value={draftParts.year}
+                        placeholder="YYYY"
+                        inputMode="numeric"
+                        maxLength={4}
+                        className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
+                        onChange={(e) => updateDraftDate({ ...draftParts, year: digits(e.target.value, 4) })}
+                        onKeyDown={(e) => {
+                          if (e.key !== 'Enter') return;
+                          e.preventDefault();
+                          updateDraftDate(draftParts);
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Calendar
+                  {...calendarRestProps}
+                  locale={locale}
+                  mode="single"
+                  captionLayout="label"
+                  startMonth={startMonth}
+                  endMonth={endMonth}
+                  disabled={calendarDisabled}
+                  month={month}
+                  onMonthChange={(nextMonth) => {
+                    const safeMonth = clampMonth(nextMonth, minDay, maxDay);
+                    setMonth(safeMonth);
+                    setDraftParts((current) => ({
+                      ...current,
+                      month: format(safeMonth, 'MM'),
+                      year: format(safeMonth, 'yyyy'),
+                    }));
+                    calendarOnMonthChange?.(safeMonth);
+                  }}
+                  selected={calendarSelected}
+                  onSelect={(next) => {
+                    if (!next) {
+                      commit(undefined);
+                      return;
+                    }
+                    if (!isWithinDayBounds(next, minDay, maxDay)) return;
+
+                    setMonth(next);
+                    setDraftParts(toParts(next));
+
+                    const nextDateTime = withTime(next, draftTime || DEFAULT_TIME, timeZone);
+                    if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
+
+                    commit(nextDateTime);
+                    onBlur?.();
+                  }}
+                />
+                <div className="border-t p-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">Time</span>
                     <Input
-                      value={draftParts.year}
-                      placeholder="YYYY"
-                      inputMode="numeric"
-                      maxLength={4}
-                      className="!h-6 w-16 rounded-md border-transparent bg-background px-1.5 py-0 text-center text-xs font-semibold shadow-xs"
-                      onChange={(e) => updateDraftDate({ ...draftParts, year: digits(e.target.value, 4) })}
+                      type="time"
+                      step={60}
+                      value={draftTime}
+                      disabled={disabled || !activeDate}
+                      className="h-7 w-[112px] appearance-none pr-2 [color-scheme:light] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-clear-button]:hidden [&::-webkit-inner-spin-button]:hidden"
+                      onChange={(e) => {
+                        const nextTime = e.target.value;
+                        setDraftTime(nextTime);
+
+                        if (!activeDate || !TIME_PATTERN.test(nextTime)) return;
+
+                        const nextDateTime = withTime(activeDate, nextTime, timeZone);
+                        if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
+
+                        commit(nextDateTime);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key !== 'Enter') return;
                         e.preventDefault();
-                        updateDraftDate(draftParts);
+
+                        if (activeDate && TIME_PATTERN.test(draftTime)) {
+                          const nextDateTime = withTime(activeDate, draftTime, timeZone);
+                          if (isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) {
+                            commit(nextDateTime);
+                          }
+                        }
+
+                        onBlur?.();
+                        setOpen(false);
                       }}
                     />
                   </div>
                 </div>
-              </div>
-              <Calendar
-                {...calendarRestProps}
-                locale={locale}
-                mode="single"
-                captionLayout="label"
-                startMonth={startMonth}
-                endMonth={endMonth}
-                disabled={calendarDisabled}
-                month={month}
-                onMonthChange={(nextMonth) => {
-                  const safeMonth = clampMonth(nextMonth, minDay, maxDay);
-                  setMonth(safeMonth);
-                  setDraftParts((current) => ({
-                    ...current,
-                    month: format(safeMonth, 'MM'),
-                    year: format(safeMonth, 'yyyy'),
-                  }));
-                  calendarOnMonthChange?.(safeMonth);
-                }}
-                selected={calendarSelected}
-                onSelect={(next) => {
-                  if (!next) {
-                    commit(undefined);
-                    return;
-                  }
-                  if (!isWithinDayBounds(next, minDay, maxDay)) return;
-
-                  setMonth(next);
-                  setDraftParts(toParts(next));
-
-                  const nextDateTime = withTime(next, draftTime || DEFAULT_TIME, timeZone);
-                  if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
-
-                  commit(nextDateTime);
-                  onBlur?.();
-                }}
-              />
-              <div className="border-t p-2">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-xs font-medium text-muted-foreground">Time</span>
-                  <Input
-                    type="time"
-                    step={60}
-                    value={draftTime}
-                    disabled={disabled || !activeDate}
-                    className="h-7 w-[112px] appearance-none pr-2 [color-scheme:light] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-clear-button]:hidden [&::-webkit-inner-spin-button]:hidden"
-                    onChange={(e) => {
-                      const nextTime = e.target.value;
-                      setDraftTime(nextTime);
-
-                      if (!activeDate || !TIME_PATTERN.test(nextTime)) return;
-
-                      const nextDateTime = withTime(activeDate, nextTime, timeZone);
-                      if (!isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) return;
-
-                      commit(nextDateTime);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key !== 'Enter') return;
-                      e.preventDefault();
-
-                      if (activeDate && TIME_PATTERN.test(draftTime)) {
-                        const nextDateTime = withTime(activeDate, draftTime, timeZone);
-                        if (isWithinDateTimeBounds(nextDateTime, minDateTimeValue, maxDateTimeValue)) {
-                          commit(nextDateTime);
-                        }
-                      }
-
-                      onBlur?.();
-                      setOpen(false);
-                    }}
-                  />
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>,
+        locked ? lockedTip(gate) : undefined,
+        disabled,
+        'block w-full',
+      )}
       {description && !error && <FieldDescription>{description}</FieldDescription>}
       {error && <FieldError>{error}</FieldError>}
     </Field>

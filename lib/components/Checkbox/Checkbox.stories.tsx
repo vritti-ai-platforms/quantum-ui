@@ -6,6 +6,7 @@ import * as z from 'zod';
 import { Label } from '../../../shadcn/shadcnLabel';
 import { Button } from '../Button';
 import { Form } from '../Form';
+import { type PermissionGateFn, PermissionGateProvider } from '../PermissionGate';
 import { Checkbox } from './Checkbox';
 
 const meta: Meta<typeof Checkbox> = {
@@ -619,5 +620,69 @@ export const ComplexFormWithErrors: Story = {
   },
   parameters: {
     layout: 'centered',
+  },
+};
+
+// Story-only gate: one code per state so each field below shows a different permission outcome
+const storyGate: PermissionGateFn = (code) => {
+  const hidden = code === 'demo.hidden';
+  const reason = code === 'demo.plan-locked' ? 'PLAN' : code === 'demo.workspace-locked' ? 'WORKSPACE' : null;
+  return {
+    granted: !hidden,
+    locked: reason !== null,
+    reason,
+    unlockPlans: reason === 'PLAN' ? ['Pro', 'Enterprise'] : [],
+    missingServices: [],
+    available: !hidden && reason === null,
+    featureName: null,
+    workspaceLabel: null,
+    workspaceScope: reason === 'WORKSPACE' ? 'SITE' : null,
+  };
+};
+
+// Permission gating: not granted renders nothing, locked renders disabled with a lock icon and upsell tooltip
+export const WithPermission: Story = {
+  render: () => (
+    <PermissionGateProvider value={storyGate}>
+      <div className="flex w-96 flex-col gap-4">
+        <Checkbox label="Granted" description="Fully interactive" permission="demo.granted" />
+        <Checkbox label="Plan locked" description="Hover the box for the upsell" permission="demo.plan-locked" />
+        <Checkbox label="Workspace locked" description="Not enabled here" permission="demo.workspace-locked" />
+        <Checkbox label="Not granted (never rendered)" permission="demo.hidden" />
+      </div>
+    </PermissionGateProvider>
+  ),
+};
+
+const permissionFormSchema = z.object({
+  newsletter: z.boolean(),
+  autoRenew: z.boolean(),
+  exportData: z.boolean(),
+});
+
+type PermissionFormValues = z.infer<typeof permissionFormSchema>;
+
+// Inside Form: a hidden field keeps its defaultValues entry, and a locked field still submits its value
+export const WithPermissionInForm: Story = {
+  render: () => {
+    const [submitted, setSubmitted] = React.useState<PermissionFormValues | null>(null);
+    const form = useForm<PermissionFormValues>({
+      resolver: zodResolver(permissionFormSchema),
+      defaultValues: { newsletter: false, autoRenew: true, exportData: true },
+    });
+
+    return (
+      <PermissionGateProvider value={storyGate}>
+        <div className="w-96 space-y-4">
+          <Form form={form} onSubmit={setSubmitted} resetOnSuccess={false} className="space-y-4">
+            <Checkbox name="newsletter" label="Newsletter" permission="demo.granted" />
+            <Checkbox name="autoRenew" label="Auto renew" permission="demo.plan-locked" />
+            <Checkbox name="exportData" label="Export data (hidden)" permission="demo.hidden" />
+            <Button type="submit">Submit</Button>
+          </Form>
+          {submitted && <pre className="rounded-md bg-muted p-3 text-xs">{JSON.stringify(submitted, null, 2)}</pre>}
+        </div>
+      </PermissionGateProvider>
+    );
   },
 };

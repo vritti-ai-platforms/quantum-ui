@@ -21,6 +21,7 @@ import {
   SingleSelectSearch,
 } from '../../../../../shadcn/shadcnSingleSelect';
 import { cn } from '../../../../../shadcn/utils';
+import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../../contextAnchor';
 import { useSingleSelect } from '../../hooks/useSingleSelect';
 import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
 
@@ -56,6 +57,11 @@ export interface SingleSelectFilterProps {
   onOpenChange?: (open: boolean) => void;
   transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
   transformDescription?: (description: string, option: SelectOption) => string;
+  /** Whether the chosen option can be cleared; off for a filter that must always hold one. Defaults to `true`. */
+  clearable?: boolean;
+  /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and value in a
+   * quiet outlined trigger, no operator choice, never clearable. */
+  mode?: FilterMode;
 }
 
 // Compact single-select filter trigger with inline label display
@@ -71,6 +77,8 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       operator: controlledOperator,
       onOperatorChange,
       operators = DEFAULT_OPERATORS,
+      clearable: clearableProp = true,
+      mode = 'filter',
       onBlur,
       name,
       disabled = false,
@@ -186,6 +194,8 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       );
     }
 
+    const isContext = mode === 'context';
+    const clearable = clearableProp && !isContext;
     const operatorLabel = operators.find((o) => o.value === operator)?.label ?? operator;
     const triggerText = state.selectedOption
       ? `${label}: ${operatorLabel} ${state.selectedOption.label}`
@@ -213,15 +223,22 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               disabled={disabled}
               onBlur={onBlur}
               className={cn(
-                'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-                state.selectedOption
-                  ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
-                  : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+                isContext
+                  ? CONTEXT_ANCHOR_CLASS
+                  : 'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                !isContext &&
+                  (state.selectedOption
+                    ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                    : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground'),
                 className,
               )}
             >
-              <span className="truncate">{triggerText}</span>
-              {state.selectedOption ? (
+              {isContext ? (
+                <ContextAnchorText label={label} value={state.selectedOption?.label} placeholder={placeholder} />
+              ) : (
+                <span className="truncate">{triggerText}</span>
+              )}
+              {state.selectedOption && clearable ? (
                 <X className="size-3.5 shrink-0 opacity-70 hover:opacity-100" onClick={handleInlineClear} />
               ) : (
                 <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
@@ -233,18 +250,20 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
             {label && (
               <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 h-[42px] shrink-0">
                 <span className="text-sm text-muted-foreground">{label}</span>
-                <RadixSelect value={operator} onValueChange={handleOperatorChange}>
-                  <RadixSelectTrigger className="h-auto w-auto gap-1 rounded-none border-0 !bg-transparent p-0 shadow-none text-sm font-medium text-foreground hover:!bg-transparent focus-visible:ring-0 data-[state=open]:!bg-transparent">
-                    <RadixSelectValue />
-                  </RadixSelectTrigger>
-                  <RadixSelectContent>
-                    {operators.map((op) => (
-                      <RadixSelectItem key={op.value} value={op.value}>
-                        {op.label}
-                      </RadixSelectItem>
-                    ))}
-                  </RadixSelectContent>
-                </RadixSelect>
+                {!isContext && (
+                  <RadixSelect value={operator} onValueChange={handleOperatorChange}>
+                    <RadixSelectTrigger className="h-auto w-auto gap-1 rounded-none border-0 !bg-transparent p-0 shadow-none text-sm font-medium text-foreground hover:!bg-transparent focus-visible:ring-0 data-[state=open]:!bg-transparent">
+                      <RadixSelectValue />
+                    </RadixSelectTrigger>
+                    <RadixSelectContent>
+                      {operators.map((op) => (
+                        <RadixSelectItem key={op.value} value={op.value}>
+                          {op.label}
+                        </RadixSelectItem>
+                      ))}
+                    </RadixSelectContent>
+                  </RadixSelect>
+                )}
               </div>
             )}
             <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
@@ -260,7 +279,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               )}
             </SingleSelectList>
 
-            <SingleSelectClear onClear={handleClearSelection} disabled={!state.selectedValue} />
+            {clearable && <SingleSelectClear onClear={handleClearSelection} disabled={!state.selectedValue} />}
           </SingleSelectContent>
         </SingleSelectRoot>
 

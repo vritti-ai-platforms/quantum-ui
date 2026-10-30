@@ -2,7 +2,9 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import React from 'react';
 import { Input } from '../../../shadcn/shadcnInput';
 import { cn } from '../../../shadcn/utils';
+import { withDisabledTip } from '../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
+import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 export interface TextFieldProps extends React.ComponentProps<'input'> {
   label?: string;
@@ -13,6 +15,8 @@ export interface TextFieldProps extends React.ComponentProps<'input'> {
   positive?: boolean;
   nonZero?: boolean;
   integer?: boolean;
+  /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
+  permission?: string;
 }
 
 // TextField molecule - Input + Label composition using Field system
@@ -24,7 +28,8 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       error,
       className,
       id,
-      disabled,
+      disabled: disabledProp,
+      permission,
       startAdornment,
       endAdornment,
       positive,
@@ -36,6 +41,10 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     },
     ref,
   ) => {
+    const gate = usePermission(permission);
+    const { granted, locked, reason } = gate;
+    // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
+    const disabled = disabledProp || locked;
     const isNumberType = props.type === 'number';
     const normalizedType = isNumberType ? 'text' : props.type;
     const normalizedInputMode = props.inputMode ?? (isNumberType ? (integer ? 'numeric' : 'decimal') : undefined);
@@ -192,63 +201,80 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       return () => observer.disconnect();
     }, [hasEndContent]);
 
+    // render = role: the role doesn't grant this field, so it doesn't exist for this user
+    if (!granted) {
+      return null;
+    }
+
     return (
       <Field data-disabled={disabled}>
-        {label && <FieldLabel>{label}</FieldLabel>}
+        {label && (
+          <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
+            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+            {label}
+          </FieldLabel>
+        )}
 
-        <div className="relative">
-          {startAdornment && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">{startAdornment}</div>
-          )}
-          <Input
-            aria-invalid={!!error}
-            ref={assignRef}
-            disabled={disabled}
-            className={cn(className, startAdornment && 'pl-10')}
-            id={id}
-            {...props}
-            style={{ ...style, paddingRight: endPadding }}
-            value={displayValue}
-            min={effectiveMin}
-            type={normalizedType}
-            inputMode={normalizedInputMode}
-            onKeyDown={handleKeyDown}
-            onChange={handleChange}
-          />
-          {hasEndContent && (
-            <div ref={endOverlayRef} className="absolute inset-y-0 right-0 z-10 flex items-center gap-2 pr-2">
-              {(endAdornment || autoConstraintText) && (
-                <div className="flex items-center gap-2">{combinedEndAdornment}</div>
-              )}
-              {isNumberType && (
-                <div className="flex h-7 w-4 flex-col overflow-hidden rounded-sm border border-border bg-background">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    className="flex h-1/2 items-center justify-center border-b border-border text-muted-foreground hover:bg-accent disabled:opacity-50"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => setInputNumericValue(1)}
-                    disabled={disabled}
-                    aria-label="Increase value"
-                  >
-                    <ChevronUp className="size-2.5" />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    className="flex h-1/2 items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-50"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => setInputNumericValue(-1)}
-                    disabled={disabled}
-                    aria-label="Decrease value"
-                  >
-                    <ChevronDown className="size-2.5" />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {withDisabledTip(
+          <div className="relative">
+            {startAdornment && (
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                {startAdornment}
+              </div>
+            )}
+            <Input
+              aria-invalid={!!error}
+              ref={assignRef}
+              disabled={disabled}
+              className={cn(className, startAdornment && 'pl-10')}
+              id={id}
+              {...props}
+              style={{ ...style, paddingRight: endPadding }}
+              value={displayValue}
+              min={effectiveMin}
+              type={normalizedType}
+              inputMode={normalizedInputMode}
+              onKeyDown={handleKeyDown}
+              onChange={handleChange}
+            />
+            {hasEndContent && (
+              <div ref={endOverlayRef} className="absolute inset-y-0 right-0 z-10 flex items-center gap-2 pr-2">
+                {(endAdornment || autoConstraintText) && (
+                  <div className="flex items-center gap-2">{combinedEndAdornment}</div>
+                )}
+                {isNumberType && (
+                  <div className="flex h-7 w-4 flex-col overflow-hidden rounded-sm border border-border bg-background">
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      className="flex h-1/2 items-center justify-center border-b border-border text-muted-foreground hover:bg-accent disabled:opacity-50"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => setInputNumericValue(1)}
+                      disabled={disabled}
+                      aria-label="Increase value"
+                    >
+                      <ChevronUp className="size-2.5" />
+                    </button>
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      className="flex h-1/2 items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-50"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => setInputNumericValue(-1)}
+                      disabled={disabled}
+                      aria-label="Decrease value"
+                    >
+                      <ChevronDown className="size-2.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>,
+          locked ? lockedTip(gate) : undefined,
+          disabled,
+          'block w-full',
+        )}
 
         {description && !error && <FieldDescription>{description}</FieldDescription>}
         {error && <FieldError>{error}</FieldError>}

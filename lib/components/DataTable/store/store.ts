@@ -115,7 +115,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState.filters directly
+  // Sets activeState.filters and returns to the first page, since the old page may be past the new result count
   setFilters: (slug, filters) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
@@ -126,7 +126,11 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           ...prev.tables,
           [slug]: {
             ...currentTable,
-            activeState: { ...currentTable.activeState, filters },
+            activeState: {
+              ...currentTable.activeState,
+              filters,
+              pagination: { ...currentTable.activeState.pagination, offset: 0 },
+            },
             lastAccessed: Date.now(),
           },
         },
@@ -134,7 +138,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState.search directly
+  // Sets activeState.search and returns to the first page, since the old page may be past the new result count
   setSearch: (slug, search) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
@@ -145,7 +149,11 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           ...prev.tables,
           [slug]: {
             ...currentTable,
-            activeState: { ...currentTable.activeState, search },
+            activeState: {
+              ...currentTable.activeState,
+              search,
+              pagination: { ...currentTable.activeState.pagination, offset: 0 },
+            },
             lastAccessed: Date.now(),
           },
         },

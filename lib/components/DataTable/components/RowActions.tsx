@@ -13,6 +13,8 @@ export interface RowAction {
   onClick?: () => void;
   variant?: 'default' | 'destructive';
   disabled?: boolean;
+  // Tooltip explaining why a disabled direct action is unavailable (not shown inside the ⋮ overflow menu)
+  disabledTip?: string;
   hidden?: boolean;
   permission?: string;
   dialog?: {
@@ -53,7 +55,7 @@ const DirectAction: React.FC<{ action: ResolvedAction; disabledAll?: boolean }> 
             size="icon"
             className={`size-7 ${destructiveClass}`}
             disabled={disabledAll || action.disabled}
-            disabledTip={action.lockTip}
+            disabledTip={action.lockTip ?? action.disabledTip}
             onClick={open}
             aria-label={action.label}
           >
@@ -71,7 +73,7 @@ const DirectAction: React.FC<{ action: ResolvedAction; disabledAll?: boolean }> 
       size="icon"
       className={`size-7 ${destructiveClass}`}
       disabled={disabledAll || action.disabled}
-      disabledTip={action.lockTip}
+      disabledTip={action.lockTip ?? action.disabledTip}
       onClick={action.onClick}
       aria-label={action.label}
     >

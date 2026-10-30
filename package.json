@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.5.8",
+  "version": "0.5.9",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -307,6 +307,10 @@
     "./UploadFile": {
       "types": "./dist/lib/components/UploadFile/index.d.ts",
       "import": "./dist/components/UploadFile.js"
+    },
+    "./DateFilter": {
+      "types": "./dist/lib/components/DateFilter/index.d.ts",
+      "import": "./dist/components/DateFilter.js"
     },
     "./ValueFilter": {
       "types": "./dist/lib/components/ValueFilter/index.d.ts",

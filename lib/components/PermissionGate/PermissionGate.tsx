@@ -52,9 +52,19 @@ export function usePermissionGate(): PermissionGateFn {
 }
 
 // Total: no provider / no code resolves to ALLOW, so callers never branch on null
-export function usePermission(code?: string): PermissionGateResult {
-  const gate = useContext(PermissionGateContext);
+function resolvePermission(gate: PermissionGateFn | null, code?: string): PermissionGateResult {
   return code && gate ? gate(code) : ALLOW;
+}
+
+export function usePermission(code?: string): PermissionGateResult {
+  return resolvePermission(useContext(PermissionGateContext), code);
+}
+
+// True when any code resolves to granted (locked still counts); omitted or empty list is true
+export function useAnyPermissionGranted(codes?: readonly string[]): boolean {
+  const gate = useContext(PermissionGateContext);
+  if (!codes || codes.length === 0) return true;
+  return codes.some((code) => resolvePermission(gate, code).granted);
 }
 
 // The lock symbol for a locked control — plan locks show a warning lock, workspace locks a red keyhole

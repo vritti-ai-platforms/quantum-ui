@@ -25,6 +25,12 @@ export interface BreadcrumbProps extends React.ComponentProps<'nav'> {
   separator?: React.ReactNode;
   maxItems?: number;
   renderSegment?: (segment: BreadcrumbSegment) => React.ReactNode | null | undefined;
+  /**
+   * Return `true` to drop a segment. Runs on the full, unfiltered segment list before `maxItems` and `isLast`
+   * are applied, so `index`/`all` let a segment be hidden based on its neighbours. Remaining segments keep their
+   * full-URL `path`.
+   */
+  hideSegment?: (segment: BreadcrumbSegment, index: number, all: BreadcrumbSegment[]) => boolean;
 }
 
 // Converts 'my-account' to 'My Account'
@@ -49,6 +55,7 @@ export function Breadcrumb({
   separator,
   maxItems = 0,
   renderSegment,
+  hideSegment,
   className,
   ...props
 }: BreadcrumbProps) {
@@ -56,7 +63,7 @@ export function Breadcrumb({
 
   const segments = pathname.split('/').filter(Boolean);
 
-  const items: BreadcrumbSegment[] = segments.map((segment, index) => {
+  const allItems: BreadcrumbSegment[] = segments.map((segment, index) => {
     const path = `/${segments.slice(0, index + 1).join('/')}`;
     const tildeIdx = segment.indexOf('~');
     const slug = tildeIdx >= 0 ? segment.slice(0, tildeIdx) : null;
@@ -72,6 +79,12 @@ export function Breadcrumb({
       isLast: index === segments.length - 1,
     };
   });
+
+  const items = hideSegment
+    ? allItems
+        .filter((item, index, all) => !hideSegment(item, index, all))
+        .map((item, index, kept) => ({ ...item, isLast: index === kept.length - 1 }))
+    : allItems;
 
   const visibleItems = applyMaxItems(items, maxItems);
 
