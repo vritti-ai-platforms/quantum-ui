@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { Select, type SelectProps } from '../../components/Select/Select';
 import { SelectFilter, type SelectFilterProps } from '../../components/Select/SelectFilter';
 import type { SelectOption } from '../../components/Select/types';
+import type { DistributiveOmit } from '../../types/utility';
 import { countryFlag, ISO_COUNTRIES } from './iso-countries';
 
 // Base Select has no custom option render slot, so the flag is baked into the label string.
@@ -18,7 +19,7 @@ export const ISOCountrySelect = forwardRef<HTMLButtonElement, ISOCountrySelectPr
 ));
 ISOCountrySelect.displayName = 'ISOCountrySelect';
 
-export type ISOCountryFilterProps = Omit<SelectFilterProps, 'optionsEndpoint' | 'options' | 'name'> & {
+export type ISOCountryFilterProps = DistributiveOmit<SelectFilterProps, 'optionsEndpoint' | 'options' | 'name'> & {
   name?: string;
 };
 

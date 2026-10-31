@@ -1,8 +1,9 @@
 import { forwardRef } from 'react';
 import { SelectFilter, type SelectFilterProps } from '../../components/Select/SelectFilter';
+import type { DistributiveOmit } from '../../types/utility';
 import { TIMEZONES } from './timezones';
 
-export type TimezoneFilterProps = Omit<SelectFilterProps, 'options' | 'name'> & { name?: string };
+export type TimezoneFilterProps = DistributiveOmit<SelectFilterProps, 'options' | 'name'> & { name?: string };
 
 // Pre-configured SelectFilter for timezone filtering with runtime-supported IANA options
 export const TimezoneFilter = Object.assign(

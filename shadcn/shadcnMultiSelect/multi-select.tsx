@@ -107,8 +107,10 @@ function MultiSelectSearch({ value, onValueChange, placeholder = 'Search...', cl
 
 // MultiSelectActions — Select All / Clear action bar
 interface MultiSelectActionsProps {
-  onSelectAll: () => void;
-  onClear: () => void;
+  // Omitted when the selection is capped — selecting everything would contradict the cap
+  onSelectAll?: () => void;
+  // Omitted when the field is not clearable
+  onClear?: () => void;
   disabled?: boolean;
   className?: string;
 }
@@ -119,22 +121,26 @@ function MultiSelectActions({ onSelectAll, onClear, disabled, className }: Multi
       data-slot="multi-select-actions"
       className={cn('flex items-center justify-between border-t px-3 py-1.5', className)}
     >
-      <button
-        type="button"
-        disabled={disabled}
-        className="text-xs font-medium text-primary hover:text-primary/80 disabled:pointer-events-none disabled:opacity-50"
-        onClick={onSelectAll}
-      >
-        Select All
-      </button>
-      <button
-        type="button"
-        disabled={disabled}
-        className="text-xs font-medium text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
-        onClick={onClear}
-      >
-        Clear
-      </button>
+      {onSelectAll && (
+        <button
+          type="button"
+          disabled={disabled}
+          className="text-xs font-medium text-primary hover:text-primary/80 disabled:pointer-events-none disabled:opacity-50"
+          onClick={onSelectAll}
+        >
+          Select All
+        </button>
+      )}
+      {onClear && (
+        <button
+          type="button"
+          disabled={disabled}
+          className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+          onClick={onClear}
+        >
+          Clear
+        </button>
+      )}
     </div>
   );
 }

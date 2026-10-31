@@ -57,10 +57,10 @@ export interface SingleSelectFilterProps {
   onOpenChange?: (open: boolean) => void;
   transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
   transformDescription?: (description: string, option: SelectOption) => string;
-  /** Whether the chosen option can be cleared; off for a filter that must always hold one. Defaults to `true`. */
+  /** Whether the chosen option can be cleared — independent of `mode`. Defaults to `true`. */
   clearable?: boolean;
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and value in a
-   * quiet outlined trigger, no operator choice, never clearable. */
+   * quiet outlined trigger, no operator choice. */
   mode?: FilterMode;
 }
 
@@ -77,7 +77,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       operator: controlledOperator,
       onOperatorChange,
       operators = DEFAULT_OPERATORS,
-      clearable: clearableProp = true,
+      clearable = true,
       mode = 'filter',
       onBlur,
       name,
@@ -195,7 +195,6 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     }
 
     const isContext = mode === 'context';
-    const clearable = clearableProp && !isContext;
     const operatorLabel = operators.find((o) => o.value === operator)?.label ?? operator;
     const triggerText = state.selectedOption
       ? `${label}: ${operatorLabel} ${state.selectedOption.label}`

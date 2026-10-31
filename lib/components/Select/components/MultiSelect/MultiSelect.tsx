@@ -38,6 +38,10 @@ export interface MultiSelectProps {
   className?: string;
   id?: string;
   defaultValue?: SelectValue[];
+  /** Caps how many options can be selected; picking past it drops the selected option rendered highest in the list */
+  maxSelected?: number;
+  /** Shows the Clear action in the popover footer; defaults to true */
+  clearable?: boolean;
   maxDisplayedItems?: number;
   searchable?: boolean;
   searchPlaceholder?: string;
@@ -69,6 +73,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       className,
       id,
       defaultValue,
+      maxSelected,
+      clearable = true,
       maxDisplayedItems = 3,
       searchable = false,
       searchPlaceholder = 'Search...',
@@ -93,6 +99,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       onOptionsSelect,
       defaultValue,
       remoteSearch: !!asyncState,
+      maxSelected,
     });
 
     // Notifies parent (Select.tsx) of open state changes to gate async queries; clears async search on close
@@ -251,7 +258,13 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
                 )}
               </MultiSelectList>
 
-              <MultiSelectActions onSelectAll={state.selectAll} onClear={state.clearAll} disabled={disabled} />
+              {(maxSelected === undefined || clearable) && (
+                <MultiSelectActions
+                  onSelectAll={maxSelected === undefined ? state.selectAll : undefined}
+                  onClear={clearable ? state.clearAll : undefined}
+                  disabled={disabled}
+                />
+              )}
             </MultiSelectContent>
           </MultiSelectRoot>,
           lockTip,

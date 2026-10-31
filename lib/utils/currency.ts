@@ -23,8 +23,8 @@ export function getCurrencyExponent(code: string): number {
 }
 
 const USER_CURRENCY_STORAGE_KEY = 'vritti_user_currency';
-const BUSINESS_UNIT_CURRENCY_SUFFIX = '_currency';
-const BUSINESS_UNIT_CURRENCY_PREFIX = 'vritti_';
+const WORKSPACE_CURRENCY_SUFFIX = '_currency';
+const WORKSPACE_CURRENCY_PREFIX = 'vritti_';
 
 const canUseStorage = () => typeof window !== 'undefined';
 
@@ -34,8 +34,8 @@ const normalizeCurrencyCode = (code: string | null | undefined): string | null =
   return /^[A-Z]{3}$/.test(trimmed) ? trimmed : null;
 };
 
-const getBusinessUnitCurrencyStorageKey = (businessUnitId: string) =>
-  `${BUSINESS_UNIT_CURRENCY_PREFIX}${businessUnitId}${BUSINESS_UNIT_CURRENCY_SUFFIX}`;
+const getWorkspaceCurrencyStorageKey = (workspaceId: string) =>
+  `${WORKSPACE_CURRENCY_PREFIX}${workspaceId}${WORKSPACE_CURRENCY_SUFFIX}`;
 
 export function setUserCurrency(code: string): void {
   if (!canUseStorage()) return;
@@ -49,19 +49,20 @@ export function getUserCurrency(): string | null {
   return normalizeCurrencyCode(localStorage.getItem(USER_CURRENCY_STORAGE_KEY));
 }
 
-export function setBusinessUnitCurrency(businessUnitId: string, code: string): void {
+// Records the currency a workspace (org, site group, legal entity or site) prices in, keyed by its id
+export function setWorkspaceCurrency(workspaceId: string, code: string): void {
   if (!canUseStorage()) return;
-  const normalizedBusinessUnitId = businessUnitId.trim();
+  const normalizedWorkspaceId = workspaceId.trim();
   const normalized = normalizeCurrencyCode(code);
-  if (!normalizedBusinessUnitId || !normalized) return;
-  localStorage.setItem(getBusinessUnitCurrencyStorageKey(normalizedBusinessUnitId), normalized);
+  if (!normalizedWorkspaceId || !normalized) return;
+  localStorage.setItem(getWorkspaceCurrencyStorageKey(normalizedWorkspaceId), normalized);
 }
 
-export function getBusinessUnitCurrency(businessUnitId: string): string | null {
+export function getWorkspaceCurrency(workspaceId: string): string | null {
   if (!canUseStorage()) return null;
-  const normalizedBusinessUnitId = businessUnitId.trim();
-  if (!normalizedBusinessUnitId) return null;
-  return normalizeCurrencyCode(localStorage.getItem(getBusinessUnitCurrencyStorageKey(normalizedBusinessUnitId)));
+  const normalizedWorkspaceId = workspaceId.trim();
+  if (!normalizedWorkspaceId) return null;
+  return normalizeCurrencyCode(localStorage.getItem(getWorkspaceCurrencyStorageKey(normalizedWorkspaceId)));
 }
 
 export function resolveCurrency(): string | null {

@@ -159,7 +159,7 @@ export function DataTable<TData>({
             {contextBar && (
               <>
                 <div className="flex shrink-0 items-center gap-2">{contextBar}</div>
-                <Separator orientation="vertical" className="h-6" />
+                <Separator orientation="vertical" className="data-[orientation=vertical]:h-6" />
               </>
             )}
             <div className="flex min-w-0 flex-1">{enableViews && slug && <DataTableViewTabs slug={slug} />}</div>

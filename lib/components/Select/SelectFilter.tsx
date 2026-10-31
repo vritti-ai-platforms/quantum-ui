@@ -28,13 +28,34 @@ interface SelectFilterBaseProps {
   params?: Record<string, string | number | boolean>;
 }
 
-export interface SelectFilterProps
-  extends Omit<SingleSelectFilterProps & MultiSelectFilterProps, 'name' | 'onChange' | 'value'>,
-    SelectFilterBaseProps {
-  multiple?: boolean;
-  value?: FilterResult | SelectValue | SelectValue[];
-  onChange?: (result: FilterResult | null | undefined) => void;
-}
+interface SelectFilterCommonProps
+  extends Omit<SingleSelectFilterProps & MultiSelectFilterProps, 'name' | 'onChange' | 'value' | 'clearable'>,
+    SelectFilterBaseProps {}
+
+// A multi-select can always be emptied by unticking every option, so it emits `null` whether or not it is clearable. A
+// single select only empties through its clear controls: with `clearable={false}` it always holds a value, so `value`
+// is required and `onChange` never receives `null`.
+export type SelectFilterProps = SelectFilterCommonProps &
+  (
+    | {
+        multiple: true;
+        clearable?: boolean;
+        value?: FilterResult | SelectValue[];
+        onChange?: (result: FilterResult | null) => void;
+      }
+    | {
+        multiple?: false;
+        clearable?: true;
+        value?: FilterResult | SelectValue;
+        onChange?: (result: FilterResult | null) => void;
+      }
+    | {
+        multiple?: false;
+        clearable: false;
+        value: FilterResult | SelectValue;
+        onChange?: (result: FilterResult) => void;
+      }
+  );
 
 // Unified filter-variant select that emits FilterResult from onChange — supports Form integration
 export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((props, ref) => {
@@ -48,12 +69,14 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     fieldKeys,
     params,
     value,
-    onChange,
+    onChange: onChangeProp,
     operator: controlledOperator,
     onOperatorChange,
     onOpenChange,
     ...rest
   } = props;
+  // null is only sent when the selection empties, which a non-clearable single select never does
+  const onChange = onChangeProp as ((result: FilterResult | null) => void) | undefined;
 
   // Track operator locally for uncontrolled usage; Form-controlled value takes precedence
   const defaultOperator = multiple ? 'isAnyOf' : 'equals';
@@ -89,6 +112,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     params,
     selectedValues: rawValue != null ? (Array.isArray(rawValue) ? rawValue : [rawValue]) : undefined,
     enabled: open,
+    open,
   });
 
   const isAsync = !!optionsEndpoint;
@@ -119,7 +143,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
   };
 
   if (multiple) {
-    // Wrap multi onChange to emit FilterResult — emit undefined when selection is cleared
+    // Wrap multi onChange to emit FilterResult — null when the selection is emptied
     function handleMultiChange(rawValues: SelectValue[]) {
       if (rawValues.length === 0) {
         onChange?.(null);
@@ -132,13 +156,14 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
       <MultiSelectFilter
         ref={ref}
         {...(sharedProps as Omit<MultiSelectFilterProps, 'onChange' | 'value'>)}
+        mode={mode}
         value={rawValue as SelectValue[] | undefined}
         onChange={handleMultiChange}
       />
     );
   }
 
-  // Wrap single onChange to emit FilterResult — emit undefined when selection is cleared
+  // Wrap single onChange to emit FilterResult — null when the selection is cleared
   function handleSingleChange(rawVal: SelectValue) {
     if (rawVal === '' || rawVal == null) {
       onChange?.(null);

@@ -21,8 +21,8 @@ import { Calendar, type CalendarProps } from '../../../shadcn/shadcnCalendar';
 import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
 import { cn } from '../../../shadcn/utils';
-import { useBUTimezone } from '../../hooks/useBUTimezone';
 import { useLocale } from '../../hooks/useLocale';
+import { useWorkspaceTimeZone } from '../../hooks/useWorkspaceTimeZone';
 import { withDisabledTip } from '../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
@@ -225,7 +225,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
   const disabled = disabledProp || locked;
 
   const locale = useLocale();
-  const timeZone = useBUTimezone() ?? 'UTC';
+  const timeZone = useWorkspaceTimeZone() ?? 'UTC';
   const parsedValue = parseDateTime(value);
   const minDateTimeValue = parseDateTime(minDateTime);
   const maxDateTimeValue = parseDateTime(maxDateTime);

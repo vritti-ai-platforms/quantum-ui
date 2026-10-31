@@ -332,6 +332,10 @@
       "types": "./dist/lib/types/table-filter.d.ts",
       "import": "./dist/types/table-filter.js"
     },
+    "./types/utility": {
+      "types": "./dist/lib/types/utility.d.ts",
+      "import": "./dist/types/utility.js"
+    },
     "./types/api-response": {
       "types": "./dist/lib/types/api-response.d.ts",
       "import": "./dist/types/api-response.js"

@@ -1,13 +1,14 @@
 export type { UseBarcodeScannerOptions, UseBarcodeScannerResult } from './useBarcodeScanner';
 export { useBarcodeScanner } from './useBarcodeScanner';
-export { useBUCurrency } from './useBUCurrency';
-export { useBUTimezone } from './useBUTimezone';
+export { useCategoricalColors } from './useCategoricalColors';
 export { type ConfirmOptions, useConfirm } from './useConfirm';
 export { type DialogHandle, useDialog } from './useDialog';
-export { type Formatters, useFormatters } from './useFormatters';
+export { type Formatters, type UseFormattersOptions, useFormatters } from './useFormatters';
 export { useIsMobile } from './useIsMobile';
 export { useLocale } from './useLocale';
 export { type SlugParam, useSlugParams } from './useSlugParams';
 export { type UseSSEOptions, type UseSSEReturn, useSSE } from './useSSE';
 export { type ThemeMode, type UseThemeReturn, useTheme } from './useTheme';
 export { type TimerHandle, useTimer } from './useTimer';
+export { useWorkspaceCurrency } from './useWorkspaceCurrency';
+export { useWorkspaceTimeZone } from './useWorkspaceTimeZone';

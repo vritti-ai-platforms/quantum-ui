@@ -22,6 +22,7 @@ import { useLocale } from '../../hooks/useLocale';
 import { withDisabledTip } from '../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
+import { RelativeDayStrip } from './RelativeDayStrip';
 
 type DatePickerValue = string | undefined;
 type DateParts = { day: string; month: string; year: string };
@@ -431,6 +432,17 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>((rawProp
                     if (!next) return;
                     if (!isWithinDayBounds(next, minDay, maxDay)) return;
                     commit(next);
+                    onBlur?.();
+                    setOpen(false);
+                  }}
+                />
+                <RelativeDayStrip
+                  label={label ?? placeholder}
+                  value={toIso(selected)}
+                  locale={locale}
+                  isDisabled={(date) => !isWithinDayBounds(date, minDay, maxDay)}
+                  onPick={(iso) => {
+                    commit(parseIso(iso));
                     onBlur?.();
                     setOpen(false);
                   }}

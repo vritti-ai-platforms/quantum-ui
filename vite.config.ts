@@ -69,6 +69,7 @@ export default defineConfig({
         'types/catalog-resolver': resolve(__dirname, 'lib/types/catalog-resolver.ts'),
         'types/api-response': resolve(__dirname, 'lib/types/api-response.ts'),
         'types/table-filter': resolve(__dirname, 'lib/types/table-filter.ts'),
+        'types/utility': resolve(__dirname, 'lib/types/utility.ts'),
         'components/TextField': resolve(__dirname, 'lib/components/TextField/index.ts'),
         'components/TokenInput': resolve(__dirname, 'lib/components/TokenInput/index.ts'),
         'components/SearchBar': resolve(__dirname, 'lib/components/SearchBar/index.ts'),

@@ -47,7 +47,7 @@ export const formatNumber = (
 };
 
 export interface FormatCurrencyOptions {
-  buCurrency?: string | null;
+  workspaceCurrency?: string | null;
   exchangeRate?: number | null;
 }
 
@@ -61,11 +61,11 @@ export const formatCurrency = (
   if (!Number.isFinite(amount)) return { primary: '—' };
   const primary = formatCurrencyMajor(amount, currency);
 
-  const { buCurrency, exchangeRate } = options;
-  if (exchangeRate != null && Number.isFinite(exchangeRate) && buCurrency && buCurrency !== currency) {
-    const buAmount = new Decimal(amountStr).times(exchangeRate).toNumber();
-    if (Number.isFinite(buAmount)) {
-      return { primary, secondary: `≈ ${formatCurrencyMajor(buAmount, buCurrency)}` };
+  const { workspaceCurrency, exchangeRate } = options;
+  if (exchangeRate != null && Number.isFinite(exchangeRate) && workspaceCurrency && workspaceCurrency !== currency) {
+    const workspaceAmount = new Decimal(amountStr).times(exchangeRate).toNumber();
+    if (Number.isFinite(workspaceAmount)) {
+      return { primary, secondary: `≈ ${formatCurrencyMajor(workspaceAmount, workspaceCurrency)}` };
     }
   }
   return { primary };
@@ -85,7 +85,7 @@ export const formatDate = (value: string | null | undefined, options: FormatDate
 
 export interface FormatDateTimeOptions {
   locale?: Locale;
-  buTimeZone?: string | null;
+  workspaceTimeZone?: string | null;
   timeZoneOverride?: string;
 }
 
@@ -97,7 +97,7 @@ export const formatDateTime = (
   const parsed = parseISO(value);
   if (!isValid(parsed)) return { primary: '—' };
 
-  const primaryTz = options.timeZoneOverride ?? options.buTimeZone ?? null;
+  const primaryTz = options.timeZoneOverride ?? options.workspaceTimeZone ?? null;
   if (!primaryTz) {
     return { primary: format(parsed, 'Pp', options.locale ? { locale: options.locale } : undefined) };
   }

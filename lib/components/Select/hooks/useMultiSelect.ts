@@ -9,6 +9,8 @@ interface UseMultiSelectStateProps {
   onOptionsSelect?: (options: SelectOption[]) => void;
   defaultValue?: SelectValue[];
   remoteSearch?: boolean;
+  // Caps the selection; picking past it drops the oldest selected options
+  maxSelected?: number;
 }
 
 // Manages controlled/uncontrolled multi-select state, search filtering, and grouping
@@ -20,6 +22,7 @@ export function useMultiSelect({
   onOptionsSelect,
   defaultValue,
   remoteSearch,
+  maxSelected,
 }: UseMultiSelectStateProps) {
   const isControlled = controlledValue !== undefined;
   const [internalValue, setInternalValue] = useState<SelectValue[]>(defaultValue ?? []);
@@ -64,14 +67,25 @@ export function useMultiSelect({
       const option = optionMap.get(optionValue);
       if (option?.disabled) return;
       const current = selectedValuesRef.current;
-      const nextValues = current.includes(optionValue)
+      let nextValues = current.includes(optionValue)
         ? current.filter((v) => v !== optionValue)
         : [...current, optionValue];
+      // Past the cap, drop the selected option rendered highest in the list; a pick not rendered (e.g. hidden by an
+      // active search) ranks after every rendered one, oldest first. Disabled picks are locked and never dropped.
+      if (maxSelected !== undefined && nextValues.length > maxSelected) {
+        const renderIndex = new Map(filteredOptions.map((o, index) => [o.value, index]));
+        const droppable = nextValues
+          .map((v, selectionIndex) => ({ v, rank: renderIndex.get(v) ?? Number.POSITIVE_INFINITY, selectionIndex }))
+          .filter(({ v }) => v !== optionValue && !optionMap.get(v)?.disabled)
+          .sort((a, b) => a.rank - b.rank || a.selectionIndex - b.selectionIndex);
+        const dropped = new Set(droppable.slice(0, nextValues.length - maxSelected).map(({ v }) => v));
+        nextValues = nextValues.filter((v) => !dropped.has(v));
+      }
       const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
       onOptionsSelect?.(nextOptions);
       updateSelection(nextValues);
     },
-    [optionMap, updateSelection, onOptionsSelect],
+    [optionMap, filteredOptions, updateSelection, onOptionsSelect, maxSelected],
   );
 
   // Preserve already-selected disabled options when selecting all
