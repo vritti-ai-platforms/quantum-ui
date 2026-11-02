@@ -1,3 +1,5 @@
+import { tz } from '@date-fns/tz';
+import { format } from 'date-fns';
 import { getConfig } from '../config';
 
 const USER_TIMEZONE_STORAGE_KEY = 'vritti_user_timezone';
@@ -59,4 +61,9 @@ export function resolveTimeZone(): string | null {
   if (configuredTimeZone) return configuredTimeZone;
 
   return getUserTimeZone() ?? getBrowserTimeZone();
+}
+
+// Today as YYYY-MM-DD in the given IANA timezone, or the browser's when none is given
+export function isoTodayDate(timeZone: string | null): string {
+  return format(new Date(), 'yyyy-MM-dd', timeZone ? { in: tz(timeZone) } : undefined);
 }
