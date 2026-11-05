@@ -2,7 +2,7 @@ import type React from 'react';
 import { cn } from '../../../shadcn/utils';
 import { CompactSwitch } from '../Switch';
 
-export type StatusSwitchTone = 'success' | 'primary' | 'warning' | 'destructive';
+export type StatusSwitchTone = 'success' | 'primary' | 'info' | 'warning' | 'destructive';
 export type StatusSwitchSize = 'sm' | 'md' | 'lg';
 
 const TONES: Record<StatusSwitchTone, { pill: string; label: string; track: string }> = {
@@ -15,6 +15,11 @@ const TONES: Record<StatusSwitchTone, { pill: string; label: string; track: stri
     pill: 'border-primary/40 bg-primary/10',
     label: 'text-primary',
     track: 'data-[state=checked]:bg-primary',
+  },
+  info: {
+    pill: 'border-info/40 bg-info/10',
+    label: 'text-info',
+    track: 'data-[state=checked]:bg-info',
   },
   warning: {
     pill: 'border-warning/40 bg-warning/10',

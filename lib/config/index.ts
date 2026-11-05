@@ -41,7 +41,8 @@ export interface TimeZoneConfig {
 }
 
 export interface CurrencyConfig {
-  resolveCurrency?: () => string | null | undefined;
+  // The host's currency for the active workspace, or for one site when `siteId` is given
+  resolveCurrency?: (siteId?: string | null) => string | null | undefined;
 }
 
 export interface SseConfig {

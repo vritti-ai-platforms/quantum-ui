@@ -114,3 +114,37 @@ export const SharedYDomain: Story = {
     </div>
   ),
 };
+
+export const Loading: Story = {
+  render: () => (
+    <LineChart
+      data={[]}
+      config={priceConfig}
+      xAxisKey="date"
+      lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
+      xAxisType="time"
+      showLegend={false}
+      isLoading
+    />
+  ),
+};
+
+export const Empty: Story = {
+  render: () => (
+    <LineChart
+      data={[]}
+      config={priceConfig}
+      xAxisKey="date"
+      lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
+      xAxisFormatter={formatDay}
+      xAxisType="time"
+      showLegend={false}
+      xDomain={[Date.UTC(2026, 8, 5), Date.UTC(2026, 11, 5)]}
+      markers={[{ x: Date.UTC(2026, 10, 5), label: 'Today' }]}
+      emptyState={{
+        title: 'No prices in this period',
+        description: 'Widen the date range, or add a price on the Prices tab.',
+      }}
+    />
+  ),
+};

@@ -29,7 +29,12 @@ function FieldLegend({
     <legend
       data-slot="field-legend"
       data-variant={variant}
-      className={cn('font-medium', 'data-[variant=legend]:text-base', 'data-[variant=label]:text-sm', className)}
+      className={cn(
+        'font-medium',
+        'data-[variant=legend]:mb-3 data-[variant=legend]:text-base',
+        'data-[variant=label]:mb-2 data-[variant=label]:text-sm',
+        className,
+      )}
       {...props}
     />
   );

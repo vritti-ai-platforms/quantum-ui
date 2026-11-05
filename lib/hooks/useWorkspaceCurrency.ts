@@ -1,11 +1,18 @@
 import { useLocation } from 'react-router-dom';
-import { getWorkspaceCurrency, resolveCurrency } from '../utils/currency';
+import { resolveCurrency } from '../utils/currency';
 
-// Returns the ISO 4217 currency of the active workspace, re-resolving when the route changes (host resolver → user
-// currency → null). Vritti hosts map org and site-group workspaces to the org default, legal entities and their sites
-// to the legal entity's currency. Pass `siteId` on a screen about one site inside a site-group workspace to use that
-// site's (legal entity's) currency instead.
-export function useWorkspaceCurrency(siteId?: string | null): string | null {
+// Returns the ISO 4217 currency of the active workspace as the host resolves it, re-resolving when the route changes.
+// Pass `siteId` on a screen about one site to ask the host for that site's currency instead. Throws when the host
+// resolves none: it must know every workspace's and site's currency before it renders a workspace screen.
+export function useWorkspaceCurrency(siteId?: string | null): string {
   useLocation();
-  return (siteId ? getWorkspaceCurrency(siteId) : null) ?? resolveCurrency();
+  const currency = resolveCurrency(siteId);
+  if (!currency) {
+    throw new Error(
+      siteId
+        ? `No currency for site ${siteId}; record it with setWorkspaceCurrency before rendering`
+        : 'No currency for the active workspace; record it with setWorkspaceCurrency before rendering',
+    );
+  }
+  return currency;
 }

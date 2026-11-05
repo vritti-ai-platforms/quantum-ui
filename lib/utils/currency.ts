@@ -22,7 +22,6 @@ export function getCurrencyExponent(code: string): number {
   return Number(currency.exponent);
 }
 
-const USER_CURRENCY_STORAGE_KEY = 'vritti_user_currency';
 const WORKSPACE_CURRENCY_SUFFIX = '_currency';
 const WORKSPACE_CURRENCY_PREFIX = 'vritti_';
 
@@ -36,18 +35,6 @@ const normalizeCurrencyCode = (code: string | null | undefined): string | null =
 
 const getWorkspaceCurrencyStorageKey = (workspaceId: string) =>
   `${WORKSPACE_CURRENCY_PREFIX}${workspaceId}${WORKSPACE_CURRENCY_SUFFIX}`;
-
-export function setUserCurrency(code: string): void {
-  if (!canUseStorage()) return;
-  const normalized = normalizeCurrencyCode(code);
-  if (!normalized) return;
-  localStorage.setItem(USER_CURRENCY_STORAGE_KEY, normalized);
-}
-
-export function getUserCurrency(): string | null {
-  if (!canUseStorage()) return null;
-  return normalizeCurrencyCode(localStorage.getItem(USER_CURRENCY_STORAGE_KEY));
-}
 
 // Records the currency a workspace (org, site group, legal entity or site) prices in, keyed by its id
 export function setWorkspaceCurrency(workspaceId: string, code: string): void {
@@ -65,9 +52,7 @@ export function getWorkspaceCurrency(workspaceId: string): string | null {
   return normalizeCurrencyCode(localStorage.getItem(getWorkspaceCurrencyStorageKey(normalizedWorkspaceId)));
 }
 
-export function resolveCurrency(): string | null {
-  const configured = normalizeCurrencyCode(getConfig().currency.resolveCurrency?.());
-  if (configured) return configured;
-
-  return getUserCurrency();
+// The active workspace's currency, or one site's when `siteId` is given, as the host resolves it; null when it has none
+export function resolveCurrency(siteId?: string | null): string | null {
+  return normalizeCurrencyCode(getConfig().currency.resolveCurrency?.(siteId));
 }

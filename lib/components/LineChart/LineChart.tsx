@@ -7,6 +7,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '../../../shadcn/shadcnChart';
+import { LineChartEmpty, type LineChartEmptyState } from './LineChartEmpty';
+import { LineChartSkeleton } from './LineChartSkeleton';
 
 export type LineCurveType = 'linear' | 'monotone' | 'step' | 'stepBefore' | 'stepAfter';
 
@@ -49,6 +51,17 @@ export interface LineChartProps {
   yDomain?: [number, number];
   /** Vertical reference lines, e.g. today on a timeline. The X domain stretches to keep each one in view. */
   markers?: LineChartMarker[];
+  /** Fixed X-axis range on a `time` axis, e.g. a picked date window. Also labels the axis of the empty state. Defaults to the data's extent. */
+  xDomain?: [number, number];
+  /** Draws a skeleton of the chart in its place, sized like it, until the data arrives. */
+  isLoading?: boolean;
+  /** What the chart says inside its frame when no series has a value to draw. Defaults to "No data to show". */
+  emptyState?: LineChartEmptyState;
+}
+
+// Whether any series has a value to draw
+function hasValues(data: Record<string, unknown>[], lines: LineSeries[]): boolean {
+  return data.some((row) => lines.some((line) => row[line.dataKey] != null));
 }
 
 export const LineChart = ({
@@ -64,87 +77,105 @@ export const LineChart = ({
   showLegend = true,
   yDomain,
   markers,
-}: LineChartProps) => (
-  <ChartContainer config={config} className={className ?? 'min-h-75 w-full'}>
-    <RechartsLineChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-      {xAxisType === 'time' ? (
-        <XAxis
-          dataKey={xAxisKey}
-          type="number"
-          scale="time"
-          domain={['dataMin', 'dataMax']}
-          padding={{ left: 44, right: 44 }}
-          tickLine={false}
-          axisLine={false}
-          tickMargin={10}
-          minTickGap={24}
-          tickFormatter={xAxisFormatter}
-        />
-      ) : (
-        <XAxis
-          dataKey={xAxisKey}
-          tickLine={false}
-          axisLine={false}
-          tickMargin={10}
-          minTickGap={24}
-          tickFormatter={xAxisFormatter}
-        />
-      )}
-      <YAxis
-        tickLine={false}
-        axisLine={false}
-        tickMargin={8}
-        padding={{ top: 8, bottom: 16 }}
-        tickFormatter={valueFormatter}
-        width={valueFormatter ? 'auto' : undefined}
-        domain={yDomain}
-        allowDataOverflow={false}
+  xDomain,
+  isLoading = false,
+  emptyState = { title: 'No data to show' },
+}: LineChartProps) => {
+  if (isLoading) return <LineChartSkeleton lines={lines.length} className={className} />;
+  if (!hasValues(data, lines)) {
+    return (
+      <LineChartEmpty
+        {...emptyState}
+        xDomain={xAxisType === 'time' ? xDomain : undefined}
+        xAxisFormatter={xAxisFormatter}
+        markers={markers}
+        className={className}
       />
-      <ChartTooltip
-        content={
-          <ChartTooltipContent
-            valueFormatter={valueFormatter}
-            labelFormatter={
-              xAxisFormatter
-                ? (label, payload) => {
-                    const xValue = payload?.[0]?.payload?.[xAxisKey] ?? label;
-                    return typeof xValue === 'string' || typeof xValue === 'number' ? xAxisFormatter(xValue) : null;
-                  }
+    );
+  }
+
+  return (
+    <ChartContainer config={config} className={className ?? 'min-h-75 w-full'}>
+      <RechartsLineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        {xAxisType === 'time' ? (
+          <XAxis
+            dataKey={xAxisKey}
+            type="number"
+            scale="time"
+            domain={xDomain ?? ['dataMin', 'dataMax']}
+            padding={{ left: 44, right: 44 }}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={10}
+            minTickGap={24}
+            tickFormatter={xAxisFormatter}
+          />
+        ) : (
+          <XAxis
+            dataKey={xAxisKey}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={10}
+            minTickGap={24}
+            tickFormatter={xAxisFormatter}
+          />
+        )}
+        <YAxis
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          padding={{ top: 8, bottom: 16 }}
+          tickFormatter={valueFormatter}
+          width={valueFormatter ? 'auto' : undefined}
+          domain={yDomain}
+          allowDataOverflow={false}
+        />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              valueFormatter={valueFormatter}
+              labelFormatter={
+                xAxisFormatter
+                  ? (label, payload) => {
+                      const xValue = payload?.[0]?.payload?.[xAxisKey] ?? label;
+                      return typeof xValue === 'string' || typeof xValue === 'number' ? xAxisFormatter(xValue) : null;
+                    }
+                  : undefined
+              }
+            />
+          }
+        />
+        {showLegend && <ChartLegend content={<ChartLegendContent />} />}
+        {markers?.map((marker) => (
+          <ReferenceLine
+            key={String(marker.x)}
+            x={marker.x}
+            stroke="var(--muted-foreground)"
+            strokeDasharray="4 4"
+            ifOverflow="extendDomain"
+            label={
+              marker.label
+                ? { value: marker.label, position: 'insideTopLeft', fill: 'var(--muted-foreground)', fontSize: 12 }
                 : undefined
             }
           />
-        }
-      />
-      {showLegend && <ChartLegend content={<ChartLegendContent />} />}
-      {markers?.map((marker) => (
-        <ReferenceLine
-          key={String(marker.x)}
-          x={marker.x}
-          stroke="var(--muted-foreground)"
-          strokeDasharray="4 4"
-          ifOverflow="extendDomain"
-          label={
-            marker.label
-              ? { value: marker.label, position: 'insideTopLeft', fill: 'var(--muted-foreground)', fontSize: 12 }
-              : undefined
-          }
-        />
-      ))}
-      {lines.map((line) => (
-        <Line
-          key={line.dataKey}
-          type={line.type ?? 'monotone'}
-          dataKey={line.dataKey}
-          stroke={`var(--color-${line.dataKey})`}
-          strokeWidth={2}
-          strokeDasharray={line.strokeDasharray}
-          dot={line.dot ? { r: 4 } : false}
-          connectNulls={line.connectNulls ?? connectNulls}
-        />
-      ))}
-    </RechartsLineChart>
-  </ChartContainer>
-);
+        ))}
+        {lines.map((line) => (
+          <Line
+            key={line.dataKey}
+            type={line.type ?? 'monotone'}
+            dataKey={line.dataKey}
+            stroke={`var(--color-${line.dataKey})`}
+            strokeWidth={2}
+            strokeDasharray={line.strokeDasharray}
+            dot={line.dot ? { r: 4 } : false}
+            connectNulls={line.connectNulls ?? connectNulls}
+          />
+        ))}
+      </RechartsLineChart>
+    </ChartContainer>
+  );
+};
 
 LineChart.displayName = 'LineChart';

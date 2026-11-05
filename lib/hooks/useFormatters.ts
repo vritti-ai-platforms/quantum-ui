@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { resolveCurrency } from '../utils/currency';
 import {
   type CurrencyAmount,
   type FormattedValue,
@@ -10,7 +11,6 @@ import {
 } from '../utils/format';
 import { getLocale } from '../utils/locale';
 import { useLocale } from './useLocale';
-import { useWorkspaceCurrency } from './useWorkspaceCurrency';
 import { useWorkspaceTimeZone } from './useWorkspaceTimeZone';
 
 export interface Formatters {
@@ -29,7 +29,7 @@ export interface UseFormattersOptions {
 export function useFormatters(options?: UseFormattersOptions): Formatters {
   const locale = useLocale();
   const workspaceTimeZone = useWorkspaceTimeZone(options?.siteId);
-  const workspaceCurrency = useWorkspaceCurrency(options?.siteId);
+  const workspaceCurrency = resolveCurrency(options?.siteId);
   const localeTag = getLocale() ?? 'en-US';
 
   return useMemo<Formatters>(
