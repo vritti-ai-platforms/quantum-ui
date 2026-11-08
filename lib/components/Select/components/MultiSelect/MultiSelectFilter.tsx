@@ -35,7 +35,9 @@ export interface MultiSelectFilterProps {
   options?: SelectOption[];
   groups?: SelectGroup[];
   value?: SelectValueType[];
-  onChange?: (values: SelectValueType[]) => void;
+  /** Fires on every tick, on an operator change while something is picked, and on the inline clear, with the operator
+   * the selection applies under. */
+  onChange?: (values: SelectValueType[], operator: string) => void;
   operator?: string;
   onOperatorChange?: (operator: string) => void;
   operators?: MultiSelectFilterOperator[];
@@ -93,18 +95,27 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
   ) => {
     const [internalOperator, setInternalOperator] = useState(operators[0]?.value ?? 'isAnyOf');
     const activeOperator = controlledOperator ?? internalOperator;
+    const [internalValue, setInternalValue] = useState<SelectValueType[]>(defaultValue ?? []);
+    const selectedValues = controlledValue ?? internalValue;
 
-    function handleOperatorChange(value: string) {
-      setInternalOperator(value);
-      onOperatorChange?.(value);
+    // Applies a selection with its operator — every tick applies at once, like a single select's pick
+    function apply(values: SelectValueType[], operator: string) {
+      if (controlledValue === undefined) setInternalValue(values);
+      onChange?.(values, operator);
+    }
+
+    // Switches the operator, applying it at once when something is already picked
+    function handleOperatorChange(operator: string) {
+      setInternalOperator(operator);
+      onOperatorChange?.(operator);
+      if (selectedValues.length > 0) apply(selectedValues, operator);
     }
 
     const state = useMultiSelect({
       options: options ?? [],
       groups,
-      value: controlledValue,
-      onChange,
-      defaultValue,
+      value: selectedValues,
+      onChange: (values) => apply(values, activeOperator),
       remoteSearch: !!asyncState,
       maxSelected,
     });

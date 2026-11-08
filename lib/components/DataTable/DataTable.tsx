@@ -2,17 +2,18 @@ import { useMutation } from '@tanstack/react-query';
 import { flexRender } from '@tanstack/react-table';
 import { ArrowDownToLine, ArrowUpFromLine, Funnel, TableProperties } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Separator } from '../../../shadcn/shadcnSeparator';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { useDialog } from '../../hooks/useDialog';
-import { EMPTY_TABLE_STATE } from '../../types/table-filter';
+import { EMPTY_TABLE_STATE, type FilterCondition } from '../../types/table-filter';
 import { axios } from '../../utils/axios';
 import { Button } from '../Button';
 import { DropdownMenu } from '../DropdownMenu';
 import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 import { Skeleton } from '../Skeleton';
+import { bindFilters } from './components/bindFilters';
 import { DataTableColumnHeader } from './components/DataTableColumnHeader';
 import { DataTableEmpty } from './components/DataTableEmpty';
 import { DataTableFilters } from './components/DataTableFilters';
@@ -33,6 +34,8 @@ const densityClasses: Record<DensityType, string> = {
   normal: 'py-2 px-3 text-sm',
   comfortable: 'py-4 px-3 text-sm',
 };
+
+const NO_FILTERS: FilterCondition[] = [];
 
 const MODE_HEIGHTS = {
   page: 'calc(100vh - 280px)',
@@ -63,7 +66,8 @@ export function DataTable<TData>({
   toolbarActions,
   filters,
   contextBar,
-  isLoading = false,
+  isLoading: isLoadingProp = false,
+  isFetching = false,
   className,
   enableViews = true,
   importExport,
@@ -93,8 +97,12 @@ export function DataTable<TData>({
 
   const meta = table.options.meta as DataTableMeta | undefined;
   const slug = meta?.slug;
-  const appliedFilterCount = useDataTableStore((s) => (slug ? (s.tables[slug]?.activeState?.filters?.length ?? 0) : 0));
+  const panelFilters = useDataTableStore((s) => (slug ? s.tables[slug]?.activeState?.filters.panel : undefined));
+  const contextFilters = useDataTableStore((s) => (slug ? s.tables[slug]?.activeState?.filters.context : undefined));
+  const appliedFilterCount = panelFilters?.length ?? 0;
   const activeViewId = useDataTableStore((s) => (slug ? (s.tables[slug]?.activeViewId ?? null) : null));
+  // Rows fetched before the page's defaults were filled never show: the skeleton stays until that refetch lands
+  const isLoading = isLoadingProp || !!meta?.isAwaitingDefaults;
   const loadViewState = useDataTableStore((s) => s.loadViewState);
   const density = meta?.density ?? 'normal';
   const columnCount = table.getAllColumns().length;
@@ -119,11 +127,25 @@ export function DataTable<TData>({
   const hasActiveSearch = hasActiveView ? !!meta?.isSearchDirty : !!(search?.value && search.value.trim() !== '');
   const isFiltered = hasActiveSearch || hasActiveFilters || hasActiveView;
   // Reset baselines: clear actions revert to the view's saved values, or to empty when no view is active.
-  const filtersBaseline = meta?.activeViewState?.filters ?? [];
+  const filtersBaseline = meta?.activeViewState?.filters.panel ?? NO_FILTERS;
   const searchBaseline = meta?.activeViewState?.search ?? null;
   const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
 
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
+
+  // Named context controls are filters kept in filters.context; one with a default can't be cleared
+  const setContext = meta?.setContext;
+  const defaultContext = meta?.defaultContext ?? NO_FILTERS;
+  const requiredContext = useMemo(() => new Set(defaultContext.map((c) => c.field)), [defaultContext]);
+  const boundContextBar =
+    contextBar && setContext
+      ? bindFilters(contextBar, {
+          conditions: contextFilters ?? NO_FILTERS,
+          onChange: setContext,
+          keepControlled: true,
+          required: requiredContext,
+        })
+      : contextBar;
 
   // Auto-close filters when rows are selected
   useEffect(() => {
@@ -158,7 +180,7 @@ export function DataTable<TData>({
           <div className="flex min-w-0 flex-1 items-center gap-3">
             {contextBar && (
               <>
-                <div className="flex shrink-0 items-center gap-2">{contextBar}</div>
+                <div className="flex shrink-0 items-center gap-2">{boundContextBar}</div>
                 <Separator orientation="vertical" className="data-[orientation=vertical]:h-6" />
               </>
             )}
@@ -275,7 +297,22 @@ export function DataTable<TData>({
       )}
 
       {/* Table container — flex column, fills remaining space */}
-      <div className="border rounded-lg overflow-hidden flex flex-col" style={{ height: MODE_HEIGHTS[mode] }}>
+      <div className="relative border rounded-lg overflow-hidden flex flex-col" style={{ height: MODE_HEIGHTS[mode] }}>
+        {/* Refetch in flight: previous rows stay, a thin bar runs along the top edge */}
+        {isFetching && !isLoading && (
+          <div
+            role="progressbar"
+            aria-label="Loading"
+            className="pointer-events-none absolute inset-x-0 top-0 z-30 h-0.5 overflow-hidden bg-primary/15"
+          >
+            <motion.div
+              className="h-full w-1/3 bg-primary"
+              initial={{ x: '-100%' }}
+              animate={{ x: '300%' }}
+              transition={{ duration: 1.1, ease: 'easeInOut', repeat: Number.POSITIVE_INFINITY }}
+            />
+          </div>
+        )}
         {/* Shared slot: SelectionBar OR FilterPanel (mutually exclusive, animated) */}
         <AnimatePresence mode="wait">
           {selectedCount > 0 ? (
@@ -512,7 +549,7 @@ export function DataTable<TData>({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => loadViewState(slug, EMPTY_TABLE_STATE, null, false)}
+                            onClick={() => loadViewState(slug, EMPTY_TABLE_STATE, null, true)}
                           >
                             Clear View
                           </Button>

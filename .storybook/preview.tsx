@@ -1,5 +1,6 @@
 import { withThemeByClassName } from '@storybook/addon-themes';
 import type { Decorator, Preview } from '@storybook/react-vite';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '../lib/context';
 import '../src/index.css';
 
@@ -8,6 +9,14 @@ const withThemeProvider: Decorator = (Story) => (
   <ThemeProvider defaultTheme="light">
     <Story />
   </ThemeProvider>
+);
+
+// Components built on TanStack Query (DataTable's import, export and state push) need a client in every story
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+const withQueryClient: Decorator = (Story) => (
+  <QueryClientProvider client={queryClient}>
+    <Story />
+  </QueryClientProvider>
 );
 
 const preview: Preview = {
@@ -25,6 +34,7 @@ const preview: Preview = {
 };
 
 export const decorators = [
+  withQueryClient,
   withThemeProvider, // Provides React context
   withThemeByClassName({
     themes: {

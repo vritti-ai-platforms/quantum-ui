@@ -10,25 +10,41 @@ export function viewStatesEqual(a: TableViewState, b: TableViewState): boolean {
   return deepEqual(a, b);
 }
 
+// Merges a stored state over EMPTY_TABLE_STATE
+function normalizeViewState(raw: TableViewState): TableViewState {
+  return { ...EMPTY_TABLE_STATE, ...raw };
+}
+
+// Replaces or removes one field's condition, keeping the order of the others; returns the same array when unchanged
+function withCondition(conditions: FilterCondition[], field: string, condition: FilterCondition | null) {
+  const index = conditions.findIndex((c) => c.field === field);
+  if (condition === null) return index === -1 ? conditions : conditions.filter((_, i) => i !== index);
+  if (index === -1) return [...conditions, condition];
+  if (deepEqual(conditions[index], condition)) return conditions;
+  return conditions.map((c, i) => (i === index ? condition : c));
+}
+
 export interface TableState {
   activeState: TableViewState;
   activeViewState: TableViewState | null;
   activeViewId: string | null;
   lastAccessed: number;
-  _skipUpsert: boolean;
+  // Counts the user's changes; each one asks for the state to be saved (loads from the server never do)
+  saveRequest: number;
 }
 
 export interface TableSlice {
   tables: Record<string, TableState>;
   initTable: (slug: string, options?: { pinSelectColumn?: boolean }) => void;
-  loadViewState: (slug: string, state: TableViewState, viewId: string | null, skipUpsert?: boolean) => void;
+  loadViewState: (slug: string, state: TableViewState, viewId: string | null, fromUser?: boolean) => void;
   updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
   setFilters: (slug: string, filters: FilterCondition[]) => void;
+  setFilter: (slug: string, field: string, condition: FilterCondition | null) => void;
+  setContext: (slug: string, field: string, condition: FilterCondition | null) => void;
   setSearch: (slug: string, search: SearchState) => void;
   setPagination: (slug: string, pagination: { limit: number; offset: number }) => void;
   setActiveViewState: (slug: string, viewState: TableViewState) => void;
   syncActiveViewState: (slug: string) => void;
-  consumeSkipUpsert: (slug: string) => boolean;
 }
 
 const DEFAULT_TABLE_STATE: TableState = {
@@ -36,7 +52,7 @@ const DEFAULT_TABLE_STATE: TableState = {
   activeViewState: null,
   activeViewId: null,
   lastAccessed: 0,
-  _skipUpsert: false,
+  saveRequest: 0,
 };
 
 // Persists per-table state across renders with oldest-first eviction at capacity
@@ -69,24 +85,25 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState/viewId/viewState, merging with EMPTY_TABLE_STATE; skipUpsert defaults true (page-load)
-  loadViewState: (slug, state, viewId, skipUpsert = true) => {
+  // Sets activeState/viewId/viewState from a stored state. A page load (the default) only shows it; a view the user
+  // switches to is also saved as the table's live state
+  loadViewState: (slug, state, viewId, fromUser = false) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
       if (!currentTable) return prev;
 
-      const mergedState = { ...EMPTY_TABLE_STATE, ...state };
+      const loaded = normalizeViewState(state);
 
       return {
         tables: {
           ...prev.tables,
           [slug]: {
             ...currentTable,
-            activeState: mergedState,
+            activeState: loaded,
             activeViewId: viewId,
             // On page-load, activeViewState is set later via setActiveViewState; on user tab activation, set it immediately
-            activeViewState: !skipUpsert && viewId !== null ? mergedState : null,
-            _skipUpsert: skipUpsert,
+            activeViewState: fromUser && viewId !== null ? loaded : null,
+            saveRequest: fromUser ? currentTable.saveRequest + 1 : currentTable.saveRequest,
             lastAccessed: Date.now(),
           },
         },
@@ -108,6 +125,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: newActiveState,
+            saveRequest: currentTable.saveRequest + 1,
             lastAccessed: Date.now(),
           },
         },
@@ -115,7 +133,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     });
   },
 
-  // Sets activeState.filters and returns to the first page, since the old page may be past the new result count
+  // Sets activeState.filters.panel and returns to the first page, since the old page may be past the new result count
   setFilters: (slug, filters) => {
     set((prev) => {
       const currentTable = prev.tables[slug];
@@ -126,10 +144,65 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           ...prev.tables,
           [slug]: {
             ...currentTable,
+            saveRequest: currentTable.saveRequest + 1,
             activeState: {
               ...currentTable.activeState,
-              filters,
+              filters: { ...currentTable.activeState.filters, panel: filters },
               pagination: { ...currentTable.activeState.pagination, offset: 0 },
+            },
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Replaces or removes one condition in filters.panel and returns to the first page
+  setFilter: (slug, field, condition) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+      const { filters, pagination } = currentTable.activeState;
+      const panel = withCondition(filters.panel, field, condition);
+      if (panel === filters.panel) return prev;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            saveRequest: currentTable.saveRequest + 1,
+            activeState: {
+              ...currentTable.activeState,
+              filters: { ...filters, panel },
+              pagination: { ...pagination, offset: 0 },
+            },
+            lastAccessed: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  // Replaces or removes one condition in filters.context and returns to the first page
+  setContext: (slug, field, condition) => {
+    set((prev) => {
+      const currentTable = prev.tables[slug];
+      if (!currentTable) return prev;
+      const { filters, pagination } = currentTable.activeState;
+      const context = withCondition(filters.context, field, condition);
+      if (context === filters.context) return prev;
+
+      return {
+        tables: {
+          ...prev.tables,
+          [slug]: {
+            ...currentTable,
+            saveRequest: currentTable.saveRequest + 1,
+            activeState: {
+              ...currentTable.activeState,
+              filters: { ...filters, context },
+              pagination: { ...pagination, offset: 0 },
             },
             lastAccessed: Date.now(),
           },
@@ -149,6 +222,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           ...prev.tables,
           [slug]: {
             ...currentTable,
+            saveRequest: currentTable.saveRequest + 1,
             activeState: {
               ...currentTable.activeState,
               search,
@@ -173,6 +247,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
           [slug]: {
             ...currentTable,
             activeState: { ...currentTable.activeState, pagination },
+            saveRequest: currentTable.saveRequest + 1,
             lastAccessed: Date.now(),
           },
         },
@@ -185,23 +260,17 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
     set((prev) => {
       const currentTable = prev.tables[slug];
       if (!currentTable) return prev;
+      const state = normalizeViewState(viewState);
       return {
         tables: {
           ...prev.tables,
-          [slug]: { ...currentTable, activeViewState: { ...EMPTY_TABLE_STATE, ...viewState } },
+          [slug]: {
+            ...currentTable,
+            activeViewState: state,
+          },
         },
       };
     });
-  },
-
-  // Reads _skipUpsert, clears it, and returns whether it was set — consumed once per load
-  consumeSkipUpsert: (slug) => {
-    const table = get().tables[slug];
-    if (!table?._skipUpsert) return false;
-    set((prev) => ({
-      tables: { ...prev.tables, [slug]: { ...prev.tables[slug], _skipUpsert: false } },
-    }));
-    return true;
   },
 
   // Syncs activeViewState to current activeState after a view is saved in-place

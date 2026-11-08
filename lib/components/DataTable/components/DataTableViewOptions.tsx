@@ -146,7 +146,7 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
                 )}
 
                 {/* Column list */}
-                <div className="max-h-[300px] overflow-y-auto py-1">
+                <div className="max-h-75 overflow-y-auto py-1">
                   <SortableList items={sortableColumns} onReorder={handleReorder}>
                     {sortableColumns.map((item) => (
                       <SortableColumnItem key={item.id} column={item.column} />

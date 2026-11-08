@@ -279,7 +279,8 @@ export function DataTableViewsMenu({ slug: tableSlug }: { slug: string }) {
     const st = s.tables[tableSlug]?.activeState;
     if (!st) return false;
     return (
-      st.filters.length > 0 ||
+      st.filters.panel.length > 0 ||
+      st.filters.context.length > 0 ||
       st.sort.length > 0 ||
       Object.keys(st.columnVisibility).length > 0 ||
       st.density !== 'normal' ||

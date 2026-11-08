@@ -133,7 +133,7 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
                 if (e.key === 'Escape') handleCollapse();
               }}
               placeholder={`Search ${selectedLabel.toLowerCase()}...`}
-              className="bg-background text-sm outline-none w-full min-w-[140px] placeholder:text-muted-foreground text-foreground"
+              className="bg-background text-sm outline-none w-full min-w-35 placeholder:text-muted-foreground text-foreground"
             />
           </div>
 

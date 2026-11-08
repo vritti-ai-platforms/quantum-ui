@@ -59,10 +59,10 @@ export function DataTableViewTabs({ slug }: { slug: string }) {
   // Executes the actual view switch without dirty check
   function doActivate(viewId: string) {
     if (activeViewId === viewId) {
-      loadViewState(tableSlug, EMPTY_TABLE_STATE, null, false);
+      loadViewState(tableSlug, EMPTY_TABLE_STATE, null, true);
     } else {
       const view = views.find((v) => v.id === viewId);
-      if (view) loadViewState(tableSlug, view.state, viewId, false);
+      if (view) loadViewState(tableSlug, view.state, viewId, true);
     }
   }
 

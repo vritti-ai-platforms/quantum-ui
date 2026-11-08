@@ -133,6 +133,7 @@ export default defineConfig({
         'utils/money': resolve(__dirname, 'lib/utils/money.ts'),
         'utils/permission-deps': resolve(__dirname, 'lib/utils/permission-deps.ts'),
         'utils/format': resolve(__dirname, 'lib/utils/format.ts'),
+        'utils/filter': resolve(__dirname, 'lib/utils/filter.ts'),
         'utils/decimal': resolve(__dirname, 'lib/utils/decimal.ts'),
         'utils/colors': resolve(__dirname, 'lib/utils/colors.ts'),
         'date-fns': resolve(__dirname, 'lib/date-fns.ts'),

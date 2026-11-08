@@ -9,19 +9,15 @@ import { Button } from '../../Button';
 import { SortableItem, SortableList } from '../../Sortable';
 import { useDataTableStore } from '../store/store';
 import type { DataTableMeta } from '../types';
-import { FilterWrapper } from './FilterWrapper';
-
-type FilterFormValues = Record<string, FilterCondition | null | undefined>;
+import { bindFilters, filterLabel, filterName } from './bindFilters';
 
 // Extracts id and label from a ReactNode's props
 function getFilterProps(node: React.ReactNode): { id: string; label: string } | null {
   if (!isValidElement(node)) return null;
-  const props = node.props as Record<string, unknown>;
-  const meta = node.type as { defaultLabel?: string; defaultName?: string };
-  const id = typeof props.name === 'string' ? props.name : (meta.defaultName ?? null);
-  const label = typeof props.label === 'string' ? props.label : (meta.defaultLabel ?? '');
+  const el = node as React.ReactElement<Record<string, unknown>>;
+  const id = filterName(el);
   if (!id) return null;
-  return { id, label };
+  return { id, label: filterLabel(el) };
 }
 
 interface DataTableFiltersProps<TData> {
@@ -83,31 +79,9 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
   const metaRaw = table.options.meta as DataTableMeta | undefined;
   const slug = metaRaw?.slug ?? '';
 
-  const activeFilters = useDataTableStore((s) => s.tables[slug]?.activeState?.filters ?? NO_FILTERS);
+  const activeFilters = useDataTableStore((s) => s.tables[slug]?.activeState?.filters.panel ?? NO_FILTERS);
   const activeViewId = useDataTableStore((s) => s.tables[slug]?.activeViewId ?? null);
-  const activeViewStateFilters = useDataTableStore((s) => s.tables[slug]?.activeViewState?.filters ?? NO_FILTERS);
-
-  // Build default values from active filters
-  const defaultValues = useMemo(
-    () =>
-      activeFilters.reduce<Record<string, FilterCondition>>((acc, f) => {
-        acc[f.field] = f;
-        return acc;
-      }, {}),
-    [activeFilters],
-  );
-
-  // Reset target: view's saved filters when a view is active, empty otherwise
-  const resetValues = useMemo(
-    () =>
-      activeViewId !== null
-        ? activeViewStateFilters.reduce<FilterFormValues>((acc, f) => {
-            acc[f.field] = f;
-            return acc;
-          }, {})
-        : {},
-    [activeViewId, activeViewStateFilters],
-  );
+  const activeViewStateFilters = useDataTableStore((s) => s.tables[slug]?.activeViewState?.filters.panel ?? NO_FILTERS);
 
   // Extract metadata from filter ReactNodes
   const filterEntries = useMemo(() => {
@@ -143,20 +117,15 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
     meta.setFilterOrder(reordered.map((r) => r.id));
   }
 
-  function handleApply(data: FilterFormValues) {
-    const applied = Object.values(data).filter((c): c is FilterCondition => c != null);
-    meta.setFilters(applied);
-  }
+  // Reset target: the view's saved filters when a view is active, else no filters
+  const resetFilters = activeViewId !== null ? activeViewStateFilters : NO_FILTERS;
 
   function handleReset() {
-    meta.setFilters(activeViewId !== null ? activeViewStateFilters : []);
+    meta.setFilters(resetFilters);
   }
 
   const toFilterMap = (filters: FilterCondition[]) => Object.fromEntries(filters.map((f) => [f.field, f]));
-  const hasResetChanges =
-    activeViewId !== null
-      ? !deepEqual(toFilterMap(activeFilters), toFilterMap(activeViewStateFilters))
-      : activeFilters.length > 0;
+  const hasResetChanges = !deepEqual(toFilterMap(activeFilters), toFilterMap(resetFilters));
   const hiddenFilterCount = filterEntries.filter((f) => meta.filterVisibility[f.id] === false).length;
 
   const sortableItems = effectiveOrder
@@ -168,35 +137,20 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
 
   return (
     <div className="flex items-center gap-2 px-4 py-3 border-b flex-wrap">
-      <FilterWrapper
-        key={activeViewId + JSON.stringify(defaultValues)}
-        defaultValues={defaultValues}
-        activeFilters={activeFilters}
-        resetValues={resetValues}
-        onSubmit={handleApply}
-        onReset={handleReset}
-        className="flex items-center gap-2 flex-1 flex-wrap"
-        renderActions={({ isPending, isSubmitting }) => (
+      <div className="flex items-center gap-2 flex-1 flex-wrap">
+        {visibleFilters.map((f) => (
+          <span key={f.id}>{bindFilters(f.node, { conditions: activeFilters, onChange: meta.setFilter })}</span>
+        ))}
+        {hasResetChanges && (
           <div className="flex items-center gap-2 ml-auto">
-            {hasResetChanges && (
-              <Button variant="ghost" size="sm" type="reset">
-                Reset
-              </Button>
-            )}
-            {isPending && (
-              <Button size="sm" type="submit" isLoading={isSubmitting}>
-                Apply
-              </Button>
-            )}
+            <Button variant="ghost" size="sm" onClick={handleReset}>
+              Reset
+            </Button>
           </div>
         )}
-      >
-        {visibleFilters.map((f) => (
-          <span key={f.id}>{f.node}</span>
-        ))}
-      </FilterWrapper>
+      </div>
 
-      {/* Settings popover — outside FilterWrapper */}
+      {/* Settings popover */}
       <div className="relative">
         <Popover>
           <PopoverTrigger asChild>
@@ -209,12 +163,12 @@ export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProp
               <span className="sr-only">Filter settings</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-[240px] p-0">
+          <PopoverContent align="end" className="w-60 p-0">
             <div className="px-3 py-3 border-b">
               <span className="text-sm font-medium">Filter Settings</span>
               <p className="text-xs text-muted-foreground mt-0.5">Drag to reorder or hide filters</p>
             </div>
-            <div className="max-h-[300px] overflow-y-auto py-1">
+            <div className="max-h-75 overflow-y-auto py-1">
               <SortableList items={sortableItems} onReorder={handleReorder}>
                 {sortableItems.map(({ id, label }) => (
                   <SortableFilterItem

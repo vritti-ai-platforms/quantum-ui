@@ -19,7 +19,7 @@ export function useTableSlice(slug: string) {
   const isFiltersDirty = useDataTableStore((s) => {
     const t = s.tables[slug];
     if (!t?.activeViewState) return false;
-    return !deepEqual(t.activeState.filters, t.activeViewState.filters);
+    return !deepEqual(t.activeState.filters.panel, t.activeViewState.filters.panel);
   });
   const isSearchDirty = useDataTableStore((s) => {
     const t = s.tables[slug];
@@ -29,9 +29,10 @@ export function useTableSlice(slug: string) {
 
   const _updateActiveState = useDataTableStore((s) => s.updateActiveState);
   const _setFilters = useDataTableStore((s) => s.setFilters);
+  const _setFilter = useDataTableStore((s) => s.setFilter);
+  const _setContext = useDataTableStore((s) => s.setContext);
   const _setSearch = useDataTableStore((s) => s.setSearch);
   const _setPagination = useDataTableStore((s) => s.setPagination);
-  const _consumeSkipUpsert = useDataTableStore((s) => s.consumeSkipUpsert);
 
   // Pre-bind slug so callers don't repeat it on every call
   const updateActiveState = useCallback(
@@ -40,13 +41,19 @@ export function useTableSlice(slug: string) {
   );
 
   const setFilters = useCallback((filters: FilterCondition[]) => _setFilters(slug, filters), [slug, _setFilters]);
+  const setFilter = useCallback(
+    (field: string, condition: FilterCondition | null) => _setFilter(slug, field, condition),
+    [slug, _setFilter],
+  );
+  const setContext = useCallback(
+    (field: string, condition: FilterCondition | null) => _setContext(slug, field, condition),
+    [slug, _setContext],
+  );
   const setSearch = useCallback((search: SearchState) => _setSearch(slug, search), [slug, _setSearch]);
   const setPagination = useCallback(
     (pagination: { limit: number; offset: number }) => _setPagination(slug, pagination),
     [slug, _setPagination],
   );
-
-  const consumeSkipUpsert = useCallback(() => _consumeSkipUpsert(slug), [slug, _consumeSkipUpsert]);
 
   const sorting = useMemo(() => sortConditionsToTanstack(activeState.sort), [activeState.sort]);
 
@@ -69,9 +76,10 @@ export function useTableSlice(slug: string) {
     isSearchDirty,
     updateActiveState,
     setFilters,
+    setFilter,
+    setContext,
     setSearch,
     setPagination,
     handleSortingChange,
-    consumeSkipUpsert,
   };
 }

@@ -29,8 +29,13 @@ export type DensityType = 'compact' | 'normal' | 'comfortable';
 
 export type SearchState = { columnId: string; value: string } | null;
 
+export interface TableFilters {
+  panel: FilterCondition[];
+  context: FilterCondition[];
+}
+
 export interface TableViewState {
-  filters: FilterCondition[];
+  filters: TableFilters;
   sort: SortCondition[];
   columnVisibility: Record<string, boolean>;
   columnOrder: string[];
@@ -45,7 +50,7 @@ export interface TableViewState {
 }
 
 export const EMPTY_TABLE_STATE: TableViewState = {
-  filters: [],
+  filters: { panel: [], context: [] },
   sort: [],
   columnVisibility: {},
   columnOrder: [],

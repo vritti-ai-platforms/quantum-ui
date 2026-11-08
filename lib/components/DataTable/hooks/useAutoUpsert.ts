@@ -1,40 +1,28 @@
 import { useEffect, useRef } from 'react';
 import { pushTableState } from '../../../services/table-views.service';
-import type { TableViewState } from '../../../types/table-filter';
+import { useDataTableStore } from '../store/store';
 
-// Watches activeState and debounces a POST to /table-states (Redis) on every change
-export function useAutoUpsert(
-  slug: string,
-  activeState: TableViewState,
-  activeViewId: string | null,
-  onStatePush: (() => void) | undefined,
-  consumeSkipUpsert: () => boolean,
-) {
+// Saves the table's live state to Redis 150 ms after the user's last change (a filter, sort, page, column or view
+// switch), then lets the page refetch. Loading from the server never asks for a save, and nothing is saved before the
+// stored state is shown — a change made earlier (an earlier visit's, or one to the empty starting state) is dropped.
+export function useAutoUpsert(slug: string, isReady: boolean, onStatePush: (() => unknown) | undefined) {
   const onStatePushRef = useRef(onStatePush);
   onStatePushRef.current = onStatePush;
 
-  const prevActiveStateRef = useRef<TableViewState>(activeState);
-  const hasInitializedRef = useRef(false);
+  const saveRequest = useDataTableStore((s) => s.tables[slug]?.saveRequest ?? 0);
+  const handledRef = useRef({ slug, saveRequest });
 
   useEffect(() => {
-    // Skip initial render
-    if (!hasInitializedRef.current) {
-      hasInitializedRef.current = true;
-      prevActiveStateRef.current = activeState;
-      return;
-    }
-
-    // Skip if same reference (no change)
-    if (prevActiveStateRef.current === activeState) return;
-    prevActiveStateRef.current = activeState;
-
-    // Skip upsert when state was loaded from server (loadViewState sets this flag)
-    if (consumeSkipUpsert()) return;
+    const handled = handledRef.current;
+    handledRef.current = { slug, saveRequest };
+    if (!isReady || handled.slug !== slug || handled.saveRequest === saveRequest) return;
 
     const timer = setTimeout(() => {
-      pushTableState(slug, activeState, activeViewId).then(() => onStatePushRef.current?.());
+      const table = useDataTableStore.getState().tables[slug];
+      if (!table) return;
+      pushTableState(slug, table.activeState, table.activeViewId).then(() => onStatePushRef.current?.());
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [activeState, activeViewId, slug, consumeSkipUpsert]);
+  }, [slug, saveRequest, isReady]);
 }

@@ -1,10 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Eye, FileX2, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import type { FilterCondition } from '../../types/table-filter';
+import { EMPTY_TABLE_STATE } from '../../types/table-filter';
+import { filter } from '../../utils/filter';
 import { Button } from '../Button';
+import { DateFilter } from '../DateFilter';
+import { SelectFilter } from '../Select';
+import { ValueFilter } from '../ValueFilter';
 import { RowActions } from './components/RowActions';
 import { DataTable } from './DataTable';
 import { useDataTable } from './hooks/useDataTable';
+import { useDataTableStore } from './store/store';
 import type { DataTableProps } from './types';
 import { getSelectionColumn } from './utils';
 
@@ -211,4 +219,106 @@ function ScrollBehaviorStory() {
 
 export const ScrollBehavior: Story = {
   render: () => <ScrollBehaviorStory />,
+};
+
+// ─── Live filters + context bar ───
+// The same SelectFilter is a panel filter in the first table and a context in the second (only the JSX moves and
+// `mode="context"` is added). Filters apply as they change (no Apply button). Both halves have page defaults, and the
+// "As of" date is a controlled context the page keeps in its own state.
+
+const statusOptions = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'processing', label: 'Processing' },
+  { value: 'success', label: 'Success' },
+  { value: 'failed', label: 'Failed' },
+];
+
+// Stands in for the server's WHERE: applies equals / isAnyOf / contains conditions to the sample rows
+function applyConditions(rows: Payment[], conditions: FilterCondition[]): Payment[] {
+  return rows.filter((row) =>
+    conditions.every((c) => {
+      const cell = String(row[c.field as keyof Payment]);
+      if (c.operator === 'equals') return cell === String(c.value);
+      if (c.operator === 'isAnyOf') return Array.isArray(c.value) && c.value.includes(cell);
+      if (c.operator === 'contains') return cell.includes(String(c.value));
+      return true;
+    }),
+  );
+}
+
+// Simulates the table endpoint: rows filtered by both halves of the stored filters, echoing the state it used
+function useStoryServerState(slug: string) {
+  const state = useDataTableStore((s) => s.tables[slug]?.activeState ?? EMPTY_TABLE_STATE);
+  const result = applyConditions(sampleData, [...state.filters.panel, ...state.filters.context]);
+  return { result, count: result.length, state, activeViewId: null };
+}
+
+const statusFilter = (mode?: 'context') => (
+  <SelectFilter key="status" name="status" label="Status" options={statusOptions} mode={mode} />
+);
+
+function StatusAsFilterTable() {
+  const slug = 'story-live-filter';
+  const { table } = useDataTable({
+    columns,
+    slug,
+    label: 'Payments',
+    serverState: useStoryServerState(slug),
+  });
+  return (
+    <DataTable
+      table={table}
+      mode="compact"
+      enableViews={false}
+      filters={[
+        statusFilter(),
+        <ValueFilter key="email" name="email" label="Email" fieldType="string" />,
+        <SelectFilter
+          key="id"
+          name="id"
+          label="Payment"
+          options={sampleData.map((p) => ({ value: p.id, label: p.id }))}
+          multiple
+        />,
+      ]}
+    />
+  );
+}
+
+function StatusAsContextTable() {
+  const slug = 'story-live-context';
+  const [asOf, setAsOf] = useState<FilterCondition | null>(null);
+  const { table, context } = useDataTable({
+    columns,
+    slug,
+    label: 'Payments',
+    serverState: useStoryServerState(slug),
+    defaultContext: [filter('status').equals('pending')],
+  });
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs text-muted-foreground">Context: {JSON.stringify(context)}</p>
+      <DataTable
+        table={table}
+        mode="compact"
+        enableViews={false}
+        contextBar={
+          <>
+            {statusFilter('context')}
+            <DateFilter name="asOf" label="As of" mode="context" value={asOf} onChange={setAsOf} />
+          </>
+        }
+        filters={[<ValueFilter key="email" name="email" label="Email" fieldType="string" />]}
+      />
+    </div>
+  );
+}
+
+export const LiveFiltersAndContext: Story = {
+  render: () => (
+    <div className="flex flex-col gap-8">
+      <StatusAsFilterTable />
+      <StatusAsContextTable />
+    </div>
+  ),
 };

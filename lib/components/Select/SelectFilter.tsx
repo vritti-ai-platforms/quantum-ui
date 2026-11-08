@@ -89,16 +89,11 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
   function handleOperatorChange(op: string) {
     setLocalOperator(op);
     onOperatorChange?.(op);
+    // A multi-select applies its own operator change together with its selection
+    if (multiple) return;
     // Propagate operator change immediately when a value is already selected
-    if (multiple) {
-      const currentValues = Array.isArray(rawValue) ? rawValue : [];
-      if (currentValues.length > 0) {
-        onChange?.({ field: name, operator: op, value: currentValues.map(String) });
-      }
-    } else {
-      if (rawValue != null && rawValue !== '') {
-        onChange?.({ field: name, operator: op, value: rawValue as string | number });
-      }
+    if (rawValue != null && rawValue !== '') {
+      onChange?.({ field: name, operator: op, value: rawValue as string | number });
     }
   }
 
@@ -144,12 +139,12 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
 
   if (multiple) {
     // Wrap multi onChange to emit FilterResult — null when the selection is emptied
-    function handleMultiChange(rawValues: SelectValue[]) {
+    function handleMultiChange(rawValues: SelectValue[], operator: string) {
       if (rawValues.length === 0) {
         onChange?.(null);
         return;
       }
-      onChange?.({ field: name, operator: currentOperator, value: rawValues.map(String) });
+      onChange?.({ field: name, operator, value: rawValues.map(String) });
     }
 
     return (
@@ -157,7 +152,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
         ref={ref}
         {...(sharedProps as Omit<MultiSelectFilterProps, 'onChange' | 'value'>)}
         mode={mode}
-        value={rawValue as SelectValue[] | undefined}
+        value={value === null ? [] : (rawValue as SelectValue[] | undefined)}
         onChange={handleMultiChange}
       />
     );
@@ -177,7 +172,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
       ref={ref}
       {...(sharedProps as Omit<SingleSelectFilterProps, 'onChange' | 'value'>)}
       mode={mode}
-      value={rawValue as SelectValue | undefined}
+      value={value === null ? null : (rawValue as SelectValue | undefined)}
       onChange={handleSingleChange}
     />
   );

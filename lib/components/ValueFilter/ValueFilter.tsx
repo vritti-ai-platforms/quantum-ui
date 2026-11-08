@@ -6,15 +6,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '../../../shadcn/utils';
 import type { FilterCondition, FilterOperator, NumberOperator, StringOperator } from '../../types/table-filter';
 import { Button } from '../Button';
+import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../Select/contextAnchor';
 
-export interface ValueFilterProps {
+interface ValueFilterBaseProps {
   name: string;
   label: string;
   fieldType: 'string' | 'number';
-  value?: FilterCondition | null;
-  onChange?: (value: FilterCondition | null | undefined) => void;
+  /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and condition
+   * in a quiet outlined trigger. */
+  mode?: FilterMode;
+  /** Shown in the context trigger while no condition is applied */
+  placeholder?: string;
   className?: string;
 }
+
+// `clearable` (independent of `mode`, default `true`) decides whether the filter can be empty: a non-clearable one
+// always holds a condition, so `value` is required and `onChange` never receives `null`. `onChange` fires only on Save
+// (or Enter) and on clear, never per keystroke.
+export type ValueFilterProps = ValueFilterBaseProps &
+  (
+    | {
+        clearable?: true;
+        value?: FilterCondition | null;
+        onChange?: (value: FilterCondition | null | undefined) => void;
+      }
+    | { clearable: false; value: FilterCondition; onChange?: (value: FilterCondition) => void }
+  );
 
 interface OperatorOption {
   value: FilterOperator;
@@ -47,8 +64,20 @@ function getOperatorLabel(operator: FilterOperator, fieldType: 'string' | 'numbe
 }
 
 // Compact filter chip with operator/value popover for building filter conditions
-export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType, value, onChange, className }) => {
+export const ValueFilter: React.FC<ValueFilterProps> = ({
+  name,
+  label,
+  fieldType,
+  value,
+  onChange: onChangeProp,
+  mode = 'filter',
+  clearable = true,
+  placeholder,
+  className,
+}) => {
   const popoverId = useId();
+  // null is only sent from the clear actions, which render only when clearable
+  const onChange = onChangeProp as ((value: FilterCondition | null) => void) | undefined;
   const [open, setOpen] = useState(false);
   const [draftOperator, setDraftOperator] = useState<FilterOperator>(
     value?.operator ?? (fieldType === 'string' ? DEFAULT_STRING_OPERATOR : DEFAULT_NUMBER_OPERATOR),
@@ -101,6 +130,9 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
 
   const operators = fieldType === 'string' ? STRING_OPERATORS : NUMBER_OPERATORS;
   const hasValue = value != null;
+  const isContext = mode === 'context';
+  const canClear = clearable && hasValue;
+  const valueText = hasValue ? `${getOperatorLabel(value.operator, fieldType)} ${value.value}` : undefined;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -111,17 +143,22 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
           aria-controls={popoverId}
           aria-expanded={open}
           className={cn(
-            'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-            hasValue
-              ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
-              : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+            isContext
+              ? CONTEXT_ANCHOR_CLASS
+              : 'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+            !isContext &&
+              (hasValue
+                ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground'),
             className,
           )}
         >
-          <span className="truncate">
-            {hasValue ? `${label}: ${getOperatorLabel(value.operator, fieldType)} ${value.value}` : label}
-          </span>
-          {hasValue ? (
+          {isContext ? (
+            <ContextAnchorText label={label} value={valueText} placeholder={placeholder} />
+          ) : (
+            <span className="truncate">{valueText ? `${label}: ${valueText}` : label}</span>
+          )}
+          {canClear ? (
             <X className="size-3.5 shrink-0 opacity-70 hover:opacity-100" onClick={handleInlineClear} />
           ) : (
             <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
@@ -218,9 +255,11 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({ name, label, fieldType
           </div>
 
           <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" size="sm" onClick={handleClear}>
-              Clear
-            </Button>
+            {clearable && (
+              <Button variant="ghost" size="sm" onClick={handleClear}>
+                Clear
+              </Button>
+            )}
             <Button size="sm" onClick={handleApply} disabled={draftValue.trim() === ''}>
               Save
             </Button>

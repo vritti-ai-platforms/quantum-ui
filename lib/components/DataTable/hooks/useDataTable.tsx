@@ -1,8 +1,9 @@
 import type { ColumnDef, Row } from '@tanstack/react-table';
 import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import { deepEqual } from 'fast-equals';
 import pluralize from 'pluralize-esm';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import type { DensityType, TableViewState } from '../../../types/table-filter';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { DensityType, FilterCondition, TableViewState } from '../../../types/table-filter';
 import { useDataTableStore } from '../store/store';
 import { useTableSlice } from '../store/useTableSlice';
 import { useAutoUpsert } from './useAutoUpsert';
@@ -24,8 +25,14 @@ interface UseDataTableOptions<TData> {
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
   enableHiding?: boolean;
   enableColumnResizing?: boolean;
-  onStatePush?: () => void;
+  /** Called after the user's changes are saved — the page refetches its rows here */
+  onStatePush?: () => unknown;
+  /** Context bar defaults: each fills its field whenever `filters.context` is missing it — on the first load, on a view
+   * switch, or when the default first becomes available. A context control with a default can't be cleared. */
+  defaultContext?: FilterCondition[];
 }
+
+const NO_CONDITIONS: FilterCondition[] = [];
 
 // Creates a fully configured TanStack Table instance with persisted state
 export function useDataTable<TData>({
@@ -39,11 +46,11 @@ export function useDataTable<TData>({
   enableSorting = true,
   enableColumnResizing = true,
   onStatePush,
+  defaultContext,
 }: UseDataTableOptions<TData>) {
   const {
     // State
     activeState,
-    activeViewId,
     activeViewState,
     sorting,
     // Dirty flags
@@ -53,19 +60,12 @@ export function useDataTable<TData>({
     // Actions
     updateActiveState,
     setFilters,
+    setFilter,
+    setContext,
     setSearch,
     setPagination,
     handleSortingChange,
-    consumeSkipUpsert,
   } = useTableSlice(slug);
-
-  // Loads server-returned state into the store once on first successful fetch
-  const hasInitRef = useRef(false);
-  useEffect(() => {
-    if (!serverState?.state || hasInitRef.current) return;
-    hasInitRef.current = true;
-    useDataTableStore.getState().loadViewState(slug, serverState.state, serverState.activeViewId ?? null);
-  }, [serverState?.state, serverState?.activeViewId, slug]);
 
   // Init in useLayoutEffect to avoid mutating the Zustand store during render (breaks useSyncExternalStore)
   const initializedSlug = useRef<string | null>(null);
@@ -75,6 +75,37 @@ export function useDataTable<TData>({
       initializedSlug.current = slug;
     }
   }, [slug, enableRowSelection]);
+
+  // Defaults compared by value, so an inline array doesn't refire every render
+  const nextDefaults = defaultContext ?? NO_CONDITIONS;
+  const [defaults, setDefaults] = useState(nextDefaults);
+  if (!deepEqual(defaults, nextDefaults)) setDefaults(nextDefaults);
+
+  // Shows the server's stored state once per visit, before paint; the store outlives the component, so a slug shown on
+  // an earlier visit is shown again
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  useLayoutEffect(() => {
+    if (!serverState?.state || loadedSlug === slug) return;
+    useDataTableStore.getState().loadViewState(slug, serverState.state, serverState.activeViewId ?? null);
+    setLoadedSlug(slug);
+  }, [serverState?.state, serverState?.activeViewId, slug, loadedSlug]);
+
+  // Ready to save once the stored state is shown — at once for a table whose server keeps no state
+  const isReady = loadedSlug === slug || (serverState != null && serverState.state == null);
+
+  // Fills each context default the shown state is missing, as though the user picked it, so it is saved and refetched
+  const context = activeState.filters.context;
+  useLayoutEffect(() => {
+    if (loadedSlug !== slug) return;
+    for (const condition of defaults) {
+      if (!context.some((c) => c.field === condition.field)) setContext(condition.field, condition);
+    }
+  }, [loadedSlug, slug, defaults, context, setContext]);
+
+  // The rows on screen were fetched without a context default while the server's echoed state still lacks it
+  const isAwaitingDefaults =
+    serverState?.state != null &&
+    defaults.some((d) => !serverState.state?.filters.context.some((c) => c.field === d.field));
 
   // Column state — defaults come from EMPTY_TABLE_STATE via useTableSlice and loadViewState merge
   const { columnVisibility, columnOrder, columnSizing, columnPinning, lockedColumnSizing } = activeState;
@@ -117,6 +148,10 @@ export function useDataTable<TData>({
 
       // Filters
       setFilters: (filters: Parameters<typeof setFilters>[0]) => setFilters(filters),
+      setFilter,
+      setContext,
+      defaultContext: defaults,
+      isAwaitingDefaults,
 
       // Search
       search: activeState.search,
@@ -135,12 +170,16 @@ export function useDataTable<TData>({
       activeViewState,
       updateActiveState,
       setFilters,
+      setFilter,
+      setContext,
+      defaults,
+      isAwaitingDefaults,
       activeState.search,
       setSearch,
     ],
   );
 
-  useAutoUpsert(slug, activeState, activeViewId, onStatePush, consumeSkipUpsert);
+  useAutoUpsert(slug, isReady, onStatePush);
 
   const data = serverState?.result ?? [];
   const totalRows = serverState?.count;
@@ -205,5 +244,5 @@ export function useDataTable<TData>({
     meta,
   });
 
-  return { table };
+  return { table, context, isLoaded: isReady };
 }

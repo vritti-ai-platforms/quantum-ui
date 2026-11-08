@@ -47,6 +47,10 @@ export interface DataTableMeta {
   isSearchDirty: boolean;
   activeViewState: TableViewState | null;
   setFilters: (filters: FilterCondition[]) => void;
+  setFilter: (field: string, condition: FilterCondition | null) => void;
+  setContext: (field: string, condition: FilterCondition | null) => void;
+  defaultContext: FilterCondition[];
+  isAwaitingDefaults: boolean;
   search: SearchState;
   setSearch: (search: SearchState) => void;
 }
@@ -80,9 +84,14 @@ export interface DataTableProps<TData> {
   toolbarActions?: DataTableToolbarConfig;
   filters?: React.ReactNode[];
   /** Controls that set what the table is about (e.g. a site, an as-of date) rather than narrow it; shown at the start
-   * of the toolbar, before the views, set apart by a separator. Not filters: they are not counted, reset or saved. */
+   * of the toolbar, before the views, set apart by a separator. Named filter components here are filters kept in
+   * `filters.context` — applied like filters, saved with views, not counted or reset. Elements with a `value` prop are
+   * the page's. */
   contextBar?: React.ReactNode;
+  /** First load: rows are replaced by a skeleton */
   isLoading?: boolean;
+  /** A refetch is in flight: the previous rows stay visible under a thin progress bar */
+  isFetching?: boolean;
   className?: string;
   enableViews?: boolean;
   importExport?: ImportExportConfig<TData>;
