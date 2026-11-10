@@ -49,6 +49,7 @@ export interface MultiSelectProps {
   transformLabel?: (label: string, option: SelectOption, context: 'option' | 'trigger') => string;
   transformDescription?: (description: string, option: SelectOption) => string;
   onOpenChange?: (open: boolean) => void;
+  disabledTip?: string;
   /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
   permission?: string;
 }
@@ -82,6 +83,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       transformLabel,
       transformDescription,
       onOpenChange,
+      disabledTip,
       permission,
     },
     ref,
@@ -90,7 +92,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
     const { granted, locked, reason } = gate;
     // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
     const disabled = disabledProp || locked;
-    const lockTip = locked ? lockedTip(gate) : undefined;
+    const tip = locked ? lockedTip(gate) : disabledTip;
     const state = useMultiSelect({
       options: options ?? [],
       groups,
@@ -247,7 +249,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
                 <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
               )}
 
-              <MultiSelectList id={state.listboxId}>
+              <MultiSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
                 {renderOptions()}
                 {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
                 {asyncState?.loadingMore && (
@@ -267,7 +269,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
               )}
             </MultiSelectContent>
           </MultiSelectRoot>,
-          lockTip,
+          tip,
           disabled,
           'block w-full',
         )}

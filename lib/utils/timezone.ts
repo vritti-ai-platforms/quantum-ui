@@ -63,6 +63,11 @@ export function resolveTimeZone(): string | null {
   return getUserTimeZone() ?? getBrowserTimeZone();
 }
 
+// Returns a site's timezone when one is given and known, else the workspace's resolved one
+export function workspaceTimeZone(siteId?: string | null): string | null {
+  return (siteId ? getWorkspaceTimeZone(siteId) : null) ?? resolveTimeZone();
+}
+
 // Today as YYYY-MM-DD in the given IANA timezone, or the browser's when none is given
 export function isoTodayDate(timeZone: string | null): string {
   return format(new Date(), 'yyyy-MM-dd', timeZone ? { in: tz(timeZone) } : undefined);

@@ -1,12 +1,13 @@
 import { getConfig } from '../config';
-import type { TableViewState } from '../types/table-filter';
+import type { FilterCondition } from '../types/conditions';
+import type { TableState } from '../types/table-state';
 import { axios } from '../utils/axios';
 
 export interface TableViewRecord {
   id: string;
   name: string;
   tableSlug: string;
-  state: TableViewState;
+  state: TableState;
   isShared: boolean;
   isCurrent: boolean;
   isOwn: boolean;
@@ -31,14 +32,14 @@ export function fetchViews(tableSlug: string): Promise<TableViewRecord[]> {
 export function createView(dto: {
   name: string;
   tableSlug: string;
-  state: TableViewState;
+  state: TableState;
   isShared?: boolean;
 }): Promise<TableViewRecord> {
   return axios.post<TableViewRecord>(viewsUrl(), dto, silent).then((r) => r.data);
 }
 
 // Saves updated state to an existing view
-export function updateView(id: string, state: TableViewState): Promise<TableViewRecord> {
+export function updateView(id: string, state: TableState): Promise<TableViewRecord> {
   return axios.patch<TableViewRecord>(viewsUrl(`/${id}`), { state }, silent).then((r) => r.data);
 }
 
@@ -62,7 +63,12 @@ function statesUrl() {
   return getConfig().views.statesEndpoint;
 }
 
-// Pushes the live table state (filters, sort, columnVisibility) along with the active view to Redis
-export function pushTableState(tableSlug: string, state: TableViewState, activeViewId: string | null): Promise<void> {
-  return axios.post(statesUrl(), { tableSlug, state, activeViewId }, silent).then(() => undefined);
+// Replaces a table's saved state (filters, sort, columns) and its active view
+export function putTableState(tableSlug: string, state: TableState, activeViewId: string | null): Promise<void> {
+  return axios.put(statesUrl(), { tableSlug, state, activeViewId }, silent).then(() => undefined);
+}
+
+// Sets context conditions in a table's saved state, keeping the rest, so a link can open the table at that context
+export function setTableContext(tableSlug: string, context: FilterCondition[]): Promise<void> {
+  return axios.patch(statesUrl(), { tableSlug, context }, silent).then(() => undefined);
 }

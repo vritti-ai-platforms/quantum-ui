@@ -1,28 +1,27 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChartConfig } from '../../../shadcn/shadcnChart';
+import { useChart } from '../Chart/useChart';
 import { RadialChart } from './RadialChart';
 
-const data = [
+const rows = [
   { name: 'desktop', value: 275 },
   { name: 'mobile', value: 200 },
   { name: 'tablet', value: 187 },
   { name: 'wearable', value: 120 },
 ];
 
-const config: ChartConfig = {
-  desktop: { label: 'Desktop', color: 'var(--chart-1)' },
-  mobile: { label: 'Mobile', color: 'var(--chart-2)' },
-  tablet: { label: 'Tablet', color: 'var(--chart-3)' },
-  wearable: { label: 'Wearable', color: 'var(--chart-4)' },
+const LABELS: Record<string, string> = { desktop: 'Desktop', mobile: 'Mobile', tablet: 'Tablet', wearable: 'Wearable' };
+
+const selectDevices = (data: typeof rows) => ({
+  rows: data,
+  series: data.map((row) => ({ id: row.name, label: LABELS[row.name] })),
+});
+
+const DevicesChart = () => {
+  const chart = useChart({ data: rows, select: selectDevices });
+  return <RadialChart chart={chart} mode="compact" dataKey="value" />;
 };
 
-const meta: Meta<typeof RadialChart> = {
-  title: 'Charts/RadialChart',
-  component: RadialChart,
-};
+const meta: Meta = { title: 'Charts/RadialChart' };
 export default meta;
-type Story = StoryObj<typeof RadialChart>;
 
-export const Default: Story = {
-  render: () => <RadialChart data={data} config={config} dataKey="value" />,
-};
+export const Default: StoryObj = { render: () => <DevicesChart /> };

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import type { FilterCondition } from '../types/table-filter';
+import type { FilterCondition } from '../types/conditions';
 import { filter } from './filter';
 
 describe('filter()', () => {

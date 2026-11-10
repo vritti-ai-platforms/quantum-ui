@@ -1,9 +1,19 @@
-import type { Row, Table } from '@tanstack/react-table';
-import type { DensityType, FilterCondition, SearchState, TableViewState } from '../../types/table-filter';
+import type { Row, RowData, Table } from '@tanstack/react-table';
+import type { FilterCondition, SearchState } from '../../types/conditions';
+import type { DensityType, TableState } from '../../types/table-state';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
-export type { DensityType, SearchState } from '../../types/table-filter';
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    grow?: boolean;
+  }
+
+  interface TableMeta<TData extends RowData> extends DataTableMeta {}
+}
+
+export type { SearchState } from '../../types/conditions';
+export type { DensityType } from '../../types/table-state';
 
 // --- Feature config types ---
 
@@ -45,12 +55,14 @@ export interface DataTableMeta {
   isViewDirty: boolean;
   isFiltersDirty: boolean;
   isSearchDirty: boolean;
-  activeViewState: TableViewState | null;
+  activeViewState: TableState | null;
   setFilters: (filters: FilterCondition[]) => void;
   setFilter: (field: string, condition: FilterCondition | null) => void;
   setContext: (field: string, condition: FilterCondition | null) => void;
+  contextValue: (field: string) => string | undefined;
   defaultContext: FilterCondition[];
   isAwaitingDefaults: boolean;
+  isLoaded: boolean;
   search: SearchState;
   setSearch: (search: SearchState) => void;
 }
@@ -76,8 +88,21 @@ export interface ImportExportConfig<TData = unknown> {
 
 // --- DataTable component props ---
 
-export interface DataTableProps<TData> {
+export interface DataTableInstance<TData> {
   table: Table<TData>;
+  isLoading: boolean;
+  isFetching: boolean;
+  /** A change (filter, sort, page, view) is waiting to be saved and refetched; the rows on screen predate it */
+  isSyncing: boolean;
+  isError: boolean;
+  error: unknown;
+  refetch?: () => unknown;
+  contextValue: (field: string) => string | undefined;
+  isLoaded: boolean;
+}
+
+export interface DataTableProps<TData> {
+  table: DataTableInstance<TData>;
   searchConfig?: DataTableSearchConfig;
   selectActions?: SelectActions<TData>;
   emptyStateConfig?: DataTableEmptyConfig;
@@ -88,10 +113,6 @@ export interface DataTableProps<TData> {
    * `filters.context` — applied like filters, saved with views, not counted or reset. Elements with a `value` prop are
    * the page's. */
   contextBar?: React.ReactNode;
-  /** First load: rows are replaced by a skeleton */
-  isLoading?: boolean;
-  /** A refetch is in flight: the previous rows stay visible under a thin progress bar */
-  isFetching?: boolean;
   className?: string;
   enableViews?: boolean;
   importExport?: ImportExportConfig<TData>;

@@ -1,17 +1,18 @@
 import { deepEqual } from 'fast-equals';
 import { create } from 'zustand';
-import type { FilterCondition, SearchState, TableViewState } from '../../../types/table-filter';
-import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
+import type { FilterCondition, SearchState } from '../../../types/conditions';
+import type { TableState } from '../../../types/table-state';
+import { EMPTY_TABLE_STATE } from '../../../types/table-state';
 
 const MAX_TABLES = 20;
 
 // Compares two view states for equality — used by all dirty-check selectors
-export function viewStatesEqual(a: TableViewState, b: TableViewState): boolean {
+export function viewStatesEqual(a: TableState, b: TableState): boolean {
   return deepEqual(a, b);
 }
 
 // Merges a stored state over EMPTY_TABLE_STATE
-function normalizeViewState(raw: TableViewState): TableViewState {
+function normalizeViewState(raw: TableState): TableState {
   return { ...EMPTY_TABLE_STATE, ...raw };
 }
 
@@ -24,9 +25,9 @@ function withCondition(conditions: FilterCondition[], field: string, condition: 
   return conditions.map((c, i) => (i === index ? condition : c));
 }
 
-export interface TableState {
-  activeState: TableViewState;
-  activeViewState: TableViewState | null;
+export interface TableEntry {
+  activeState: TableState;
+  activeViewState: TableState | null;
   activeViewId: string | null;
   lastAccessed: number;
   // Counts the user's changes; each one asks for the state to be saved (loads from the server never do)
@@ -34,20 +35,20 @@ export interface TableState {
 }
 
 export interface TableSlice {
-  tables: Record<string, TableState>;
+  tables: Record<string, TableEntry>;
   initTable: (slug: string, options?: { pinSelectColumn?: boolean }) => void;
-  loadViewState: (slug: string, state: TableViewState, viewId: string | null, fromUser?: boolean) => void;
-  updateActiveState: (slug: string, updater: (prev: TableViewState) => TableViewState) => void;
+  loadViewState: (slug: string, state: TableState, viewId: string | null, fromUser?: boolean) => void;
+  updateActiveState: (slug: string, updater: (prev: TableState) => TableState) => void;
   setFilters: (slug: string, filters: FilterCondition[]) => void;
   setFilter: (slug: string, field: string, condition: FilterCondition | null) => void;
   setContext: (slug: string, field: string, condition: FilterCondition | null) => void;
   setSearch: (slug: string, search: SearchState) => void;
   setPagination: (slug: string, pagination: { limit: number; offset: number }) => void;
-  setActiveViewState: (slug: string, viewState: TableViewState) => void;
+  setActiveViewState: (slug: string, viewState: TableState) => void;
   syncActiveViewState: (slug: string) => void;
 }
 
-const DEFAULT_TABLE_STATE: TableState = {
+const DEFAULT_TABLE_ENTRY: TableEntry = {
   activeState: EMPTY_TABLE_STATE,
   activeViewState: null,
   activeViewId: null,
@@ -77,7 +78,7 @@ export const useDataTableStore = create<TableSlice>((set, get) => ({
       const pinning = options?.pinSelectColumn ? { left: ['select'], right: [] } : { left: [], right: [] };
 
       tables[slug] = {
-        ...DEFAULT_TABLE_STATE,
+        ...DEFAULT_TABLE_ENTRY,
         activeState: { ...EMPTY_TABLE_STATE, columnPinning: pinning },
         lastAccessed: Date.now(),
       };

@@ -1,5 +1,6 @@
 // Main component
 
+export { setTableContext } from '../../services/table-views.service';
 export type { CompactTableSkeletonColumn, CompactTableSkeletonProps } from './CompactTableSkeleton';
 export { CompactTableSkeleton } from './CompactTableSkeleton';
 // Cell components — wrap useFormatters() for consistent rendering with DetailField.
@@ -23,14 +24,13 @@ export { DataTableViewOptions } from './components/DataTableViewOptions';
 export type { RowAction, RowActionsProps } from './components/RowActions';
 export { RowActions } from './components/RowActions';
 export { DataTable } from './DataTable';
-export type { DataTableServerState } from './hooks/useDataTable';
+export type { DataTableQuery, DataTableServerState } from './hooks/useDataTable';
 export { useDataTable } from './hooks/useDataTable';
-export type { TableSlice, TableState } from './store/store';
-export { useDataTableStore } from './store/store';
 // Types
 export type {
   ColumnDef,
   DataTableEmptyConfig,
+  DataTableInstance,
   DataTableMeta,
   DataTableProps,
   DataTableSearchConfig,

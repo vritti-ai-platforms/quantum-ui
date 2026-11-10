@@ -16,10 +16,17 @@ interface DataTableSearchProps {
   className?: string;
 }
 
-// Column-specific search with dropdown selector -- collapsed icon button, expanded search bar
+// Column-specific search with dropdown selector -- collapsed icon button, expanded search bar; a search in the table's
+// state opens it
 export function DataTableSearch({ columns, search, onSearchChange, searchAll, className }: DataTableSearchProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(() => !!search?.value);
+  const focusOnExpand = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // A search in the table's state, including one restored after mount, opens the bar
+  useEffect(() => {
+    if (search?.value) setIsExpanded(true);
+  }, [search?.value]);
 
   const options = useMemo(() => {
     const cols = columns.map((c) => ({ value: c.id, label: c.label }));
@@ -36,6 +43,11 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
     return defaultColumnId;
   });
 
+  // Follows a search that arrives with the saved state after mount
+  useEffect(() => {
+    if (search?.columnId && options.some((o) => o.value === search.columnId)) setSelectedColumnId(search.columnId);
+  }, [search?.columnId, options]);
+
   // Reset to first available if selected column no longer exists in options
   useEffect(() => {
     if (!options.some((o) => o.value === selectedColumnId)) {
@@ -48,9 +60,11 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
   // Displayed input value comes from the prop
   const inputValue = search?.columnId === selectedColumnId ? (search?.value ?? '') : '';
 
-  // Auto-focus when expanding
+  // Focuses the input when the user opens the bar, not when a restored search does
   useEffect(() => {
-    if (isExpanded) inputRef.current?.focus();
+    if (!isExpanded || !focusOnExpand.current) return;
+    focusOnExpand.current = false;
+    inputRef.current?.focus();
   }, [isExpanded]);
 
   // Clears the search and collapses
@@ -83,7 +97,10 @@ export function DataTableSearch({ columns, search, onSearchChange, searchAll, cl
             variant="outline"
             size="sm"
             className={cn('h-9 w-9 p-0', className)}
-            onClick={() => setIsExpanded(true)}
+            onClick={() => {
+              focusOnExpand.current = true;
+              setIsExpanded(true);
+            }}
           >
             <Search className="h-4 w-4" />
             <span className="sr-only">Search</span>

@@ -1,20 +1,13 @@
 import { ChartLine } from 'lucide-react';
-import type * as React from 'react';
 import { cn } from '../../../shadcn/utils';
+import type { ChartEmptyState } from '../Chart/types';
 
 // Same 100×40 plot and gutter as LineChartSkeleton, so loading, empty and drawn charts share their geometry
 const GRID_Y = [4, 14, 24, 34];
 const BASELINE_Y = 24;
 const X_TICKS = 5;
 
-export interface LineChartEmptyState {
-  title: string;
-  description?: string;
-  /** Replaces the default chart icon; size it `size-4`. */
-  icon?: React.ReactNode;
-}
-
-interface LineChartEmptyProps extends LineChartEmptyState {
+interface LineChartEmptyProps extends ChartEmptyState {
   // The X range the chart would cover; with it a time axis keeps its labels and markers
   xDomain?: [number, number];
   xAxisFormatter?: (value: string | number) => string;

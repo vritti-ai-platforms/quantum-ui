@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { useForm } from 'react-hook-form';
 import { AreaChart } from '../lib/components/AreaChart';
-import type { ChartConfig } from '../lib/components/BarChart';
 import { BarChart } from '../lib/components/BarChart';
 import { Button } from '../lib/components/Button';
+import { useChart } from '../lib/components/Chart';
 import { DatePicker } from '../lib/components/DatePicker';
 import { DateRangePicker } from '../lib/components/DateRangePicker';
 import { DateTimePicker } from '../lib/components/DateTimePicker';
@@ -338,10 +338,13 @@ const monthlyData = [
   { month: 'Jun', desktop: 214, mobile: 140 },
 ];
 
-const multiSeriesConfig: ChartConfig = {
-  desktop: { label: 'Desktop', color: 'var(--chart-1)' },
-  mobile: { label: 'Mobile', color: 'var(--chart-2)' },
-};
+const selectDevices = (rows: typeof monthlyData) => ({
+  rows,
+  series: [
+    { id: 'desktop', label: 'Desktop' },
+    { id: 'mobile', label: 'Mobile' },
+  ],
+});
 
 const browserData = [
   { browser: 'Chrome', visitors: 275 },
@@ -351,13 +354,10 @@ const browserData = [
   { browser: 'Other', visitors: 90 },
 ];
 
-const browserConfig: ChartConfig = {
-  Chrome: { label: 'Chrome', color: 'var(--chart-1)' },
-  Safari: { label: 'Safari', color: 'var(--chart-2)' },
-  Firefox: { label: 'Firefox', color: 'var(--chart-3)' },
-  Edge: { label: 'Edge', color: 'var(--chart-4)' },
-  Other: { label: 'Other', color: 'var(--chart-5)' },
-};
+const selectBrowsers = (rows: typeof browserData) => ({
+  rows,
+  series: rows.map((row) => ({ id: row.browser, label: row.browser })),
+});
 
 const radarData = [
   { subject: 'Speed', A: 120, B: 110 },
@@ -367,10 +367,13 @@ const radarData = [
   { subject: 'Efficiency', A: 85, B: 90 },
 ];
 
-const radarConfig: ChartConfig = {
-  A: { label: 'Model A', color: 'var(--chart-1)' },
-  B: { label: 'Model B', color: 'var(--chart-2)' },
-};
+const selectModels = (rows: typeof radarData) => ({
+  rows,
+  series: [
+    { id: 'A', label: 'Model A' },
+    { id: 'B', label: 'Model B' },
+  ],
+});
 
 const radialData = [
   { name: 'Chrome', visitors: 275 },
@@ -378,66 +381,46 @@ const radialData = [
   { name: 'Firefox', visitors: 187 },
 ];
 
-const radialConfig: ChartConfig = {
-  Chrome: { label: 'Chrome', color: 'var(--chart-1)' },
-  Safari: { label: 'Safari', color: 'var(--chart-2)' },
-  Firefox: { label: 'Firefox', color: 'var(--chart-3)' },
-};
+const selectRings = (rows: typeof radialData) => ({
+  rows,
+  series: rows.map((row) => ({ id: row.name, label: row.name })),
+});
 
-const ChartsSection = () => (
-  <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">BarChart</p>
-      <BarChart
-        data={monthlyData}
-        config={multiSeriesConfig}
-        xAxisKey="month"
-        bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]}
-      />
+const ChartsSection = () => {
+  const devices = useChart({ data: monthlyData, select: selectDevices });
+  const browsers = useChart({ data: browserData, select: selectBrowsers });
+  const models = useChart({ data: radarData, select: selectModels });
+  const rings = useChart({ data: radialData, select: selectRings });
+
+  return (
+    <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">BarChart</p>
+        <BarChart chart={devices} mode="compact" xAxisKey="month" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">LineChart</p>
+        <LineChart chart={devices} mode="compact" xAxisKey="month" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">AreaChart</p>
+        <AreaChart chart={devices} mode="compact" xAxisKey="month" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">PieChart</p>
+        <PieChart chart={browsers} mode="compact" dataKey="visitors" nameKey="browser" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">RadarChart</p>
+        <RadarChart chart={models} mode="compact" angleKey="subject" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">RadialChart</p>
+        <RadialChart chart={rings} mode="compact" dataKey="visitors" />
+      </div>
     </div>
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">LineChart</p>
-      <LineChart
-        data={monthlyData}
-        config={multiSeriesConfig}
-        xAxisKey="month"
-        lines={[
-          { dataKey: 'desktop', type: 'monotone' },
-          { dataKey: 'mobile', type: 'monotone' },
-        ]}
-      />
-    </div>
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">AreaChart</p>
-      <AreaChart
-        data={monthlyData}
-        config={multiSeriesConfig}
-        xAxisKey="month"
-        areas={[
-          { dataKey: 'desktop', type: 'monotone' },
-          { dataKey: 'mobile', type: 'monotone' },
-        ]}
-      />
-    </div>
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">PieChart</p>
-      <PieChart data={browserData} config={browserConfig} dataKey="visitors" nameKey="browser" />
-    </div>
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">RadarChart</p>
-      <RadarChart
-        data={radarData}
-        config={radarConfig}
-        angleKey="subject"
-        radars={[{ dataKey: 'A' }, { dataKey: 'B' }]}
-      />
-    </div>
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">RadialChart</p>
-      <RadialChart data={radialData} config={radialConfig} dataKey="visitors" />
-    </div>
-  </div>
-);
+  );
+};
 
 // ─── APP ───
 export const App = () => {

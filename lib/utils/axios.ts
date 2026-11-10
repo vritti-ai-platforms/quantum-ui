@@ -341,3 +341,9 @@ axios.interceptors.response.use(
 );
 
 export default axios;
+
+// The problem detail a failed request carries (RFC 9457), if any
+export function problemDetail(error: unknown): string | undefined {
+  const detail = Axios.isAxiosError(error) ? error.response?.data?.detail : undefined;
+  return typeof detail === 'string' ? detail : undefined;
+}

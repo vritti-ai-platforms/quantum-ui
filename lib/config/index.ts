@@ -34,6 +34,8 @@ export interface ViewsConfig {
   viewsEndpoint: string;
 
   statesEndpoint: string;
+
+  contextStatesEndpoint: string;
 }
 
 export interface TimeZoneConfig {
@@ -110,6 +112,7 @@ const defaultConfig: {
   views: {
     viewsEndpoint: 'table-views',
     statesEndpoint: 'table-states',
+    contextStatesEndpoint: 'context-states',
   },
 };
 

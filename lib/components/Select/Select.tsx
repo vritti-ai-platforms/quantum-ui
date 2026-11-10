@@ -51,6 +51,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
         loadingMore: selectData.loadingMore,
         hasMore: selectData.hasMore,
         searchQuery: selectData.searchQuery,
+        searching: selectData.searching,
         setSearchQuery: selectData.setSearchQuery,
         sentinelRef: selectData.sentinelRef,
       }

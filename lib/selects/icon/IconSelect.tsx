@@ -103,6 +103,7 @@ export const IconSelect = forwardRef<HTMLButtonElement, IconSelectProps>(
       loadingMore: false,
       hasMore,
       searchQuery: query,
+      searching: false,
       setSearchQuery: (q: string) => {
         setQuery(q);
         setLimit(PAGE_SIZE);

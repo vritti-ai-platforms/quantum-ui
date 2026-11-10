@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChartConfig } from '../../../shadcn/shadcnChart';
 import { formatCurrency, formatDate } from '../../utils/format';
+import { ChartKey } from '../Chart/ChartKey';
+import { useChart } from '../Chart/useChart';
+import type { LineChartSelection } from './LineChart';
 import { LineChart } from './LineChart';
 
-const data = [
+const months = [
   { month: 'Jan', revenue: 4200, expenses: 2400 },
   { month: 'Feb', revenue: 3800, expenses: 2100 },
   { month: 'Mar', revenue: 5100, expenses: 2800 },
@@ -12,23 +14,13 @@ const data = [
   { month: 'Jun', revenue: 7400, expenses: 3400 },
 ];
 
-const config: ChartConfig = {
-  revenue: { label: 'Revenue', color: 'var(--chart-1)' },
-  expenses: { label: 'Expenses', color: 'var(--chart-2)' },
-};
-
-const meta: Meta<typeof LineChart> = {
-  title: 'Charts/LineChart',
-  component: LineChart,
-};
-export default meta;
-type Story = StoryObj<typeof LineChart>;
-
-export const Default: Story = {
-  render: () => (
-    <LineChart data={data} config={config} xAxisKey="month" lines={[{ dataKey: 'revenue' }, { dataKey: 'expenses' }]} />
-  ),
-};
+const selectMonths = (data: typeof months) => ({
+  rows: data,
+  series: [
+    { id: 'revenue', label: 'Revenue' },
+    { id: 'expenses', label: 'Expenses' },
+  ],
+});
 
 const priceHistory = [
   { date: Date.UTC(2026, 0, 1), price: 120.5 },
@@ -39,112 +31,143 @@ const priceHistory = [
   { date: Date.UTC(2026, 9, 29), price: 131.2 },
 ];
 
-const priceConfig: ChartConfig = {
-  price: { label: 'Unit price', color: 'var(--chart-1)' },
-};
+type PricePoint = { date: number; price: number | null };
+
+const selectPrices = (data: PricePoint[]): LineChartSelection => ({
+  rows: data,
+  series: [{ id: 'price', label: 'Unit price' }],
+});
 
 const formatPrice = (value: number) => String(formatCurrency({ currency: 'INR', value: String(value) }).primary);
 const formatDay = (value: string | number) => String(formatDate(new Date(Number(value)).toISOString()).primary);
 
-export const PriceHistory: Story = {
-  render: () => (
-    <LineChart
-      data={priceHistory}
-      config={priceConfig}
-      xAxisKey="date"
-      lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
-      valueFormatter={formatPrice}
-      xAxisFormatter={formatDay}
-      xAxisType="time"
-      showLegend={false}
-    />
-  ),
+const MonthsChart = ({ footnote }: { footnote?: string }) => {
+  const chart = useChart({ data: months, select: selectMonths });
+  return <LineChart chart={chart} mode="compact" xAxisKey="month" footnote={footnote} />;
 };
 
-export const PriceHistoryConnectedGaps: Story = {
-  render: () => (
+const PriceChart = ({ data, connectNulls }: { data: PricePoint[]; connectNulls?: boolean }) => {
+  const chart = useChart({ data, select: selectPrices });
+  return (
     <LineChart
-      data={priceHistory}
-      config={priceConfig}
+      chart={chart}
+      mode="compact"
       xAxisKey="date"
-      lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
+      xAxisType="time"
+      curve="stepAfter"
+      dot
+      showLegend={false}
+      connectNulls={connectNulls}
       valueFormatter={formatPrice}
       xAxisFormatter={formatDay}
-      xAxisType="time"
-      showLegend={false}
-      connectNulls
     />
-  ),
+  );
 };
-
-const supplierAPrices = [
-  { date: Date.UTC(2026, 0, 1), price: 120.5 },
-  { date: Date.UTC(2026, 3, 1), price: 126 },
-  { date: Date.UTC(2026, 9, 29), price: 126 },
-];
-
-const supplierBPrices = [
-  { date: Date.UTC(2026, 0, 1), price: 98 },
-  { date: Date.UTC(2026, 5, 15), price: 104.25 },
-  { date: Date.UTC(2026, 9, 29), price: 104.25 },
-];
 
 const sharedPriceDomain: [number, number] = [0, 140];
+const selectSharedScale = (data: PricePoint[]): LineChartSelection => ({
+  ...selectPrices(data),
+  yDomain: sharedPriceDomain,
+});
 
-export const SharedYDomain: Story = {
-  render: () => (
-    <div className="grid w-full grid-cols-2 gap-4">
-      {[
-        { supplier: 'supplier-a', prices: supplierAPrices },
-        { supplier: 'supplier-b', prices: supplierBPrices },
-      ].map(({ supplier, prices }) => (
-        <LineChart
-          key={supplier}
-          data={prices}
-          config={priceConfig}
-          xAxisKey="date"
-          lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
-          valueFormatter={formatPrice}
-          xAxisFormatter={formatDay}
-          xAxisType="time"
-          showLegend={false}
-          yDomain={sharedPriceDomain}
-        />
-      ))}
-    </div>
-  ),
-};
-
-export const Loading: Story = {
-  render: () => (
+const SharedScaleChart = ({ data }: { data: PricePoint[] }) => {
+  const chart = useChart({ data, select: selectSharedScale });
+  return (
     <LineChart
-      data={[]}
-      config={priceConfig}
+      chart={chart}
+      mode="compact"
       xAxisKey="date"
-      lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
       xAxisType="time"
+      curve="stepAfter"
+      dot
       showLegend={false}
-      isLoading
-    />
-  ),
-};
-
-export const Empty: Story = {
-  render: () => (
-    <LineChart
-      data={[]}
-      config={priceConfig}
-      xAxisKey="date"
-      lines={[{ dataKey: 'price', type: 'stepAfter', dot: true }]}
+      valueFormatter={formatPrice}
       xAxisFormatter={formatDay}
+    />
+  );
+};
+
+const emptyWindow = (): LineChartSelection => ({
+  rows: [],
+  series: [{ id: 'price', label: 'Unit price' }],
+  xDomain: [Date.UTC(2026, 8, 5), Date.UTC(2026, 11, 5)],
+  markers: [{ x: Date.UTC(2026, 10, 5), label: 'Today' }],
+});
+
+// A request that never answers (loading), answers with nothing (empty), or fails (error)
+const STATE_FETCHERS = {
+  loading: () => new Promise<PricePoint[]>(() => {}),
+  empty: () => Promise.resolve<PricePoint[]>([]),
+  error: () => Promise.reject(new Error('Network down')),
+};
+
+const StateChart = ({ state }: { state: 'loading' | 'empty' | 'error' }) => {
+  const chart = useChart({
+    query: { queryKey: ['line-chart-story', state], queryFn: STATE_FETCHERS[state], retry: false },
+    select: emptyWindow,
+  });
+  return (
+    <LineChart
+      chart={chart}
+      mode="compact"
+      xAxisKey="date"
       xAxisType="time"
       showLegend={false}
-      xDomain={[Date.UTC(2026, 8, 5), Date.UTC(2026, 11, 5)]}
-      markers={[{ x: Date.UTC(2026, 10, 5), label: 'Today' }]}
+      xAxisFormatter={formatDay}
       emptyState={{
         title: 'No prices in this period',
         description: 'Widen the date range, or add a price on the Prices tab.',
       }}
     />
+  );
+};
+
+const KeyedChart = () => {
+  const chart = useChart({ data: months, select: selectMonths });
+  return (
+    <div className="flex flex-col gap-4">
+      <LineChart chart={chart} mode="compact" xAxisKey="month" showLegend={false} />
+      <ChartKey
+        chart={chart}
+        title="Latest Month"
+        value={(series) => String(months[months.length - 1][series.id as 'revenue' | 'expenses'])}
+      />
+    </div>
+  );
+};
+
+const meta: Meta = { title: 'Charts/LineChart' };
+export default meta;
+
+export const Default: StoryObj = { render: () => <MonthsChart /> };
+export const PriceHistory: StoryObj = { render: () => <PriceChart data={priceHistory} /> };
+export const PriceHistoryConnectedGaps: StoryObj = { render: () => <PriceChart data={priceHistory} connectNulls /> };
+export const SharedYDomain: StoryObj = {
+  render: () => (
+    <div className="grid w-full grid-cols-2 gap-4">
+      <SharedScaleChart
+        data={[
+          { date: Date.UTC(2026, 0, 1), price: 120.5 },
+          { date: Date.UTC(2026, 3, 1), price: 126 },
+          { date: Date.UTC(2026, 9, 29), price: 126 },
+        ]}
+      />
+      <SharedScaleChart
+        data={[
+          { date: Date.UTC(2026, 0, 1), price: 98 },
+          { date: Date.UTC(2026, 5, 15), price: 104.25 },
+          { date: Date.UTC(2026, 9, 29), price: 104.25 },
+        ]}
+      />
+    </div>
+  ),
+};
+export const Loading: StoryObj = { render: () => <StateChart state="loading" /> };
+export const Empty: StoryObj = { render: () => <StateChart state="empty" /> };
+export const LoadFailed: StoryObj = { render: () => <StateChart state="error" /> };
+export const WithKey: StoryObj = { render: () => <KeyedChart /> };
+export const WithFootnote: StoryObj = {
+  render: () => (
+    <MonthsChart footnote="Revenue is booked on invoice date; expenses on payment date, so a month's margin can lag its sales." />
   ),
 };

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { Children, cloneElement, isValidElement } from 'react';
-import type { FilterCondition } from '../../../types/table-filter';
+import type { FilterCondition } from '../../../types/conditions';
 
 type FilterElement = React.ReactElement<Record<string, unknown>>;
 
@@ -34,6 +34,9 @@ export interface FilterBinding {
   keepControlled?: boolean;
   /** Fields whose controls are cloned with `clearable={false}` */
   required?: ReadonlySet<string>;
+  loading?: boolean;
+  /** Told, per field, whether its control is still settling its value (picking a first option, checking a held one) */
+  onFieldSettling?: (field: string, settling: boolean) => void;
 }
 
 // Binds each named filter element to its condition, recursing through fragments and wrappers
@@ -49,6 +52,10 @@ export function bindFilters(children: React.ReactNode, binding: FilterBinding): 
         value: binding.conditions.find((c) => c.field === name) ?? null,
         onChange: (condition: FilterCondition | null | undefined) => binding.onChange(name, condition ?? null),
         ...(binding.required?.has(name) ? { clearable: false } : {}),
+        ...(binding.loading ? { loading: true } : {}),
+        ...(binding.onFieldSettling
+          ? { onSettlingChange: (settling: boolean) => binding.onFieldSettling?.(name, settling) }
+          : {}),
       });
     }
 

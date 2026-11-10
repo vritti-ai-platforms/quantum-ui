@@ -3,7 +3,7 @@ import { Download } from 'lucide-react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { DropdownMenu } from '../../DropdownMenu';
-import type { DataTableMeta, ImportExportConfig } from '../types';
+import type { ImportExportConfig } from '../types';
 import { exportSelectedRows } from '../utils';
 
 interface DataTableSelectionBarProps<TData> {
@@ -24,7 +24,7 @@ export function DataTableSelectionBar<TData>({
   exportHidden,
   exportLockTip,
 }: DataTableSelectionBarProps<TData>) {
-  const meta = table.options.meta as DataTableMeta | undefined;
+  const meta = table.options.meta;
   const selectedRows = table.getFilteredSelectedRowModel().rows;
   const count = selectedRows.length;
   const singular = meta?.singular ?? 'row';
@@ -37,7 +37,7 @@ export function DataTableSelectionBar<TData>({
   // fallback gave
   const exportConfig: ImportExportConfig<TData> = importExport ?? {
     columns: table
-      .getAllColumns()
+      .getAllLeafColumns()
       .filter((column) => 'accessorKey' in column.columnDef && column.getIsVisible())
       .map((column) => ({
         key: column.id,

@@ -21,14 +21,21 @@ export interface UseSelectReturn {
   options: SelectOption[];
   groups: SelectGroup[];
   loading: boolean;
+  resolving: boolean;
   loadingMore: boolean;
   hasMore: boolean;
   searchQuery: string;
+  searching: boolean;
+  /** Held values the server no longer has — deleted, or no longer offered for these params */
+  missingValues: SelectValue[];
+  /** The lookup of the held values hasn't answered yet, so whether they still exist isn't known */
+  checkingValues: boolean;
   setSearchQuery: (q: string) => void;
   sentinelRef: (node?: Element | null) => void;
 }
 
 const NOOP_REF = () => {};
+const NO_VALUES: SelectValue[] = [];
 
 // Stable JSON serialization for query keys (order-independent)
 export function stableStringify(obj: object | undefined): string {
@@ -104,7 +111,13 @@ export function useSelect({
   );
 
   // Query 1: Resolve selected values to full option objects
-  const { data: resolvedSelected } = useQuery({
+  const {
+    data: resolvedSelected,
+    isSuccess: isResolveSuccess,
+    isError: isResolveError,
+    isFetching: isResolveFetching,
+    isPlaceholderData: isResolvePlaceholder,
+  } = useQuery({
     queryKey: [
       'select-resolve',
       optionsEndpoint,
@@ -124,6 +137,20 @@ export function useSelect({
     staleTime: 5 * 60_000,
     placeholderData: keepPreviousData,
   });
+
+  // The lookup has answered for exactly the held values — found or not, or failed (a failed lookup drops nothing)
+  const hasHeldValues = isAsync && (resolveValues?.length ?? 0) > 0;
+  const hasAnswered = (isResolveSuccess || isResolveError) && !isResolveFetching && !isResolvePlaceholder;
+  const checkingValues = hasHeldValues && !hasAnswered;
+
+  // The held values the lookup above didn't return. Only counted once a lookup for exactly these values has succeeded, so
+  // a failed, pending or earlier lookup never marks a value as gone.
+  const missingValues = useMemo(() => {
+    const hasSettledLookup = isResolveSuccess && !isResolveFetching && !isResolvePlaceholder;
+    if (!hasSettledLookup || !resolveValues?.length) return NO_VALUES;
+    const found = new Set((resolvedSelected?.options ?? []).map((option) => String(option.value)));
+    return resolveValues.filter((value) => typeof value !== 'boolean' && !found.has(String(value)));
+  }, [isResolveSuccess, isResolveFetching, isResolvePlaceholder, resolveValues, resolvedSelected]);
 
   // Query 2: Paginated search results, excluding selected IDs
   const { data, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
@@ -191,9 +218,13 @@ export function useSelect({
       options: staticOptions ?? [],
       groups: staticGroups ?? [],
       loading: false,
+      resolving: false,
       loadingMore: false,
       hasMore: false,
       searchQuery,
+      searching: false,
+      missingValues: NO_VALUES,
+      checkingValues: false,
       setSearchQuery,
       sentinelRef: NOOP_REF,
     };
@@ -203,9 +234,13 @@ export function useSelect({
     options: fetchedOptions,
     groups: fetchedGroups,
     loading: isFetching && !isFetchingNextPage && !hasSearchResultsData,
+    resolving: isResolveFetching && (isResolvePlaceholder || resolvedSelected == null),
     loadingMore: isFetchingNextPage,
     hasMore: hasNextPage ?? false,
     searchQuery,
+    searching: searchQuery !== debouncedSearch || (isFetching && !isFetchingNextPage),
+    missingValues,
+    checkingValues,
     setSearchQuery,
     sentinelRef,
   };

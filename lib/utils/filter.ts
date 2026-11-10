@@ -1,4 +1,4 @@
-import type { FilterCurrencyValue, FilterOperator, FilterValue } from '../types/table-filter';
+import type { FilterCurrencyValue, FilterOperator, FilterValue } from '../types/conditions';
 
 type Comparable = string | number | FilterCurrencyValue;
 export type Condition<O extends FilterOperator, V extends FilterValue> = { field: string; operator: O; value: V };

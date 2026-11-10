@@ -6,7 +6,7 @@ import { Calendar } from '../../../shadcn/shadcnCalendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
 import { cn } from '../../../shadcn/utils';
 import { useLocale } from '../../hooks/useLocale';
-import type { FilterCondition } from '../../types/table-filter';
+import type { FilterCondition } from '../../types/conditions';
 import { RELATIVE_DAYS, RelativeDayStrip, relativeDayOf, resolveRelative } from '../DatePicker/RelativeDayStrip';
 import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../Select/contextAnchor';
 
@@ -23,6 +23,7 @@ interface DateFilterBaseProps {
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and value in a
    * quiet outlined trigger. */
   mode?: FilterMode;
+  loading?: boolean;
   className?: string;
 }
 
@@ -49,6 +50,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({
   onChange: onChangeProp,
   defaultToToday,
   mode = 'filter',
+  loading = false,
   clearable = true,
   className,
 }) => {
@@ -121,7 +123,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({
         >
           <CalendarIcon className={cn('size-3.5 shrink-0', isContext ? 'text-muted-foreground' : 'opacity-70')} />
           {isContext ? (
-            <ContextAnchorText label={label} value={valueText} />
+            <ContextAnchorText loading={loading} label={label} value={valueText} />
           ) : (
             <span className="truncate">{valueText ? `${label}: ${valueText}` : label}</span>
           )}

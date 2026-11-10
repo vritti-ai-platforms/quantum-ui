@@ -1,6 +1,6 @@
 import type { CellContext, ColumnDef, HeaderContext, Row, SortingState } from '@tanstack/react-table';
 import * as xlsxLib from 'xlsx';
-import type { SortCondition } from '../../types/table-filter';
+import type { SortCondition } from '../../types/conditions';
 import { Checkbox } from '../Checkbox';
 import type { ImportExportConfig } from './types';
 

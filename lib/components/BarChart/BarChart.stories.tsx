@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChartConfig } from '../../../shadcn/shadcnChart';
+import { useChart } from '../Chart/useChart';
 import { BarChart } from './BarChart';
 
-const data = [
+const rows = [
   { month: 'Jan', desktop: 186, mobile: 80 },
   { month: 'Feb', desktop: 305, mobile: 200 },
   { month: 'Mar', desktop: 237, mobile: 120 },
@@ -11,20 +11,20 @@ const data = [
   { month: 'Jun', desktop: 214, mobile: 140 },
 ];
 
-const config: ChartConfig = {
-  desktop: { label: 'Desktop', color: 'var(--chart-1)' },
-  mobile: { label: 'Mobile', color: 'var(--chart-2)' },
+const selectDevices = (data: typeof rows) => ({
+  rows: data,
+  series: [
+    { id: 'desktop', label: 'Desktop' },
+    { id: 'mobile', label: 'Mobile' },
+  ],
+});
+
+const DevicesChart = () => {
+  const chart = useChart({ data: rows, select: selectDevices });
+  return <BarChart chart={chart} mode="compact" xAxisKey="month" />;
 };
 
-const meta: Meta<typeof BarChart> = {
-  title: 'Charts/BarChart',
-  component: BarChart,
-};
+const meta: Meta = { title: 'Charts/BarChart' };
 export default meta;
-type Story = StoryObj<typeof BarChart>;
 
-export const Default: Story = {
-  render: () => (
-    <BarChart data={data} config={config} xAxisKey="month" bars={[{ dataKey: 'desktop' }, { dataKey: 'mobile' }]} />
-  ),
-};
+export const Default: StoryObj = { render: () => <DevicesChart /> };

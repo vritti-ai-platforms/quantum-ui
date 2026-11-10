@@ -5,7 +5,6 @@ import { Input } from '../../../../shadcn/shadcnInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shadcn/shadcnSelect';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
-import type { DataTableMeta } from '../types';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -28,7 +27,7 @@ export function DataTablePagination<TData>({
   const rowsOnPage = table.getRowModel().rows.length;
   const start = totalRows === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = start + rowsOnPage - (rowsOnPage > 0 ? 1 : 0);
-  const meta = table.options.meta as DataTableMeta | undefined;
+  const meta = table.options.meta;
   const singular = meta?.singular ?? 'Row';
   const plural = meta?.plural ?? 'Rows';
 

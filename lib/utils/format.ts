@@ -65,7 +65,7 @@ export const formatCurrency = (
   if (exchangeRate != null && Number.isFinite(exchangeRate) && workspaceCurrency && workspaceCurrency !== currency) {
     const workspaceAmount = new Decimal(amountStr).times(exchangeRate).toNumber();
     if (Number.isFinite(workspaceAmount)) {
-      return { primary, secondary: `≈ ${formatCurrencyMajor(workspaceAmount, workspaceCurrency)}` };
+      return { primary, secondary: `(${formatCurrencyMajor(workspaceAmount, workspaceCurrency)})` };
     }
   }
   return { primary };

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChartConfig } from '../../../shadcn/shadcnChart';
+import { useChart } from '../Chart/useChart';
 import { RadarChart } from './RadarChart';
 
-const data = [
+const rows = [
   { skill: 'Speed', team: 120, baseline: 100 },
   { skill: 'Reliability', team: 98, baseline: 110 },
   { skill: 'Comfort', team: 86, baseline: 130 },
@@ -11,20 +11,20 @@ const data = [
   { skill: 'Cost', team: 65, baseline: 85 },
 ];
 
-const config: ChartConfig = {
-  team: { label: 'Team', color: 'var(--chart-1)' },
-  baseline: { label: 'Baseline', color: 'var(--chart-2)' },
+const selectSkills = (data: typeof rows) => ({
+  rows: data,
+  series: [
+    { id: 'team', label: 'Team' },
+    { id: 'baseline', label: 'Baseline' },
+  ],
+});
+
+const SkillsChart = () => {
+  const chart = useChart({ data: rows, select: selectSkills });
+  return <RadarChart chart={chart} mode="compact" angleKey="skill" />;
 };
 
-const meta: Meta<typeof RadarChart> = {
-  title: 'Charts/RadarChart',
-  component: RadarChart,
-};
+const meta: Meta = { title: 'Charts/RadarChart' };
 export default meta;
-type Story = StoryObj<typeof RadarChart>;
 
-export const Default: Story = {
-  render: () => (
-    <RadarChart data={data} config={config} angleKey="skill" radars={[{ dataKey: 'team' }, { dataKey: 'baseline' }]} />
-  ),
-};
+export const Default: StoryObj = { render: () => <SkillsChart /> };

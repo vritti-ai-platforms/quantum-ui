@@ -1,8 +1,9 @@
 import type { SortingState } from '@tanstack/react-table';
 import { deepEqual } from 'fast-equals';
 import { useCallback, useMemo } from 'react';
-import type { FilterCondition, SearchState, TableViewState } from '../../../types/table-filter';
-import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
+import type { FilterCondition, SearchState } from '../../../types/conditions';
+import type { TableState } from '../../../types/table-state';
+import { EMPTY_TABLE_STATE } from '../../../types/table-state';
 import { sortConditionsToTanstack, tanstackToSortConditions } from '../utils';
 import { useDataTableStore, viewStatesEqual } from './store';
 
@@ -36,7 +37,7 @@ export function useTableSlice(slug: string) {
 
   // Pre-bind slug so callers don't repeat it on every call
   const updateActiveState = useCallback(
-    (updater: (prev: TableViewState) => TableViewState) => _updateActiveState(slug, updater),
+    (updater: (prev: TableState) => TableState) => _updateActiveState(slug, updater),
     [slug, _updateActiveState],
   );
 

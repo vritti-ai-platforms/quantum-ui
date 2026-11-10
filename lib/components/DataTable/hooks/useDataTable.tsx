@@ -2,24 +2,36 @@ import type { ColumnDef, Row } from '@tanstack/react-table';
 import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import { deepEqual } from 'fast-equals';
 import pluralize from 'pluralize-esm';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { DensityType, FilterCondition, TableViewState } from '../../../types/table-filter';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { FilterCondition } from '../../../types/conditions';
+import type { DensityType, TableState } from '../../../types/table-state';
+import { hasEveryDefault, holdsResetDefaults, readValue, withDefaults } from '../../../utils/conditions';
 import { useDataTableStore } from '../store/store';
 import { useTableSlice } from '../store/useTableSlice';
+import type { DataTableInstance } from '../types';
 import { useAutoUpsert } from './useAutoUpsert';
 
 export interface DataTableServerState<TData> {
   result?: TData[];
   count?: number;
-  state?: TableViewState;
+  state?: TableState;
   activeViewId?: string | null;
+}
+
+export interface DataTableQuery<TData> {
+  data?: DataTableServerState<TData>;
+  isLoading?: boolean;
+  isFetching?: boolean;
+  isError?: boolean;
+  error?: unknown;
+  refetch?: () => unknown;
 }
 
 interface UseDataTableOptions<TData> {
   columns: ColumnDef<TData, unknown>[];
   slug: string;
   label: string;
-  serverState?: DataTableServerState<TData>;
+  query?: DataTableQuery<TData>;
   enableSorting?: boolean;
   enableMultiSort?: boolean;
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
@@ -30,16 +42,45 @@ interface UseDataTableOptions<TData> {
   /** Context bar defaults: each fills its field whenever `filters.context` is missing it — on the first load, on a view
    * switch, or when the default first becomes available. A context control with a default can't be cleared. */
   defaultContext?: FilterCondition[];
+  resetOnOpen?: string[];
 }
 
 const NO_CONDITIONS: FilterCondition[] = [];
+const NO_FIELDS: string[] = [];
+
+// The leaf column ids in definition order, resolved the way TanStack names columns
+function leafColumnIds<TData>(columns: ColumnDef<TData, unknown>[]): string[] {
+  return columns.flatMap((column) => {
+    if ('columns' in column && column.columns) return leafColumnIds(column.columns);
+    if (column.id) return [column.id];
+    if ('accessorKey' in column && typeof column.accessorKey === 'string')
+      return [column.accessorKey.replace(/\./g, '_')];
+    return typeof column.header === 'string' ? [column.header] : [];
+  });
+}
+
+// A saved column order that predates a column: the new one goes after its neighbour in the definitions (TanStack would
+// put it last, past the actions and outside its group) and columns no longer defined drop out
+function withDefinedColumns(savedOrder: string[], definedIds: string[]): string[] {
+  if (savedOrder.length === 0) return savedOrder;
+  const order = savedOrder.filter((id) => definedIds.includes(id));
+  definedIds.forEach((id, index) => {
+    if (order.includes(id)) return;
+    const previous = definedIds
+      .slice(0, index)
+      .reverse()
+      .find((defined) => order.includes(defined));
+    order.splice(previous ? order.indexOf(previous) + 1 : 0, 0, id);
+  });
+  return order;
+}
 
 // Creates a fully configured TanStack Table instance with persisted state
 export function useDataTable<TData>({
   columns,
   slug,
   label,
-  serverState,
+  query,
   enableMultiSort = true,
   enableRowSelection = true,
   enableHiding = true,
@@ -47,7 +88,9 @@ export function useDataTable<TData>({
   enableColumnResizing = true,
   onStatePush,
   defaultContext,
-}: UseDataTableOptions<TData>) {
+  resetOnOpen = NO_FIELDS,
+}: UseDataTableOptions<TData>): DataTableInstance<TData> {
+  const serverState = query?.data;
   const {
     // State
     activeState,
@@ -93,22 +136,49 @@ export function useDataTable<TData>({
   // Ready to save once the stored state is shown — at once for a table whose server keeps no state
   const isReady = loadedSlug === slug || (serverState != null && serverState.state == null);
 
-  // Fills each context default the shown state is missing, as though the user picked it, so it is saved and refetched
+  // When the stored state is shown, each default it lacks is filled in as though the user picked it, so it is saved and
+  // the rows refetched. On the first fill of a visit, a reset-on-open default also replaces the stored value.
   const context = activeState.filters.context;
+  const openedSlug = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (loadedSlug !== slug) return;
-    for (const condition of defaults) {
-      if (!context.some((c) => c.field === condition.field)) setContext(condition.field, condition);
-    }
-  }, [loadedSlug, slug, defaults, context, setContext]);
+    const isOpening = openedSlug.current !== slug;
+    openedSlug.current = slug;
+    const filled = withDefaults(context, defaults, { isOpening, resetOnOpen });
+    const addedOrReplaced = filled.filter((condition) => !context.includes(condition));
+    for (const condition of addedOrReplaced) setContext(condition.field, condition);
+  }, [loadedSlug, slug, defaults, resetOnOpen, context, setContext]);
 
-  // The rows on screen were fetched without a context default while the server's echoed state still lacks it
-  const isAwaitingDefaults =
-    serverState?.state != null &&
-    defaults.some((d) => !serverState.state?.filters.context.some((c) => c.field === d.field));
+  const contextValue = useCallback((field: string) => readValue(context, field), [context]);
+
+  // The context the server echoes back — the one the rows on screen were fetched with
+  const echoedContext = serverState?.state?.filters.context;
+
+  // The opening reset is done once the server echoes every reset-on-open default, or once the user picks a value
+  const [resetDoneSlug, setResetDoneSlug] = useState<string | null>(null);
+  const isAwaitingReset =
+    resetDoneSlug !== slug && echoedContext != null && !holdsResetDefaults(echoedContext, defaults, resetOnOpen);
+  useLayoutEffect(() => {
+    if (echoedContext != null && !isAwaitingReset && resetDoneSlug !== slug) setResetDoneSlug(slug);
+  }, [echoedContext, isAwaitingReset, resetDoneSlug, slug]);
+  const setUserContext = useCallback(
+    (...args: Parameters<typeof setContext>) => {
+      setResetDoneSlug(slug);
+      setContext(...args);
+    },
+    [slug, setContext],
+  );
+
+  // The rows on screen were fetched without a default, or with a value the opening reset replaces — keep the skeleton
+  const isAwaitingDefaults = isAwaitingReset || (echoedContext != null && !hasEveryDefault(echoedContext, defaults));
 
   // Column state — defaults come from EMPTY_TABLE_STATE via useTableSlice and loadViewState merge
-  const { columnVisibility, columnOrder, columnSizing, columnPinning, lockedColumnSizing } = activeState;
+  const { columnVisibility, columnSizing, columnPinning, lockedColumnSizing } = activeState;
+  const definedIds = useMemo(() => leafColumnIds(columns), [columns]);
+  const columnOrder = useMemo(
+    () => withDefinedColumns(activeState.columnOrder, definedIds),
+    [activeState.columnOrder, definedIds],
+  );
   // Filter + UI state
   const { filterOrder, filterVisibility, density } = activeState;
 
@@ -149,9 +219,11 @@ export function useDataTable<TData>({
       // Filters
       setFilters: (filters: Parameters<typeof setFilters>[0]) => setFilters(filters),
       setFilter,
-      setContext,
+      setContext: setUserContext,
+      contextValue,
       defaultContext: defaults,
       isAwaitingDefaults,
+      isLoaded: isReady,
 
       // Search
       search: activeState.search,
@@ -171,15 +243,17 @@ export function useDataTable<TData>({
       updateActiveState,
       setFilters,
       setFilter,
-      setContext,
+      setUserContext,
+      contextValue,
       defaults,
       isAwaitingDefaults,
+      isReady,
       activeState.search,
       setSearch,
     ],
   );
 
-  useAutoUpsert(slug, isReady, onStatePush);
+  const isSyncing = useAutoUpsert(slug, isReady, onStatePush);
 
   const data = serverState?.result ?? [];
   const totalRows = serverState?.count;
@@ -219,7 +293,7 @@ export function useDataTable<TData>({
       updateActiveState((prev) => ({ ...prev, columnPinning: newVal }));
     },
     onColumnOrderChange: (updater) => {
-      const current = activeState.columnOrder;
+      const current = columnOrder;
       const newVal = typeof updater === 'function' ? updater(current) : updater;
       updateActiveState((prev) => ({ ...prev, columnOrder: newVal }));
     },
@@ -244,5 +318,16 @@ export function useDataTable<TData>({
     meta,
   });
 
-  return { table, context, isLoaded: isReady };
+  // What <DataTable table={…}> renders: the table with the query's loading and error states
+  return {
+    table,
+    isLoading: query?.isLoading ?? false,
+    isFetching: query?.isFetching ?? false,
+    isSyncing,
+    isError: query?.isError ?? false,
+    error: query?.error,
+    refetch: query?.refetch,
+    contextValue,
+    isLoaded: isReady,
+  };
 }

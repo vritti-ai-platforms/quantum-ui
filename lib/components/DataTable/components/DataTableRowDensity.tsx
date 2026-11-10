@@ -3,7 +3,7 @@ import { AlignJustify, Check } from 'lucide-react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { DropdownMenu } from '../../DropdownMenu';
-import type { DataTableMeta, DensityType } from '../types';
+import type { DensityType } from '../types';
 
 interface DataTableRowDensityProps {
   table: Table<unknown>;
@@ -18,9 +18,7 @@ const densityOptions: { value: DensityType; label: string; description: string }
 
 // Renders a row density toggle dropdown with compact/normal/comfortable options
 export function DataTableRowDensity({ table, className }: DataTableRowDensityProps) {
-  const meta = table.options.meta as DataTableMeta;
-  const density = meta.density;
-  const setDensity = meta.setDensity;
+  const meta = table.options.meta;
 
   return (
     <DropdownMenu
@@ -38,10 +36,12 @@ export function DataTableRowDensity({ table, className }: DataTableRowDensityPro
         type: 'custom' as const,
         id: option.value,
         asMenuItem: true,
-        onClick: () => setDensity(option.value),
+        onClick: () => meta?.setDensity(option.value),
         render: (
           <div className="flex items-start gap-2 py-0.5">
-            <Check className={cn('h-4 w-4 mt-0.5 shrink-0', density === option.value ? 'opacity-100' : 'opacity-0')} />
+            <Check
+              className={cn('h-4 w-4 mt-0.5 shrink-0', meta?.density === option.value ? 'opacity-100' : 'opacity-0')}
+            />
             <div>
               <div className="font-medium text-sm">{option.label}</div>
               <div className="text-xs text-muted-foreground">{option.description}</div>

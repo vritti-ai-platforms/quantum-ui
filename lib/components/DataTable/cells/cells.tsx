@@ -34,13 +34,14 @@ export interface CurrencyCellProps {
   className?: string;
 }
 
+// The amount, with the workspace-currency equivalent on its own muted line when it is converted
 export const CurrencyCell: React.FC<CurrencyCellProps> = ({ value, exchangeRate, className }) => {
   const fmt = useFormatters();
   const { primary, secondary } = fmt.currency(value, { exchangeRate });
   return (
-    <span className={['font-mono', className].filter(Boolean).join(' ')}>
+    <span className={['inline-flex flex-col font-mono', className].filter(Boolean).join(' ')}>
       {primary}
-      {secondary && <span className="ml-1 text-xs text-muted-foreground">{secondary}</span>}
+      {secondary && <span className="text-xs text-muted-foreground">{secondary}</span>}
     </span>
   );
 };

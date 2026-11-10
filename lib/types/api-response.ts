@@ -1,4 +1,4 @@
-import type { TableViewState } from './table-filter';
+import type { TableState } from './table-state';
 
 export type MutationResponse = {
   success: boolean;
@@ -19,6 +19,6 @@ export interface CreateResponse<T> {
 export interface TableResponse<T> {
   result: T[];
   count: number;
-  state: TableViewState;
+  state: TableState;
   activeViewId: string | null;
 }

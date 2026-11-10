@@ -15,7 +15,7 @@ import {
   toggleShareView,
   updateView,
 } from '../../../services/table-views.service';
-import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
+import { EMPTY_TABLE_STATE } from '../../../types/table-state';
 import { Button } from '../../Button';
 import { Dialog, DialogActions } from '../../Dialog';
 import { DropdownMenu } from '../../DropdownMenu';

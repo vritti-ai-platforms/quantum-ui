@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChartConfig } from '../../../shadcn/shadcnChart';
+import { useChart } from '../Chart/useChart';
 import { PieChart } from './PieChart';
 
-const data = [
+const rows = [
   { browser: 'chrome', visitors: 275 },
   { browser: 'safari', visitors: 200 },
   { browser: 'firefox', visitors: 187 },
@@ -10,21 +10,26 @@ const data = [
   { browser: 'other', visitors: 90 },
 ];
 
-const config: ChartConfig = {
-  chrome: { label: 'Chrome', color: 'var(--chart-1)' },
-  safari: { label: 'Safari', color: 'var(--chart-2)' },
-  firefox: { label: 'Firefox', color: 'var(--chart-3)' },
-  edge: { label: 'Edge', color: 'var(--chart-4)' },
-  other: { label: 'Other', color: 'var(--chart-5)' },
+const LABELS: Record<string, string> = {
+  chrome: 'Chrome',
+  safari: 'Safari',
+  firefox: 'Firefox',
+  edge: 'Edge',
+  other: 'Other',
 };
 
-const meta: Meta<typeof PieChart> = {
-  title: 'Charts/PieChart',
-  component: PieChart,
+const selectBrowsers = (data: typeof rows) => ({
+  rows: data,
+  series: data.map((row) => ({ id: row.browser, label: LABELS[row.browser] })),
+});
+
+const BrowsersChart = ({ innerRadius }: { innerRadius?: string }) => {
+  const chart = useChart({ data: rows, select: selectBrowsers });
+  return <PieChart chart={chart} mode="compact" dataKey="visitors" nameKey="browser" innerRadius={innerRadius} />;
 };
+
+const meta: Meta = { title: 'Charts/PieChart' };
 export default meta;
-type Story = StoryObj<typeof PieChart>;
 
-export const Default: Story = {
-  render: () => <PieChart data={data} config={config} dataKey="visitors" nameKey="browser" />,
-};
+export const Default: StoryObj = { render: () => <BrowsersChart /> };
+export const Donut: StoryObj = { render: () => <BrowsersChart innerRadius="60%" /> };

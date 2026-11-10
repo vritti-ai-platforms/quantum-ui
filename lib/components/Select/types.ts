@@ -27,6 +27,8 @@ export interface AsyncSelectState {
   loadingMore: boolean;
   hasMore: boolean;
   searchQuery: string;
+  /** The options don't answer the typed search yet — it waits out the debounce or is being fetched */
+  searching: boolean;
   setSearchQuery: (q: string) => void;
   sentinelRef: (node?: Element | null) => void;
 }

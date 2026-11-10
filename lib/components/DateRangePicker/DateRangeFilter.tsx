@@ -7,7 +7,7 @@ import { Calendar } from '../../../shadcn/shadcnCalendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
 import { cn } from '../../../shadcn/utils';
 import { useLocale } from '../../hooks/useLocale';
-import type { FilterCondition } from '../../types/table-filter';
+import type { FilterCondition } from '../../types/conditions';
 import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../Select/contextAnchor';
 
 const ISO = 'yyyy-MM-dd';
@@ -22,6 +22,7 @@ interface DateRangeFilterBaseProps {
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and range in a
    * quiet outlined trigger. */
   mode?: FilterMode;
+  loading?: boolean;
   /** How many months the calendar shows side by side. Defaults to `2`. */
   numberOfMonths?: number;
   /** The earliest day that can be picked */
@@ -74,6 +75,7 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   value,
   onChange: onChangeProp,
   mode = 'filter',
+  loading = false,
   clearable = true,
   numberOfMonths = 2,
   minDate,
@@ -163,7 +165,7 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         >
           <CalendarIcon className={cn('size-3.5 shrink-0', isContext ? 'text-muted-foreground' : 'opacity-70')} />
           {isContext ? (
-            <ContextAnchorText label={label} value={valueText} placeholder={placeholder} />
+            <ContextAnchorText loading={loading} label={label} value={valueText} placeholder={placeholder} />
           ) : (
             <span className="truncate">{valueText ? `${label}: ${valueText}` : label}</span>
           )}

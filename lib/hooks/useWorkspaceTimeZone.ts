@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { getWorkspaceTimeZone, resolveTimeZone } from '../utils/timezone';
+import { workspaceTimeZone } from '../utils/timezone';
 
 // Returns the IANA timezone of the active workspace, re-resolving when the route changes (host resolver → user
 // timezone → browser timezone). Vritti hosts give sites their own timezone; org, site-group and legal-entity
@@ -7,5 +7,5 @@ import { getWorkspaceTimeZone, resolveTimeZone } from '../utils/timezone';
 // use that site's timezone instead.
 export function useWorkspaceTimeZone(siteId?: string | null): string | null {
   useLocation();
-  return (siteId ? getWorkspaceTimeZone(siteId) : null) ?? resolveTimeZone();
+  return workspaceTimeZone(siteId);
 }

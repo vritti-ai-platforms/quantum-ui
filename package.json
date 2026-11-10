@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.6.3",
+  "version": "0.6.4",
   "type": "module",
   "sideEffects": false,
   "repository": {
@@ -80,6 +80,10 @@
       "types": "./dist/lib/components/BarChart/index.d.ts",
       "import": "./dist/components/BarChart.js"
     },
+    "./Chart": {
+      "types": "./dist/lib/components/Chart/index.d.ts",
+      "import": "./dist/components/Chart.js"
+    },
     "./LineChart": {
       "types": "./dist/lib/components/LineChart/index.d.ts",
       "import": "./dist/components/LineChart.js"
@@ -107,6 +111,10 @@
     "./DataTable": {
       "types": "./dist/lib/components/DataTable/index.d.ts",
       "import": "./dist/components/DataTable.js"
+    },
+    "./ContextBar": {
+      "types": "./dist/lib/components/ContextBar/index.d.ts",
+      "import": "./dist/components/ContextBar.js"
     },
     "./TextField": {
       "types": "./dist/lib/components/TextField/index.d.ts",
@@ -328,9 +336,13 @@
       "types": "./dist/lib/components/Field/index.d.ts",
       "import": "./dist/shadcn/shadcnField.js"
     },
-    "./types/table-filter": {
-      "types": "./dist/lib/types/table-filter.d.ts",
-      "import": "./dist/types/table-filter.js"
+    "./types/conditions": {
+      "types": "./dist/lib/types/conditions.d.ts",
+      "import": "./dist/types/conditions.js"
+    },
+    "./types/table-state": {
+      "types": "./dist/lib/types/table-state.d.ts",
+      "import": "./dist/types/table-state.js"
     },
     "./types/utility": {
       "types": "./dist/lib/types/utility.d.ts",
@@ -371,6 +383,10 @@
     "./currency": {
       "types": "./dist/lib/utils/currency.d.ts",
       "import": "./dist/utils/currency.js"
+    },
+    "./country": {
+      "types": "./dist/lib/utils/country.d.ts",
+      "import": "./dist/utils/country.js"
     },
     "./pluralize": {
       "types": "./dist/lib/utils/pluralize.d.ts",

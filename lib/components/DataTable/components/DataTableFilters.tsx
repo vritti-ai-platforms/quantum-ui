@@ -4,11 +4,10 @@ import { Eye, EyeOff, GripVertical, Settings } from 'lucide-react';
 import { isValidElement, useMemo } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../shadcn/utils';
-import type { FilterCondition } from '../../../types/table-filter';
+import type { FilterCondition } from '../../../types/conditions';
 import { Button } from '../../Button';
 import { SortableItem, SortableList } from '../../Sortable';
 import { useDataTableStore } from '../store/store';
-import type { DataTableMeta } from '../types';
 import { bindFilters, filterLabel, filterName } from './bindFilters';
 
 // Extracts id and label from a ReactNode's props
@@ -76,7 +75,7 @@ const NO_FILTERS: FilterCondition[] = [];
 
 // Renders the active filter bar with ordered/visible filters and a settings popover
 export function DataTableFilters<TData>({ filters, table }: DataTableFiltersProps<TData>) {
-  const metaRaw = table.options.meta as DataTableMeta | undefined;
+  const metaRaw = table.options.meta;
   const slug = metaRaw?.slug ?? '';
 
   const activeFilters = useDataTableStore((s) => s.tables[slug]?.activeState?.filters.panel ?? NO_FILTERS);

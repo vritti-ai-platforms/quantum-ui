@@ -3,7 +3,7 @@ import { TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDialog } from '../../../hooks/useDialog';
 import { fetchViews, updateView } from '../../../services/table-views.service';
-import { EMPTY_TABLE_STATE } from '../../../types/table-filter';
+import { EMPTY_TABLE_STATE } from '../../../types/table-state';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
 import { useDataTableStore, viewStatesEqual } from '../store/store';

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { flexRender } from '@tanstack/react-table';
+import { type Column, flexRender } from '@tanstack/react-table';
 import { ArrowDownToLine, ArrowUpFromLine, Funnel, TableProperties } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -7,7 +7,8 @@ import { Separator } from '../../../shadcn/shadcnSeparator';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shadcn/shadcnTable';
 import { cn } from '../../../shadcn/utils';
 import { useDialog } from '../../hooks/useDialog';
-import { EMPTY_TABLE_STATE, type FilterCondition } from '../../types/table-filter';
+import type { FilterCondition } from '../../types/conditions';
+import { EMPTY_TABLE_STATE } from '../../types/table-state';
 import { axios } from '../../utils/axios';
 import { Button } from '../Button';
 import { DropdownMenu } from '../DropdownMenu';
@@ -18,6 +19,7 @@ import { DataTableColumnHeader } from './components/DataTableColumnHeader';
 import { DataTableEmpty } from './components/DataTableEmpty';
 import { DataTableFilters } from './components/DataTableFilters';
 import { DataTableImportDialog } from './components/DataTableImportDialog';
+import { DataTableLoadFailed, DataTableRefreshFailed } from './components/DataTableLoadStates';
 import { DataTablePagination } from './components/DataTablePagination';
 import { DataTableRowDensity } from './components/DataTableRowDensity';
 import { DataTableSearch } from './components/DataTableSearch';
@@ -26,7 +28,7 @@ import { DataTableViewOptions } from './components/DataTableViewOptions';
 import { DataTableViewsMenu } from './components/DataTableViewsMenu';
 import { DataTableViewTabs } from './components/DataTableViewTabs';
 import { useDataTableStore } from './store/store';
-import type { DataTableMeta, DataTableProps, DensityType, SearchState } from './types';
+import type { DataTableProps, DensityType, SearchState } from './types';
 import { downloadBlob } from './utils';
 
 const densityClasses: Record<DensityType, string> = {
@@ -44,6 +46,31 @@ const MODE_HEIGHTS = {
 };
 
 // Builds "No results match your search, your filters and this view." from the active flags
+// Whether a column, or a column in its group, takes the width the others leave instead of a fixed width
+function grows<TData>(column: Column<TData, unknown>): boolean {
+  return column.getLeafColumns().some((leaf) => leaf.columnDef.meta?.grow === true);
+}
+
+// Where a column sits in its column group, by the group's visible columns; an ungrouped column is in none
+function groupEdges<TData>(column: Column<TData, unknown>): { inGroup: boolean; isFirst: boolean; isLast: boolean } {
+  const leaves = column.parent?.getLeafColumns().filter((leaf) => leaf.getIsVisible()) ?? [];
+  if (leaves.length === 0) return { inGroup: false, isFirst: false, isLast: false };
+  return { inGroup: true, isFirst: leaves[0].id === column.id, isLast: leaves[leaves.length - 1].id === column.id };
+}
+
+// A group's label set in a rule whose ends drop onto the first and last columns it spans: ┌── QUANTITY ──┐
+function GroupBracket({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-w-0 items-end gap-2 px-2">
+      <span aria-hidden className="h-2 min-w-1 flex-1 rounded-tl-sm border-t border-l border-primary/50" />
+      <span className="min-w-0 truncate pb-0.5 text-xs leading-none font-semibold tracking-wider text-primary uppercase">
+        {children}
+      </span>
+      <span aria-hidden className="h-2 min-w-1 flex-1 rounded-tr-sm border-t border-r border-primary/50" />
+    </div>
+  );
+}
+
 function buildNoResultsDescription(flags: {
   hasActiveSearch: boolean;
   hasActiveFilters: boolean;
@@ -59,15 +86,13 @@ function buildNoResultsDescription(flags: {
 
 // Renders a full-featured data table from a raw TanStack Table instance
 export function DataTable<TData>({
-  table,
+  table: instance,
   searchConfig,
   selectActions,
   emptyStateConfig,
   toolbarActions,
   filters,
   contextBar,
-  isLoading: isLoadingProp = false,
-  isFetching = false,
   className,
   enableViews = true,
   importExport,
@@ -76,6 +101,7 @@ export function DataTable<TData>({
   selectedRowId,
   permission,
 }: DataTableProps<TData>) {
+  const { table, isLoading: isLoadingProp, isFetching, isSyncing, isError, error, refetch } = instance;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const importDialog = useDialog();
 
@@ -89,23 +115,44 @@ export function DataTable<TData>({
       headerScrollRef.current.scrollLeft = bodyScrollRef.current.scrollLeft;
     }
   };
+  // The header scrolls on its own when a title it clips takes focus (a click, a Tab); the body follows it
+  const syncBodyScroll = () => {
+    if (headerScrollRef.current && bodyScrollRef.current) {
+      bodyScrollRef.current.scrollLeft = headerScrollRef.current.scrollLeft;
+    }
+  };
 
   // Table-level + import/export gates — ALLOW when no code or no provider is mounted
   const tableGate = usePermission(permission);
   const importGate = usePermission(importExport?.importPermission);
   const exportGate = usePermission(importExport?.exportPermission);
 
-  const meta = table.options.meta as DataTableMeta | undefined;
+  const meta = table.options.meta;
   const slug = meta?.slug;
   const panelFilters = useDataTableStore((s) => (slug ? s.tables[slug]?.activeState?.filters.panel : undefined));
   const contextFilters = useDataTableStore((s) => (slug ? s.tables[slug]?.activeState?.filters.context : undefined));
   const appliedFilterCount = panelFilters?.length ?? 0;
   const activeViewId = useDataTableStore((s) => (slug ? (s.tables[slug]?.activeViewId ?? null) : null));
-  // Rows fetched before the page's defaults were filled never show: the skeleton stays until that refetch lands
-  const isLoading = isLoadingProp || !!meta?.isAwaitingDefaults;
+  const hasRows = table.getRowModel().rows.length > 0;
+  // Rows fetched before the page's defaults were filled never show: the skeleton stays until that refetch lands. A
+  // change to a table showing nothing loads like a first fetch, so its "no results" doesn't stand in for the answer.
+  const isLoading = isLoadingProp || !!meta?.isAwaitingDefaults || (isSyncing && !hasRows && !isError);
   const loadViewState = useDataTableStore((s) => s.loadViewState);
   const density = meta?.density ?? 'normal';
-  const columnCount = table.getAllColumns().length;
+  // Leaf columns, so a grouped header's columns each get a skeleton cell and hidden ones get none
+  const columnCount = table.getVisibleLeafColumns().length;
+  // Each visible column's own width for both tables: a fixed-layout table otherwise sizes its columns from its first row,
+  // which under grouped headers is the group row and splits a group's width evenly across the columns it spans
+  const columnWidths = (
+    <colgroup>
+      {table.getVisibleLeafColumns().map((column) => (
+        <col
+          key={column.id}
+          style={{ width: column.id === 'actions' ? 70 : grows(column) ? undefined : column.getSize() }}
+        />
+      ))}
+    </colgroup>
+  );
   const visibilityEnabled = table.options.enableHiding !== false;
   // Import/Export respect their gates: hidden when not granted, disabled (with lock) when locked
   const showImport = !!importExport?.importEndpoint && importGate.granted;
@@ -144,6 +191,8 @@ export function DataTable<TData>({
           onChange: setContext,
           keepControlled: true,
           required: requiredContext,
+          // After a failed first load the controls show what the table holds rather than waiting on a load that ended
+          loading: !meta?.isLoaded && !isError,
         })
       : contextBar;
 
@@ -170,6 +219,57 @@ export function DataTable<TData>({
 
   // Locked keeps the table shell but shows a lock empty-state and disables filters instead of data
   const locked = tableGate.locked;
+
+  // What the table shows when it has no rows to show: a lock, a failed load, no matches for the filters, or nothing yet
+  function renderNoRows() {
+    if (locked) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
+          <PermissionLockIcon reason={tableGate.reason} className="size-6" />
+          <p className="text-sm text-muted-foreground">{lockedTip(tableGate)}</p>
+        </div>
+      );
+    }
+    if (isError) {
+      return <DataTableLoadFailed plural={meta?.plural ?? 'rows'} error={error} refetch={refetch} />;
+    }
+    if (isFiltered) {
+      return (
+        <DataTableEmpty
+          icon={emptyStateConfig?.icon}
+          title="No results found"
+          description={buildNoResultsDescription({ hasActiveSearch, hasActiveFilters, hasActiveView })}
+          action={
+            <div className="flex gap-2">
+              {hasActiveSearch && (
+                <Button variant="outline" size="sm" onClick={() => meta?.setSearch?.(searchBaseline)}>
+                  Clear Search
+                </Button>
+              )}
+              {hasActiveFilters && (
+                <Button variant="outline" size="sm" onClick={() => meta?.setFilters?.(filtersBaseline)}>
+                  Clear Filters
+                </Button>
+              )}
+              {hasActiveView && slug && (
+                <Button variant="outline" size="sm" onClick={() => loadViewState(slug, EMPTY_TABLE_STATE, null, true)}>
+                  Clear View
+                </Button>
+              )}
+            </div>
+          }
+        />
+      );
+    }
+    return (
+      <DataTableEmpty
+        icon={emptyStateConfig?.icon}
+        title={emptyStateConfig?.title}
+        description={emptyStateConfig?.description}
+        action={emptyStateConfig?.action}
+      />
+    );
+  }
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -295,11 +395,10 @@ export function DataTable<TData>({
           </div>
         </div>
       )}
-
       {/* Table container — flex column, fills remaining space */}
       <div className="relative border rounded-lg overflow-hidden flex flex-col" style={{ height: MODE_HEIGHTS[mode] }}>
-        {/* Refetch in flight: previous rows stay, a thin bar runs along the top edge */}
-        {isFetching && !isLoading && (
+        {/* Refetch in flight, or a change waiting on one: previous rows stay, a thin bar runs along the top edge */}
+        {(isFetching || isSyncing) && !isLoading && (
           <div
             role="progressbar"
             aria-label="Loading"
@@ -313,6 +412,8 @@ export function DataTable<TData>({
             />
           </div>
         )}
+        {/* A refetch failed with rows on screen: they stay, marked as the earlier answer */}
+        {isError && hasRows && !isLoading && <DataTableRefreshFailed refetch={refetch} />}
         {/* Shared slot: SelectionBar OR FilterPanel (mutually exclusive, animated) */}
         <AnimatePresence mode="wait">
           {selectedCount > 0 ? (
@@ -358,17 +459,26 @@ export function DataTable<TData>({
         */}
         <div className="flex w-full flex-col flex-1 min-h-0">
           {/* Header region — never scrolls vertically; mirrors the body's horizontal scroll */}
-          <div ref={headerScrollRef} className="shrink-0 overflow-hidden">
+          <div ref={headerScrollRef} onScroll={syncBodyScroll} className="shrink-0 overflow-hidden">
             <table
               className="w-full caption-bottom text-sm table-fixed"
               style={{ minWidth: table.getCenterTotalSize() }}
             >
+              {columnWidths}
               <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                {table.getHeaderGroups().map((headerGroup, rowIndex, headerGroups) => (
+                  <TableRow
+                    key={headerGroup.id}
+                    // a group row has no rule under it: its brackets lead into the columns, and an ungrouped column's
+                    // empty slot above it merges with its header
+                    className={cn(rowIndex < headerGroups.length - 1 && 'border-b-0!')}
+                  >
                     {headerGroup.headers.map((header) => {
                       const isActions = header.column.id === 'actions';
                       const headerAlignClass = isActions ? 'justify-end' : 'justify-center';
+                      const isGroup = header.subHeaders.length > 0 && !header.isPlaceholder;
+                      const isGroupRow = rowIndex < headerGroups.length - 1;
+                      const edges = groupEdges(header.column);
                       return (
                         <TableHead
                           key={header.id}
@@ -376,13 +486,23 @@ export function DataTable<TData>({
                           style={
                             isActions
                               ? { width: '70px' }
-                              : { width: header.getSize(), minWidth: header.getSize(), maxWidth: header.getSize() }
+                              : grows(header.column)
+                                ? { minWidth: header.getSize() }
+                                : { width: header.getSize(), minWidth: header.getSize(), maxWidth: header.getSize() }
                           }
                           className={cn(
                             'relative group/resize',
                             // actions header stays pinned on horizontal scroll; z-20 keeps it above the
                             // regular header cells that scroll underneath it.
                             isActions ? 'text-right sticky right-0 z-20' : 'text-center',
+                            // grouped, the two rows together take one ungrouped header row's height
+                            isGroupRow && 'h-5 px-0 align-bottom',
+                            !isGroupRow && headerGroups.length > 1 && 'h-7',
+                            // a group and the column headers under it share one tint, edged where the group starts and ends
+                            (isGroup || edges.inGroup) && 'bg-primary/5',
+                            isGroup && 'border-x border-border',
+                            edges.isFirst && 'border-l border-border',
+                            edges.isLast && 'border-r border-border',
                           )}
                           aria-sort={
                             header.column.getCanSort()
@@ -405,9 +525,21 @@ export function DataTable<TData>({
                               className="pointer-events-none absolute inset-x-0 top-0 bottom-px bg-muted backdrop-blur-sm"
                             />
                           )}
-                          <div className={cn(isActions ? 'relative' : undefined)}>
-                            {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'string' ? (
-                              <div className={cn('flex', headerAlignClass)}>
+                          <div
+                            className={cn(
+                              isActions ? 'relative' : undefined,
+                              // an ungrouped column's title rises by half the group row so it centres across both rows
+                              !isGroupRow && headerGroups.length > 1 && !edges.inGroup && '-translate-y-2.5',
+                            )}
+                          >
+                            {header.isPlaceholder ? null : isGroup ? (
+                              <GroupBracket>
+                                {typeof header.column.columnDef.header === 'string'
+                                  ? header.column.columnDef.header
+                                  : flexRender(header.column.columnDef.header, header.getContext())}
+                              </GroupBracket>
+                            ) : typeof header.column.columnDef.header === 'string' ? (
+                              <div className={cn('flex min-w-0', headerAlignClass)}>
                                 <DataTableColumnHeader column={header.column} title={header.column.columnDef.header} />
                               </div>
                             ) : (
@@ -441,12 +573,13 @@ export function DataTable<TData>({
             onScroll={syncHeaderScroll}
             className="relative flex flex-col flex-1 min-h-0 overflow-auto overscroll-auto"
           >
-            {!locked && (isLoading || table.getRowModel().rows.length > 0) && (
+            {!locked && (isLoading || hasRows) && (
               <table
                 className="w-full caption-bottom text-sm table-fixed"
                 style={{ minWidth: table.getCenterTotalSize() }}
               >
-                <TableBody>
+                {columnWidths}
+                <TableBody className={cn('transition-opacity', isSyncing && !isLoading && 'opacity-60')}>
                   {isLoading
                     ? Array.from(
                         { length: table.getState().pagination?.pageSize ?? 20 },
@@ -472,11 +605,14 @@ export function DataTable<TData>({
                           >
                             {row.getVisibleCells().map((cell) => {
                               const isActionsCell = cell.column.id === 'actions';
+                              const edges = groupEdges(cell.column);
                               return (
                                 <TableCell
                                   key={cell.id}
                                   className={cn(
                                     densityClasses[density],
+                                    edges.isFirst && 'border-l border-border/60',
+                                    edges.isLast && 'border-r border-border/60',
                                     isActionsCell ? 'px-2 sticky right-0 z-10' : undefined,
                                     onRowClick && !isActionsCell ? 'cursor-pointer' : undefined,
                                   )}
@@ -484,11 +620,13 @@ export function DataTable<TData>({
                                   style={
                                     isActionsCell
                                       ? { width: '70px' }
-                                      : {
-                                          width: cell.column.getSize(),
-                                          minWidth: cell.column.getSize(),
-                                          maxWidth: cell.column.getSize(),
-                                        }
+                                      : grows(cell.column)
+                                        ? { minWidth: cell.column.getSize() }
+                                        : {
+                                            width: cell.column.getSize(),
+                                            minWidth: cell.column.getSize(),
+                                            maxWidth: cell.column.getSize(),
+                                          }
                                   }
                                 >
                                   {/*
@@ -521,51 +659,8 @@ export function DataTable<TData>({
                 </TableBody>
               </table>
             )}
-            {(locked || (!isLoading && table.getRowModel().rows.length === 0)) && (
-              <div className="flex flex-1 items-center justify-center">
-                {locked ? (
-                  <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <PermissionLockIcon reason={tableGate.reason} className="size-6" />
-                    <p className="text-sm text-muted-foreground">{lockedTip(tableGate)}</p>
-                  </div>
-                ) : isFiltered ? (
-                  <DataTableEmpty
-                    icon={emptyStateConfig?.icon}
-                    title="No results found"
-                    description={buildNoResultsDescription({ hasActiveSearch, hasActiveFilters, hasActiveView })}
-                    action={
-                      <div className="flex gap-2">
-                        {hasActiveSearch && (
-                          <Button variant="outline" size="sm" onClick={() => meta?.setSearch?.(searchBaseline)}>
-                            Clear Search
-                          </Button>
-                        )}
-                        {hasActiveFilters && (
-                          <Button variant="outline" size="sm" onClick={() => meta?.setFilters?.(filtersBaseline)}>
-                            Clear Filters
-                          </Button>
-                        )}
-                        {hasActiveView && slug && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => loadViewState(slug, EMPTY_TABLE_STATE, null, true)}
-                          >
-                            Clear View
-                          </Button>
-                        )}
-                      </div>
-                    }
-                  />
-                ) : (
-                  <DataTableEmpty
-                    icon={emptyStateConfig?.icon}
-                    title={emptyStateConfig?.title}
-                    description={emptyStateConfig?.description}
-                    action={emptyStateConfig?.action}
-                  />
-                )}
-              </div>
+            {(locked || (!isLoading && !hasRows)) && (
+              <div className="flex flex-1 items-center justify-center">{renderNoRows()}</div>
             )}
           </div>
         </div>

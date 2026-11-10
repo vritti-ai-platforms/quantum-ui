@@ -62,6 +62,7 @@ export interface SingleSelectFilterProps {
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and value in a
    * quiet outlined trigger, no operator choice. */
   mode?: FilterMode;
+  loading?: boolean;
 }
 
 // Compact single-select filter trigger with inline label display
@@ -79,6 +80,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       operators = DEFAULT_OPERATORS,
       clearable = true,
       mode = 'filter',
+      loading = false,
       onBlur,
       name,
       disabled = false,
@@ -233,7 +235,12 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
               )}
             >
               {isContext ? (
-                <ContextAnchorText label={label} value={state.selectedOption?.label} placeholder={placeholder} />
+                <ContextAnchorText
+                  loading={loading}
+                  label={label}
+                  value={state.selectedOption?.label}
+                  placeholder={placeholder}
+                />
               ) : (
                 <span className="truncate">{triggerText}</span>
               )}
@@ -267,7 +274,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
             )}
             <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
 
-            <SingleSelectList id={state.listboxId}>
+            <SingleSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
               {renderOptions()}
               {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
               {asyncState?.loadingMore && (

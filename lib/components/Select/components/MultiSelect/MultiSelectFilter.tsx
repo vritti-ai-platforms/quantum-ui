@@ -60,6 +60,7 @@ export interface MultiSelectFilterProps {
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and a summary
    * of the selection in a quiet outlined trigger, no operator choice, no inline clear. */
   mode?: FilterMode;
+  loading?: boolean;
 }
 
 // Compact multi-select filter trigger with count-based label display
@@ -76,6 +77,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       onOperatorChange,
       operators = DEFAULT_MULTI_OPERATORS,
       mode = 'filter',
+      loading = false,
       onBlur,
       name,
       disabled = false,
@@ -241,7 +243,12 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
               )}
             >
               {isContext ? (
-                <ContextAnchorText label={label} value={contextValue} placeholder={placeholder ?? 'All'} />
+                <ContextAnchorText
+                  loading={loading}
+                  label={label}
+                  value={contextValue}
+                  placeholder={placeholder ?? 'All'}
+                />
               ) : (
                 <span className="truncate">{triggerText}</span>
               )}
@@ -275,7 +282,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
             )}
             <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
 
-            <MultiSelectList id={state.listboxId}>
+            <MultiSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
               {renderOptions()}
               {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
               {asyncState?.loadingMore && (

@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Eye, FileX2, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import type { FilterCondition } from '../../types/table-filter';
-import { EMPTY_TABLE_STATE } from '../../types/table-filter';
+import type { FilterCondition } from '../../types/conditions';
+import { EMPTY_TABLE_STATE } from '../../types/table-state';
 import { filter } from '../../utils/filter';
+import { isoTodayDate } from '../../utils/timezone';
 import { Button } from '../Button';
 import { DateFilter } from '../DateFilter';
 import { SelectFilter } from '../Select';
@@ -59,17 +60,25 @@ const selectionColumns: ColumnDef<Payment, unknown>[] = [getSelectionColumn<Paym
 // ─── Story wrappers ───
 
 function DefaultStory() {
-  const table = useDataTable({ data: sampleData, columns, slug: 'story-default' });
-  return <DataTable table={table} enableSearch={{}} paginationConfig={{ pageSizeOptions: [5, 10, 20] }} />;
+  const table = useDataTable({
+    columns,
+    slug: 'story-default',
+    label: 'Payments',
+    query: { data: { result: sampleData, count: sampleData.length } },
+  });
+  return <DataTable table={table} />;
 }
 
 function WithSelectionStory() {
-  const table = useDataTable({ data: sampleData, columns: selectionColumns, slug: 'story-selection' });
+  const table = useDataTable({
+    columns: selectionColumns,
+    slug: 'story-selection',
+    label: 'Payments',
+    query: { data: { result: sampleData, count: sampleData.length } },
+  });
   return (
     <DataTable
       table={table}
-      enableSearch={{}}
-      paginationConfig={{ pageSizeOptions: [5, 10] }}
       selectActions={(rows) => (
         <Button
           variant="destructive"
@@ -91,16 +100,15 @@ function WithSelectionStory() {
 
 function EmptyStateStory() {
   const table = useDataTable({
-    data: [] as Payment[],
     columns,
     slug: 'story-empty',
+    label: 'Payments',
+    query: { data: { result: [] as Payment[], count: 0 } },
     enableRowSelection: false,
   });
   return (
     <DataTable
       table={table}
-      enableSearch={{}}
-      paginationConfig={{ pageSizeOptions: [5, 10] }}
       emptyStateConfig={{
         icon: FileX2,
         title: 'No payments found',
@@ -112,18 +120,54 @@ function EmptyStateStory() {
 }
 
 function LoadingStory() {
-  const table = useDataTable({ data: [] as Payment[], columns, slug: 'story-loading' });
-  return <DataTable table={table} isLoading paginationConfig={{ pageSizeOptions: [5, 10] }} />;
+  const table = useDataTable({ columns, slug: 'story-loading', label: 'Payments', query: { isLoading: true } });
+  return <DataTable table={table} />;
 }
 
 function CustomPaginationStory() {
   const table = useDataTable({
-    data: sampleData,
     columns,
     slug: 'story-pagination',
-    initialState: { pagination: { pageIndex: 0, pageSize: 3 } },
+    label: 'Payments',
+    query: { data: { result: sampleData, count: sampleData.length } },
   });
-  return <DataTable table={table} enableSearch={{}} paginationConfig={{ pageSizeOptions: [3, 6, 12] }} />;
+  return <DataTable table={table} />;
+}
+
+// Two header rows: "Customer" spans Email, "Payment" spans Status and Amount; ID has no group above it
+const groupedColumns: ColumnDef<Payment, unknown>[] = [
+  { accessorKey: 'id', header: 'ID', enableSorting: false },
+  {
+    id: 'customer',
+    header: 'Customer',
+    columns: [{ accessorKey: 'email', header: 'Email', size: 260, meta: { grow: true } }],
+  },
+  {
+    id: 'payment',
+    header: 'Payment',
+    columns: [
+      { accessorKey: 'status', header: 'Status', size: 110 },
+      {
+        accessorKey: 'amount',
+        header: 'Amount',
+        size: 110,
+        cell: ({ row }) =>
+          new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(row.getValue('amount')),
+      },
+    ],
+  },
+];
+
+function GroupedHeadersStory() {
+  const slug = 'story-grouped-headers';
+  const table = useDataTable({
+    columns: [getSelectionColumn<Payment>(), ...groupedColumns],
+    slug,
+    label: 'Payments',
+    query: { data: useStoryServerState(slug) },
+    enableRowSelection: true,
+  });
+  return <DataTable table={table} />;
 }
 
 // ─── Meta ───
@@ -150,6 +194,10 @@ export const WithSelection: Story = {
 
 export const EmptyState: Story = {
   render: () => <EmptyStateStory />,
+};
+
+export const GroupedHeaders: Story = {
+  render: () => <GroupedHeadersStory />,
 };
 
 export const Loading: Story = {
@@ -208,13 +256,13 @@ const wideColumns: ColumnDef<Payment, unknown>[] = [
 ];
 
 function ScrollBehaviorStory() {
-  const table = useDataTable({
+  const scrollTable = useDataTable({
     columns: wideColumns,
     slug: 'story-scroll',
     label: 'Payments',
-    serverState: { result: tallData, count: tallData.length },
+    query: { data: { result: tallData, count: tallData.length } },
   });
-  return <DataTable table={table} mode="page" enableViews={false} />;
+  return <DataTable table={scrollTable} mode="page" enableViews={false} />;
 }
 
 export const ScrollBehavior: Story = {
@@ -224,7 +272,7 @@ export const ScrollBehavior: Story = {
 // ─── Live filters + context bar ───
 // The same SelectFilter is a panel filter in the first table and a context in the second (only the JSX moves and
 // `mode="context"` is added). Filters apply as they change (no Apply button). Both halves have page defaults, and the
-// "As of" date is a controlled context the page keeps in its own state.
+// "As of" date resets to today each time the table opens (`resetOnOpen`).
 
 const statusOptions = [
   { value: 'pending', label: 'Pending' },
@@ -249,7 +297,8 @@ function applyConditions(rows: Payment[], conditions: FilterCondition[]): Paymen
 // Simulates the table endpoint: rows filtered by both halves of the stored filters, echoing the state it used
 function useStoryServerState(slug: string) {
   const state = useDataTableStore((s) => s.tables[slug]?.activeState ?? EMPTY_TABLE_STATE);
-  const result = applyConditions(sampleData, [...state.filters.panel, ...state.filters.context]);
+  const rowConditions = state.filters.context.filter((c) => c.field !== 'asOf');
+  const result = applyConditions(sampleData, [...state.filters.panel, ...rowConditions]);
   return { result, count: result.length, state, activeViewId: null };
 }
 
@@ -259,11 +308,11 @@ const statusFilter = (mode?: 'context') => (
 
 function StatusAsFilterTable() {
   const slug = 'story-live-filter';
-  const { table } = useDataTable({
+  const table = useDataTable({
     columns,
     slug,
     label: 'Payments',
-    serverState: useStoryServerState(slug),
+    query: { data: useStoryServerState(slug) },
   });
   return (
     <DataTable
@@ -287,17 +336,19 @@ function StatusAsFilterTable() {
 
 function StatusAsContextTable() {
   const slug = 'story-live-context';
-  const [asOf, setAsOf] = useState<FilterCondition | null>(null);
-  const { table, context } = useDataTable({
+  const table = useDataTable({
     columns,
     slug,
     label: 'Payments',
-    serverState: useStoryServerState(slug),
-    defaultContext: [filter('status').equals('pending')],
+    query: { data: useStoryServerState(slug) },
+    defaultContext: [filter('status').equals('pending'), filter('asOf').equals(isoTodayDate(null))],
+    resetOnOpen: ['asOf'],
   });
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-muted-foreground">Context: {JSON.stringify(context)}</p>
+      <p className="text-xs text-muted-foreground">
+        Context status: {table.contextValue('status') ?? 'none'} · as of: {table.contextValue('asOf') ?? 'none'}
+      </p>
       <DataTable
         table={table}
         mode="compact"
@@ -305,7 +356,7 @@ function StatusAsContextTable() {
         contextBar={
           <>
             {statusFilter('context')}
-            <DateFilter name="asOf" label="As of" mode="context" value={asOf} onChange={setAsOf} />
+            <DateFilter name="asOf" label="As of" mode="context" />
           </>
         }
         filters={[<ValueFilter key="email" name="email" label="Email" fieldType="string" />]}
@@ -314,11 +365,25 @@ function StatusAsContextTable() {
   );
 }
 
+// Unmounts and remounts the context table, as leaving and coming back to a page does: its saved state is shown again,
+// except the "As of" day, which opens on today
+function ReopenableContextTable() {
+  const [opening, setOpening] = useState(0);
+  return (
+    <div className="flex flex-col gap-2">
+      <Button variant="outline" size="sm" className="self-start" onClick={() => setOpening((n) => n + 1)}>
+        Reopen table
+      </Button>
+      <StatusAsContextTable key={opening} />
+    </div>
+  );
+}
+
 export const LiveFiltersAndContext: Story = {
   render: () => (
     <div className="flex flex-col gap-8">
       <StatusAsFilterTable />
-      <StatusAsContextTable />
+      <ReopenableContextTable />
     </div>
   ),
 };

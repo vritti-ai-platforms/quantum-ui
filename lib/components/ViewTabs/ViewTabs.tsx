@@ -1,7 +1,7 @@
 import { Check, Ellipsis, Globe, Lock, Pencil, Plus, Save, Share2, Trash2, X } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { cn } from '../../../shadcn/utils';
-import type { TableViewState } from '../../types/table-filter';
+import type { TableState } from '../../types/table-state';
 import { Button } from '../Button';
 import { DropdownMenu, type MenuItem } from '../DropdownMenu';
 import { Spinner } from '../Spinner';
@@ -9,7 +9,7 @@ import { Spinner } from '../Spinner';
 export interface TableView {
   id: string;
   name: string;
-  state: TableViewState;
+  state: TableState;
   isShared: boolean;
   isOwn: boolean;
 }
@@ -18,7 +18,7 @@ export interface ViewTabsProps {
   defaultLabel?: string;
   views: TableView[];
   activeViewId: string | null;
-  currentState: TableViewState;
+  currentState: TableState;
   onActivate: (viewId: string | null) => void;
   onSave: (name: string) => void;
   onUpdate: (viewId: string) => void;

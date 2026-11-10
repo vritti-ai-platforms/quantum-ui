@@ -1,11 +1,11 @@
 import type { Column, Table } from '@tanstack/react-table';
-import { Columns, Eye, EyeOff, GripVertical, Lock, Pin } from 'lucide-react';
+import { ArrowUpDown, Columns, Eye, EyeOff, GripVertical, Lock, MoveHorizontal, Pin } from 'lucide-react';
+import pluralize from 'pluralize-esm';
 import { Switch } from '../../../../shadcn/shadcnSwitch';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { DropdownMenu } from '../../DropdownMenu';
 import { SortableItem, SortableList } from '../../Sortable';
-import type { DataTableMeta } from '../types';
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;
@@ -69,7 +69,7 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
 
 // Column settings dropdown with drag-to-reorder, pin, and visibility controls
 export function DataTableViewOptions<TData>({ table, className }: DataTableViewOptionsProps<TData>) {
-  const meta = table.options.meta as DataTableMeta | undefined;
+  const meta = table.options.meta;
 
   // getAllLeafColumns respects columnOrder — getAllColumns does NOT
   const columns = table
@@ -78,6 +78,14 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
 
   const sortableColumns = columns.map((col) => ({ id: col.id, column: col }));
   const hiddenColumnCount = columns.filter((col) => !col.getIsVisible()).length;
+  const resizedColumnCount = Object.keys(table.getState().columnSizing).length;
+  // A saved order that differs from the columns' definition order; an empty one is the definition order
+  const definedOrder = table
+    .getAllFlatColumns()
+    .filter((column) => column.columns.length === 0)
+    .map((column) => column.id);
+  const savedOrder = table.getState().columnOrder;
+  const isReordered = savedOrder.length > 0 && savedOrder.some((id, index) => id !== definedOrder[index]);
 
   // Reorders the full column order array and persists via table.setColumnOrder
   function handleReorder(reordered: { id: string; column: Column<TData, unknown> }[]) {
@@ -144,6 +152,54 @@ export function DataTableViewOptions<TData>({ table, className }: DataTableViewO
                     />
                   </div>
                 )}
+
+                {/* Column widths: drop every saved width so each column falls back to its defined size */}
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MoveHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-sm">Column Widths</span>
+                      <p className="text-xs text-muted-foreground">
+                        {resizedColumnCount > 0
+                          ? `${pluralize('column', resizedColumnCount, true)} resized`
+                          : 'Default widths'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 px-2.5 text-xs"
+                    disabled={resizedColumnCount === 0 || !!meta?.lockedColumnSizing}
+                    disabledTip={
+                      meta?.lockedColumnSizing ? 'Turn off Resize Lock to reset widths' : 'No column has been resized'
+                    }
+                    onClick={() => table.resetColumnSizing(true)}
+                  >
+                    Reset
+                  </Button>
+                </div>
+
+                {/* Column order: drop the saved order so the columns fall back to their defined order */}
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-sm">Column Order</span>
+                      <p className="text-xs text-muted-foreground">{isReordered ? 'Reordered' : 'Default order'}</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 px-2.5 text-xs"
+                    disabled={!isReordered}
+                    disabledTip="Columns are in their default order"
+                    onClick={() => table.resetColumnOrder(true)}
+                  >
+                    Reset
+                  </Button>
+                </div>
 
                 {/* Column list */}
                 <div className="max-h-75 overflow-y-auto py-1">

@@ -4,7 +4,7 @@ import { Input } from '../../../shadcn/shadcnInput';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shadcn/shadcnSelect';
 import { cn } from '../../../shadcn/utils';
-import type { FilterCondition, FilterOperator, NumberOperator, StringOperator } from '../../types/table-filter';
+import type { FilterCondition, FilterOperator, NumberOperator, StringOperator } from '../../types/conditions';
 import { Button } from '../Button';
 import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../Select/contextAnchor';
 
@@ -15,6 +15,7 @@ interface ValueFilterBaseProps {
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and condition
    * in a quiet outlined trigger. */
   mode?: FilterMode;
+  loading?: boolean;
   /** Shown in the context trigger while no condition is applied */
   placeholder?: string;
   className?: string;
@@ -71,6 +72,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({
   value,
   onChange: onChangeProp,
   mode = 'filter',
+  loading = false,
   clearable = true,
   placeholder,
   className,
@@ -154,7 +156,7 @@ export const ValueFilter: React.FC<ValueFilterProps> = ({
           )}
         >
           {isContext ? (
-            <ContextAnchorText label={label} value={valueText} placeholder={placeholder} />
+            <ContextAnchorText loading={loading} label={label} value={valueText} placeholder={placeholder} />
           ) : (
             <span className="truncate">{valueText ? `${label}: ${valueText}` : label}</span>
           )}

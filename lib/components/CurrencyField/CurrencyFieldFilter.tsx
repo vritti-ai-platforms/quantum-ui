@@ -3,7 +3,7 @@ import type React from 'react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
 import { cn } from '../../../shadcn/utils';
-import type { FilterCondition, FilterCurrencyValue } from '../../types/table-filter';
+import type { FilterCondition, FilterCurrencyValue } from '../../types/conditions';
 import { getCurrencyExponent, resolveCurrency } from '../../utils/currency';
 import Decimal from '../../utils/decimal';
 import { formatCurrency } from '../../utils/format';
@@ -26,6 +26,7 @@ interface CurrencyFieldFilterBaseProps {
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and amount in
    * a quiet outlined trigger. */
   mode?: FilterMode;
+  loading?: boolean;
   /** Shown in the context trigger while no amount is applied */
   placeholder?: string;
   className?: string;
@@ -82,6 +83,7 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
   currencyCode,
   currencies,
   mode = 'filter',
+  loading = false,
   clearable = true,
   placeholder,
   className,
@@ -183,7 +185,7 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
         >
           <BanknoteIcon className={cn('size-3.5 shrink-0', isContext ? 'text-muted-foreground' : 'opacity-70')} />
           {isContext ? (
-            <ContextAnchorText label={label} value={valueText} placeholder={placeholder} />
+            <ContextAnchorText loading={loading} label={label} value={valueText} placeholder={placeholder} />
           ) : (
             <span className="truncate">
               {label}

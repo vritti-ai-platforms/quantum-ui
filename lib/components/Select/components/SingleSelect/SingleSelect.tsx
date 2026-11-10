@@ -63,6 +63,7 @@ export interface SingleSelectProps {
   footer?: React.ReactNode;
   contentClassName?: string;
   onOpenChange?: (open: boolean) => void;
+  disabledTip?: string;
   /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
   permission?: string;
 }
@@ -98,6 +99,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       footer,
       contentClassName,
       onOpenChange,
+      disabledTip,
       permission,
     },
     ref,
@@ -106,7 +108,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
     const { granted, locked, reason } = gate;
     // enable = role ∧ plan ∧ BU: granted but locked renders disabled with the upsell as its tooltip
     const disabled = disabledProp || locked;
-    const lockTip = locked ? lockedTip(gate) : undefined;
+    const tip = locked ? lockedTip(gate) : disabledTip;
     const state = useSingleSelect({
       options: options ?? [],
       groups,
@@ -212,7 +214,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
           )}
 
-          <SingleSelectList id={state.listboxId}>
+          <SingleSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
             {renderOptions()}
             {asyncState?.hasMore && <div ref={asyncState.sentinelRef} className="h-1" />}
             {asyncState?.loadingMore && (
@@ -251,7 +253,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
               </PopoverTrigger>
               {renderContent()}
             </SingleSelectRoot>,
-            lockTip,
+            tip,
             disabled,
             'block w-full',
           )}
@@ -299,7 +301,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
             </SingleSelectTrigger>
             {renderContent()}
           </SingleSelectRoot>,
-          lockTip,
+          tip,
           disabled,
           'block w-full',
         )}

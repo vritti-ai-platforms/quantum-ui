@@ -1,5 +1,5 @@
 import type React from 'react';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { MultiSelectFilter, type MultiSelectFilterProps } from './components/MultiSelect/MultiSelectFilter';
 import { SingleSelectFilter, type SingleSelectFilterProps } from './components/SingleSelect/SingleSelectFilter';
 import { useSelect } from './hooks/useSelect';
@@ -26,6 +26,9 @@ interface SelectFilterBaseProps {
   limit?: number;
   fieldKeys?: SelectFieldKeys;
   params?: Record<string, string | number | boolean>;
+  /** Told whether this control is still settling its value — picking its first option, or checking that its held value
+   * still exists; a context bar binds it, and holds its view's data until every control has settled */
+  onSettlingChange?: (settling: boolean) => void;
 }
 
 interface SelectFilterCommonProps
@@ -34,25 +37,35 @@ interface SelectFilterCommonProps
 
 // A multi-select can always be emptied by unticking every option, so it emits `null` whether or not it is clearable. A
 // single select only empties through its clear controls: with `clearable={false}` it always holds a value, so `value`
-// is required and `onChange` never receives `null`.
+// is required and `onChange` never receives `null` — unless `selectFirst` supplies that value from the first option.
 export type SelectFilterProps = SelectFilterCommonProps &
   (
     | {
         multiple: true;
         clearable?: boolean;
+        selectFirst?: never;
         value?: FilterResult | SelectValue[];
         onChange?: (result: FilterResult | null) => void;
       }
     | {
         multiple?: false;
         clearable?: true;
+        selectFirst?: boolean;
         value?: FilterResult | SelectValue;
         onChange?: (result: FilterResult | null) => void;
       }
     | {
         multiple?: false;
         clearable: false;
+        selectFirst?: false;
         value: FilterResult | SelectValue;
+        onChange?: (result: FilterResult) => void;
+      }
+    | {
+        multiple?: false;
+        clearable: false;
+        selectFirst: true;
+        value?: FilterResult | SelectValue;
         onChange?: (result: FilterResult) => void;
       }
   );
@@ -73,6 +86,9 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     operator: controlledOperator,
     onOperatorChange,
     onOpenChange,
+    selectFirst,
+    onSettlingChange,
+    loading: loadingProp,
     ...rest
   } = props;
   // null is only sent when the selection empties, which a non-clearable single select never does
@@ -85,6 +101,8 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
   const currentOperator = isFilterResult(value) ? value.operator : (controlledOperator ?? localOperator);
 
   const rawValue = extractRawValue(value);
+  // A value still on its way (the `loading` prop) isn't missing, so the first option waits for it
+  const needsFirst = !!selectFirst && !multiple && !loadingProp && (rawValue == null || rawValue === '');
 
   function handleOperatorChange(op: string) {
     setLocalOperator(op);
@@ -106,11 +124,55 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
     fieldKeys,
     params,
     selectedValues: rawValue != null ? (Array.isArray(rawValue) ? rawValue : [rawValue]) : undefined,
-    enabled: open,
+    enabled: open || needsFirst,
     open,
   });
 
+  // The latest onChange in a ref, so a parent passing a new callback each render doesn't re-pick the first option
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  // The value `selectFirst` picks: the first enabled option's — a boolean option can't be a filter value, so none
+  const firstOptionValue = selectData.options.find((option) => !option.disabled)?.value;
+  const firstValue =
+    typeof firstOptionValue === 'string' || typeof firstOptionValue === 'number' ? firstOptionValue : undefined;
+  useEffect(() => {
+    if (!needsFirst || firstValue === undefined) return;
+    onChangeRef.current?.({ field: name, operator: currentOperator, value: firstValue });
+  }, [needsFirst, firstValue, name, currentOperator]);
+
+  // A held value the server no longer has (deleted, or no longer offered here) is dropped, so a saved filter or context
+  // bar never keeps pointing at something gone — a context default or `selectFirst` then fills the gap
+  const { missingValues } = selectData;
+  useEffect(() => {
+    if (missingValues.length === 0 || rawValue == null) return;
+    const gone = new Set(missingValues.map(String));
+    if (Array.isArray(rawValue)) {
+      const kept = rawValue.map(String).filter((value) => !gone.has(value));
+      if (kept.length === rawValue.length) return;
+      onChangeRef.current?.(kept.length > 0 ? { field: name, operator: currentOperator, value: kept } : null);
+    } else if (gone.has(String(rawValue))) {
+      onChangeRef.current?.(null);
+    }
+  }, [missingValues, rawValue, name, currentOperator]);
+
+  // Still settling its value: picking its first option, checking that its held value still exists, or about to drop one
+  // that doesn't. Reported, and cleared when the control goes away mid-way.
+  const isPickingFirst = needsFirst && (selectData.loading || firstValue !== undefined);
+  const isSettling = isPickingFirst || selectData.checkingValues || missingValues.length > 0;
+  const onSettlingChangeRef = useRef(onSettlingChange);
+  onSettlingChangeRef.current = onSettlingChange;
+  useEffect(() => {
+    onSettlingChangeRef.current?.(isSettling);
+  }, [isSettling]);
+  useEffect(() => () => onSettlingChangeRef.current?.(false), []);
+
   const isAsync = !!optionsEndpoint;
+
+  // A context selector holds its value's place until it can name it: while told the value is on its way, while the held
+  // value's label is read, and while the first option is fetched and picked
+  const hasValue = rawValue != null && rawValue !== '' && !(Array.isArray(rawValue) && rawValue.length === 0);
+  const isReadingHeldLabel = hasValue && selectData.resolving;
+  const loading = !!loadingProp || (mode === 'context' && (isReadingHeldLabel || isPickingFirst));
 
   const asyncState: AsyncSelectState | undefined = isAsync
     ? {
@@ -118,6 +180,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
         loadingMore: selectData.loadingMore,
         hasMore: selectData.hasMore,
         searchQuery: selectData.searchQuery,
+        searching: selectData.searching,
         setSearchQuery: selectData.setSearchQuery,
         sentinelRef: selectData.sentinelRef,
       }
@@ -125,6 +188,7 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
 
   const sharedProps = {
     ...rest,
+    loading,
     options: selectData.options,
     groups: selectData.groups,
     asyncState,

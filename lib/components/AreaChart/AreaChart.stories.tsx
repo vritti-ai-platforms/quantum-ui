@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ChartConfig } from '../../../shadcn/shadcnChart';
+import { useChart } from '../Chart/useChart';
 import { AreaChart } from './AreaChart';
 
-const data = [
+const rows = [
   { month: 'Jan', visitors: 1200, signups: 320 },
   { month: 'Feb', visitors: 1800, signups: 480 },
   { month: 'Mar', visitors: 2400, signups: 620 },
@@ -11,20 +11,20 @@ const data = [
   { month: 'Jun', visitors: 3800, signups: 920 },
 ];
 
-const config: ChartConfig = {
-  visitors: { label: 'Visitors', color: 'var(--chart-1)' },
-  signups: { label: 'Signups', color: 'var(--chart-2)' },
+const selectTraffic = (data: typeof rows) => ({
+  rows: data,
+  series: [
+    { id: 'visitors', label: 'Visitors' },
+    { id: 'signups', label: 'Sign-ups' },
+  ],
+});
+
+const TrafficChart = () => {
+  const chart = useChart({ data: rows, select: selectTraffic });
+  return <AreaChart chart={chart} mode="compact" xAxisKey="month" />;
 };
 
-const meta: Meta<typeof AreaChart> = {
-  title: 'Charts/AreaChart',
-  component: AreaChart,
-};
+const meta: Meta = { title: 'Charts/AreaChart' };
 export default meta;
-type Story = StoryObj<typeof AreaChart>;
 
-export const Default: Story = {
-  render: () => (
-    <AreaChart data={data} config={config} xAxisKey="month" areas={[{ dataKey: 'visitors' }, { dataKey: 'signups' }]} />
-  ),
-};
+export const Default: StoryObj = { render: () => <TrafficChart /> };

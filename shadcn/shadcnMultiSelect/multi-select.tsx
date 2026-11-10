@@ -3,7 +3,7 @@
 import { ChevronDownIcon, SearchIcon } from 'lucide-react';
 import type React from 'react';
 import { forwardRef, memo } from 'react';
-
+import { focusSearchOnOpen, handleOptionKeys } from '../optionKeys';
 import { Checkbox } from '../shadcnCheckbox';
 import { Popover, PopoverContent, PopoverTrigger } from '../shadcnPopover';
 import { cn } from '../utils';
@@ -66,11 +66,26 @@ interface MultiSelectContentProps extends React.ComponentProps<typeof PopoverCon
   className?: string;
 }
 
-function MultiSelectContent({ className, children, align = 'start', ...props }: MultiSelectContentProps) {
+function MultiSelectContent({
+  className,
+  children,
+  align = 'start',
+  onKeyDown,
+  onOpenAutoFocus,
+  ...props
+}: MultiSelectContentProps) {
   return (
     <PopoverContent
       data-slot="multi-select-content"
       align={align}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        handleOptionKeys(event);
+      }}
+      onOpenAutoFocus={(event) => {
+        onOpenAutoFocus?.(event);
+        if (!event.defaultPrevented) focusSearchOnOpen(event);
+      }}
       className={cn('w-auto min-w-[var(--radix-popover-trigger-width)] p-0', className)}
       {...props}
     >
@@ -206,7 +221,7 @@ const MultiSelectRow = memo(function MultiSelectRow({
       className={cn(
         'relative flex w-full cursor-default gap-2 rounded-md px-2 text-sm outline-hidden select-none',
         description ? 'min-h-11 items-start py-1.5' : 'h-8 items-center py-0',
-        'hover:bg-accent hover:text-accent-foreground',
+        'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
