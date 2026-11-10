@@ -110,7 +110,7 @@ When adding a new component, update these files:
 ### Shared type modules — `lib/types/*` + `./types/*` subpaths
 
 Cross-app TYPE surfaces (not component props) live in `lib/types/<name>.ts` and are exported at
-`@vritti/quantum-ui/types/<name>` (see `types/catalog-resolver`, `types/api-response`, `types/table-filter`).
+`@vritti/quantum-ui/types/<name>` (see `types/catalog-resolver`, `types/api-response`, `types/conditions`, `types/table-state`).
 `lib/types/catalog-resolver.ts` is a frontend mirror of `@vritti/api-sdk/catalog-resolver` — keep it
 field-for-field in sync; web apps import from HERE, never from the server SDK.
 
@@ -349,6 +349,52 @@ The DropdownMenu tracks `activeDialogId` internally and renders all dialog-type 
 **`RowActions` is for DataTable rows only.** Card and panel actions use `DropdownMenu` directly — the two have different action styling.
 
 ---
+
+## DataTable & context filters — the contract
+
+- **`useDataTable({ query, columns, slug, label, … })`** takes the page's query (anything with `data` /
+  `isLoading` / `isFetching` — a TanStack `useQuery` result fits; type `DataTableQuery<TData>`) and returns a
+  **`DataTableInstance`**: `{ table, isLoading, isFetching, contextValue, isLoaded }`. **`<DataTable table={instance}>`**
+  renders the whole instance — DataTable has no `isLoading` / `isFetching` props. Don't reintroduce a `serverState`
+  option or loading props; anything a page must also wait on is folded into the `query` it passes.
+- **Context-mode filters** (`mode="context"`) all render through `ContextAnchorText` and take a **`loading`** prop that
+  holds the value's place with a pulsing bar. A new context-capable filter must accept `loading` and pass it to
+  `ContextAnchorText`. `DataTable` injects `loading` into its bound context-bar filters (via `bindFilters`) until the
+  stored state is shown (`meta.isLoaded`).
+- **`SelectFilter`** sets `loading` itself in context mode while it resolves the held value's label
+  (`useSelect().resolving`) or picks its first option. **`selectFirst`** (single select) picks the first enabled
+  option whenever nothing is selected, and waits while `loading` is set, so it never replaces a saved value on its way.
+  `clearable={false}` + `selectFirst` makes `value` optional in the types.
+- **`setTableContext(slug, conditions)`** (exported from `DataTable`) merges context conditions into a table's saved
+  state server-side (`PATCH {statesEndpoint}`) — how a link opens a table at a context. The caller drops the table's
+  cached query before navigating.
+- **`useContextState` + `<ContextBar>`** (`@vritti/quantum-ui/ContextBar`) are the same context bar for views that are
+  not tables: the hook loads the saved `FilterCondition[]` itself (`GET {contextStatesEndpoint}?slug=`), fills
+  defaults, applies `resets` (dependent fields cleared when a field changes) and saves with `PUT {contextStatesEndpoint}`;
+  `<ContextBar>` binds its children through the same `bindFilters`. The view's own response carries no context.
+- **Stale values heal themselves**: a `SelectFilter` drops a held value its endpoint no longer returns (deleted, or no
+  longer offered for its params) once the `values=` lookup has succeeded — `useSelect().missingValues`. A context default
+  or `selectFirst` then fills the gap. Works the same in table panel filters, DataTable context bars and `<ContextBar>`.
+- **Types**: conditions (`FilterCondition`, operators, `SortCondition`, `SearchState`) live in `types/conditions`; a
+  table's saved state (`TableState`, `TableFilters`, `DensityType`, `EMPTY_TABLE_STATE`) in `types/table-state`.
+
+## Charts — the `useChart` contract
+
+`lib/components/Chart/` owns what every chart shares; each chart (`LineChart`, `AreaChart`, `BarChart`, `PieChart`,
+`RadarChart`, `RadialChart`) takes a `chart` instance and only its own display props.
+
+- `useChart({ query | data, select, slug?, defaultContext?, resetOnOpen?, resets?, onStatePush? })` — `query` is query
+  options (it runs them itself, first request held until the context bar settles: loaded, saved, every control done
+  checking/picking); `select(data,
+  context)` returns `{ rows, series: [{ id, label, color? }], …extras }`; `LineChartSelection` adds `xDomain`,
+  `yDomain`, `markers`. With a `slug` it holds the context bar's saved state (`chart.context`, via `useContextState`).
+- Colour slots live in `useChart` (stable per series id, palette `--chart-series-1..8`); a series' own `color` skips
+  the palette. `chart.view.config` is the built `ChartConfig` — charts never take one.
+- `ChartFrame` renders the `contextBar` slot above the bordered frame. `tab` mode (default) sizes bar + frame to the
+  screen below a tab's header and the frame flexes into what the bar's rows leave; `compact` is an `h-96` frame;
+  `className` adjusts the frame. It renders every state in the frame: skeleton (`chart.isLoading`), failed load
+  with Retry, empty (`emptyState`), refetch failure over the drawn chart. A new chart renders inside `ChartFrame`.
+- `ChartKey` is the series key card (`value` / `detail` render props, skeleton rows while loading).
 
 ## Permission gating — the `permission` prop
 
