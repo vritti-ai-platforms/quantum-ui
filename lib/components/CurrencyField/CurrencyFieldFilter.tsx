@@ -227,7 +227,7 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
 
       <PopoverContent id={popoverId} className="w-72 p-0" align="start" onOpenAutoFocus={handleOpenAutoFocus}>
         {withOperators && (
-          <div className="flex h-[42px] items-center gap-1.5 border-b bg-muted/30 px-3">
+          <div className="flex h-10.5 items-center gap-1.5 border-b bg-muted/30 px-3">
             <span className="text-sm text-muted-foreground">{label}</span>
             <Select value={draftOperator} onValueChange={(operator) => setDraftOperator(operator as NumberOperator)}>
               <SelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 text-sm font-medium text-foreground shadow-none focus-visible:ring-0">
