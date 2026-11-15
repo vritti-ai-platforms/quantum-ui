@@ -280,7 +280,12 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
                 )}
               </div>
             )}
-            <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
+            <MultiSelectSearch
+              value={searchValue}
+              onValueChange={setSearchValue}
+              placeholder={searchPlaceholder}
+              searching={asyncState?.searching}
+            />
 
             <MultiSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
               {renderOptions()}

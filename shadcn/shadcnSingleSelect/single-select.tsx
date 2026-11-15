@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckIcon, ChevronDownIcon, SearchIcon } from 'lucide-react';
+import { CheckIcon, ChevronDownIcon, Loader2Icon, SearchIcon } from 'lucide-react';
 import type React from 'react';
 import { forwardRef, memo } from 'react';
 import { focusSearchOnOpen, handleOptionKeys } from '../optionKeys';
@@ -102,10 +102,18 @@ interface SingleSelectSearchProps {
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  // The typed search isn't answered yet — waiting out the debounce or being fetched
+  searching?: boolean;
   className?: string;
 }
 
-function SingleSelectSearch({ value, onValueChange, placeholder = 'Search...', className }: SingleSelectSearchProps) {
+function SingleSelectSearch({
+  value,
+  onValueChange,
+  placeholder = 'Search...',
+  searching = false,
+  className,
+}: SingleSelectSearchProps) {
   return (
     <div data-slot="single-select-search" className={cn('px-3 py-2', className)}>
       <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 h-9">
@@ -118,6 +126,7 @@ function SingleSelectSearch({ value, onValueChange, placeholder = 'Search...', c
           placeholder={placeholder}
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         />
+        {searching && <Loader2Icon aria-hidden className="size-4 shrink-0 animate-spin text-muted-foreground" />}
       </div>
     </div>
   );

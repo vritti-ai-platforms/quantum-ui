@@ -2,13 +2,15 @@ import { BanknoteIcon, ChevronDownIcon, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnPopover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shadcn/shadcnSelect';
 import { cn } from '../../../shadcn/utils';
-import type { FilterCondition, FilterCurrencyValue } from '../../types/conditions';
+import type { FilterCondition, FilterCurrencyValue, NumberOperator } from '../../types/conditions';
 import { getCurrencyExponent, resolveCurrency } from '../../utils/currency';
 import Decimal from '../../utils/decimal';
 import { formatCurrency } from '../../utils/format';
 import { Button } from '../Button';
 import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../Select/contextAnchor';
+import { NUMBER_OPERATORS } from '../ValueFilter/ValueFilter';
 import { CurrencyField } from './CurrencyField';
 
 const AMOUNT_PATTERN = /^(\d+\.?\d*|\.\d+)$/;
@@ -29,6 +31,10 @@ interface CurrencyFieldFilterBaseProps {
   loading?: boolean;
   /** Shown in the context trigger while no amount is applied */
   placeholder?: string;
+  /** Lets the amount be compared (=, ≠, >, ≥, <, ≤, starting at ≥) instead of always matched exactly */
+  withOperators?: boolean;
+  /** Lets zero be applied as the amount; otherwise it must be positive */
+  allowZero?: boolean;
   className?: string;
 }
 
@@ -65,12 +71,13 @@ function draftCurrency(
   return currencies?.[0] ?? 'USD';
 }
 
-// The draft amount as a positive major-unit string at the currency's precision, or undefined when it can't be applied
-function normalizeAmount(draft: FilterCurrencyValue): string | undefined {
+// The draft amount as a major-unit string at the currency's precision, or undefined when it can't be applied: never
+// negative, and zero only when allowed
+function normalizeAmount(draft: FilterCurrencyValue, allowZero: boolean): string | undefined {
   const amount = draft.value.trim();
   if (!AMOUNT_PATTERN.test(amount)) return undefined;
   const decimal = new Decimal(amount);
-  if (!decimal.isFinite() || decimal.lte(0)) return undefined;
+  if (!decimal.isFinite() || decimal.lt(0) || (decimal.isZero() && !allowZero)) return undefined;
   return decimal.toFixed(getCurrencyExponent(draft.currency));
 }
 
@@ -86,6 +93,8 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
   loading = false,
   clearable = true,
   placeholder,
+  withOperators = false,
+  allowZero = false,
   className,
 }) => {
   const popoverId = useId();
@@ -99,6 +108,8 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
   const appliedAmount = applied?.value;
   const currencyKey = currencies?.join(',');
 
+  const appliedOperator = (value?.operator as NumberOperator | undefined) ?? (withOperators ? 'gte' : 'equals');
+  const [draftOperator, setDraftOperator] = useState<NumberOperator>(appliedOperator);
   const [draft, setDraft] = useState<FilterCurrencyValue>(() => ({
     currency: draftCurrency(applied, currencyCode, currencies),
     value: applied?.value ?? '',
@@ -109,16 +120,21 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
   useEffect(() => {
     if (open) return;
     setDraft({ currency: draftCurrency(applied, currencyCode, currencies), value: appliedAmount ?? '' });
-  }, [open, appliedCurrency, appliedAmount, currencyCode, currencyKey]);
+    setDraftOperator(appliedOperator);
+  }, [open, appliedCurrency, appliedAmount, appliedOperator, currencyCode, currencyKey]);
 
-  const normalized = normalizeAmount(draft);
+  const normalized = normalizeAmount(draft, allowZero);
 
   // Commits the draft amount to the parent; an empty or non-positive amount is never applied
   const handleApply = useCallback(() => {
     if (normalized === undefined) return;
-    onChange?.({ field: name, operator: 'equals', value: { currency: draft.currency, value: normalized } });
+    onChange?.({
+      field: name,
+      operator: withOperators ? draftOperator : 'equals',
+      value: { currency: draft.currency, value: normalized },
+    });
     setOpen(false);
-  }, [draft.currency, name, normalized, onChange]);
+  }, [draft.currency, draftOperator, name, normalized, onChange, withOperators]);
 
   // Clears the filter condition
   const handleClear = useCallback(() => {
@@ -162,7 +178,16 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
   const hasValue = applied != null;
   const isContext = mode === 'context';
   const canClear = clearable && hasValue;
-  const valueText = applied ? formatCurrency(applied).primary : undefined;
+  const operatorLabel = NUMBER_OPERATORS.find((option) => option.value === appliedOperator)?.label;
+  const amountText = applied ? formatCurrency(applied).primary : undefined;
+  const valueText =
+    amountText != null && withOperators ? (
+      <>
+        {operatorLabel} {amountText}
+      </>
+    ) : (
+      amountText
+    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -201,11 +226,28 @@ export const CurrencyFieldFilter: React.FC<CurrencyFieldFilterProps> = ({
       </PopoverTrigger>
 
       <PopoverContent id={popoverId} className="w-72 p-0" align="start" onOpenAutoFocus={handleOpenAutoFocus}>
+        {withOperators && (
+          <div className="flex h-[42px] items-center gap-1.5 border-b bg-muted/30 px-3">
+            <span className="text-sm text-muted-foreground">{label}</span>
+            <Select value={draftOperator} onValueChange={(operator) => setDraftOperator(operator as NumberOperator)}>
+              <SelectTrigger className="h-auto w-auto gap-1 border-0 bg-transparent p-0 text-sm font-medium text-foreground shadow-none focus-visible:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {NUMBER_OPERATORS.map((operator) => (
+                  <SelectItem key={operator.value} value={operator.value}>
+                    {operator.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <fieldset aria-label={label} className="min-w-0 space-y-3 p-4" onKeyDown={handleKeyDown}>
           <CurrencyField
             ref={amountRef}
             name={name}
-            label={label}
+            label={withOperators ? undefined : label}
             value={draft}
             onChange={setDraft}
             currencyCode={currencyCode}

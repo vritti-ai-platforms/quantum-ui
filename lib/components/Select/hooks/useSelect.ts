@@ -1,5 +1,5 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type InfiniteData, keepPreviousData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { axios } from '../../../utils/axios';
 import type { SelectFieldKeys, SelectGroup, SelectOption, SelectOptionsResponse, SelectValue } from '../types';
@@ -152,9 +152,19 @@ export function useSelect({
     return resolveValues.filter((value) => typeof value !== 'boolean' && !found.has(String(value)));
   }, [isResolveSuccess, isResolveFetching, isResolvePlaceholder, resolveValues, resolvedSelected]);
 
+  // The search query's key, one builder for the live query and for trimming the unsearched list on close
+  const fieldKeysKey = stableStringify(fieldKeys);
+  const paramsKey = stableStringify(params);
+  const searchQueryKey = useCallback(
+    (search: string) => ['select-search', optionsEndpoint, search, fieldKeysKey, paramsKey],
+    [optionsEndpoint, fieldKeysKey, paramsKey],
+  );
+
   // Query 2: Paginated search results, excluding selected IDs
-  const { data, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ['select-search', optionsEndpoint, debouncedSearch, stableStringify(fieldKeys), stableStringify(params)],
+  // The last search's results stay listed while the next one is fetched, rather than the list blanking on every search —
+  // only when the search text alone changed: under other params or another endpoint they are not options at all
+  const { data, isFetching, isFetchingNextPage, isPlaceholderData, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    queryKey: searchQueryKey(debouncedSearch),
     queryFn: ({ pageParam = 0 }) =>
       axios
         .get<SelectOptionsResponse>(optionsEndpoint ?? '', {
@@ -175,7 +185,25 @@ export function useSelect({
     enabled: isAsync && enabled !== false,
     staleTime: 0,
     refetchOnMount: 'always',
+    placeholderData: (previous, previousQuery) => {
+      const previousKey = previousQuery?.queryKey;
+      const sameScope =
+        previousKey?.[1] === optionsEndpoint && previousKey?.[3] === fieldKeysKey && previousKey?.[4] === paramsKey;
+      return sameScope ? previous : undefined;
+    },
   });
+
+  // On close, the unsearched list keeps only its first page: a reopen then shows that page at once and refetches just it,
+  // rather than refetching every page scrolled through one after another and mounting them all before the list shows
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (open || !isAsync) return;
+    queryClient.setQueryData<InfiniteData<SelectOptionsResponse, number>>(searchQueryKey(''), (cached) =>
+      cached && cached.pages.length > 1
+        ? { pages: cached.pages.slice(0, 1), pageParams: cached.pageParams.slice(0, 1) }
+        : cached,
+    );
+  }, [open, isAsync, queryClient, searchQueryKey]);
 
   // Merge options with value-based dedup; during active search show only live results, not previously selected options
   const fetchedOptions = useMemo(() => {
@@ -204,13 +232,13 @@ export function useSelect({
   const fetchedGroups = data?.pages[0]?.groups ?? staticGroups ?? [];
   const hasSearchResultsData = (data?.pages.length ?? 0) > 0;
 
-  // IntersectionObserver sentinel for infinite scroll
+  // IntersectionObserver sentinel for infinite scroll; the last search's results shown meanwhile have no next page here
   const { ref: sentinelRef, inView } = useInView();
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
+    if (inView && hasNextPage && !isFetchingNextPage && !isPlaceholderData) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, isPlaceholderData, fetchNextPage]);
 
   // Static mode
   if (!isAsync) {

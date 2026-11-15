@@ -272,7 +272,12 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
                 )}
               </div>
             )}
-            <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
+            <SingleSelectSearch
+              value={searchValue}
+              onValueChange={setSearchValue}
+              placeholder={searchPlaceholder}
+              searching={asyncState?.searching}
+            />
 
             <SingleSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
               {renderOptions()}

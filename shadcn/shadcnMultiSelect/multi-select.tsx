@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDownIcon, SearchIcon } from 'lucide-react';
+import { ChevronDownIcon, Loader2Icon, SearchIcon } from 'lucide-react';
 import type React from 'react';
 import { forwardRef, memo } from 'react';
 import { focusSearchOnOpen, handleOptionKeys } from '../optionKeys';
@@ -45,7 +45,7 @@ const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTriggerProps
           aria-controls={listboxId}
           disabled={disabled}
           className={cn(
-            "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+            "border-input data-placeholder:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
             'min-h-9',
             className,
           )}
@@ -86,7 +86,7 @@ function MultiSelectContent({
         onOpenAutoFocus?.(event);
         if (!event.defaultPrevented) focusSearchOnOpen(event);
       }}
-      className={cn('w-auto min-w-[var(--radix-popover-trigger-width)] p-0', className)}
+      className={cn('w-auto min-w-(--radix-popover-trigger-width) p-0', className)}
       {...props}
     >
       {children}
@@ -99,10 +99,18 @@ interface MultiSelectSearchProps {
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  // The typed search isn't answered yet — waiting out the debounce or being fetched
+  searching?: boolean;
   className?: string;
 }
 
-function MultiSelectSearch({ value, onValueChange, placeholder = 'Search...', className }: MultiSelectSearchProps) {
+function MultiSelectSearch({
+  value,
+  onValueChange,
+  placeholder = 'Search...',
+  searching = false,
+  className,
+}: MultiSelectSearchProps) {
   return (
     <div data-slot="multi-select-search" className={cn('px-3 py-2', className)}>
       <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 h-9">
@@ -115,6 +123,7 @@ function MultiSelectSearch({ value, onValueChange, placeholder = 'Search...', cl
           placeholder={placeholder}
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         />
+        {searching && <Loader2Icon aria-hidden className="size-4 shrink-0 animate-spin text-muted-foreground" />}
       </div>
     </div>
   );
@@ -222,7 +231,7 @@ const MultiSelectRow = memo(function MultiSelectRow({
         'relative flex w-full cursor-default gap-2 rounded-md px-2 text-sm outline-hidden select-none',
         description ? 'min-h-11 items-start py-1.5' : 'h-8 items-center py-0',
         'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-        'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'data-disabled:pointer-events-none data-disabled:opacity-50',
         className,
       )}
       data-disabled={disabled ? '' : undefined}

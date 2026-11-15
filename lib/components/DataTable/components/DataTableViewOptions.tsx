@@ -17,7 +17,7 @@ function SortableColumnItem<TData>({ column }: { column: Column<TData, unknown> 
   const isPinned = column.getIsPinned();
   const isVisible = column.getIsVisible();
   const header = column.columnDef.header;
-  const label = typeof header === 'string' ? header : column.id;
+  const label = typeof header === 'string' ? header : (column.columnDef.meta?.label ?? column.id);
 
   return (
     <SortableItem id={column.id}>

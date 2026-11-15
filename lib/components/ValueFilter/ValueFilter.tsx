@@ -34,7 +34,7 @@ export type ValueFilterProps = ValueFilterBaseProps &
     | { clearable: false; value: FilterCondition; onChange?: (value: FilterCondition) => void }
   );
 
-interface OperatorOption {
+export interface OperatorOption {
   value: FilterOperator;
   label: string;
 }
@@ -46,7 +46,8 @@ const STRING_OPERATORS: OperatorOption[] = [
   { value: 'notEquals', label: 'not equals' },
 ];
 
-const NUMBER_OPERATORS: OperatorOption[] = [
+// The comparisons a number filter offers; CurrencyFieldFilter offers the same for an amount
+export const NUMBER_OPERATORS: OperatorOption[] = [
   { value: 'equals', label: '=' },
   { value: 'notEquals', label: '\u2260' },
   { value: 'gt', label: '>' },

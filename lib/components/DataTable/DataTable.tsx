@@ -27,6 +27,7 @@ import { DataTableSelectionBar } from './components/DataTableSelectionBar';
 import { DataTableViewOptions } from './components/DataTableViewOptions';
 import { DataTableViewsMenu } from './components/DataTableViewsMenu';
 import { DataTableViewTabs } from './components/DataTableViewTabs';
+import { DATA_TABLE_MODE_HEIGHTS } from './modes';
 import { useDataTableStore } from './store/store';
 import type { DataTableProps, DensityType, SearchState } from './types';
 import { downloadBlob } from './utils';
@@ -38,12 +39,6 @@ const densityClasses: Record<DensityType, string> = {
 };
 
 const NO_FILTERS: FilterCondition[] = [];
-
-const MODE_HEIGHTS = {
-  page: 'calc(100vh - 280px)',
-  tab: 'calc(100vh - 320px)',
-  compact: 'calc(100vh - 570px)',
-};
 
 // Builds "No results match your search, your filters and this view." from the active flags
 // Whether a column, or a column in its group, takes the width the others leave instead of a fixed width
@@ -396,7 +391,10 @@ export function DataTable<TData>({
         </div>
       )}
       {/* Table container — flex column, fills remaining space */}
-      <div className="relative border rounded-lg overflow-hidden flex flex-col" style={{ height: MODE_HEIGHTS[mode] }}>
+      <div
+        className="relative border rounded-lg overflow-hidden flex flex-col"
+        style={{ height: DATA_TABLE_MODE_HEIGHTS[mode] }}
+      >
         {/* Refetch in flight, or a change waiting on one: previous rows stay, a thin bar runs along the top edge */}
         {(isFetching || isSyncing) && !isLoading && (
           <div

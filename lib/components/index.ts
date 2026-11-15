@@ -42,6 +42,7 @@ export * from './RadarChart';
 export * from './RadialChart';
 export * from './RadioGroup';
 export * from './SearchBar';
+export * from './SegmentedProgress';
 export * from './Select';
 export * from './Separator';
 export * from './Sidebar';

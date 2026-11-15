@@ -1,12 +1,15 @@
 import type { Row, RowData, Table } from '@tanstack/react-table';
 import type { FilterCondition, SearchState } from '../../types/conditions';
 import type { DensityType, TableState } from '../../types/table-state';
+import type { DataTableMode } from './modes';
 
 export type { ColumnDef } from '@tanstack/react-table';
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
     grow?: boolean;
+    // Names a column whose header renders a node, for the column settings and export
+    label?: string;
   }
 
   interface TableMeta<TData extends RowData> extends DataTableMeta {}
@@ -116,7 +119,7 @@ export interface DataTableProps<TData> {
   className?: string;
   enableViews?: boolean;
   importExport?: ImportExportConfig<TData>;
-  mode?: 'page' | 'tab' | 'compact';
+  mode?: DataTableMode;
   permission?: string;
   onRowClick?: (row: TData) => void;
   selectedRowId?: string | null;

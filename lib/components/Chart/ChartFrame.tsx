@@ -3,10 +3,11 @@ import { cn } from '../../../shadcn/utils';
 import { ChartFootnote, ChartLoadFailed, ChartRefreshFailed } from './ChartStates';
 import type { ChartInstance, ChartMode, ChartSelection } from './types';
 
-// `tab` sizes the context bar and the frame together, so the frame takes whatever the bar's rows leave; `compact` sizes
+// `tab` sizes the context bar and the frame together, so the frame takes whatever the bar's rows leave, and the panel
+// ends where a tab's DataTable (toolbar, table and pagination) ends, leaving the same space under it; `compact` sizes
 // the frame alone
 const PANEL_HEIGHTS: Record<ChartMode, string> = {
-  tab: 'h-[max(calc(100svh-12.5rem),31rem)]',
+  tab: 'h-[max(calc(100svh-14.5rem),31rem)]',
   compact: '',
 };
 const FRAME_HEIGHTS: Record<ChartMode, string> = {

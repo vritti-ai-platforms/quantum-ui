@@ -25,6 +25,18 @@ export const formatString = (value: React.ReactNode): FormattedValue => {
   return { primary: value };
 };
 
+// One Intl.NumberFormat per locale and options, reused: building one costs far more than formatting with it, and a
+// table formats the same few shapes on every row
+const numberFormatters = new Map<string, Intl.NumberFormat>();
+function numberFormatter(localeTag: string, options?: Intl.NumberFormatOptions): Intl.NumberFormat {
+  const key = `${localeTag}|${JSON.stringify(options ?? {})}`;
+  const cached = numberFormatters.get(key);
+  if (cached) return cached;
+  const formatter = new Intl.NumberFormat(localeTag, options);
+  numberFormatters.set(key, formatter);
+  return formatter;
+}
+
 export interface FormatNumberOptions {
   localeTag: string;
   fractionDigits?: number;
@@ -37,13 +49,33 @@ export const formatNumber = (
   if (value == null) return { primary: '—' };
   const num = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(num)) return { primary: '—' };
-  const formatter = new Intl.NumberFormat(
+  const formatter = numberFormatter(
     options.localeTag,
     options.fractionDigits != null
       ? { minimumFractionDigits: options.fractionDigits, maximumFractionDigits: options.fractionDigits }
       : undefined,
   );
   return { primary: formatter.format(num) };
+};
+
+export interface FormatPercentOptions {
+  localeTag: string;
+  maximumFractionDigits?: number;
+}
+
+// Formats a percentage given on a 0–100 scale (42.5 → "42.5%"), one decimal at most unless told otherwise
+export const formatPercent = (
+  value: number | string | null | undefined,
+  options: FormatPercentOptions,
+): FormattedValue => {
+  if (value == null) return { primary: '—' };
+  const num = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(num)) return { primary: '—' };
+  const formatter = numberFormatter(options.localeTag, {
+    style: 'percent',
+    maximumFractionDigits: options.maximumFractionDigits ?? 1,
+  });
+  return { primary: formatter.format(new Decimal(num).div(100).toNumber()) };
 };
 
 export interface FormatCurrencyOptions {

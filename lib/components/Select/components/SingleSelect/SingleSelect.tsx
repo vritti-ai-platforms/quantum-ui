@@ -60,6 +60,8 @@ export interface SingleSelectProps {
   renderOption?: (props: SingleSelectOptionRenderProps) => React.ReactNode;
   transformLabel?: (label: string, option: SelectOption, context: SingleSelectLabelTransformContext) => string;
   transformDescription?: (description: string, option: SelectOption) => string;
+  // Sits between the search and the options, such as filters that narrow the options
+  header?: React.ReactNode;
   footer?: React.ReactNode;
   contentClassName?: string;
   onOpenChange?: (open: boolean) => void;
@@ -96,6 +98,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       renderOption,
       transformLabel,
       transformDescription,
+      header,
       footer,
       contentClassName,
       onOpenChange,
@@ -211,8 +214,14 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       return (
         <SingleSelectContent className={contentClassName}>
           {showSearch && (
-            <SingleSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
+            <SingleSelectSearch
+              value={searchValue}
+              onValueChange={setSearchValue}
+              placeholder={searchPlaceholder}
+              searching={asyncState?.searching}
+            />
           )}
+          {header}
 
           <SingleSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
             {renderOptions()}

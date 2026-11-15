@@ -24,8 +24,11 @@ export { DataTableViewOptions } from './components/DataTableViewOptions';
 export type { RowAction, RowActionsProps } from './components/RowActions';
 export { RowActions } from './components/RowActions';
 export { DataTable } from './DataTable';
+export type { DataTableSkeletonProps } from './DataTableSkeleton';
+export { DataTableSkeleton } from './DataTableSkeleton';
 export type { DataTableQuery, DataTableServerState } from './hooks/useDataTable';
 export { useDataTable } from './hooks/useDataTable';
+export type { DataTableMode } from './modes';
 // Types
 export type {
   ColumnDef,

@@ -41,7 +41,10 @@ export function DataTableSelectionBar<TData>({
       .filter((column) => 'accessorKey' in column.columnDef && column.getIsVisible())
       .map((column) => ({
         key: column.id,
-        label: typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id,
+        label:
+          typeof column.columnDef.header === 'string'
+            ? column.columnDef.header
+            : (column.columnDef.meta?.label ?? column.id),
       })),
     filename: meta?.slug ?? 'export',
   };

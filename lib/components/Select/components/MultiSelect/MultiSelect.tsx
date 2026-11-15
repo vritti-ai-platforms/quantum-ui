@@ -246,7 +246,12 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
 
             <MultiSelectContent>
               {showSearch && (
-                <MultiSelectSearch value={searchValue} onValueChange={setSearchValue} placeholder={searchPlaceholder} />
+                <MultiSelectSearch
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                  placeholder={searchPlaceholder}
+                  searching={asyncState?.searching}
+                />
               )}
 
               <MultiSelectList id={state.listboxId} aria-busy={asyncState?.searching || undefined}>
