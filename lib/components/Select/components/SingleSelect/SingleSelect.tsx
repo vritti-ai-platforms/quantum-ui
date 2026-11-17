@@ -35,7 +35,7 @@ export interface SingleSelectOptionRenderProps {
 
 export type SingleSelectLabelTransformContext = 'trigger' | 'option';
 
-export interface SingleSelectProps {
+interface SingleSelectBaseProps {
   label?: string;
   description?: React.ReactNode;
   error?: string;
@@ -44,7 +44,6 @@ export interface SingleSelectProps {
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
-  onOptionSelect?: (option: SelectOption | null) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
@@ -54,7 +53,6 @@ export interface SingleSelectProps {
   defaultValue?: SelectValue;
   searchable?: boolean;
   searchPlaceholder?: string;
-  clearable?: boolean;
   asyncState?: AsyncSelectState;
   anchor?: (props: SingleSelectAnchorProps) => React.ReactElement;
   renderOption?: (props: SingleSelectOptionRenderProps) => React.ReactNode;
@@ -69,6 +67,13 @@ export interface SingleSelectProps {
   /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
   permission?: string;
 }
+
+// A single select only empties through its clear control, so `onOptionSelect` receives `null` only when it is clearable
+export type SingleSelectClearableProps =
+  | { clearable: true; onOptionSelect?: (option: SelectOption | null) => void }
+  | { clearable?: false; onOptionSelect?: (option: SelectOption) => void };
+
+export type SingleSelectProps = SingleSelectBaseProps & SingleSelectClearableProps;
 
 // Single-value form field wrapper built on Popover primitives
 export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
@@ -117,7 +122,8 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       groups,
       value: controlledValue,
       onChange,
-      onOptionSelect,
+      // null is only sent by the clear control, which a select that is not clearable never renders
+      onOptionSelect: onOptionSelect as ((option: SelectOption | null) => void) | undefined,
       defaultValue,
       remoteSearch: !!asyncState,
     });

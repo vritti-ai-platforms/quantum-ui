@@ -57,8 +57,8 @@ export function useSingleSelect({
   const selectOption = useCallback(
     (optionValue: SelectValue) => {
       const option = optionMap.get(optionValue);
-      if (option?.disabled) return;
-      onOptionSelect?.(option ?? null);
+      if (!option || option.disabled) return;
+      onOptionSelect?.(option);
       updateSelection(optionValue);
       setOpen(false);
     },

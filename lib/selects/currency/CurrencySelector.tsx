@@ -1,8 +1,9 @@
 import { forwardRef } from 'react';
 import { Select, type SelectProps } from '../../components/Select/Select';
+import type { DistributiveOmit } from '../../types/utility';
 import { CURRENCIES } from './currencies';
 
-export type CurrencySelectorProps = Omit<SelectProps, 'optionsEndpoint'> & {
+export type CurrencySelectorProps = DistributiveOmit<SelectProps, 'optionsEndpoint'> & {
   excludeCodes?: string[];
 };
 

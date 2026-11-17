@@ -11,7 +11,7 @@ const ISO_COUNTRY_OPTIONS: SelectOption[] = ISO_COUNTRIES.map(({ code, name }) =
   label: `${countryFlag(code)} ${name}`,
 }));
 
-export type ISOCountrySelectProps = Omit<SelectProps, 'optionsEndpoint' | 'options'>;
+export type ISOCountrySelectProps = DistributiveOmit<SelectProps, 'optionsEndpoint' | 'options'>;
 
 // Pre-configured Select for ISO 3166-1 alpha-2 country selection with a baked-in static list.
 export const ISOCountrySelect = forwardRef<HTMLButtonElement, ISOCountrySelectProps>((props, ref) => (

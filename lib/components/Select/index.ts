@@ -12,7 +12,7 @@ export type { SingleSelectFilterProps } from './components/SingleSelect/SingleSe
 export { SingleSelectFilter } from './components/SingleSelect/SingleSelectFilter';
 export type { UseSelectProps, UseSelectReturn } from './hooks/useSelect';
 export { useSelect } from './hooks/useSelect';
-export type { SelectProps } from './Select';
+export type { ClearableSelectProps, SelectProps } from './Select';
 export { Select } from './Select';
 export type { SelectFilterProps } from './SelectFilter';
 export { SelectFilter } from './SelectFilter';

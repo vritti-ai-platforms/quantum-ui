@@ -2,9 +2,13 @@ import type React from 'react';
 import { forwardRef, useState } from 'react';
 import { usePermission } from '../PermissionGate';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
-import { SingleSelect, type SingleSelectProps } from './components/SingleSelect/SingleSelect';
+import {
+  SingleSelect,
+  type SingleSelectClearableProps,
+  type SingleSelectProps,
+} from './components/SingleSelect/SingleSelect';
 import { useSelect } from './hooks/useSelect';
-import type { AsyncSelectState, SelectFieldKeys } from './types';
+import type { AsyncSelectState, SelectFieldKeys, SelectOption } from './types';
 
 interface SelectBaseProps {
   optionsEndpoint?: string;
@@ -14,11 +18,24 @@ interface SelectBaseProps {
   params?: Record<string, string | number | boolean>;
 }
 
-export interface SelectProps extends Omit<SingleSelectProps & MultiSelectProps, 'value' | 'onChange'>, SelectBaseProps {
+interface SelectCommonProps
+  extends Omit<SingleSelectProps & MultiSelectProps, 'value' | 'onChange' | 'clearable' | 'onOptionSelect'>,
+    SelectBaseProps {
   multiple?: boolean;
   value?: SingleSelectProps['value'] | MultiSelectProps['value'];
   onChange?: SingleSelectProps['onChange'] | MultiSelectProps['onChange'];
 }
+
+// Wrappers that drop props from it use `DistributiveOmit` so each clearable branch keeps its own `onOptionSelect`
+export type SelectProps = SelectCommonProps & SingleSelectClearableProps;
+
+// The props of a wrapper that makes its select clearable unless it is passed `clearable={false}`: left out, `clearable`
+// means true, so `onOptionSelect` may receive `null`
+export type ClearableSelectProps = SelectCommonProps &
+  (
+    | { clearable?: true; onOptionSelect?: (option: SelectOption | null) => void }
+    | { clearable: false; onOptionSelect?: (option: SelectOption) => void }
+  );
 
 export type SelectSingleProps = SelectProps;
 export type SelectMultiProps = SelectProps;
