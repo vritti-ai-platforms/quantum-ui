@@ -10,6 +10,11 @@ export type FilterMode = 'filter' | 'context';
 export const CONTEXT_ANCHOR_CLASS =
   'inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm whitespace-nowrap shadow-xs outline-none transition-[color,box-shadow,border-color] hover:bg-accent/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-expanded:border-ring disabled:cursor-not-allowed disabled:opacity-50';
 
+// A context control's label: the small uppercase caption before what it holds
+export const ContextAnchorLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{children}</span>
+);
+
 interface ContextAnchorTextProps {
   label?: string;
   value?: React.ReactNode;
@@ -20,9 +25,7 @@ interface ContextAnchorTextProps {
 // A context selector's label and value: a small uppercase caption, then the value it holds
 export const ContextAnchorText: React.FC<ContextAnchorTextProps> = ({ label, value, placeholder, loading = false }) => (
   <span className="flex min-w-0 items-baseline gap-2">
-    {label && (
-      <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
-    )}
+    {label && <ContextAnchorLabel>{label}</ContextAnchorLabel>}
     {loading ? (
       <Skeleton className="h-3.5 w-20 self-center" />
     ) : (

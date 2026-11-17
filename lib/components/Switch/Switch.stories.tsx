@@ -1,8 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import type { FilterCondition } from '../../types/conditions';
 import { Button } from '../Button';
 import { Form } from '../Form';
+import { Select, SelectFilter, type SelectOption, type SelectValue } from '../Select';
 import { Switch } from './Switch';
+import { SwitchFilter } from './SwitchFilter';
 
 const meta: Meta<typeof Switch> = {
   title: 'Components/Switch',
@@ -239,6 +243,98 @@ export const InFormWithValidation: Story = {
             </Button>
           </div>
         </Form>
+      </div>
+    );
+  },
+};
+
+// SwitchFilter — boolean filter control
+
+const items: SelectOption[] = [
+  { value: 'paracetamol', label: 'Paracetamol 500mg' },
+  { value: 'ibuprofen', label: 'Ibuprofen 400mg' },
+  { value: 'cetirizine', label: 'Cetirizine 10mg' },
+];
+
+const stockStatuses: SelectOption[] = [
+  { value: 'IN_STOCK', label: 'In stock' },
+  { value: 'LOW', label: 'Low' },
+  { value: 'OUT', label: 'Out of stock' },
+];
+
+export const FilterContextMode: Story = {
+  render: () => {
+    const [value, setValue] = useState<FilterCondition | null>(null);
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <div className="flex items-center gap-2">
+          <SwitchFilter name="inStockOnly" label="In stock only" mode="context" value={value} onChange={setValue} />
+          <SwitchFilter
+            name="blocked"
+            label="Blocked"
+            mode="context"
+            disabled
+            disabledTip="Blocked items are hidden at this site"
+          />
+          <SwitchFilter name="loading" label="Loading" mode="context" loading />
+        </div>
+        <code className="text-xs text-muted-foreground">{JSON.stringify(value)}</code>
+      </div>
+    );
+  },
+};
+
+export const FilterContextModeInSelectHeader: Story = {
+  render: () => {
+    const [item, setItem] = useState<SelectValue>(null);
+    const [stockStatus, setStockStatus] = useState<string[]>([]);
+    const [inStockOnly, setInStockOnly] = useState<FilterCondition | null>(null);
+    return (
+      <div className="w-96">
+        <Select
+          label="Inventory Item"
+          placeholder="Select inventory item"
+          searchable
+          options={items}
+          value={item}
+          onChange={(next: SelectValue) => setItem(next)}
+          header={
+            <div className="flex flex-wrap items-center gap-2 px-3 pb-2">
+              <SelectFilter
+                name="stockStatus"
+                label="Status"
+                placeholder="All"
+                multiple
+                mode="context"
+                options={stockStatuses}
+                value={stockStatus}
+                onChange={(result) => setStockStatus(result ? [result.value].flat().map(String) : [])}
+              />
+              <SwitchFilter
+                name="inStockOnly"
+                label="In stock only"
+                mode="context"
+                value={inStockOnly}
+                onChange={setInStockOnly}
+              />
+            </div>
+          }
+        />
+      </div>
+    );
+  },
+};
+
+export const FilterMode: Story = {
+  render: () => {
+    const [value, setValue] = useState<FilterCondition | null>({ field: 'active', operator: 'equals', value: 'true' });
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <div className="flex items-center gap-2">
+          <SwitchFilter name="active" label="Active only" value={value} onChange={setValue} />
+          <SwitchFilter name="archived" label="Archived" disabled disabledTip="Archived records are not filterable" />
+        </div>
+        <code className="text-xs text-muted-foreground">{JSON.stringify(value)}</code>
       </div>
     );
   },
