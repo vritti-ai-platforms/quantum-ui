@@ -38,6 +38,7 @@ export * from './PermissionGate';
 export * from './PhoneField';
 export * from './PieChart';
 export * from './Progress';
+export * from './QuantityField';
 export * from './RadarChart';
 export * from './RadialChart';
 export * from './RadioGroup';

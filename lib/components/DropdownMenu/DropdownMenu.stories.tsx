@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import {
+  CheckCircle,
   Cloud,
+  Copy,
   CreditCard,
+  FileText,
   Github,
   Keyboard,
   LifeBuoy,
@@ -16,6 +19,7 @@ import {
   User,
   UserPlus,
   Users,
+  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -314,6 +318,64 @@ export const DisabledItems: Story = {
       { type: 'item', id: 'disabled-2', label: 'Premium Feature', disabled: true, icon: CreditCard },
       { type: 'item', id: 'disabled-3', label: 'Admin Only', disabled: true, icon: Settings },
     ],
+  },
+};
+
+// Disabled items with a disabledTip render the reason as a muted second line; enabled items ignore it
+export const DisabledItemsWithReasons: Story = {
+  args: {
+    trigger: { label: 'Actions', variant: 'outline' },
+    items: [
+      {
+        type: 'item',
+        id: 'send',
+        label: 'Send to Suppliers',
+        icon: Mail,
+        disabledTip: 'Not shown, because this item is enabled.',
+      },
+      {
+        type: 'item',
+        id: 'enable-quotations',
+        label: 'Enable Quotations',
+        icon: FileText,
+        disabled: true,
+        disabledTip:
+          '2 suppliers already submitted without quotations; quotations can only be required before the first is submitted.',
+      },
+      { type: 'item', id: 'duplicate', label: 'Duplicate', icon: Copy, disabled: true, disabledTip: 'Save first.' },
+      { type: 'separator' },
+      {
+        type: 'dialog',
+        id: 'close-purchase',
+        label: 'Close Purchase',
+        icon: CheckCircle,
+        dialog: {
+          title: 'Close Purchase',
+          description: 'Closing stops further receipts against this purchase.',
+          content: (close) => (
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={close}>
+                Cancel
+              </Button>
+              <Button onClick={close}>Close Purchase</Button>
+            </div>
+          ),
+        },
+      },
+      {
+        type: 'dialog',
+        id: 'cancel-purchase',
+        label: 'Cancel Purchase',
+        icon: XCircle,
+        disabled: true,
+        disabledTip: 'Goods have already been received against this purchase.',
+        dialog: {
+          title: 'Cancel Purchase',
+          description: 'Cancelling voids this purchase for every supplier.',
+        },
+      },
+    ],
+    align: 'end',
   },
 };
 

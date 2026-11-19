@@ -2,12 +2,14 @@ import { useMemo } from 'react';
 import { resolveCurrency } from '../utils/currency';
 import {
   type CurrencyAmount,
+  type DisplayQuantity,
   type FormattedValue,
   formatCurrency,
   formatDate,
   formatDateTime,
   formatNumber,
   formatPercent,
+  formatQuantity,
   formatString,
 } from '../utils/format';
 import { getLocale } from '../utils/locale';
@@ -19,6 +21,7 @@ export interface Formatters {
   number: (value: number | string | null | undefined, options?: { fractionDigits?: number }) => FormattedValue;
   percent: (value: number | string | null | undefined, options?: { maximumFractionDigits?: number }) => FormattedValue;
   currency: (value: CurrencyAmount | null | undefined, options?: { exchangeRate?: number | null }) => FormattedValue;
+  quantity: (value: DisplayQuantity | null | undefined) => FormattedValue;
   date: (value: string | null | undefined) => FormattedValue;
   dateTime: (value: string | null | undefined, options?: { timeZone?: string }) => FormattedValue;
 }
@@ -42,6 +45,7 @@ export function useFormatters(options?: UseFormattersOptions): Formatters {
         formatPercent(value, { localeTag, maximumFractionDigits: options?.maximumFractionDigits }),
       currency: (value, options) =>
         formatCurrency(value, { workspaceCurrency, exchangeRate: options?.exchangeRate ?? null }),
+      quantity: (value) => formatQuantity(value, { localeTag }),
       date: (value) => formatDate(value, { locale }),
       dateTime: (value, options) =>
         formatDateTime(value, { locale, workspaceTimeZone, timeZoneOverride: options?.timeZone }),

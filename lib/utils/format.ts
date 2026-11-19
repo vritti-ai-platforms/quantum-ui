@@ -78,6 +78,41 @@ export const formatPercent = (
   return { primary: formatter.format(new Decimal(num).div(100).toNumber()) };
 };
 
+export type DisplayQuantity = {
+  primaryUomQty: number;
+  displayUomQty: number;
+  wholeDisplayUomQty: number;
+  remainderPrimaryUomQty: number;
+  displayUomSymbol: string;
+  primaryUomSymbol: string;
+  isPack: boolean;
+};
+
+export interface FormatQuantityOptions {
+  localeTag: string;
+}
+
+// Formats an item quantity in its display unit: a pack unit as whole packs plus the primary units left over ("234 strip
+// + 4 tab"), any other unit as one figure ("12.5 kg"); the primary-unit total is the secondary whenever it differs
+export const formatQuantity = (
+  value: DisplayQuantity | null | undefined,
+  options: FormatQuantityOptions,
+): FormattedValue => {
+  if (value == null) return { primary: '—' };
+  const number = numberFormatter(options.localeTag);
+  const inPrimary = `${number.format(value.primaryUomQty)} ${value.primaryUomSymbol}`;
+  if (value.displayUomSymbol === value.primaryUomSymbol) return { primary: inPrimary };
+  if (!value.isPack) {
+    return { primary: `${number.format(value.displayUomQty)} ${value.displayUomSymbol}`, secondary: inPrimary };
+  }
+  if (value.wholeDisplayUomQty === 0) return { primary: inPrimary };
+  const packs = `${number.format(value.wholeDisplayUomQty)} ${value.displayUomSymbol}`;
+  if (value.remainderPrimaryUomQty === 0) return { primary: packs, secondary: inPrimary };
+  const sign = value.remainderPrimaryUomQty < 0 ? '−' : '+';
+  const remainder = `${number.format(Math.abs(value.remainderPrimaryUomQty))} ${value.primaryUomSymbol}`;
+  return { primary: `${packs} ${sign} ${remainder}`, secondary: inPrimary };
+};
+
 export interface FormatCurrencyOptions {
   workspaceCurrency?: string | null;
   exchangeRate?: number | null;

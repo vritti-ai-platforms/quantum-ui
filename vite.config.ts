@@ -45,6 +45,7 @@ export default defineConfig({
         'components/Checkbox': resolve(__dirname, 'lib/components/Checkbox/index.ts'),
         'components/Collapsible': resolve(__dirname, 'lib/components/Collapsible/index.ts'),
         'components/CurrencyField': resolve(__dirname, 'lib/components/CurrencyField/index.ts'),
+        'components/QuantityField': resolve(__dirname, 'lib/components/QuantityField/index.ts'),
         'components/OTPField': resolve(__dirname, 'lib/components/OTPField/index.ts'),
         'components/PageContent': resolve(__dirname, 'lib/components/PageContent/index.ts'),
         'components/PageHeader': resolve(__dirname, 'lib/components/PageHeader/index.ts'),

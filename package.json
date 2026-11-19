@@ -152,6 +152,10 @@
       "types": "./dist/lib/components/CurrencyField/index.d.ts",
       "import": "./dist/components/CurrencyField.js"
     },
+    "./QuantityField": {
+      "types": "./dist/lib/components/QuantityField/index.d.ts",
+      "import": "./dist/components/QuantityField.js"
+    },
     "./Progress": {
       "types": "./dist/lib/components/Progress/index.d.ts",
       "import": "./dist/components/Progress.js"

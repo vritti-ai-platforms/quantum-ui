@@ -18,6 +18,7 @@ import {
   DropdownMenuSubTrigger as ShadcnDropdownMenuSubTrigger,
   DropdownMenuTrigger as ShadcnDropdownMenuTrigger,
 } from '../../../shadcn/shadcnDropdownMenu';
+import { cn } from '../../../shadcn/utils';
 import type { DialogHandle } from '../../hooks/useDialog';
 import { Button } from '../Button';
 import { Dialog } from '../Dialog';
@@ -91,6 +92,46 @@ const LeadingIcon: React.FC<{ icon?: LucideIcon; lock?: LockInfo }> = ({ icon: I
   return Icon ? <Icon className="mr-2 h-4 w-4" /> : null;
 };
 
+interface ItemBodyProps {
+  label: string;
+  icon?: LucideIcon;
+  lock?: LockInfo;
+  trailing?: string;
+  reason?: string;
+}
+
+// Renders icon, label and trailing text, plus a wrapping second line explaining why the item is disabled
+const ItemBody: React.FC<ItemBodyProps> = ({ label, icon, lock, trailing, reason }) => {
+  if (!reason) {
+    return (
+      <>
+        <LeadingIcon icon={icon} lock={lock} />
+        <span>{label}</span>
+        {trailing && <DropdownMenuShortcut>{trailing}</DropdownMenuShortcut>}
+      </>
+    );
+  }
+
+  return (
+    <span className="flex min-w-0 flex-1 flex-col">
+      <span className="flex items-center opacity-50">
+        <LeadingIcon icon={icon} lock={lock} />
+        <span>{label}</span>
+        {trailing && <DropdownMenuShortcut>{trailing}</DropdownMenuShortcut>}
+      </span>
+      <span className={cn('mt-0.5 max-w-64 text-muted-foreground text-xs', icon && 'pl-6')}>{reason}</span>
+    </span>
+  );
+};
+
+// Returns the disabled reason to show under an item — a permission lock already explains itself, so it wins
+const disabledReason = (item: { disabled?: boolean; disabledTip?: string }, lock?: LockInfo): string | undefined =>
+  item.disabled && !lock ? item.disabledTip : undefined;
+
+// Keeps a reason-bearing disabled item fully opaque so the reason stays legible while its label row dims
+const reasonClassName = (reason: string | undefined, className?: string): string | undefined =>
+  cn(reason && 'data-[disabled]:opacity-100', className) || undefined;
+
 // Renders a single menu item based on its type — supports nested submenus
 const renderMenuItem = (
   item: MenuItem,
@@ -108,56 +149,68 @@ const renderMenuItem = (
       return <DropdownMenuLabel key={item.id}>{item.label}</DropdownMenuLabel>;
 
     case 'item': {
-      const trailing = lock?.tip ?? item.shortcut;
+      const reason = disabledReason(item, lock);
       return (
         <DropdownMenuItem
           key={item.id}
           onClick={item.onClick}
           disabled={item.disabled}
-          className={item.variant === 'destructive' && !lock ? 'text-destructive focus:text-destructive' : undefined}
+          className={reasonClassName(
+            reason,
+            item.variant === 'destructive' && !lock ? 'text-destructive focus:text-destructive' : undefined,
+          )}
         >
-          <LeadingIcon icon={item.icon} lock={lock} />
-          <span>{item.label}</span>
-          {trailing && <DropdownMenuShortcut>{trailing}</DropdownMenuShortcut>}
+          <ItemBody
+            label={item.label}
+            icon={item.icon}
+            lock={lock}
+            trailing={lock?.tip ?? item.shortcut}
+            reason={reason}
+          />
         </DropdownMenuItem>
       );
     }
 
-    case 'checkbox':
+    case 'checkbox': {
+      const reason = disabledReason(item, lock);
       return (
         <DropdownMenuCheckboxItem
           key={item.id}
           checked={item.checked}
           onCheckedChange={item.onCheckedChange}
           disabled={item.disabled}
+          className={reasonClassName(reason)}
         >
-          <LeadingIcon icon={item.icon} lock={lock} />
-          {item.label}
-          {lock && <DropdownMenuShortcut>{lock.tip}</DropdownMenuShortcut>}
+          <ItemBody label={item.label} icon={item.icon} lock={lock} trailing={lock?.tip} reason={reason} />
         </DropdownMenuCheckboxItem>
       );
+    }
 
     case 'radio-group':
       return (
         <DropdownMenuRadioGroup key={item.id} value={item.value} onValueChange={item.onValueChange}>
           {item.items.map((radioItem) => {
-            const Icon = radioItem.icon;
+            const reason = disabledReason(radioItem);
             return (
-              <DropdownMenuRadioItem key={radioItem.value} value={radioItem.value} disabled={radioItem.disabled}>
-                {Icon && <Icon className="mr-2 h-4 w-4" />}
-                {radioItem.label}
+              <DropdownMenuRadioItem
+                key={radioItem.value}
+                value={radioItem.value}
+                disabled={radioItem.disabled}
+                className={reasonClassName(reason)}
+              >
+                <ItemBody label={radioItem.label} icon={radioItem.icon} reason={reason} />
               </DropdownMenuRadioItem>
             );
           })}
         </DropdownMenuRadioGroup>
       );
 
-    case 'sub':
+    case 'sub': {
+      const reason = disabledReason(item, lock);
       return (
         <DropdownMenuSub key={item.id}>
-          <DropdownMenuSubTrigger disabled={item.disabled}>
-            <LeadingIcon icon={item.icon} lock={lock} />
-            <span>{item.label}</span>
+          <DropdownMenuSubTrigger disabled={item.disabled} className={reasonClassName(reason)}>
+            <ItemBody label={item.label} icon={item.icon} lock={lock} reason={reason} />
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
@@ -166,6 +219,7 @@ const renderMenuItem = (
           </DropdownMenuPortal>
         </DropdownMenuSub>
       );
+    }
 
     case 'group':
       return (
@@ -175,7 +229,8 @@ const renderMenuItem = (
         </DropdownMenuGroup>
       );
 
-    case 'dialog':
+    case 'dialog': {
+      const reason = disabledReason(item, lock);
       return (
         <DropdownMenuItem
           key={item.id}
@@ -184,12 +239,12 @@ const renderMenuItem = (
             e.preventDefault();
             onDialogSelect?.(item.id);
           }}
+          className={reasonClassName(reason)}
         >
-          <LeadingIcon icon={item.icon} lock={lock} />
-          <span>{item.label}</span>
-          {lock && <DropdownMenuShortcut>{lock.tip}</DropdownMenuShortcut>}
+          <ItemBody label={item.label} icon={item.icon} lock={lock} trailing={lock?.tip} reason={reason} />
         </DropdownMenuItem>
       );
+    }
 
     case 'custom': {
       const content = typeof item.render === 'function' ? item.render() : item.render;

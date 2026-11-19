@@ -6,6 +6,7 @@ export interface MenuItemBase {
   label: string;
   icon?: LucideIcon;
   disabled?: boolean;
+  disabledTip?: string;
   permission?: string;
   hidden?: boolean;
 }
