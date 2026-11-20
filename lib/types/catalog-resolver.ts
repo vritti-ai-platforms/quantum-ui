@@ -70,7 +70,6 @@ export interface SnapshotPermission {
 export interface SnapshotMicrofrontendWeb {
   code: string;
   name: string;
-  remoteEntry: string;
   exposedModule: string;
   routePrefix: string;
 }
@@ -78,8 +77,6 @@ export interface SnapshotMicrofrontendWeb {
 export interface SnapshotMicrofrontendMobile {
   code: string;
   name: string;
-  remoteEntryAndroid: string;
-  remoteEntryIos: string;
   exposedModule: string;
   routePrefix: string;
 }
@@ -188,13 +185,12 @@ export interface FeatureCatalogEntry {
   sfSymbol: string;
   materialSymbol: string;
   web: {
-    remoteEntry: string;
+    microfrontendCode: string;
     exposedModule: string;
     routePrefix: string;
   } | null;
   mobile: {
-    remoteEntryAndroid: string;
-    remoteEntryIos: string;
+    microfrontendCode: string;
     exposedModule: string;
     routePrefix: string;
   } | null;
@@ -292,7 +288,7 @@ export interface PermissionFeature {
   lockedPermissions: LockedPermission[];
   upsell: PlanUpsell[];
   route: {
-    remoteEntry: string;
+    microfrontendCode: string;
     exposedModule: string;
     routePrefix: string;
   };
