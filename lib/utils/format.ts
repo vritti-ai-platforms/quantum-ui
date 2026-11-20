@@ -102,6 +102,8 @@ export const formatQuantity = (
   const number = numberFormatter(options.localeTag);
   const inPrimary = `${number.format(value.primaryUomQty)} ${value.primaryUomSymbol}`;
   if (value.displayUomSymbol === value.primaryUomSymbol) return { primary: inPrimary };
+  // Nothing is nothing in either unit, so it reads in the display unit the item's other quantities use
+  if (value.primaryUomQty === 0) return { primary: `${number.format(0)} ${value.displayUomSymbol}` };
   if (!value.isPack) {
     return { primary: `${number.format(value.displayUomQty)} ${value.displayUomSymbol}`, secondary: inPrimary };
   }

@@ -94,7 +94,7 @@ export const StatusSwitch: React.FC<StatusSwitchProps> = ({
               // biome-ignore lint/suspicious/noArrayIndexKey: a fixed pair of slots, not a reorderable list
               key={index}
               className={cn(
-                'col-start-1 row-start-1 select-none font-semibold uppercase leading-none tracking-[0.08em] transition-all duration-200',
+                'col-start-1 row-start-1 select-none whitespace-nowrap font-semibold uppercase leading-none tracking-[0.08em] transition-all duration-200',
                 dimensions.label,
                 checked === (index === 1) ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0',
                 index === 1 ? label : 'text-muted-foreground',

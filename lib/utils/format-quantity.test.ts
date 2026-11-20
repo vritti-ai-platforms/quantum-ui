@@ -26,6 +26,10 @@ describe('formatQuantity', () => {
     assert.deepEqual(formatQuantity(strips(2340, 234, 0), options), { primary: '234 strip', secondary: '2,340 tab' });
   });
 
+  it('shows nothing in the display unit', () => {
+    assert.deepEqual(formatQuantity(strips(0, 0, 0), options), { primary: '0 strip' });
+  });
+
   it('shows primary units alone when there is less than one pack', () => {
     assert.deepEqual(formatQuantity(strips(4, 0, 4), options), { primary: '4 tab' });
   });
