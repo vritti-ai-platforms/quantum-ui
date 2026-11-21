@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { MoreVertical } from 'lucide-react';
+import { type ConfirmOptions, useConfirm } from '../../../hooks/useConfirm';
 import { useDialog } from '../../../hooks/useDialog';
 import { Button } from '../../Button';
 import { Dialog } from '../../Dialog';
@@ -17,6 +18,9 @@ export interface RowAction {
   disabledTip?: string;
   hidden?: boolean;
   permission?: string;
+  // Asks before onClick runs: true titles it "<label>?" with the action's label and variant on the confirm button, an
+  // object overrides any of those; ignored for dialog actions
+  confirm?: ConfirmOptions | boolean;
   dialog?: {
     title: string;
     description: string;
@@ -82,6 +86,26 @@ const DirectAction: React.FC<{ action: ResolvedAction; disabledAll?: boolean }> 
   );
 };
 
+// Runs an action's onClick only once its confirm is accepted, when it asks for one
+function withConfirm(action: RowAction, confirm: ReturnType<typeof useConfirm>): RowAction {
+  const { onClick } = action;
+  if (!action.confirm || action.dialog || !onClick) return action;
+  const options: ConfirmOptions = {
+    title: `${action.label}?`,
+    confirmLabel: action.label,
+    variant: action.variant ?? 'default',
+    ...(action.confirm === true ? {} : action.confirm),
+  };
+  return {
+    ...action,
+    onClick: () => {
+      void confirm(options).then((accepted) => {
+        if (accepted) onClick();
+      });
+    },
+  };
+}
+
 // Converts actions to DropdownMenu items format
 function toDropdownItems(actions: ResolvedAction[], disabledAll?: boolean) {
   return actions.map((action) => {
@@ -111,14 +135,16 @@ function toDropdownItems(actions: ResolvedAction[], disabledAll?: boolean) {
 // Auto-layout row actions: 0→null, 1→button, 2→side-by-side, 3+→primary + ⋮ dropdown
 export const RowActions: React.FC<RowActionsProps> = ({ actions, disabledAll }) => {
   const gate = usePermissionGate();
+  const confirm = useConfirm();
 
   // Resolve permissions before the visibility filter so the 1/2/3+ layout counts only what the role grants
   const resolved: ResolvedAction[] = actions.map((action) => {
-    if (!action.permission) return action;
-    const result = gate(action.permission);
-    if (!result.granted) return { ...action, hidden: true };
-    if (result.locked) return { ...action, disabled: true, lockTip: lockedTip(result) };
-    return action;
+    const confirmed = withConfirm(action, confirm);
+    if (!confirmed.permission) return confirmed;
+    const result = gate(confirmed.permission);
+    if (!result.granted) return { ...confirmed, hidden: true };
+    if (result.locked) return { ...confirmed, disabled: true, lockTip: lockedTip(result) };
+    return confirmed;
   });
 
   const visible = resolved.filter((a) => !a.hidden);

@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { type ConfirmOptions, useConfirm } from '../../hooks/useConfirm';
 import { Alert } from '../Alert';
 import { Button } from '../Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card';
@@ -16,6 +17,9 @@ export interface DangerZoneProps {
   showWarning?: boolean;
   /** Permission code gating the action: hides the whole card when not granted; the button locks (disabled) when locked */
   permission?: string;
+  // Asks before onClick runs: true reuses the card's title, description and button text in a destructive confirm, an
+  // object overrides any of those
+  confirm?: ConfirmOptions | boolean;
 }
 
 // Renders a destructive-bordered card with a warning heading, description, and action button
@@ -29,7 +33,9 @@ export const DangerZone = ({
   warning,
   showWarning,
   permission,
+  confirm,
 }: DangerZoneProps) => {
+  const askConfirm = useConfirm();
   // No provider / no code resolves to granted, so the card renders unless a role explicitly withholds delete
   const { granted } = usePermission(permission);
   if (!granted) {
@@ -54,7 +60,18 @@ export const DangerZone = ({
             variant="destructive"
             size="sm"
             permission={permission}
-            onClick={onClick}
+            onClick={() => {
+              if (!confirm) return onClick();
+              void askConfirm({
+                title: `${title}?`,
+                description,
+                confirmLabel: buttonText,
+                variant: 'destructive',
+                ...(confirm === true ? {} : confirm),
+              }).then((accepted) => {
+                if (accepted) onClick();
+              });
+            }}
             disabled={disabled}
             isLoading={isLoading}
           >
