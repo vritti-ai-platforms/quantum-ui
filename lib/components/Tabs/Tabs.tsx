@@ -11,7 +11,10 @@ import {
 } from '../../../shadcn/shadcnTabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../shadcn/shadcnTooltip';
 import { cn } from '../../../shadcn/utils';
+import { formatNumber } from '../../utils/format';
+import { getLocale } from '../../utils/locale';
 import { lockedTip, PermissionLockIcon, usePermissionGate } from '../PermissionGate';
+import { Skeleton } from '../Skeleton/Skeleton';
 
 export interface TabItem {
   value: string;
@@ -21,6 +24,10 @@ export interface TabItem {
   className?: string;
   contentClassName?: string;
   permission?: string;
+  // How many records the tab holds, drawn beside the label; left out, the tab shows no count
+  count?: number;
+  // The count is on its way: a placeholder holds its place so the label doesn't shift when it lands
+  countLoading?: boolean;
   // Set internally by permission gating: the upsell tip shown when a tab is plan/BU-locked
   lockTip?: string;
 }
@@ -88,6 +95,28 @@ function withLockTooltip(trigger: React.ReactNode, tab: TabItem): React.ReactNod
         <TooltipContent>{tab.lockTip}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
+  );
+}
+
+// A tab's count beside its label, in the locale's digits; a placeholder while it loads
+function TabCount({ count, loading }: { count?: number; loading?: boolean }) {
+  if (loading) return <Skeleton aria-hidden className="h-4 w-5 rounded-full" />;
+  if (count === undefined) return null;
+  return (
+    <span className="rounded-full bg-muted px-1.5 text-xs leading-4 tabular-nums text-muted-foreground group-data-[state=active]:bg-primary/10 group-data-[state=active]:text-foreground">
+      {formatNumber(count, { localeTag: getLocale() ?? 'en-US' }).primary}
+    </span>
+  );
+}
+
+// A tab's label with its count, when it has one
+function TabLabel({ tab }: { tab: TabItem }) {
+  if (tab.count === undefined && !tab.countLoading) return <>{tab.label}</>;
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      {tab.label}
+      <TabCount count={tab.count} loading={tab.countLoading} />
+    </span>
   );
 }
 
@@ -168,9 +197,9 @@ function TabsView({
                 key={tab.value}
                 value={tab.value}
                 disabled={disabled || tab.disabled}
-                className={tab.className}
+                className={cn('group', tab.className)}
               >
-                {tab.label}
+                <TabLabel tab={tab} />
               </ShadcnTabsTrigger>,
               tab,
             ),
@@ -203,7 +232,7 @@ function TabsView({
                 value={tab.value}
                 disabled={disabled || tab.disabled}
                 className={cn(
-                  'relative inline-flex items-center justify-center gap-1.5',
+                  'group relative inline-flex items-center justify-center gap-1.5',
                   'rounded-md px-3 py-1',
                   'text-sm font-medium whitespace-nowrap',
                   'text-muted-foreground',
@@ -222,7 +251,9 @@ function TabsView({
                     transition={{ type: 'spring', visualDuration: 0.3, bounce: 0.05 }}
                   />
                 )}
-                <span className="relative z-10">{tab.label}</span>
+                <span className="relative z-10">
+                  <TabLabel tab={tab} />
+                </span>
               </TabsPrimitive.Trigger>,
               tab,
             ),
