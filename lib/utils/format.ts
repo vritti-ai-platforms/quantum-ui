@@ -86,14 +86,18 @@ export type DisplayQuantity = {
   displayUomSymbol: string;
   primaryUomSymbol: string;
   isPack: boolean;
+  // The quantity broken down by unit, largest first, zero shares left out — whole display packs, the item's smaller
+  // packs when it cascades its units, then the primary units left over; absent, it is the whole packs and the leftover
+  breakdown?: { qty: number; symbol: string }[];
 };
 
 export interface FormatQuantityOptions {
   localeTag: string;
 }
 
-// Formats an item quantity in its display unit: a pack unit as whole packs plus the primary units left over ("234 strip
-// + 4 tab"), any other unit as one figure ("12.5 kg"); the primary-unit total is the secondary whenever it differs
+// Formats an item quantity in its display unit: a pack unit as its breakdown ("234 strip + 4 tab", or "9 box + 5 strip +
+// 2 tab" for an item that cascades its units), any other unit as one figure ("12.5 kg"); the primary-unit total is the
+// secondary whenever it differs
 export const formatQuantity = (
   value: DisplayQuantity | null | undefined,
   options: FormatQuantityOptions,
@@ -107,12 +111,24 @@ export const formatQuantity = (
   if (!value.isPack) {
     return { primary: `${number.format(value.displayUomQty)} ${value.displayUomSymbol}`, secondary: inPrimary };
   }
-  if (value.wholeDisplayUomQty === 0) return { primary: inPrimary };
-  const packs = `${number.format(value.wholeDisplayUomQty)} ${value.displayUomSymbol}`;
-  if (value.remainderPrimaryUomQty === 0) return { primary: packs, secondary: inPrimary };
-  const sign = value.remainderPrimaryUomQty < 0 ? '−' : '+';
-  const remainder = `${number.format(Math.abs(value.remainderPrimaryUomQty))} ${value.primaryUomSymbol}`;
-  return { primary: `${packs} ${sign} ${remainder}`, secondary: inPrimary };
+  const parts = value.breakdown?.length
+    ? value.breakdown
+    : [
+        { qty: value.wholeDisplayUomQty, symbol: value.displayUomSymbol },
+        { qty: value.remainderPrimaryUomQty, symbol: value.primaryUomSymbol },
+      ].filter((part) => part.qty !== 0);
+  // Less than one of the smallest pack reads in the primary unit alone, as does a sliver every share rounds away
+  if (parts.length === 0 || (parts.length === 1 && parts[0].symbol === value.primaryUomSymbol)) {
+    return { primary: inPrimary };
+  }
+  // A negative quantity splits toward zero, so every share after the first is taken off it
+  const sign = value.primaryUomQty < 0 ? '−' : '+';
+  const [first, ...rest] = parts;
+  const reading = [
+    `${number.format(first.qty)} ${first.symbol}`,
+    ...rest.map((part) => `${sign} ${number.format(Math.abs(part.qty))} ${part.symbol}`),
+  ].join(' ');
+  return { primary: reading, secondary: inPrimary };
 };
 
 export interface FormatCurrencyOptions {

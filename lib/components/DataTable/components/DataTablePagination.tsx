@@ -15,7 +15,7 @@ interface DataTablePaginationProps<TData> {
 // Renders pagination in a single row with info, controls, and nav buttons
 export function DataTablePagination<TData>({
   table,
-  pageSizeOptions = [10, 20, 30, 50],
+  pageSizeOptions = [10, 20, 30, 50, 100],
   className,
 }: DataTablePaginationProps<TData>) {
   const [pageInputValue, setPageInputValue] = useState<string | null>(null);

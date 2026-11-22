@@ -1,4 +1,4 @@
-import type { CellContext, ColumnDef, HeaderContext, Row, SortingState } from '@tanstack/react-table';
+import type { CellContext, ColumnDef, HeaderContext, SortingState } from '@tanstack/react-table';
 import * as xlsxLib from 'xlsx';
 import type { SortCondition } from '../../types/conditions';
 import { Checkbox } from '../Checkbox';
@@ -22,6 +22,7 @@ export function getSelectionColumn<TData>(): ColumnDef<TData, unknown> {
       <Checkbox
         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        disabled={!table.getRowModel().rows.some((row) => row.getCanSelect())}
         aria-label="Select all"
       />
     ),
@@ -29,6 +30,7 @@ export function getSelectionColumn<TData>(): ColumnDef<TData, unknown> {
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
+        disabled={!row.getCanSelect()}
         aria-label="Select row"
       />
     ),
@@ -52,11 +54,9 @@ export function downloadBlob(blob: Blob, filename: string): void {
 }
 
 // Transforms selected rows into flat export objects using importExport columns
-function transformRows<TData>(rows: Row<TData>[], config: ImportExportConfig<TData>): Record<string, string>[] {
+function transformRows<TData>(rows: TData[], config: ImportExportConfig<TData>): Record<string, string>[] {
   return rows.map((row) => {
-    const transformed = config.transformExportRow
-      ? config.transformExportRow(row.original)
-      : (row.original as Record<string, unknown>);
+    const transformed = config.transformExportRow ? config.transformExportRow(row) : (row as Record<string, unknown>);
     const picked: Record<string, string> = {};
     for (const col of config.columns) {
       picked[col.label] = String(transformed[col.key] ?? '');
@@ -77,7 +77,7 @@ const FORMAT_CONFIG: Record<ExportFormat, { ext: string; bookType: string; separ
 };
 
 export function exportSelectedRows<TData>(
-  rows: Row<TData>[],
+  rows: TData[],
   config: ImportExportConfig<TData>,
   format: ExportFormat,
 ): void {

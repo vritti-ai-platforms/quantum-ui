@@ -41,6 +41,44 @@ describe('formatQuantity', () => {
     });
   });
 
+  it('shows every share of a cascaded breakdown', () => {
+    const value = {
+      ...strips(14235, 1423, 5),
+      displayUomSymbol: 'box',
+      breakdown: [
+        { qty: 142, symbol: 'box' },
+        { qty: 3, symbol: 'strip' },
+        { qty: 5, symbol: 'tab' },
+      ],
+    };
+    assert.deepEqual(formatQuantity(value, options), { primary: '142 box + 3 strip + 5 tab', secondary: '14,235 tab' });
+  });
+
+  it('subtracts every later share of a negative cascaded breakdown', () => {
+    const value = {
+      ...strips(-125, -12, -5),
+      displayUomSymbol: 'box',
+      breakdown: [
+        { qty: -1, symbol: 'box' },
+        { qty: -2, symbol: 'strip' },
+        { qty: -5, symbol: 'tab' },
+      ],
+    };
+    assert.deepEqual(formatQuantity(value, options), { primary: '-1 box − 2 strip − 5 tab', secondary: '-125 tab' });
+  });
+
+  it('shows a breakdown below one display pack in the smaller packs', () => {
+    const value = {
+      ...strips(52, 5, 2),
+      displayUomSymbol: 'box',
+      breakdown: [
+        { qty: 5, symbol: 'strip' },
+        { qty: 2, symbol: 'tab' },
+      ],
+    };
+    assert.deepEqual(formatQuantity(value, options), { primary: '5 strip + 2 tab', secondary: '52 tab' });
+  });
+
   it('shows a derived unit as one figure', () => {
     assert.deepEqual(
       formatQuantity(
@@ -75,6 +113,10 @@ describe('formatQuantity', () => {
       ),
       { primary: '2,344 tab' },
     );
+  });
+
+  it('shows a sliver every share rounds away in the primary unit', () => {
+    assert.deepEqual(formatQuantity(strips(0.0004, 0, 0), options), { primary: '0 tab' });
   });
 
   it('shows a dash for a missing quantity', () => {

@@ -37,6 +37,7 @@ export type {
   DataTableMeta,
   DataTableProps,
   DataTableSearchConfig,
+  DataTableSelection,
   DataTableToolbarConfig,
   DensityType,
   ImportExportColumn,

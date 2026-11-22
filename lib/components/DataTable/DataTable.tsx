@@ -69,10 +69,12 @@ function GroupBracket({ children }: { children: React.ReactNode }) {
 function buildNoResultsDescription(flags: {
   hasActiveSearch: boolean;
   hasActiveFilters: boolean;
+  hasActiveContext: boolean;
   hasActiveView: boolean;
 }): string {
   const parts: string[] = [];
   if (flags.hasActiveSearch) parts.push('your search');
+  if (flags.hasActiveContext) parts.push('the context');
   if (flags.hasActiveFilters) parts.push('your filters');
   if (flags.hasActiveView) parts.push('this view');
   const joined = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
@@ -96,7 +98,7 @@ export function DataTable<TData>({
   selectedRowId,
   permission,
 }: DataTableProps<TData>) {
-  const { table, isLoading: isLoadingProp, isFetching, isSyncing, isError, error, refetch } = instance;
+  const { table, isLoading: isLoadingProp, isFetching, isSyncing, isError, error, refetch, selection } = instance;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const importDialog = useDialog();
 
@@ -162,23 +164,31 @@ export function DataTable<TData>({
     showImport ||
     showExport;
 
+  // Named context controls are filters kept in filters.context; one with a default can't be cleared
+  const setContext = meta?.setContext;
+  const defaultContext = meta?.defaultContext ?? NO_FILTERS;
+  const requiredContext = useMemo(() => new Set(defaultContext.map((c) => c.field)), [defaultContext]);
+  // The context picks the user can clear, which narrow the rows as filters do
+  const clearableContext = useMemo(
+    () => (contextFilters ?? NO_FILTERS).filter((condition) => !requiredContext.has(condition.field)),
+    [contextFilters, requiredContext],
+  );
+
   const search = meta?.search ?? null;
   const hasActiveView = !!activeViewId;
   // Without a view, "active" = anything present. With a view, "active" = diverged from the view's saved state.
   const hasActiveFilters = hasActiveView ? !!meta?.isFiltersDirty : appliedFilterCount > 0;
   const hasActiveSearch = hasActiveView ? !!meta?.isSearchDirty : !!(search?.value && search.value.trim() !== '');
-  const isFiltered = hasActiveSearch || hasActiveFilters || hasActiveView;
+  const hasActiveContext = clearableContext.length > 0;
+  const isFiltered = hasActiveSearch || hasActiveFilters || hasActiveContext || hasActiveView;
   // Reset baselines: clear actions revert to the view's saved values, or to empty when no view is active.
   const filtersBaseline = meta?.activeViewState?.filters.panel ?? NO_FILTERS;
   const searchBaseline = meta?.activeViewState?.search ?? null;
   const onSearchChange = (s: SearchState) => meta?.setSearch?.(s);
 
-  const selectedCount = table.getFilteredSelectedRowModel().rows.length;
+  // Across pages: ticks are kept by row id, and an all-matching selection counts the rows it stands for
+  const selectedCount = selection.count;
 
-  // Named context controls are filters kept in filters.context; one with a default can't be cleared
-  const setContext = meta?.setContext;
-  const defaultContext = meta?.defaultContext ?? NO_FILTERS;
-  const requiredContext = useMemo(() => new Set(defaultContext.map((c) => c.field)), [defaultContext]);
   const boundContextBar =
     contextBar && setContext
       ? bindFilters(contextBar, {
@@ -233,7 +243,12 @@ export function DataTable<TData>({
         <DataTableEmpty
           icon={emptyStateConfig?.icon}
           title="No results found"
-          description={buildNoResultsDescription({ hasActiveSearch, hasActiveFilters, hasActiveView })}
+          description={buildNoResultsDescription({
+            hasActiveSearch,
+            hasActiveFilters,
+            hasActiveContext,
+            hasActiveView,
+          })}
           action={
             <div className="flex gap-2">
               {hasActiveSearch && (
@@ -244,6 +259,17 @@ export function DataTable<TData>({
               {hasActiveFilters && (
                 <Button variant="outline" size="sm" onClick={() => meta?.setFilters?.(filtersBaseline)}>
                   Clear Filters
+                </Button>
+              )}
+              {hasActiveContext && setContext && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    for (const condition of clearableContext) setContext(condition.field, null);
+                  }}
+                >
+                  Clear Context
                 </Button>
               )}
               {hasActiveView && slug && (
@@ -425,11 +451,12 @@ export function DataTable<TData>({
             >
               <DataTableSelectionBar
                 table={table}
+                selection={selection}
                 importExport={importExport}
                 exportHidden={!exportGate.granted}
                 exportLockTip={exportGate.locked ? lockedTip(exportGate) : undefined}
               >
-                {selectActions?.(table.getFilteredSelectedRowModel().rows)}
+                {selectActions?.(table.getFilteredSelectedRowModel().rows, selection)}
               </DataTableSelectionBar>
             </motion.div>
           ) : filters && filtersOpen ? (

@@ -354,9 +354,20 @@ The DropdownMenu tracks `activeDialogId` internally and renders all dialog-type 
 
 - **`useDataTable({ query, columns, slug, label, … })`** takes the page's query (anything with `data` /
   `isLoading` / `isFetching` — a TanStack `useQuery` result fits; type `DataTableQuery<TData>`) and returns a
-  **`DataTableInstance`**: `{ table, isLoading, isFetching, contextValue, isLoaded }`. **`<DataTable table={instance}>`**
+  **`DataTableInstance`**: `{ table, isLoading, isFetching, contextValue, isLoaded, selection }`. **`<DataTable table={instance}>`**
   renders the whole instance — DataTable has no `isLoading` / `isFetching` props. Don't reintroduce a `serverState`
   option or loading props; anything a page must also wait on is folded into the `query` it passes.
+- **Selection is by row id and survives paging.** Rows are keyed by their `id` (or `getRowId`; the index only when a
+  page's rows lack a unique id), so a tick stays with its row across pages. `selection` holds the whole selection —
+  `ids`, `rows` (every ticked row seen on any page; what Export Selected exports), `count` — while
+  `selectActions(rows, selection)` also gets the ticked rows of the page in view. All matching can't be exported from the
+  selection bar: those rows were never loaded. Changing the
+  filters or search clears it. A row `enableRowSelection` refuses shows a disabled checkbox.
+- **`enableSelectAllMatching`** adds "Select all N matching" to the selection bar once a whole page is ticked:
+  `selection.allMatching` then stands for every row the filters match minus `selection.excludedIds`, and
+  `selection.count` is `matchingCount` (the response's `selectableCount`, else its `count`) minus those. A bulk action
+  sends `{ allMatching, ids | excludedIds }` and the server re-applies the table's saved filters — never the rows on the
+  client. `selection.clear()` (or `table.resetRowSelection()`) ends it.
 - **Context-mode filters** (`mode="context"`) all render through `ContextAnchorText` and take a **`loading`** prop that
   holds the value's place with a pulsing bar. A new context-capable filter must accept `loading` and pass it to
   `ContextAnchorText`. `DataTable` injects `loading` into its bound context-bar filters (via `bindFilters`) until the

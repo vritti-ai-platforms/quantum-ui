@@ -3,11 +3,12 @@ import { Download } from 'lucide-react';
 import { cn } from '../../../../shadcn/utils';
 import { Button } from '../../Button';
 import { DropdownMenu } from '../../DropdownMenu';
-import type { ImportExportConfig } from '../types';
+import type { DataTableSelection, ImportExportConfig } from '../types';
 import { exportSelectedRows } from '../utils';
 
 interface DataTableSelectionBarProps<TData> {
   table: Table<TData>;
+  selection: DataTableSelection<TData>;
   children?: React.ReactNode;
   className?: string;
   importExport?: ImportExportConfig<TData>;
@@ -15,9 +16,13 @@ interface DataTableSelectionBarProps<TData> {
   exportLockTip?: string;
 }
 
+// All matching rows span pages that were never loaded here, so only a selection of ticked rows exports
+const ALL_MATCHING_EXPORT_TIP = 'All matching rows are not loaded here — tick the rows to export instead';
+
 // Renders a selection info bar showing selected row count with export and clear actions
 export function DataTableSelectionBar<TData>({
   table,
+  selection,
   children,
   className,
   importExport,
@@ -25,8 +30,13 @@ export function DataTableSelectionBar<TData>({
   exportLockTip,
 }: DataTableSelectionBarProps<TData>) {
   const meta = table.options.meta;
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-  const count = selectedRows.length;
+  const count = selection.count;
+  // "Select all N matching" once the whole page is ticked and the filters match more than it holds
+  const offersAllMatching =
+    selection.canSelectAllMatching &&
+    !selection.allMatching &&
+    table.getIsAllPageRowsSelected() &&
+    selection.matchingCount > count;
   const singular = meta?.singular ?? 'row';
   const plural = meta?.plural ?? 'rows';
 
@@ -52,17 +62,28 @@ export function DataTableSelectionBar<TData>({
   return (
     <div className={cn('flex items-center gap-2 px-4 py-3 border-b', className)}>
       <span className="text-sm font-medium mr-2">
+        {selection.allMatching ? 'All ' : ''}
         {count} {count === 1 ? singular : plural} selected
       </span>
+      {offersAllMatching && (
+        <Button variant="link" size="sm" className="h-8 px-1" onClick={selection.selectAllMatching}>
+          Select all {selection.matchingCount} matching
+        </Button>
+      )}
+      {selection.allMatching && (
+        <Button variant="link" size="sm" className="h-8 px-1" onClick={selection.clear}>
+          Clear selection
+        </Button>
+      )}
       {children}
       <div className="ml-auto flex items-center gap-2">
-        {exportHidden ? null : exportLockTip ? (
+        {exportHidden ? null : exportLockTip || selection.allMatching ? (
           <Button
             variant="outline"
             size="sm"
             className="h-8 text-sm"
             disabled
-            disabledTip={exportLockTip}
+            disabledTip={exportLockTip ?? ALL_MATCHING_EXPORT_TIP}
             startAdornment={<Download className="h-4 w-4" />}
           >
             Export Selected
@@ -80,31 +101,31 @@ export function DataTableSelectionBar<TData>({
                 type: 'item' as const,
                 id: 'csv',
                 label: 'CSV (.csv)',
-                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'csv'),
+                onClick: () => exportSelectedRows(selection.rows, exportConfig, 'csv'),
               },
               {
                 type: 'item' as const,
                 id: 'xlsx',
                 label: 'Excel (.xlsx)',
-                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'xlsx'),
+                onClick: () => exportSelectedRows(selection.rows, exportConfig, 'xlsx'),
               },
               {
                 type: 'item' as const,
                 id: 'xls',
                 label: 'Excel 97-2004 (.xls)',
-                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'xls'),
+                onClick: () => exportSelectedRows(selection.rows, exportConfig, 'xls'),
               },
               {
                 type: 'item' as const,
                 id: 'ods',
                 label: 'OpenDocument (.ods)',
-                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'ods'),
+                onClick: () => exportSelectedRows(selection.rows, exportConfig, 'ods'),
               },
               {
                 type: 'item' as const,
                 id: 'tsv',
                 label: 'TSV (.tsv)',
-                onClick: () => exportSelectedRows(selectedRows, exportConfig, 'tsv'),
+                onClick: () => exportSelectedRows(selection.rows, exportConfig, 'tsv'),
               },
             ]}
           />

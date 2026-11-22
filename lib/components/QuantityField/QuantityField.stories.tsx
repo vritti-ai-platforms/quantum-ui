@@ -40,3 +40,31 @@ export const WithQuantityError: Story = {
 export const Loading: Story = { args: { units: [], loading: true } };
 
 export const Disabled: Story = { args: { value: 30, disabled: true } };
+
+export const ReadInBoxes: Story = { args: { value: 952, anchorUnitId: 'box' } };
+
+export const Cascading: Story = { args: { value: 952, anchorUnitId: 'box', cascade: true } };
+
+export const Compact: Story = {
+  render: (args) => (
+    <div className="w-60">
+      <QuantityField {...args} label={undefined} compact cascade value={952} defaultUnitId="box" />
+    </div>
+  ),
+};
+
+export const SingleUnit: Story = { args: { units: [units[0]], defaultUnitId: 'tab', value: 30 } };
+
+export const DecimalPrimary: Story = {
+  args: {
+    units: [
+      { id: 'ml', name: 'Millilitre', symbol: 'ml', primaryUomQty: 1, uomQty: 1, isPack: false },
+      { id: 'l', name: 'Litre', symbol: 'L', primaryUomQty: 1000, uomQty: 1, isPack: false },
+      { id: 'bottle', name: 'Bottle of 100 ml', symbol: 'bottle', primaryUomQty: 100, uomQty: 1 },
+    ],
+    primaryUnitId: 'ml',
+    defaultUnitId: 'bottle',
+    allowDecimal: true,
+    value: 250.5,
+  },
+};

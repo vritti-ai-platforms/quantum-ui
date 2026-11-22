@@ -1,4 +1,4 @@
-import type { ColumnDef, Row } from '@tanstack/react-table';
+import type { ColumnDef, Row, RowSelectionState } from '@tanstack/react-table';
 import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import { deepEqual } from 'fast-equals';
 import pluralize from 'pluralize-esm';
@@ -8,12 +8,15 @@ import type { DensityType, TableState } from '../../../types/table-state';
 import { hasEveryDefault, holdsResetDefaults, readValue, withDefaults } from '../../../utils/conditions';
 import { useDataTableStore } from '../store/store';
 import { useTableSlice } from '../store/useTableSlice';
-import type { DataTableInstance } from '../types';
+import type { DataTableInstance, DataTableSelection } from '../types';
 import { useAutoUpsert } from './useAutoUpsert';
 
 export interface DataTableServerState<TData> {
   result?: TData[];
   count?: number;
+  // How many of the matching rows can be selected, when some can't (blocked, locked) — what "Select all N matching"
+  // counts; the count stands in when absent
+  selectableCount?: number;
   state?: TableState;
   activeViewId?: string | null;
 }
@@ -35,6 +38,11 @@ interface UseDataTableOptions<TData> {
   enableSorting?: boolean;
   enableMultiSort?: boolean;
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
+  // Offers "Select all N matching" once a whole page is ticked: the selection then stands for every row the filters
+  // match, minus the ones unticked after — read it from the instance's `selection`
+  enableSelectAllMatching?: boolean;
+  // A row's id, which keeps its tick across pages; defaults to the row's `id`, or its index when rows have no unique id
+  getRowId?: (row: TData) => string;
   enableHiding?: boolean;
   enableColumnResizing?: boolean;
   /** Called after the user's changes are saved — the page refetches its rows here */
@@ -46,7 +54,17 @@ interface UseDataTableOptions<TData> {
 }
 
 const NO_CONDITIONS: FilterCondition[] = [];
+const NO_ROW_SELECTION: RowSelectionState = {};
+
+// A row's own `id`, when every row on the page has a distinct one
+function rowIdsOf<TData>(rows: TData[]): string[] | null {
+  const ids = rows.map((row) => (row as { id?: unknown } | null)?.id);
+  if (!ids.every((id) => typeof id === 'string' || typeof id === 'number')) return null;
+  const unique = new Set(ids.map(String));
+  return unique.size === ids.length ? [...unique] : null;
+}
 const NO_FIELDS: string[] = [];
+const NO_ROWS: never[] = [];
 
 // The leaf column ids in definition order, resolved the way TanStack names columns
 function leafColumnIds<TData>(columns: ColumnDef<TData, unknown>[]): string[] {
@@ -83,6 +101,8 @@ export function useDataTable<TData>({
   query,
   enableMultiSort = true,
   enableRowSelection = true,
+  enableSelectAllMatching = false,
+  getRowId,
   enableHiding = true,
   enableSorting = true,
   enableColumnResizing = true,
@@ -255,14 +275,46 @@ export function useDataTable<TData>({
 
   const isSyncing = useAutoUpsert(slug, isReady, onStatePush);
 
-  const data = serverState?.result ?? [];
+  const data = serverState?.result ?? NO_ROWS;
   const totalRows = serverState?.count;
+
+  // Rows are ticked by id, so a tick stays with its row when the page changes; rows without a unique id fall back to
+  // their index on the page
+  const ownIds = useMemo(() => (getRowId ? null : rowIdsOf(data)), [getRowId, data]);
+  const resolveRowId = useCallback(
+    (row: TData, index: number) => (getRowId ? getRowId(row) : (ownIds?.[index] ?? String(index))),
+    [getRowId, ownIds],
+  );
+
+  // Selection: ticked ids, or every matching row minus the unticked ones once all matching are selected
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>(NO_ROW_SELECTION);
+  const [allMatching, setAllMatching] = useState(false);
+  const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
+  const clearSelection = useCallback(() => {
+    setAllMatching(false);
+    setExcludedIds(new Set());
+    setRowSelection(NO_ROW_SELECTION);
+  }, []);
+  const selectAllMatching = useCallback(() => {
+    setExcludedIds(new Set());
+    setAllMatching(true);
+  }, []);
+
+  // A selection is of the rows the filters and search matched; changing either starts it over
+  const selectionScope = JSON.stringify([activeState.filters, activeState.search]);
+  const scopeRef = useRef(selectionScope);
+  useLayoutEffect(() => {
+    if (scopeRef.current === selectionScope) return;
+    scopeRef.current = selectionScope;
+    clearSelection();
+  }, [selectionScope, clearSelection]);
 
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
+      rowSelection,
       columnVisibility,
       columnOrder,
       columnSizing,
@@ -271,6 +323,21 @@ export function useDataTable<TData>({
         pageIndex: activeState.pagination.limit > 0 ? activeState.pagination.offset / activeState.pagination.limit : 0,
         pageSize: activeState.pagination.limit,
       },
+    },
+    getRowId: resolveRowId,
+    onRowSelectionChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(rowSelection) : updater;
+      if (allMatching) {
+        // Clearing every tick (resetRowSelection, or unticking the whole page) ends the all-matching selection
+        if (Object.values(next).every((ticked) => !ticked)) return clearSelection();
+        setExcludedIds((previous) => {
+          const excluded = new Set(previous);
+          for (const id of Object.keys(rowSelection)) if (!next[id]) excluded.add(id);
+          for (const [id, ticked] of Object.entries(next)) if (ticked) excluded.delete(id);
+          return excluded;
+        });
+      }
+      setRowSelection(next);
     },
     onSortingChange: handleSortingChange,
     onPaginationChange: (updater) => {
@@ -318,6 +385,51 @@ export function useDataTable<TData>({
     meta,
   });
 
+  // While all matching are selected, every selectable row on the page in view is ticked unless it was unticked — rerun
+  // for each page of rows, since the table instance itself never changes
+  useLayoutEffect(() => {
+    if (!allMatching || data.length === 0) return;
+    const ticked: RowSelectionState = {};
+    for (const row of table.getRowModel().rows)
+      if (row.getCanSelect() && !excludedIds.has(row.id)) ticked[row.id] = true;
+    setRowSelection((previous) => (deepEqual(previous, ticked) ? previous : ticked));
+  }, [allMatching, excludedIds, data, table]);
+
+  const matchingCount = serverState?.selectableCount ?? totalRows ?? 0;
+  const tickedIds = useMemo(
+    () => Object.entries(rowSelection).flatMap(([id, ticked]) => (ticked ? [id] : [])),
+    [rowSelection],
+  );
+  // Every row seen on any page, by id, so a row ticked on another page can still be read (exported) from here
+  const seenRows = useRef(new Map<string, TData>());
+  const tickedRows = useMemo(() => {
+    data.forEach((row, index) => seenRows.current.set(resolveRowId(row, index), row));
+    return tickedIds.flatMap((id) => seenRows.current.get(id) ?? []);
+  }, [data, resolveRowId, tickedIds]);
+  const selection = useMemo<DataTableSelection<TData>>(
+    () => ({
+      allMatching,
+      ids: allMatching ? [] : tickedIds,
+      rows: allMatching ? [] : tickedRows,
+      excludedIds: allMatching ? [...excludedIds] : [],
+      count: allMatching ? Math.max(0, matchingCount - excludedIds.size) : tickedIds.length,
+      matchingCount,
+      canSelectAllMatching: enableSelectAllMatching,
+      selectAllMatching,
+      clear: clearSelection,
+    }),
+    [
+      allMatching,
+      tickedIds,
+      tickedRows,
+      excludedIds,
+      matchingCount,
+      enableSelectAllMatching,
+      selectAllMatching,
+      clearSelection,
+    ],
+  );
+
   // What <DataTable table={…}> renders: the table with the query's loading and error states
   return {
     table,
@@ -329,5 +441,6 @@ export function useDataTable<TData>({
     refetch: query?.refetch,
     contextValue,
     isLoaded: isReady,
+    selection,
   };
 }

@@ -30,7 +30,32 @@ export interface DataTableSearchConfig {
   searchAll?: boolean;
 }
 
-export type SelectActions<TData> = (selectedRows: Row<TData>[]) => React.ReactNode;
+// What a table has selected: the rows ticked by id (kept across pages), or — once "Select all N matching" is used — every
+// row its filters match except the ones unticked since
+export interface DataTableSelection<TData = unknown> {
+  allMatching: boolean;
+  // The ticked rows' ids while not selecting all matching
+  ids: string[];
+  // The ticked rows themselves, from whichever page they were ticked on; none while selecting all matching, whose rows
+  // on other pages were never loaded
+  rows: TData[];
+  // The rows unticked while selecting all matching
+  excludedIds: string[];
+  // How many rows are selected, across pages
+  count: number;
+  // How many rows the filters match that can be selected — what "Select all N matching" selects
+  matchingCount: number;
+  // Whether the table offers "Select all N matching" (useDataTable's enableSelectAllMatching)
+  canSelectAllMatching: boolean;
+  selectAllMatching: () => void;
+  clear: () => void;
+}
+
+// The selection bar's actions: the selected rows on the page in view, and the whole selection
+export type SelectActions<TData> = (
+  selectedRows: Row<TData>[],
+  selection: DataTableSelection<TData>,
+) => React.ReactNode;
 
 export interface DataTableEmptyConfig {
   icon?: React.ElementType;
@@ -102,6 +127,7 @@ export interface DataTableInstance<TData> {
   refetch?: () => unknown;
   contextValue: (field: string) => string | undefined;
   isLoaded: boolean;
+  selection: DataTableSelection<TData>;
 }
 
 export interface DataTableProps<TData> {
