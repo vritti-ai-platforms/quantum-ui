@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import { z } from 'zod';
+import { type CurrencyCode, isCurrencyCode } from './currencyCode';
 
 // Re-export zod + the @hookform/resolvers/zod adapter so apps consume one bundled, version-locked copy.
 export * from 'zod';
@@ -21,7 +22,9 @@ export interface NumericFieldOptions {
   maxMessage?: string;
 }
 
-// NaN-aware numeric field builder; overloads narrow the output type by `nullable`.
+// NaN-aware numeric field builder; overloads narrow the output type by `nullable`. An empty field — undefined (a
+// cleared input, or a default left out) or NaN — reads as the `required` message, or as null where nullable, never as
+// zod's raw type error.
 export function zodNumericField(
   options?: Omit<NumericFieldOptions, 'nullable'> & { nullable?: false },
 ): z.ZodType<number, number>;
@@ -47,9 +50,10 @@ export function zodNumericField(
   } = options;
 
   if (nullable) {
-    return z
-      .union([z.number(), z.nan(), z.null()])
-      .transform((v) => (v === null || Number.isNaN(v as number) ? null : v))
+    // undefined is taken as empty at runtime; the declared input stays number | null so forms typed that way still fit
+    const field = z
+      .union([z.number(), z.nan(), z.null(), z.undefined()])
+      .transform((v) => (v == null || Number.isNaN(v) ? null : v))
       .pipe(
         z
           .number()
@@ -69,12 +73,11 @@ export function zodNumericField(
             }
           }),
       );
+    return field as unknown as z.ZodType<number | null, number | null>;
   }
 
-  return z.union([z.number(), z.nan()]).superRefine((v, ctx) => {
-    if (Number.isNaN(v)) {
-      ctx.addIssue({ code: 'custom', message: required });
-    } else if (integer && !Number.isInteger(v)) {
+  return z.number({ error: required }).superRefine((v, ctx) => {
+    if (integer && !Number.isInteger(v)) {
       ctx.addIssue({ code: 'custom', message: integerMessage });
     } else if (nonZero && v === 0) {
       ctx.addIssue({ code: 'custom', message: nonZeroMessage });
@@ -95,6 +98,11 @@ export interface CurrencyFieldOptions {
   positiveMessage?: string;
 }
 
+// A currency the platform supports, typed as CurrencyCode
+export function zodCurrencyCode(message = 'Currency is required') {
+  return z.custom<CurrencyCode>((value) => isCurrencyCode(value), { message });
+}
+
 // CurrencyField returns undefined when untouched and { currency, value } once used; optional:true accepts an empty amount
 export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
   const {
@@ -104,13 +112,15 @@ export function zodCurrencyField(options: CurrencyFieldOptions = {}) {
     positiveMessage = 'Must be greater than 0',
   } = options;
 
-  return z.union([z.object({ currency: z.string(), value: z.string() }), z.undefined()]).superRefine((v, ctx) => {
-    if (!v?.value) {
-      if (!optional) ctx.addIssue({ code: 'custom', message: required });
-    } else if (positive && Number(v.value) <= 0) {
-      ctx.addIssue({ code: 'custom', message: positiveMessage });
-    }
-  });
+  return z
+    .union([z.object({ currency: zodCurrencyCode(), value: z.string() }), z.undefined()])
+    .superRefine((v, ctx) => {
+      if (!v?.value) {
+        if (!optional) ctx.addIssue({ code: 'custom', message: required });
+      } else if (positive && Number(v.value) <= 0) {
+        ctx.addIssue({ code: 'custom', message: positiveMessage });
+      }
+    });
 }
 
 export interface PhoneFieldOptions {

@@ -4,6 +4,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getContextState } from '../../services/context-states.service';
 import type { FilterCondition } from '../../types/conditions';
 import { readValue, readValues, withChange, withDefaults } from '../../utils/conditions';
+import type { SelectOption } from '../Select/types';
 import { toast } from '../Sonner/toast';
 import { type ContextSave, useContextSave } from './useContextSave';
 import { useSettlingFields } from './useSettlingFields';
@@ -13,12 +14,16 @@ interface UseContextStateOptions {
   slug?: string;
   /** Values the context always has — filled whenever a field is missing */
   defaultContext?: FilterCondition[];
+  /** Values an in-memory context (no slug) starts with, which can still be changed or cleared */
+  initialContext?: FilterCondition[];
   /** Fields whose default replaces the saved value every time the view opens */
   resetOnOpen?: string[];
   /** Fields cleared when another field changes, e.g. `{ site: ['supplierIds'] }` */
   resets?: Record<string, string[]>;
   /** Called after a change is saved — the view refetches its data here */
   onStatePush?: () => unknown;
+  /** Called with each field a change sets or clears, as the change is shown */
+  onChange?: (field: string, condition: FilterCondition | null) => void;
 }
 
 export interface ContextStateInstance {
@@ -33,9 +38,16 @@ export interface ContextStateInstance {
    * a first option, checking a held one). A view holds its data request until it settles. */
   isSettling: boolean;
   markFieldSettling: (field: string, settling: boolean) => void;
+  /** The options a Select given this context holds, in the order of its value — picked, looked up, or looked up again
+   * under new filters; in memory only, never saved */
+  selectedOptions: SelectOption[];
+  /** The first of them, for a single select */
+  selectedOption: SelectOption | null;
+  setSelectedOptions: (options: SelectOption[]) => void;
 }
 
 const NO_CONDITIONS: FilterCondition[] = [];
+const NO_OPTIONS: SelectOption[] = [];
 const NO_FIELDS: string[] = [];
 const NO_RESETS: Record<string, string[]> = {};
 
@@ -48,9 +60,11 @@ function contextQueryKey(slug: string | undefined) {
 export function useContextState({
   slug,
   defaultContext,
+  initialContext,
   resetOnOpen = NO_FIELDS,
   resets = NO_RESETS,
   onStatePush,
+  onChange,
 }: UseContextStateOptions): ContextStateInstance {
   const queryClient = useQueryClient();
   const queryKey = useMemo(() => contextQueryKey(slug), [slug]);
@@ -83,6 +97,10 @@ export function useContextState({
 
   const onStatePushRef = useRef(onStatePush);
   onStatePushRef.current = onStatePush;
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  // Read once, as the context starts
+  const initialRef = useRef(initialContext ?? NO_CONDITIONS);
 
   const { save, isSaving } = useContextSave({
     onSaved: ({ slug: savedSlug, context: savedContext }: ContextSave) => {
@@ -115,11 +133,12 @@ export function useContextState({
     [slug, persist],
   );
 
-  // 1. Nothing to read (no slug, or the read failed): start from the defaults, so the view still answers
+  // 1. Nothing to read (no slug, or the read failed): start from the initial values and the defaults, so the view still
+  // answers
   useLayoutEffect(() => {
     const canRead = slug != null && !readFailed;
     if (hasHeld || canRead) return;
-    setHeld({ slug, context: withDefaults([], defaults, { isOpening: true, resetOnOpen }) });
+    setHeld({ slug, context: withDefaults(initialRef.current, defaults, { isOpening: true, resetOnOpen }) });
   }, [hasHeld, slug, readFailed, defaults, resetOnOpen]);
 
   // 2. The saved context arrives: show it with its defaults filled, and save it if filling changed it
@@ -151,8 +170,16 @@ export function useContextState({
       if (!hasHeld) return;
       const current = held.context.find((existing) => existing.field === field) ?? null;
       if (deepEqual(current, condition)) return;
-      const changed = withChange(held.context, field, condition, resets[field] ?? NO_FIELDS);
-      showAndPersist(withDefaults(changed, defaults));
+      const cleared = resets[field] ?? NO_FIELDS;
+      const next = withDefaults(withChange(held.context, field, condition, cleared), defaults);
+      showAndPersist(next);
+      onChangeRef.current?.(field, condition);
+      // The fields the change cleared are reported too, as they now stand: gone, or back on their default
+      for (const reset of cleared) {
+        const before = held.context.find((existing) => existing.field === reset) ?? null;
+        const after = next.find((existing) => existing.field === reset) ?? null;
+        if (!deepEqual(before, after)) onChangeRef.current?.(reset, after);
+      }
     },
     [hasHeld, held, resets, defaults, showAndPersist],
   );
@@ -161,6 +188,12 @@ export function useContextState({
   const contextValues = useCallback((field: string) => readValues(context, field), [context]);
   const required = useMemo(() => new Set(defaults.map((condition) => condition.field)), [defaults]);
   const { hasSettlingFields, markFieldSettling } = useSettlingFields();
+  const [selectedOptions, setHeldOptions] = useState<SelectOption[]>(NO_OPTIONS);
+  // The same options again leave the held ones in place, so the page does not render for nothing
+  const setSelectedOptions = useCallback(
+    (options: SelectOption[]) => setHeldOptions((current) => (deepEqual(current, options) ? current : options)),
+    [],
+  );
 
   const isLoaded = hasHeld;
   const isSettling = !isLoaded || isSaving || hasSettlingFields;
@@ -176,7 +209,22 @@ export function useContextState({
       isSaving,
       isSettling,
       markFieldSettling,
+      selectedOptions,
+      selectedOption: selectedOptions[0] ?? null,
+      setSelectedOptions,
     }),
-    [context, contextValue, contextValues, setContext, required, isLoaded, isSaving, isSettling, markFieldSettling],
+    [
+      context,
+      contextValue,
+      contextValues,
+      setContext,
+      required,
+      isLoaded,
+      isSaving,
+      isSettling,
+      markFieldSettling,
+      selectedOptions,
+      setSelectedOptions,
+    ],
   );
 }

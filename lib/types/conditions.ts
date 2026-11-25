@@ -1,3 +1,5 @@
+import type { CurrencyCode } from '../utils/currencyCode';
+
 export type StringOperator = 'equals' | 'notEquals' | 'contains' | 'notContains';
 export type NumberOperator = 'equals' | 'notEquals' | 'gt' | 'gte' | 'lt' | 'lte';
 export type SelectOperator = 'equals' | 'notEquals';
@@ -8,7 +10,7 @@ export type FilterOperator = StringOperator | NumberOperator | SelectOperator | 
 
 // A money amount a filter matches on: the currency and a major-unit amount string
 export interface FilterCurrencyValue {
-  currency: string;
+  currency: CurrencyCode;
   value: string;
 }
 

@@ -141,6 +141,7 @@ export default defineConfig({
         'utils/format': resolve(__dirname, 'lib/utils/format.ts'),
         'utils/filter': resolve(__dirname, 'lib/utils/filter.ts'),
         'utils/decimal': resolve(__dirname, 'lib/utils/decimal.ts'),
+        'utils/store': resolve(__dirname, 'lib/utils/store.ts'),
         'utils/colors': resolve(__dirname, 'lib/utils/colors.ts'),
         'date-fns': resolve(__dirname, 'lib/date-fns.ts'),
       },

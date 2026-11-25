@@ -1,6 +1,6 @@
 import type React from 'react';
 import { Children, cloneElement, isValidElement } from 'react';
-import type { FilterCondition } from '../../../types/conditions';
+import type { FilterCondition } from '../types/conditions';
 
 type FilterElement = React.ReactElement<Record<string, unknown>>;
 
@@ -37,6 +37,25 @@ export interface FilterBinding {
   loading?: boolean;
   /** Told, per field, whether its control is still settling its value (picking a first option, checking a held one) */
   onFieldSettling?: (field: string, settling: boolean) => void;
+}
+
+// The fields of the named filter elements bindFilters binds, found as it finds them
+export function boundFilterNames(
+  children: React.ReactNode,
+  { keepControlled }: Pick<FilterBinding, 'keepControlled'> = {},
+  names: Set<string> = new Set(),
+): Set<string> {
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+    const el = child as FilterElement;
+    const name = filterName(el);
+    if (name !== undefined) {
+      if (!(keepControlled && 'value' in el.props)) names.add(name);
+    } else if (el.props.children != null) {
+      boundFilterNames(el.props.children as React.ReactNode, { keepControlled }, names);
+    }
+  });
+  return names;
 }
 
 // Binds each named filter element to its condition, recursing through fragments and wrappers

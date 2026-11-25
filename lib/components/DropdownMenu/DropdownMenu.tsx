@@ -239,7 +239,10 @@ const renderMenuItem = (
             e.preventDefault();
             onDialogSelect?.(item.id);
           }}
-          className={reasonClassName(reason)}
+          className={reasonClassName(
+            reason,
+            item.variant === 'destructive' && !lock ? 'text-destructive focus:text-destructive' : undefined,
+          )}
         >
           <ItemBody label={item.label} icon={item.icon} lock={lock} trailing={lock?.tip} reason={reason} />
         </DropdownMenuItem>
@@ -333,9 +336,11 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
             key={item.id}
             handle={handle}
             icon={item.icon}
+            iconVariant={item.variant === 'destructive' ? 'destructive' : 'default'}
             title={item.dialog.title}
             description={item.dialog.description}
             badgeSlot={item.dialog.badgeSlot}
+            className={item.dialog.className}
             content={item.dialog.content}
           />
         );

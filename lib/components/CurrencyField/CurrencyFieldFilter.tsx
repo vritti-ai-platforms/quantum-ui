@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../../shadcn/shadcnP
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shadcn/shadcnSelect';
 import { cn } from '../../../shadcn/utils';
 import type { FilterCondition, FilterCurrencyValue, NumberOperator } from '../../types/conditions';
-import { getCurrencyExponent, resolveCurrency } from '../../utils/currency';
+import { type CurrencyCode, getCurrencyExponent, isCurrencyCode, resolveCurrency } from '../../utils/currency';
 import Decimal from '../../utils/decimal';
 import { formatCurrency } from '../../utils/format';
 import { Button } from '../Button';
@@ -22,9 +22,9 @@ interface CurrencyFieldFilterBaseProps {
   name: string;
   label: string;
   /** Locks the currency, passed through to CurrencyField */
-  currencyCode?: string;
+  currencyCode?: CurrencyCode;
   /** The currencies that can be picked when the currency is not locked, passed through to CurrencyField */
-  currencies?: string[];
+  currencies?: CurrencyCode[];
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and amount in
    * a quiet outlined trigger. */
   mode?: FilterMode;
@@ -51,18 +51,18 @@ export type CurrencyFieldFilterProps = CurrencyFieldFilterBaseProps &
 function parseCurrencyValue(value: unknown): FilterCurrencyValue | undefined {
   if (value == null || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const { currency, value: amount } = value as Partial<FilterCurrencyValue>;
-  if (typeof currency !== 'string' || typeof amount !== 'string') return undefined;
+  if (!isCurrencyCode(currency) || typeof amount !== 'string') return undefined;
   return { currency, value: amount };
 }
 
 // The currency a fresh draft starts in: the locked one, else the applied one, else the workspace's, else the first allowed
 function draftCurrency(
   applied: FilterCurrencyValue | undefined,
-  currencyCode: string | undefined,
-  currencies: string[] | undefined,
-): string {
+  currencyCode: CurrencyCode | undefined,
+  currencies: CurrencyCode[] | undefined,
+): CurrencyCode {
   if (currencyCode) return currencyCode;
-  const allowed = (code: string | null | undefined): code is string =>
+  const allowed = (code: CurrencyCode | null | undefined): code is CurrencyCode =>
     !!code && (!currencies || currencies.length === 0 || currencies.includes(code));
   const appliedCurrency = applied?.currency;
   if (allowed(appliedCurrency)) return appliedCurrency;

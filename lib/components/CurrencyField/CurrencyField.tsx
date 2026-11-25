@@ -4,7 +4,10 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '.
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../shadcn/shadcnTooltip';
 import { cn } from '../../../shadcn/utils';
 import { CURRENCIES } from '../../selects/currency/currencies';
-import { type CurrencyValue, getCurrencyExponent } from '../../utils/currency';
+import { type CurrencyCode, type CurrencyValue, getCurrencyExponent, isCurrencyCode } from '../../utils/currency';
+import { formatNumber } from '../../utils/format';
+import { getLocale } from '../../utils/locale';
+import { BoundAfterValue, boundWords, isOutOfBounds, NumberFieldLabelRow } from '../Field/numberConstraints';
 import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 import { Select, type SelectOption, type SelectValue } from '../Select';
 
@@ -15,11 +18,11 @@ export interface CurrencyFieldProps {
 
   onChange?: (value: CurrencyValue) => void;
 
-  currencyCode?: string;
+  currencyCode?: CurrencyCode;
 
-  currencies?: string[];
+  currencies?: CurrencyCode[];
 
-  defaultCurrencyCode?: string;
+  defaultCurrencyCode?: CurrencyCode;
 
   label?: React.ReactNode;
 
@@ -39,6 +42,15 @@ export interface CurrencyFieldProps {
 
   /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
   permission?: string;
+
+  // The bounds the amount keeps, in major units; read in words right after the amount ("of 5,000", "min 100", "100 to
+  // 5,000"). The form's schema enforces them
+  min?: number;
+  max?: number;
+
+  // Above zero, and never zero; shown as rule chips on the label row
+  positive?: boolean;
+  nonZero?: boolean;
 }
 
 // Truncates an amount string to at most `decimals` fractional digits
@@ -59,7 +71,7 @@ function stepForDecimals(decimals: number): string {
 }
 
 // The selectable currencies, in the caller's order; a code missing from the ISO list still appears as itself
-function currencyOptions(currencies?: string[]): SelectOption[] {
+function currencyOptions(currencies?: CurrencyCode[]): SelectOption[] {
   if (!currencies) return CURRENCIES;
   return currencies.map((code) => CURRENCIES.find((option) => option.value === code) ?? { value: code, label: code });
 }
@@ -83,6 +95,10 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       className,
       required,
       permission,
+      min,
+      max,
+      positive,
+      nonZero,
     },
     ref,
   ) => {
@@ -101,7 +117,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
         : defaultCurrencyCode;
 
     const initialCurrency = value?.currency ?? currencyCode ?? fallbackCurrency ?? 'USD';
-    const [currency, setCurrency] = React.useState<string>(initialCurrency);
+    const [currency, setCurrency] = React.useState<CurrencyCode>(initialCurrency);
     const [amount, setAmount] = React.useState<string>(value?.value ?? '');
 
     // Sync with external controlled value changes
@@ -110,7 +126,10 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       if (value?.currency !== undefined && value.currency !== currency) {
         setCurrency(value.currency);
       }
-      if (value?.value !== undefined && value.value !== amount) {
+      // A value cleared from outside (a form reset) empties the amount too, rather than leaving the old one on show
+      if (value?.value === undefined) {
+        if (amount !== '') setAmount('');
+      } else if (value.value !== amount) {
         setAmount(value.value);
       }
     }, [value?.currency, value?.value]);
@@ -135,7 +154,7 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
     const step = stepForDecimals(decimals);
 
     const emit = React.useCallback(
-      (nextCurrency: string, nextAmount: string) => {
+      (nextCurrency: CurrencyCode, nextAmount: string) => {
         onChange?.({ currency: nextCurrency, value: nextAmount });
       },
       [onChange],
@@ -143,8 +162,8 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
 
     const handleCurrencyChange = React.useCallback(
       (nextValue: SelectValue) => {
-        if (nextValue == null) return;
-        const nextCurrency = String(nextValue);
+        if (!isCurrencyCode(nextValue)) return;
+        const nextCurrency = nextValue;
         const nextDecimals = getCurrencyExponent(nextCurrency);
         const truncated = truncateDecimals(amount, nextDecimals);
         setCurrency(nextCurrency);
@@ -188,22 +207,32 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
       return null;
     }
 
+    const formatBound = (bound: number) => String(formatNumber(bound, { localeTag: getLocale() ?? 'en-US' }).primary);
+    const bound = boundWords(
+      min === undefined ? undefined : formatBound(min),
+      max === undefined ? undefined : formatBound(max),
+    );
+    const outOfBounds = isOutOfBounds(amount === '' ? undefined : Number(amount), min, max);
+
     const field = (
       <Field data-disabled={disabled}>
         {label && (
-          <FieldLabel htmlFor={fieldId} className={cn(locked && 'items-center gap-1.5')}>
-            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
-            {label}
-          </FieldLabel>
+          <NumberFieldLabelRow positive={positive} nonZero={nonZero}>
+            <FieldLabel htmlFor={fieldId} className={cn(locked && 'items-center gap-1.5')}>
+              {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+              {label}
+            </FieldLabel>
+          </NumberFieldLabelRow>
         )}
 
         <FieldContent>
           <div
             className={cn(
-              'flex h-9 w-full items-stretch rounded-md border border-input bg-transparent dark:bg-input/30 shadow-xs transition-[color,box-shadow]',
+              'flex h-9 w-full items-stretch rounded-md border border-input bg-input/30 shadow-xs transition-[color,box-shadow]',
               'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[1px]',
               disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
-              hasError && 'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
+              hasError &&
+                'border-destructive focus-within:border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
               className,
             )}
           >
@@ -249,27 +278,37 @@ export const CurrencyField = React.forwardRef<HTMLInputElement, CurrencyFieldPro
               </div>
             )}
 
-            <input
-              ref={ref}
-              id={fieldId}
-              type="text"
-              inputMode="decimal"
-              pattern="^[0-9]*\.?[0-9]*$"
-              step={step}
-              value={amount}
-              onChange={handleAmountChange}
-              onBlur={handleAmountBlur}
-              disabled={disabled}
-              required={required}
-              placeholder={placeholder}
-              aria-invalid={hasError}
-              aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
-              className={cn(
-                'flex-1 min-w-0 bg-transparent px-3 py-1 text-sm outline-none',
-                'placeholder:text-muted-foreground',
-                'disabled:cursor-not-allowed',
+            <div className="relative flex min-w-0 flex-1">
+              <input
+                ref={ref}
+                id={fieldId}
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                step={step}
+                value={amount}
+                onChange={handleAmountChange}
+                onBlur={handleAmountBlur}
+                disabled={disabled}
+                required={required}
+                placeholder={placeholder}
+                aria-invalid={hasError}
+                aria-describedby={description || error ? `${fieldId}-description ${fieldId}-error` : undefined}
+                className={cn(
+                  'flex-1 min-w-0 bg-transparent px-3 py-1 text-sm outline-none',
+                  'placeholder:text-muted-foreground',
+                  'disabled:cursor-not-allowed',
+                )}
+              />
+              {bound && (
+                <BoundAfterValue
+                  text={amount || placeholder || ''}
+                  bound={bound}
+                  outOfBounds={outOfBounds}
+                  className="pl-3 text-sm"
+                />
               )}
-            />
+            </div>
           </div>
 
           {description && !error && <FieldDescription id={`${fieldId}-description`}>{description}</FieldDescription>}

@@ -461,3 +461,14 @@ export const WithPermission: Story = {
     </PermissionGateProvider>
   ),
 };
+
+// A number field's rules on the label row and its bounds in words right after the value
+export const NumberBounds: Story = {
+  render: () => (
+    <div className="flex w-96 flex-col gap-4">
+      <TextField label="Lead time (days)" type="number" integer positive defaultValue={10} min={1} max={90} />
+      <TextField label="Discount %" type="number" max={100} defaultValue={120} />
+      <TextField label="Minimum order" type="number" nonZero min={5} placeholder="Qty" />
+    </div>
+  ),
+};

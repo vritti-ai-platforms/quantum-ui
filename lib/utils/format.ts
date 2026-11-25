@@ -3,11 +3,12 @@ import { tz } from '@date-fns/tz';
 import type { Locale } from 'date-fns';
 import { format, isValid, parseISO } from 'date-fns';
 import type React from 'react';
+import type { CurrencyCode, CurrencyValue } from './currency';
 import Decimal from './decimal';
 import { formatCurrencyMajor } from './money';
 import { getUserTimeZone } from './timezone';
 
-export type CurrencyAmount = { currency: string; value: string };
+export type CurrencyAmount = CurrencyValue;
 
 export type FormattedValue = { primary: React.ReactNode; secondary?: string };
 
@@ -132,7 +133,7 @@ export const formatQuantity = (
 };
 
 export interface FormatCurrencyOptions {
-  workspaceCurrency?: string | null;
+  workspaceCurrency?: CurrencyCode | null;
   exchangeRate?: number | null;
 }
 

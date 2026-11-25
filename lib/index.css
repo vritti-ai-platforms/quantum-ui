@@ -23,6 +23,13 @@
  */
 @layer theme, base, components, utilities;
 
+/**
+ * dark: follows the app's theme — the `.dark` class ThemeContext puts on <html> — not the operating system's
+ * prefers-color-scheme, which Tailwind falls back to. Declared here so quantum-ui's compiled utilities (which @reference
+ * this file) and every consuming app (which imports it) read dark: the same way.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* .light mirrors .dark so a subtree can be pinned to either theme regardless of the document's */
 :root,
 .light {
@@ -42,12 +49,21 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.5771 0.2152 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --warning: oklch(0.62 0.14 78);
-  --warning-foreground: oklch(0.2302 0.0547 256.1829);
+  --warning: oklch(0.76 0.16 70);
+  --warning-foreground: oklch(0.25 0.06 55);
+  --warning-ink: oklch(0.52 0.13 60);
+  --destructive-ink: oklch(0.5 0.19 27);
+  --notice: oklch(0.36 0.11 262);
+  --notice-foreground: oklch(1 0 0);
+  --notice-ink: oklch(0.38 0.11 262);
+  --excess-ink: oklch(0.47 0.2 300);
+  --excess-foreground: oklch(1 0 0);
   --success: oklch(0.65 0.15 145);
-  --success-foreground: oklch(1 0 0);
-  --info: oklch(0.65 0.15 200);
-  --info-foreground: oklch(1 0 0);
+  --success-foreground: oklch(0.22 0.06 150);
+  --success-ink: oklch(0.5 0.13 150);
+  --info: oklch(0.6 0.13 230);
+  --info-foreground: oklch(0.18 0.04 235);
+  --info-ink: oklch(0.48 0.12 235);
   --border: oklch(0.9467 0.0207 248.0465);
   --input: oklch(0.9467 0.0207 248.0465);
   --ring: oklch(0.5789 0.1833 256.2496);
@@ -142,12 +158,21 @@
   --accent-foreground: oklch(0.9842 0.0034 247.8575);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(1 0 0);
-  --warning: oklch(0.8 0.16 90);
-  --warning-foreground: oklch(0.1288 0.008 264.6952);
+  --warning: oklch(0.8 0.15 75);
+  --warning-foreground: oklch(0.22 0.05 60);
+  --warning-ink: oklch(0.83 0.14 78);
+  --destructive-ink: oklch(0.76 0.15 25);
+  --notice: oklch(0.55 0.15 264);
+  --notice-foreground: oklch(1 0 0);
+  --notice-ink: oklch(0.82 0.1 264);
+  --excess-ink: oklch(0.78 0.14 300);
+  --excess-foreground: oklch(1 0 0);
   --success: oklch(0.7 0.16 150);
   --success-foreground: oklch(0.1288 0.008 264.6952);
-  --info: oklch(0.72 0.15 200);
+  --success-ink: oklch(0.78 0.15 150);
+  --info: oklch(0.7 0.12 225);
   --info-foreground: oklch(0.1288 0.008 264.6952);
+  --info-ink: oklch(0.78 0.11 225);
   --border: oklch(0.2795 0.01 260.031);
   --input: oklch(0.2795 0.01 260.031);
   --ring: oklch(0.49 0.188 259.8145);
@@ -232,10 +257,19 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-warning-ink: var(--warning-ink);
+  --color-destructive-ink: var(--destructive-ink);
+  --color-notice: var(--notice);
+  --color-notice-foreground: var(--notice-foreground);
+  --color-notice-ink: var(--notice-ink);
+  --color-excess-ink: var(--excess-ink);
+  --color-excess-foreground: var(--excess-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-ink: var(--success-ink);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-info-ink: var(--info-ink);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -284,6 +318,18 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+
+  /* A step below text-xs, for dense labels (gauge rulers) */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+
+  /* Diagonal stripes drifting along, for something in motion (quantity on order); pair with motion-safe: */
+  --animate-stripe-drift: stripe-drift 2.4s linear infinite;
+  @keyframes stripe-drift {
+    to {
+      background-position: 8.485px 0;
+    }
+  }
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

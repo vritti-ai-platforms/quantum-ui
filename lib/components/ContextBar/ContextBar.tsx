@@ -1,6 +1,6 @@
 import type React from 'react';
 import { cn } from '../../../shadcn/utils';
-import { bindFilters } from '../DataTable/components/bindFilters';
+import { bindFilters } from '../../utils/bindFilters';
 import type { ContextStateInstance } from './useContextState';
 
 interface ContextBarProps {

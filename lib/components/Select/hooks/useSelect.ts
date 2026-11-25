@@ -30,6 +30,10 @@ export interface UseSelectReturn {
   missingValues: SelectValue[];
   /** The lookup of the held values hasn't answered yet, so whether they still exist isn't known */
   checkingValues: boolean;
+  /** The held values as the server returns them under the current params, once that lookup has settled */
+  heldOptions?: SelectOption[];
+  /** The current params, serialized, so a caller can tell the held values were looked up again under new ones */
+  paramsKey: string;
   setSearchQuery: (q: string) => void;
   sentinelRef: (node?: Element | null) => void;
 }
@@ -229,6 +233,11 @@ export function useSelect({
     return Array.from(uniqueByValue.values());
   }, [resolvedSelected, data, debouncedSearch, resolveValues]);
 
+  const heldOptions = useMemo(() => {
+    const hasSettledLookup = isResolveSuccess && !isResolveFetching && !isResolvePlaceholder;
+    return hasSettledLookup ? (resolvedSelected?.options ?? []) : undefined;
+  }, [isResolveSuccess, isResolveFetching, isResolvePlaceholder, resolvedSelected]);
+
   const fetchedGroups = data?.pages[0]?.groups ?? staticGroups ?? [];
   const hasSearchResultsData = (data?.pages.length ?? 0) > 0;
 
@@ -253,6 +262,7 @@ export function useSelect({
       searching: false,
       missingValues: NO_VALUES,
       checkingValues: false,
+      paramsKey,
       setSearchQuery,
       sentinelRef: NOOP_REF,
     };
@@ -269,6 +279,8 @@ export function useSelect({
     searching: searchQuery !== debouncedSearch || (isFetching && !isFetchingNextPage),
     missingValues,
     checkingValues,
+    heldOptions,
+    paramsKey,
     setSearchQuery,
     sentinelRef,
   };

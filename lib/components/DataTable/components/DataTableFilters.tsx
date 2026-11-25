@@ -5,10 +5,10 @@ import { isValidElement, useMemo } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../shadcn/shadcnPopover';
 import { cn } from '../../../../shadcn/utils';
 import type { FilterCondition } from '../../../types/conditions';
+import { bindFilters, filterLabel, filterName } from '../../../utils/bindFilters';
 import { Button } from '../../Button';
 import { SortableItem, SortableList } from '../../Sortable';
 import { useDataTableStore } from '../store/store';
-import { bindFilters, filterLabel, filterName } from './bindFilters';
 
 // Extracts id and label from a ReactNode's props
 function getFilterProps(node: React.ReactNode): { id: string; label: string } | null {

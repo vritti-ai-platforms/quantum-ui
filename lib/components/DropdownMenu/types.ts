@@ -73,10 +73,13 @@ export interface CustomMenuItem {
 export interface DialogMenuItem extends MenuItemBase {
   type: 'dialog';
   icon: LucideIcon;
+  variant?: 'default' | 'destructive';
   dialog: {
     title: string;
     description: string;
     badgeSlot?: ReactNode;
+    // Sizes the dialog (max-w-2xl …), as it would opened from a button
+    className?: string;
     content?: (close: () => void) => ReactNode;
   };
 }

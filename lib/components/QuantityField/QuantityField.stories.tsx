@@ -45,6 +45,9 @@ export const ReadInBoxes: Story = { args: { value: 952, anchorUnitId: 'box' } };
 
 export const Cascading: Story = { args: { value: 952, anchorUnitId: 'box', cascade: true } };
 
+// Read only in strips and boxes, as a supplier sells them; tablets are still typed through the breakdown
+export const SupplierUnitsOnly: Story = { args: { value: 950, anchorUnitIds: ['strip', 'box'] } };
+
 export const Compact: Story = {
   render: (args) => (
     <div className="w-60">
@@ -67,4 +70,17 @@ export const DecimalPrimary: Story = {
     allowDecimal: true,
     value: 250.5,
   },
+};
+
+// The rules on the label row and the bound in words right after the value, read in the unit the field reads in
+export const Bounds: Story = {
+  render: (args) => (
+    <div className="flex w-96 flex-col gap-4">
+      <QuantityField {...args} label="Max" value={30} max={40} positive nonZero />
+      <QuantityField {...args} label="Over max" value={50} max={40} positive nonZero />
+      <QuantityField {...args} label="Min" value={30} min={20} />
+      <QuantityField {...args} label="Range" value={30} min={20} max={40} />
+      <QuantityField {...args} label="Max across packs" anchorUnitId="box" max={120} positive />
+    </div>
+  ),
 };

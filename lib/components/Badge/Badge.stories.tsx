@@ -13,8 +13,34 @@ const meta: Meta<typeof Badge> = {
   argTypes: {
     variant: {
       control: { type: 'select' },
-      options: ['default', 'secondary', 'destructive', 'success', 'warning', 'outline', 'ghost', 'link'],
+      options: [
+        'default',
+        'secondary',
+        'destructive',
+        'success',
+        'warning',
+        'info',
+        'excess',
+        'notice',
+        'outline',
+        'ghost',
+        'link',
+      ],
       description: 'The visual variant of the badge',
+    },
+    shape: {
+      control: { type: 'select' },
+      options: ['pill', 'rounded'],
+      description: 'A pill, or a rounded rectangle for statuses',
+    },
+    appearance: {
+      control: { type: 'select' },
+      options: [undefined, 'solid', 'soft', 'outline'],
+      description: "Solid, soft or outlined in the variant's tone; left out, the variant keeps its own fill",
+    },
+    dot: {
+      control: { type: 'boolean' },
+      description: 'A leading dot in the text colour, for a status',
     },
     asChild: {
       control: { type: 'boolean' },
@@ -134,6 +160,33 @@ export const AllVariants: Story = {
       <Badge variant="outline">Outline</Badge>
       <Badge variant="ghost">Ghost</Badge>
       <Badge variant="link">Link</Badge>
+    </div>
+  ),
+};
+
+const TONES = ['destructive', 'warning', 'success', 'info', 'excess', 'notice'] as const;
+
+// Every tone in each shape and appearance: rounded with a dot for statuses, outlined for secondary chips
+export const ShapesAndAppearances: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      {(
+        [
+          ['pill', 'solid', false],
+          ['pill', 'soft', false],
+          ['pill', 'outline', false],
+          ['rounded', 'soft', true],
+          ['rounded', 'outline', true],
+        ] as const
+      ).map(([shape, appearance, dot]) => (
+        <div key={`${shape}-${appearance}`} className="flex items-center gap-2">
+          {TONES.map((tone) => (
+            <Badge key={tone} variant={tone} shape={shape} appearance={appearance} dot={dot}>
+              {tone}
+            </Badge>
+          ))}
+        </div>
+      ))}
     </div>
   ),
 };

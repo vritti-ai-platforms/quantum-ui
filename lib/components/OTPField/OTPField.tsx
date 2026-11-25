@@ -89,7 +89,7 @@ export const OTPField = React.forwardRef<HTMLInputElement, OTPFieldProps>(
                     index={position}
                     className={cn(
                       hasError &&
-                        'border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
+                        'border-destructive focus-within:border-destructive focus-within:ring-destructive/20 dark:focus-within:ring-destructive/40',
                     )}
                   />
                 ))}

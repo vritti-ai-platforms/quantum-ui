@@ -4,6 +4,13 @@ import { Input } from '../../../shadcn/shadcnInput';
 import { cn } from '../../../shadcn/utils';
 import { withDisabledTip } from '../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
+import {
+  BoundAfterValue,
+  boundWords,
+  isOutOfBounds,
+  NumberFieldLabelRow,
+  NumberRuleChips,
+} from '../Field/numberConstraints';
 import { lockedTip, PermissionLockIcon, usePermission } from '../PermissionGate';
 
 export interface TextFieldProps extends React.ComponentProps<'input'> {
@@ -58,7 +65,9 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         : (propsMinValid ?? positiveFloor);
     const inputRef = React.useRef<HTMLInputElement>(null);
     // Tracks the last raw string typed so intermediate states like "-" or "0." survive the RHF round-trip; must be state so updates re-render and don't revert the controlled input.
-    const [rawInput, setRawInput] = React.useState<string>('');
+    const [rawInput, setRawInput] = React.useState<string>(() =>
+      props.defaultValue === undefined ? '' : String(props.defaultValue),
+    );
     // Trailing overlay is measured at runtime so the input reserves exactly its width as right padding; re-measures via ResizeObserver.
     const endOverlayRef = React.useRef<HTMLDivElement>(null);
     const [endPadding, setEndPadding] = React.useState<number | undefined>(undefined);
@@ -160,31 +169,25 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       }
     }
 
-    const hasMin = propsMinValid !== undefined;
-    const hasMax = props.max != null && props.max !== '';
-    const hints: string[] = [];
-    const integerLabel = positive ? '+Int' : 'Int';
-    const positiveLabel = '+';
-    const nonZeroLabel = '≠0';
-    if (integer && nonZero) hints.push(`${integerLabel} ${nonZeroLabel}`);
-    else if (integer) hints.push(integerLabel);
-    else if (positive && nonZero) hints.push(`${positiveLabel} ${nonZeroLabel}`);
-    else if (positive) hints.push(positiveLabel);
-    else if (nonZero) hints.push(nonZeroLabel);
-    if (hasMin && hasMax) hints.push(`Range: ${propsMinValid} - ${props.max}`);
-    else if (hasMax) hints.push(`Max: ${props.max}`);
-    else if (hasMin) hints.push(`Min: ${propsMinValid}`);
-    const autoConstraintText = hints.join(', ');
-    const combinedEndAdornment = (
-      <>
-        {autoConstraintText ? (
-          <span className="text-xs text-muted-foreground whitespace-nowrap">{autoConstraintText}</span>
-        ) : null}
-        {endAdornment}
-      </>
-    );
+    // A number field's bounds, in words right after its value ("of 4", "min 2", "2 to 4"); its rules go on the label row
+    const parsedMax = props.max != null && props.max !== '' ? Number(props.max) : undefined;
+    const maxValid = parsedMax !== undefined && Number.isFinite(parsedMax) ? parsedMax : undefined;
+    const bound = isNumberType
+      ? boundWords(
+          propsMinValid === undefined ? undefined : String(propsMinValid),
+          maxValid === undefined ? undefined : String(maxValid),
+        )
+      : undefined;
+    // What the input shows: its value when controlled, else what was typed into it (rawInput starts from its default)
+    const shownText =
+      props.value !== undefined
+        ? displayValue === null || displayValue === undefined
+          ? ''
+          : String(displayValue)
+        : rawInput;
+    const outOfBounds = isOutOfBounds(shownText === '' ? undefined : Number(shownText), propsMinValid, maxValid);
 
-    const hasEndContent = isNumberType || !!endAdornment || !!autoConstraintText;
+    const hasEndContent = isNumberType || !!endAdornment;
 
     React.useLayoutEffect(() => {
       const node = endOverlayRef.current;
@@ -209,10 +212,12 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     return (
       <Field data-disabled={disabled}>
         {label && (
-          <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
-            {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
-            {label}
-          </FieldLabel>
+          <NumberFieldLabelRow {...(isNumberType ? { integer, positive, nonZero } : {})}>
+            <FieldLabel className={cn(locked && 'items-center gap-1.5')}>
+              {locked && <PermissionLockIcon reason={reason} className="size-3.5" />}
+              {label}
+            </FieldLabel>
+          </NumberFieldLabelRow>
         )}
 
         {withDisabledTip(
@@ -237,11 +242,18 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
               onKeyDown={handleKeyDown}
               onChange={handleChange}
             />
+            {bound && (
+              <BoundAfterValue
+                text={shownText || props.placeholder || ''}
+                bound={bound}
+                outOfBounds={outOfBounds}
+                className={cn('text-base md:text-sm', startAdornment ? 'pl-10' : 'pl-3')}
+              />
+            )}
             {hasEndContent && (
               <div ref={endOverlayRef} className="absolute inset-y-0 right-0 z-10 flex items-center gap-2 pr-2">
-                {(endAdornment || autoConstraintText) && (
-                  <div className="flex items-center gap-2">{combinedEndAdornment}</div>
-                )}
+                {endAdornment && <div className="flex items-center gap-2">{endAdornment}</div>}
+                {isNumberType && !label && <NumberRuleChips integer={integer} positive={positive} nonZero={nonZero} />}
                 {isNumberType && (
                   <div className="flex h-7 w-4 flex-col overflow-hidden rounded-sm border border-border bg-background">
                     <button
