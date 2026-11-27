@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '../../../../../shadcn/utils';
 import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../../contextAnchor';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
-import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue as SelectValueType } from '../../types';
+import type { AnySelectOption, AsyncSelectState, SelectGroup, SelectValue as SelectValueType } from '../../types';
 
 export interface MultiSelectFilterOperator {
   value: string;
@@ -29,10 +29,10 @@ const DEFAULT_MULTI_OPERATORS: MultiSelectFilterOperator[] = [
   { value: 'isNotAnyOf', label: 'is not any of' },
 ];
 
-export interface MultiSelectFilterProps {
+export interface MultiSelectFilterProps<TOption extends AnySelectOption = AnySelectOption> {
   label?: string;
   placeholder?: string;
-  options?: SelectOption[];
+  options?: TOption[];
   groups?: SelectGroup[];
   value?: SelectValueType[];
   /** Fires on every tick, on an operator change while something is picked, and on the inline clear, with the operator
@@ -55,8 +55,8 @@ export interface MultiSelectFilterProps {
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
   onOpenChange?: (open: boolean) => void;
-  transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
-  transformDescription?: (description: string, option: SelectOption) => string;
+  transformLabel?: (label: string, option: TOption, context: 'option') => string;
+  transformDescription?: (description: string, option: TOption) => string;
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and a summary
    * of the selection in a quiet outlined trigger, no operator choice, no inline clear. */
   mode?: FilterMode;
@@ -64,8 +64,8 @@ export interface MultiSelectFilterProps {
 }
 
 // Compact multi-select filter trigger with count-based label display
-export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilterProps>(
-  (
+export const MultiSelectFilter = forwardRef(
+  <TOption extends AnySelectOption = AnySelectOption>(
     {
       label,
       placeholder,
@@ -92,8 +92,8 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       onOpenChange,
       transformLabel,
       transformDescription,
-    },
-    ref,
+    }: MultiSelectFilterProps<TOption>,
+    ref: React.ForwardedRef<HTMLButtonElement>,
   ) => {
     const [internalOperator, setInternalOperator] = useState(operators[0]?.value ?? 'isAnyOf');
     const activeOperator = controlledOperator ?? internalOperator;
@@ -133,7 +133,7 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
     }
 
     // Renders a single option row
-    function renderRow(option: SelectOption) {
+    function renderRow(option: TOption) {
       const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
       const optionDescription = option.description
         ? transformDescription
@@ -312,6 +312,8 @@ export const MultiSelectFilter = forwardRef<HTMLButtonElement, MultiSelectFilter
       </>
     );
   },
-);
+) as (<TOption extends AnySelectOption = AnySelectOption>(
+  props: MultiSelectFilterProps<TOption> & React.RefAttributes<HTMLButtonElement>,
+) => React.ReactElement | null) & { displayName?: string };
 
 MultiSelectFilter.displayName = 'MultiSelectFilter';

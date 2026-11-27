@@ -19,18 +19,18 @@ import { withDisabledTip } from '../../../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
 import { lockedTip, PermissionLockIcon, usePermission } from '../../../PermissionGate';
 import { useMultiSelect } from '../../hooks/useMultiSelect';
-import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
+import type { AnySelectOption, AsyncSelectState, SelectGroup, SelectValue } from '../../types';
 
-export interface MultiSelectProps {
+export interface MultiSelectProps<TOption extends AnySelectOption = AnySelectOption> {
   label?: string;
   description?: React.ReactNode;
   error?: string;
   placeholder?: string;
-  options?: SelectOption[];
+  options?: TOption[];
   groups?: SelectGroup[];
   value?: SelectValue[];
   onChange?: (values: SelectValue[]) => void;
-  onOptionsSelect?: (options: SelectOption[]) => void;
+  onOptionsSelect?: (options: TOption[]) => void;
   onBlur?: () => void;
   name?: string;
   disabled?: boolean;
@@ -46,8 +46,8 @@ export interface MultiSelectProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
-  transformLabel?: (label: string, option: SelectOption, context: 'option' | 'trigger') => string;
-  transformDescription?: (description: string, option: SelectOption) => string;
+  transformLabel?: (label: string, option: TOption, context: 'option' | 'trigger') => string;
+  transformDescription?: (description: string, option: TOption) => string;
   onOpenChange?: (open: boolean) => void;
   disabledTip?: string;
   /** Permission code gating this field: hidden when not granted, disabled with a lock + upsell tip when locked */
@@ -55,8 +55,8 @@ export interface MultiSelectProps {
 }
 
 // Multi-value select with checkbox options, search, and badge chips
-export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
-  (
+export const MultiSelect = forwardRef(
+  <TOption extends AnySelectOption = AnySelectOption>(
     {
       label,
       description,
@@ -85,8 +85,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       onOpenChange,
       disabledTip,
       permission,
-    },
-    ref,
+    }: MultiSelectProps<TOption>,
+    ref: React.ForwardedRef<HTMLButtonElement>,
   ) => {
     const gate = usePermission(permission);
     const { granted, locked, reason } = gate;
@@ -117,7 +117,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
     const showSearch = !!asyncState || searchable;
 
     // Renders a single option row
-    function renderRow(option: SelectOption) {
+    function renderRow(option: TOption) {
       const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
       const optionDescription = option.description
         ? transformDescription
@@ -286,6 +286,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProps>(
       </Field>
     );
   },
-);
+) as (<TOption extends AnySelectOption = AnySelectOption>(
+  props: MultiSelectProps<TOption> & React.RefAttributes<HTMLButtonElement>,
+) => React.ReactElement | null) & { displayName?: string };
 
 MultiSelect.displayName = 'MultiSelect';

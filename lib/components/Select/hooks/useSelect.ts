@@ -2,15 +2,15 @@ import { type InfiniteData, keepPreviousData, useInfiniteQuery, useQuery, useQue
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { axios } from '../../../utils/axios';
-import type { SelectFieldKeys, SelectGroup, SelectOption, SelectOptionsResponse, SelectValue } from '../types';
+import type { AnySelectFieldKeys, AnySelectOption, SelectGroup, SelectOptionsResponse, SelectValue } from '../types';
 
 export interface UseSelectProps {
-  options?: SelectOption[];
+  options?: AnySelectOption[];
   groups?: SelectGroup[];
   optionsEndpoint?: string;
   searchDebounceMs?: number;
   limit?: number;
-  fieldKeys?: SelectFieldKeys;
+  fieldKeys?: AnySelectFieldKeys;
   params?: Record<string, string | number | boolean>;
   selectedValues?: SelectValue[];
   enabled?: boolean;
@@ -18,7 +18,7 @@ export interface UseSelectProps {
 }
 
 export interface UseSelectReturn {
-  options: SelectOption[];
+  options: AnySelectOption[];
   groups: SelectGroup[];
   loading: boolean;
   resolving: boolean;
@@ -31,7 +31,7 @@ export interface UseSelectReturn {
   /** The lookup of the held values hasn't answered yet, so whether they still exist isn't known */
   checkingValues: boolean;
   /** The held values as the server returns them under the current params, once that lookup has settled */
-  heldOptions?: SelectOption[];
+  heldOptions?: AnySelectOption[];
   /** The current params, serialized, so a caller can tell the held values were looked up again under new ones */
   paramsKey: string;
   setSearchQuery: (q: string) => void;
@@ -213,7 +213,7 @@ export function useSelect({
   const fetchedOptions = useMemo(() => {
     const searchResults = data?.pages.flatMap((p) => p.options) ?? [];
     const selected = resolvedSelected?.options ?? [];
-    const uniqueByValue = new Map<string, SelectOption>();
+    const uniqueByValue = new Map<string, AnySelectOption>();
     const makeKey = (value: SelectValue) => `${typeof value}:${String(value)}`;
 
     if (debouncedSearch.trim().length === 0) {

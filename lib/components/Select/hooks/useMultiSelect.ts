@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { SelectGroup, SelectOption, SelectValue } from '../types';
+import type { AnySelectOption, SelectGroup, SelectValue } from '../types';
 
-interface UseMultiSelectStateProps {
-  options: SelectOption[];
+interface UseMultiSelectStateProps<TOption extends AnySelectOption> {
+  options: TOption[];
   groups?: SelectGroup[];
   value?: SelectValue[];
   onChange?: (values: SelectValue[]) => void;
-  onOptionsSelect?: (options: SelectOption[]) => void;
+  onOptionsSelect?: (options: TOption[]) => void;
   defaultValue?: SelectValue[];
   remoteSearch?: boolean;
   // Caps the selection; picking past it drops the oldest selected options
@@ -14,7 +14,7 @@ interface UseMultiSelectStateProps {
 }
 
 // Manages controlled/uncontrolled multi-select state, search filtering, and grouping
-export function useMultiSelect({
+export function useMultiSelect<TOption extends AnySelectOption>({
   options,
   groups,
   value: controlledValue,
@@ -23,7 +23,7 @@ export function useMultiSelect({
   defaultValue,
   remoteSearch,
   maxSelected,
-}: UseMultiSelectStateProps) {
+}: UseMultiSelectStateProps<TOption>) {
   const isControlled = controlledValue !== undefined;
   const [internalValue, setInternalValue] = useState<SelectValue[]>(defaultValue ?? []);
   const selectedValues = isControlled ? controlledValue : internalValue;
@@ -38,7 +38,7 @@ export function useMultiSelect({
   const listboxId = useId();
 
   const optionMap = useMemo(() => {
-    const map = new Map<SelectValue, SelectOption>();
+    const map = new Map<SelectValue, TOption>();
     for (const option of options) {
       map.set(option.value, option);
     }
@@ -81,7 +81,7 @@ export function useMultiSelect({
         const dropped = new Set(droppable.slice(0, nextValues.length - maxSelected).map(({ v }) => v));
         nextValues = nextValues.filter((v) => !dropped.has(v));
       }
-      const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
+      const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as TOption[];
       onOptionsSelect?.(nextOptions);
       updateSelection(nextValues);
     },
@@ -93,7 +93,7 @@ export function useMultiSelect({
     const enabledValues = options.filter((o) => !o.disabled).map((o) => o.value);
     const currentDisabledValues = selectedValuesRef.current.filter((v) => optionMap.get(v)?.disabled);
     const nextValues = [...new Set([...currentDisabledValues, ...enabledValues])];
-    const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
+    const nextOptions = nextValues.map((v) => optionMap.get(v)).filter(Boolean) as TOption[];
     onOptionsSelect?.(nextOptions);
     updateSelection(nextValues);
   }, [options, optionMap, updateSelection, onOptionsSelect]);
@@ -101,7 +101,7 @@ export function useMultiSelect({
   // Retain disabled options that are currently selected when clearing
   const clearAll = useCallback(() => {
     const currentDisabledValues = selectedValuesRef.current.filter((v) => optionMap.get(v)?.disabled);
-    const remainingOptions = currentDisabledValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[];
+    const remainingOptions = currentDisabledValues.map((v) => optionMap.get(v)).filter(Boolean) as TOption[];
     onOptionsSelect?.(remainingOptions);
     updateSelection(currentDisabledValues);
   }, [optionMap, updateSelection, onOptionsSelect]);
@@ -115,7 +115,7 @@ export function useMultiSelect({
 
   // Map selected values to their option objects for display
   const selectedOptions = useMemo(
-    () => selectedValues.map((v) => optionMap.get(v)).filter(Boolean) as SelectOption[],
+    () => selectedValues.map((v) => optionMap.get(v)).filter(Boolean) as TOption[],
     [selectedValues, optionMap],
   );
 
@@ -135,12 +135,12 @@ export function useMultiSelect({
   const grouped = useMemo(() => {
     if (!groups || groups.length === 0) return null;
 
-    const buckets = new Map<string | number, SelectOption[]>();
+    const buckets = new Map<string | number, TOption[]>();
     for (const g of groups) {
       buckets.set(g.id, []);
     }
 
-    const ungrouped: SelectOption[] = [];
+    const ungrouped: TOption[] = [];
     for (const option of filteredOptions) {
       const bucket = option.groupId != null ? buckets.get(option.groupId) : undefined;
       if (bucket) {
@@ -150,7 +150,7 @@ export function useMultiSelect({
       }
     }
 
-    const entries: Array<{ name: string; options: SelectOption[] }> = [];
+    const entries: Array<{ name: string; options: TOption[] }> = [];
     for (const g of groups) {
       const bucket = buckets.get(g.id);
       if (!bucket || bucket.length === 0) continue;

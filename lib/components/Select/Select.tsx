@@ -3,7 +3,7 @@ import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import type { FilterCondition } from '../../types/conditions';
 import { bindFilters, boundFilterNames } from '../../utils/bindFilters';
 import { withChange } from '../../utils/conditions';
-import type { ContextStateInstance } from '../ContextBar/useContextState';
+import type { SelectContextInstance } from '../ContextBar/useContextState';
 import { usePermission } from '../PermissionGate';
 import { MultiSelect, type MultiSelectProps } from './components/MultiSelect/MultiSelect';
 import {
@@ -12,26 +12,27 @@ import {
   type SingleSelectProps,
 } from './components/SingleSelect/SingleSelect';
 import { useSelect } from './hooks/useSelect';
-import type { AsyncSelectState, SelectFieldKeys, SelectOption } from './types';
+import type { AnySelectOption, AsyncSelectState, NoSelectFields, SelectedOption, SelectFieldKeys } from './types';
 
-interface SelectBaseProps {
+interface SelectBaseProps<TFields extends object, TKeys extends string> {
   optionsEndpoint?: string;
   searchDebounceMs?: number;
   limit?: number;
-  fieldKeys?: SelectFieldKeys;
+  // The response fields that fill an option; additionalKeys types the picked option's additionals
+  fieldKeys?: SelectFieldKeys<TFields, TKeys>;
   params?: Record<string, string | number | boolean>;
   // The state of the filters in `header`, for a page that reads or sets them (a useContextState instance); without it
   // the select holds them itself. Either way each header filter's value goes out as a request param under the filter's
   // name, over a param of the same name; the context's other fields do not.
   // The select also keeps the context's selectedOptions in step with the options it holds
-  context?: ContextStateInstance;
+  context?: SelectContextInstance<SelectedOption<TFields, TKeys>>;
   // A single select's held option as the server returns it once the params or the header filters change — fresh
   // additionals, or null when it is no longer offered; not called for the first lookup or for a newly picked option
-  onSelectionRefresh?: (option: SelectOption | null) => void;
+  onSelectionRefresh?: (option: SelectedOption<TFields, TKeys> | null) => void;
 }
 
 const NO_CONDITIONS: FilterCondition[] = [];
-const NO_OPTIONS: SelectOption[] = [];
+const NO_OPTIONS: AnySelectOption[] = [];
 const NO_FIELDS = new Set<string>();
 
 // The request params with each header filter's value under the filter's name, a list joined by commas; conditions of
@@ -51,30 +52,38 @@ function withContextParams(
   return entries.length > 0 ? { ...params, ...Object.fromEntries(entries) } : params;
 }
 
-interface SelectCommonProps
-  extends Omit<SingleSelectProps & MultiSelectProps, 'value' | 'onChange' | 'clearable' | 'onOptionSelect'>,
-    SelectBaseProps {
-  multiple?: boolean;
-  value?: SingleSelectProps['value'] | MultiSelectProps['value'];
-  onChange?: SingleSelectProps['onChange'] | MultiSelectProps['onChange'];
-}
+type SelectCommonProps<TFields extends object, TKeys extends string> = Omit<
+  SingleSelectProps<SelectedOption<TFields, TKeys>> & MultiSelectProps<SelectedOption<TFields, TKeys>>,
+  'value' | 'onChange' | 'clearable' | 'onOptionSelect'
+> &
+  SelectBaseProps<TFields, TKeys> & {
+    multiple?: boolean;
+    value?: SingleSelectProps['value'] | MultiSelectProps['value'];
+    onChange?: SingleSelectProps['onChange'] | MultiSelectProps['onChange'];
+  };
 
-// Wrappers that drop props from it use `DistributiveOmit` so each clearable branch keeps its own `onOptionSelect`
-export type SelectProps = SelectCommonProps & SingleSelectClearableProps;
+// A select of an endpoint whose options carry TFields, typed by the additionalKeys TKeys it asks for: its picked options
+// (onOptionSelect, onOptionsSelect, onSelectionRefresh, the option row and transforms) hold those fields only. Wrappers
+// that drop props from it use `DistributiveOmit` so each clearable branch keeps its own `onOptionSelect`
+export type SelectProps<TFields extends object = NoSelectFields, TKeys extends string = never> = SelectCommonProps<
+  TFields,
+  TKeys
+> &
+  SingleSelectClearableProps<SelectedOption<TFields, TKeys>>;
 
 // The props of a wrapper that makes its select clearable unless it is passed `clearable={false}`: left out, `clearable`
 // means true, so `onOptionSelect` may receive `null`
-export type ClearableSelectProps = SelectCommonProps &
+export type ClearableSelectProps<
+  TFields extends object = NoSelectFields,
+  TKeys extends string = never,
+> = SelectCommonProps<TFields, TKeys> &
   (
-    | { clearable?: true; onOptionSelect?: (option: SelectOption | null) => void }
-    | { clearable: false; onOptionSelect?: (option: SelectOption) => void }
+    | { clearable?: true; onOptionSelect?: (option: SelectedOption<TFields, TKeys> | null) => void }
+    | { clearable: false; onOptionSelect?: (option: SelectedOption<TFields, TKeys>) => void }
   );
 
-export type SelectSingleProps = SelectProps;
-export type SelectMultiProps = SelectProps;
-
 // Unified select field supporting single/multi selection and default/filter variants
-export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) => {
+export const Select = forwardRef<HTMLButtonElement, SelectProps<object>>((props, ref) => {
   const {
     multiple,
     optionsEndpoint,
@@ -156,7 +165,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     const previous = lookedUp.current;
     if (previous?.valuesKey === heldKey && previous.paramsKey === paramsKey) return;
     lookedUp.current = { valuesKey: heldKey, paramsKey };
-    const optionOf = (options: SelectOption[], value: string) =>
+    const optionOf = (options: readonly AnySelectOption[], value: string) =>
       options.find((option) => String(option.value) === value);
     reportOptions?.(
       heldValues.flatMap((value) => {
@@ -171,11 +180,11 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
   // Picks report their options to the context as they are made, then reach the page's own handlers
   const reportingHandlers = reportOptions
     ? {
-        onOptionSelect: (option: SelectOption | null) => {
+        onOptionSelect: (option: AnySelectOption | null) => {
           reportOptions(option ? [option] : NO_OPTIONS);
-          (rest.onOptionSelect as ((option: SelectOption | null) => void) | undefined)?.(option);
+          (rest.onOptionSelect as ((option: AnySelectOption | null) => void) | undefined)?.(option);
         },
-        onOptionsSelect: (options: SelectOption[]) => {
+        onOptionsSelect: (options: AnySelectOption[]) => {
           reportOptions(options);
           rest.onOptionsSelect?.(options);
         },
@@ -216,6 +225,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>((props, ref) =>
     return <MultiSelect ref={ref} {...(childProps as MultiSelectProps)} onOpenChange={handleOpenChange} />;
   }
   return <SingleSelect ref={ref} {...(childProps as SingleSelectProps)} onOpenChange={handleOpenChange} />;
-}) as React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLButtonElement>>;
+}) as (<TFields extends object = NoSelectFields, TKeys extends string = never>(
+  props: SelectProps<TFields, TKeys> & React.RefAttributes<HTMLButtonElement>,
+) => React.ReactElement | null) & { displayName?: string };
 
 Select.displayName = 'Select';

@@ -23,7 +23,7 @@ import {
 import { cn } from '../../../../../shadcn/utils';
 import { CONTEXT_ANCHOR_CLASS, ContextAnchorText, type FilterMode } from '../../contextAnchor';
 import { useSingleSelect } from '../../hooks/useSingleSelect';
-import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
+import type { AnySelectOption, AsyncSelectState, SelectGroup, SelectValue } from '../../types';
 
 export interface SelectFilterOperator {
   value: string;
@@ -35,10 +35,10 @@ const DEFAULT_OPERATORS: SelectFilterOperator[] = [
   { value: 'notEquals', label: 'not equals' },
 ];
 
-export interface SingleSelectFilterProps {
+export interface SingleSelectFilterProps<TOption extends AnySelectOption = AnySelectOption> {
   label?: string;
   placeholder?: string;
-  options?: SelectOption[];
+  options?: TOption[];
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
@@ -55,8 +55,8 @@ export interface SingleSelectFilterProps {
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
   onOpenChange?: (open: boolean) => void;
-  transformLabel?: (label: string, option: SelectOption, context: 'option') => string;
-  transformDescription?: (description: string, option: SelectOption) => string;
+  transformLabel?: (label: string, option: TOption, context: 'option') => string;
+  transformDescription?: (description: string, option: TOption) => string;
   /** Whether the chosen option can be cleared — independent of `mode`. Defaults to `true`. */
   clearable?: boolean;
   /** `filter` (default) is an applied filter chip; `context` is a DataTable context-bar selector — label and value in a
@@ -66,8 +66,8 @@ export interface SingleSelectFilterProps {
 }
 
 // Compact single-select filter trigger with inline label display
-export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilterProps>(
-  (
+export const SingleSelectFilter = forwardRef(
+  <TOption extends AnySelectOption = AnySelectOption>(
     {
       label,
       placeholder,
@@ -93,8 +93,8 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       onOpenChange,
       transformLabel,
       transformDescription,
-    },
-    ref,
+    }: SingleSelectFilterProps<TOption>,
+    ref: React.ForwardedRef<HTMLButtonElement>,
   ) => {
     const [internalOperator, setInternalOperator] = useState(operators[0]?.value ?? 'equals');
     const operator = controlledOperator ?? internalOperator;
@@ -134,7 +134,7 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
     }
 
     // Renders a single option row
-    function renderRow(option: SelectOption) {
+    function renderRow(option: TOption) {
       const optionLabel = transformLabel ? transformLabel(option.label, option, 'option') : option.label;
       const optionDescription = option.description
         ? transformDescription
@@ -298,6 +298,8 @@ export const SingleSelectFilter = forwardRef<HTMLButtonElement, SingleSelectFilt
       </>
     );
   },
-);
+) as (<TOption extends AnySelectOption = AnySelectOption>(
+  props: SingleSelectFilterProps<TOption> & React.RefAttributes<HTMLButtonElement>,
+) => React.ReactElement | null) & { displayName?: string };
 
 SingleSelectFilter.displayName = 'SingleSelectFilter';

@@ -19,28 +19,28 @@ import { withDisabledTip } from '../../../../utils/disabledTip';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../../../Field';
 import { lockedTip, PermissionLockIcon, usePermission } from '../../../PermissionGate';
 import { useSingleSelect } from '../../hooks/useSingleSelect';
-import type { AsyncSelectState, SelectGroup, SelectOption, SelectValue } from '../../types';
+import type { AnySelectOption, AsyncSelectState, SelectGroup, SelectValue } from '../../types';
 
-export interface SingleSelectAnchorProps {
-  selectedOption: SelectOption | undefined;
+export interface SingleSelectAnchorProps<TOption extends AnySelectOption = AnySelectOption> {
+  selectedOption: TOption | undefined;
   open: boolean;
   disabled: boolean;
 }
 
-export interface SingleSelectOptionRenderProps {
-  option: SelectOption;
+export interface SingleSelectOptionRenderProps<TOption extends AnySelectOption = AnySelectOption> {
+  option: TOption;
   selected: boolean;
   onSelect: () => void;
 }
 
 export type SingleSelectLabelTransformContext = 'trigger' | 'option';
 
-interface SingleSelectBaseProps {
+interface SingleSelectBaseProps<TOption extends AnySelectOption = AnySelectOption> {
   label?: string;
   description?: React.ReactNode;
   error?: string;
   placeholder?: string;
-  options?: SelectOption[];
+  options?: TOption[];
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
@@ -54,10 +54,10 @@ interface SingleSelectBaseProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   asyncState?: AsyncSelectState;
-  anchor?: (props: SingleSelectAnchorProps) => React.ReactElement;
-  renderOption?: (props: SingleSelectOptionRenderProps) => React.ReactNode;
-  transformLabel?: (label: string, option: SelectOption, context: SingleSelectLabelTransformContext) => string;
-  transformDescription?: (description: string, option: SelectOption) => string;
+  anchor?: (props: SingleSelectAnchorProps<TOption>) => React.ReactElement;
+  renderOption?: (props: SingleSelectOptionRenderProps<TOption>) => React.ReactNode;
+  transformLabel?: (label: string, option: TOption, context: SingleSelectLabelTransformContext) => string;
+  transformDescription?: (description: string, option: TOption) => string;
   // Sits between the search and the options, such as filters that narrow the options
   header?: React.ReactNode;
   footer?: React.ReactNode;
@@ -69,15 +69,16 @@ interface SingleSelectBaseProps {
 }
 
 // A single select only empties through its clear control, so `onOptionSelect` receives `null` only when it is clearable
-export type SingleSelectClearableProps =
-  | { clearable: true; onOptionSelect?: (option: SelectOption | null) => void }
-  | { clearable?: false; onOptionSelect?: (option: SelectOption) => void };
+export type SingleSelectClearableProps<TOption extends AnySelectOption = AnySelectOption> =
+  | { clearable: true; onOptionSelect?: (option: TOption | null) => void }
+  | { clearable?: false; onOptionSelect?: (option: TOption) => void };
 
-export type SingleSelectProps = SingleSelectBaseProps & SingleSelectClearableProps;
+export type SingleSelectProps<TOption extends AnySelectOption = AnySelectOption> = SingleSelectBaseProps<TOption> &
+  SingleSelectClearableProps<TOption>;
 
 // Single-value form field wrapper built on Popover primitives
-export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
-  (
+export const SingleSelect = forwardRef(
+  <TOption extends AnySelectOption = AnySelectOption>(
     {
       label,
       description,
@@ -109,8 +110,8 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       onOpenChange,
       disabledTip,
       permission,
-    },
-    ref,
+    }: SingleSelectProps<TOption>,
+    ref: React.ForwardedRef<HTMLButtonElement>,
   ) => {
     const gate = usePermission(permission);
     const { granted, locked, reason } = gate;
@@ -123,7 +124,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       value: controlledValue,
       onChange,
       // null is only sent by the clear control, which a select that is not clearable never renders
-      onOptionSelect: onOptionSelect as ((option: SelectOption | null) => void) | undefined,
+      onOptionSelect: onOptionSelect as ((option: TOption | null) => void) | undefined,
       defaultValue,
       remoteSearch: !!asyncState,
     });
@@ -151,7 +152,7 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
     const showSearch = !!asyncState || searchable;
 
     // Renders a single option row
-    function renderRow(option: SelectOption) {
+    function renderRow(option: TOption) {
       if (renderOption) {
         return (
           <Fragment key={String(option.value)}>
@@ -328,6 +329,8 @@ export const SingleSelect = forwardRef<HTMLButtonElement, SingleSelectProps>(
       </Field>
     );
   },
-);
+) as (<TOption extends AnySelectOption = AnySelectOption>(
+  props: SingleSelectProps<TOption> & React.RefAttributes<HTMLButtonElement>,
+) => React.ReactElement | null) & { displayName?: string };
 
 SingleSelect.displayName = 'SingleSelect';

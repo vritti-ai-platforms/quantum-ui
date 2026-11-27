@@ -17,9 +17,15 @@ export { Select } from './Select';
 export type { SelectFilterProps } from './SelectFilter';
 export { SelectFilter } from './SelectFilter';
 export type {
+  AdditionalKeysOf,
+  AnySelectFieldKeys,
+  AnySelectOption,
   AsyncSelectState,
   FilterOperator,
   FilterResult,
+  KnownAdditionalKeys,
+  NoSelectFields,
+  SelectedOption,
   SelectFieldKeys,
   SelectGroup,
   SelectOption,

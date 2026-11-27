@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { SelectGroup, SelectOption, SelectValue } from '../types';
+import type { AnySelectOption, SelectGroup, SelectValue } from '../types';
 
-interface UseSingleSelectStateProps {
-  options: SelectOption[];
+interface UseSingleSelectStateProps<TOption extends AnySelectOption> {
+  options: TOption[];
   groups?: SelectGroup[];
   value?: SelectValue;
   onChange?: (value: SelectValue) => void;
-  onOptionSelect?: (option: SelectOption | null) => void;
+  onOptionSelect?: (option: TOption | null) => void;
   defaultValue?: SelectValue;
   remoteSearch?: boolean;
 }
 
 // Manages controlled/uncontrolled single-select state, search filtering, and grouping
-export function useSingleSelect({
+export function useSingleSelect<TOption extends AnySelectOption>({
   options,
   groups,
   value: controlledValue,
@@ -20,7 +20,7 @@ export function useSingleSelect({
   onOptionSelect,
   defaultValue,
   remoteSearch,
-}: UseSingleSelectStateProps) {
+}: UseSingleSelectStateProps<TOption>) {
   const isControlled = controlledValue !== undefined;
   const [internalValue, setInternalValue] = useState<SelectValue>(defaultValue ?? null);
   const selectedValue = isControlled ? controlledValue : internalValue;
@@ -30,7 +30,7 @@ export function useSingleSelect({
   const listboxId = useId();
 
   const optionMap = useMemo(() => {
-    const map = new Map<SelectValue, SelectOption>();
+    const map = new Map<SelectValue, TOption>();
     for (const option of options) {
       map.set(option.value, option);
     }
@@ -94,12 +94,12 @@ export function useSingleSelect({
   const grouped = useMemo(() => {
     if (!groups || groups.length === 0) return null;
 
-    const buckets = new Map<string | number, SelectOption[]>();
+    const buckets = new Map<string | number, TOption[]>();
     for (const g of groups) {
       buckets.set(g.id, []);
     }
 
-    const ungrouped: SelectOption[] = [];
+    const ungrouped: TOption[] = [];
     for (const option of filteredOptions) {
       const bucket = option.groupId != null ? buckets.get(option.groupId) : undefined;
       if (bucket) {
@@ -109,7 +109,7 @@ export function useSingleSelect({
       }
     }
 
-    const entries: Array<{ name: string; options: SelectOption[] }> = [];
+    const entries: Array<{ name: string; options: TOption[] }> = [];
     for (const g of groups) {
       const bucket = buckets.get(g.id);
       if (!bucket || bucket.length === 0) continue;

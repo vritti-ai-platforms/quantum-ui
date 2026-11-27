@@ -3,7 +3,14 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { MultiSelectFilter, type MultiSelectFilterProps } from './components/MultiSelect/MultiSelectFilter';
 import { SingleSelectFilter, type SingleSelectFilterProps } from './components/SingleSelect/SingleSelectFilter';
 import { useSelect } from './hooks/useSelect';
-import type { AsyncSelectState, FilterResult, SelectFieldKeys, SelectValue } from './types';
+import type {
+  AsyncSelectState,
+  FilterResult,
+  NoSelectFields,
+  SelectedOption,
+  SelectFieldKeys,
+  SelectValue,
+} from './types';
 
 // Checks if a value is a FilterResult object (used to handle Form-controlled value round-trips)
 function isFilterResult(v: unknown): v is FilterResult {
@@ -19,26 +26,33 @@ function extractRawValue(
   return v as SelectValue | SelectValue[];
 }
 
-interface SelectFilterBaseProps {
+interface SelectFilterBaseProps<TFields extends object, TKeys extends string> {
   name: string;
   optionsEndpoint?: string;
   searchDebounceMs?: number;
   limit?: number;
-  fieldKeys?: SelectFieldKeys;
+  // The response fields that fill an option; additionalKeys types the options' additionals
+  fieldKeys?: SelectFieldKeys<TFields, TKeys>;
   params?: Record<string, string | number | boolean>;
   /** Told whether this control is still settling its value — picking its first option, or checking that its held value
    * still exists; a context bar binds it, and holds its view's data until every control has settled */
   onSettlingChange?: (settling: boolean) => void;
 }
 
-interface SelectFilterCommonProps
-  extends Omit<SingleSelectFilterProps & MultiSelectFilterProps, 'name' | 'onChange' | 'value' | 'clearable'>,
-    SelectFilterBaseProps {}
+type SelectFilterCommonProps<TFields extends object, TKeys extends string> = Omit<
+  SingleSelectFilterProps<SelectedOption<TFields, TKeys>> & MultiSelectFilterProps<SelectedOption<TFields, TKeys>>,
+  'name' | 'onChange' | 'value' | 'clearable'
+> &
+  SelectFilterBaseProps<TFields, TKeys>;
 
 // A multi-select can always be emptied by unticking every option, so it emits `null` whether or not it is clearable. A
 // single select only empties through its clear controls: with `clearable={false}` it always holds a value, so `value`
 // is required and `onChange` never receives `null` — unless `selectFirst` supplies that value from the first option.
-export type SelectFilterProps = SelectFilterCommonProps &
+// TFields / TKeys type the options' additionals exactly as on Select
+export type SelectFilterProps<
+  TFields extends object = NoSelectFields,
+  TKeys extends string = never,
+> = SelectFilterCommonProps<TFields, TKeys> &
   (
     | {
         multiple: true;
@@ -71,7 +85,7 @@ export type SelectFilterProps = SelectFilterCommonProps &
   );
 
 // Unified filter-variant select that emits FilterResult from onChange — supports Form integration
-export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((props, ref) => {
+export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps<object>>((props, ref) => {
   const {
     multiple,
     mode,
@@ -240,6 +254,8 @@ export const SelectFilter = forwardRef<HTMLButtonElement, SelectFilterProps>((pr
       onChange={handleSingleChange}
     />
   );
-}) as React.ForwardRefExoticComponent<SelectFilterProps & React.RefAttributes<HTMLButtonElement>>;
+}) as (<TFields extends object = NoSelectFields, TKeys extends string = never>(
+  props: SelectFilterProps<TFields, TKeys> & React.RefAttributes<HTMLButtonElement>,
+) => React.ReactElement | null) & { displayName?: string };
 
 SelectFilter.displayName = 'SelectFilter';

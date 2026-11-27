@@ -4,7 +4,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getContextState } from '../../services/context-states.service';
 import type { FilterCondition } from '../../types/conditions';
 import { readValue, readValues, withChange, withDefaults } from '../../utils/conditions';
-import type { SelectOption } from '../Select/types';
+import type { AnySelectOption } from '../Select/types';
 import { toast } from '../Sonner/toast';
 import { type ContextSave, useContextSave } from './useContextSave';
 import { useSettlingFields } from './useSettlingFields';
@@ -26,7 +26,7 @@ interface UseContextStateOptions {
   onChange?: (field: string, condition: FilterCondition | null) => void;
 }
 
-export interface ContextStateInstance {
+export interface ContextStateInstance<TOption extends AnySelectOption = AnySelectOption> {
   context: FilterCondition[];
   contextValue: (field: string) => string | undefined;
   contextValues: (field: string) => string[];
@@ -40,14 +40,24 @@ export interface ContextStateInstance {
   markFieldSettling: (field: string, settling: boolean) => void;
   /** The options a Select given this context holds, in the order of its value — picked, looked up, or looked up again
    * under new filters; in memory only, never saved */
-  selectedOptions: SelectOption[];
+  selectedOptions: TOption[];
   /** The first of them, for a single select */
-  selectedOption: SelectOption | null;
-  setSelectedOptions: (options: SelectOption[]) => void;
+  selectedOption: TOption | null;
+  setSelectedOptions: (options: TOption[]) => void;
 }
 
+// The context a Select reports its options to: any context whose options the select's options are — a page may keep a
+// narrower view of them (the fields it reads) than the select's own
+export type SelectContextInstance<TOption extends AnySelectOption> = Omit<
+  ContextStateInstance,
+  'selectedOptions' | 'selectedOption' | 'setSelectedOptions'
+> & {
+  selectedOptions: readonly AnySelectOption[];
+  setSelectedOptions: (options: TOption[]) => void;
+};
+
 const NO_CONDITIONS: FilterCondition[] = [];
-const NO_OPTIONS: SelectOption[] = [];
+const NO_OPTIONS: AnySelectOption[] = [];
 const NO_FIELDS: string[] = [];
 const NO_RESETS: Record<string, string[]> = {};
 
@@ -56,8 +66,8 @@ function contextQueryKey(slug: string | undefined) {
 }
 
 // A view's context bar: the saved conditions for this visit, with defaults filled in. Every change is shown at once
-// and saved in the background.
-export function useContextState({
+// and saved in the background. TOption types the options the context's Select holds (selectedOptions)
+export function useContextState<TOption extends AnySelectOption = AnySelectOption>({
   slug,
   defaultContext,
   initialContext,
@@ -65,7 +75,7 @@ export function useContextState({
   resets = NO_RESETS,
   onStatePush,
   onChange,
-}: UseContextStateOptions): ContextStateInstance {
+}: UseContextStateOptions): ContextStateInstance<TOption> {
   const queryClient = useQueryClient();
   const queryKey = useMemo(() => contextQueryKey(slug), [slug]);
 
@@ -188,10 +198,10 @@ export function useContextState({
   const contextValues = useCallback((field: string) => readValues(context, field), [context]);
   const required = useMemo(() => new Set(defaults.map((condition) => condition.field)), [defaults]);
   const { hasSettlingFields, markFieldSettling } = useSettlingFields();
-  const [selectedOptions, setHeldOptions] = useState<SelectOption[]>(NO_OPTIONS);
+  const [selectedOptions, setHeldOptions] = useState<TOption[]>(NO_OPTIONS as TOption[]);
   // The same options again leave the held ones in place, so the page does not render for nothing
   const setSelectedOptions = useCallback(
-    (options: SelectOption[]) => setHeldOptions((current) => (deepEqual(current, options) ? current : options)),
+    (options: TOption[]) => setHeldOptions((current) => (deepEqual(current, options) ? current : options)),
     [],
   );
 
